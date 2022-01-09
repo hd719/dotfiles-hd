@@ -1,6 +1,6 @@
 # HomeBrew
 # --------------------------------------------------------------------------------------------------------
-eval "$(rbenv init - zsh)"
+# eval "$(rbenv init - zsh)" -> Ruby
 if type brew &>/dev/null
 then
   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
