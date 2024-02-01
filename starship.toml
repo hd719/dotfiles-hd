@@ -18,7 +18,7 @@ cmd_duration\
 $character"""
 
 [nodejs]
-format = 'via [🤖 $version](bold green) '
+format = ' [$version](bold green) '
 
 [gcloud]
 symbol = '🌩️  '
@@ -35,11 +35,11 @@ contexts = [
 ]
 
 [docker_context]
-format = 'via [🐋 $context](blue bold)'
+format = '[🐋 $context](blue bold)'
 
 
 [golang]
-format = 'via [🏎💨 $version](bold cyan) '
+format = ' [$version](bold cyan) '
 
 [directory]
 style = "blue"
