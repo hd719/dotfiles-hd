@@ -1,5 +1,4 @@
-# Fig pre block. Keep at the top of this file.
-[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
+# [ZSH Config]
 # --------------------------------------------------------------------------------------------------------
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -11,38 +10,8 @@ then
 fi
 # --------------------------------------------------------------------------------------------------------
 
-# [Axio Conifig]
+# [Company Conifig]
 # --------------------------------------------------------------------------------------------------------
-COGNITO_USERNAME=${COGNITO_USERNAME:-'jlismore@axio.com'}
-COGNITO_PASSWORD=${COGNITO_PASSWORD:-'testpassword'}
-PATH_TO_REPOS=~/Developer/Axio/
-SETUP_USER_ID="${USER}"
-PATH="/opt/homebrew/opt/mongodb-community@4.2/bin:$PATH"
-PATH_TO_REPOS=${PATH_TO_REPOS:-'$HOME/axio'}
-EDITOR=${EDITOR:-'code'}
-COGNITO_USERNAME=${COGNITO_USERNAME:-'jlismore@axio.com'}
-COGNITO_PASSWORD=${COGNITO_PASSWORD:-'testpassword'}
-source ~/.bash_profile_dev
-
-# Aliases for Directories
-alias admin-ui="cd ~/Developer/Axio/admin-ui"
-alias client="cd ~/Developer/Axio/client"
-alias client-path="cd; ~/Developer/Axio/client"
-alias cypress="cd ~/Developer/Axio/cypress"
-alias graphql-storage="cd ~/Developer/Axio/graphql-storage"
-alias reporting="cd ~/Developer/Axio/reporting"
-alias storage="cd ~/Developer/Axio/storage"
-alias docs="cd ~/Developer/Axio/docs"
-alias dev-tools="cd ~/Developer/Axio/dev-tools"
-
-alias code-client="client && code ."
-alias code-storage="storage && code ."
-alias code-graphql-storage="graphql-storage && code ."
-alias code-admin-ui="admin-ui && code ."
-alias code-cypress="cypress && code ."
-alias code-reporting="reporting && code ."
-alias code-dev-tools="dev-tools && code ."
-alias code-docs="docs && code ."
 # --------------------------------------------------------------------------------------------------------
 
 # Aliases
@@ -125,6 +94,3 @@ alias dockerrmi='docker rmi $(docker ps -a -q)'
 # Cleans up all the docker stuff on your machine
 alias dockercleanup='docker system prune --force'
 # --------------------------------------------------------------------------------------------------------
-
-# Fig post block. Keep at the bottom of this file.
-[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
