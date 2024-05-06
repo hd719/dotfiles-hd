@@ -1,0 +1,46 @@
+// Place your key bindings in this file to overwrite the defaults
+[
+  {
+    "key": "cmd+[",
+    "command": "workbench.action.previousEditor"
+  },
+  {
+    "key": "cmd+]",
+    "command": "workbench.action.nextEditor"
+  },
+  {
+    "key": "cmd+p",
+    "command": "workbench.action.closeActiveEditor"
+  },
+  {
+    "key": "cmd+0",
+    "command": "workbench.action.files.openFileFolder"
+  },
+  {
+    "key": "cmd+l",
+    "command": "workbench.action.focusSideBar"
+  },
+  {
+    "key": "cmd+;",
+    "command": "workbench.action.focusFirstEditorGroup"
+  },
+  {
+    "key": "enter",
+    "command": "list.select",
+    "when": "listFocus && !inputFocus"
+  },
+  {
+    "key": "cmd+enter",
+    "command": "renameFile",
+    "when": "explorerViewletVisible && filesExplorerFocus && !inputFocus"
+  },
+  {
+    "key": "cmd+shift+b",
+    "command": "workbench.action.toggleActivityBarVisibility"
+  },
+  {
+    "key": "ctrl+s",
+    "command": "trailing-spaces.deleteTrailingSpaces",
+    "when": "editorTextFocus"
+  }
+]
