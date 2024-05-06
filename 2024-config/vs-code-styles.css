@@ -1,0 +1,21 @@
+/* Set italics and comments to the script font */
+.mtk3,
+.mtk4 {
+  font-family: 'OperatorMonoLig-BookItalic';
+  font-size: 1em;
+  font-style: normal;
+  color: #b5b5b5 !important;
+}
+
+.comment {
+  font-family: 'OperatorMonoLig-BookItalic';
+  font-style: italic;
+  font-size: 1em;
+  color: #b5b5b5 !important;
+}
+
+.comment:not(.punctuation) {
+  font-family: 'OperatorMonoLig-BookItalic';
+  font-size: 1em;
+  color: #b5b5b5 !important;
+}
