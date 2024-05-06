@@ -1,0 +1,389 @@
+#!/bin/sh
+
+### Directory paths
+# within your personal bashprofile/rc/whatever set these variables yourself
+# otherwise they will default to here
+# PATH_TO_REPOS=${PATH_TO_REPOS:-'$HOME/axio'}
+PATH_TO_REPOS=~/Developer/Axio-ADO/Axio360-Project
+PATH_TO_REPOS_OPS=~/Developer/Axio-ADO/Axio-Ops
+EDITOR=${EDITOR:-'code'}
+COGNITO_USERNAME=${COGNITO_USERNAME:-'jlismore@axio.com'}
+COGNITO_PASSWORD=${COGNITO_PASSWORD:-'testpassword'}
+
+### General stuff
+# alias bp='$EDITOR ~/.bash_profile'
+alias zshrc='$EDITOR ~/.zshrc'
+# alias bashrc='$EDITOR ~/.bashrc'
+# alias updatebp='$PATH_TO_REPOS/dev-tools/setup.sh'
+
+# lists all files and dirs in a dir including hidden ones
+alias ll='ls -a -l'
+
+# nukes node modules for those times when node does node things.
+alias fucknode='rm -rf node_modules'
+
+# cause who knows when we have a dangling instance of istorage
+# alias killgstores='ps -ef | grep [d]ist/s | awk "{ print $2 }" | xargs kill'
+
+# checks the readme from your current dir
+alias readme='cat README.md'
+
+### Git stuff
+alias glast='git checkout - && gpp'
+alias gprune='git fetch --prune'
+alias gpull='git pull'
+alias gpp='gpull && gprune'
+alias gba='git branch -a'
+# gss and gs because gs by default calls GhostScript
+# if you call it as test=gs; $test you get ghost script.
+alias gss='git status'
+alias gs='git status'
+alias gsshort='gss | grep -e "Your branch" -e "modified"'
+alias gadd='git add .'
+alias gnew='git checkout -b'
+alias gcm='git commit -a -m'
+alias gpush='git push'
+alias gdiff='git diff'
+alias gpublish='git push -u origin $(git rev-parse --abbrev-ref HEAD)'
+
+# obviously the best alias
+alias gsoft='git reset --soft HEAD~1'
+
+# lists the branches you have locally with no upstream branch
+alias glist='git branch --merged develop | grep -v develop | grep -v master'
+
+# nukes the above branches
+alias gclean='git branch --merged develop | grep -v develop | grep -v master | xargs git branch -D'
+
+# Congito token stuff
+alias gettoken='$PATH_TO_REPOS/storage/tests/get_token.sh'
+alias gettokenme='TOKEN=$($PATH_TO_REPOS/storage/tests/get_token.sh $COGNITO_USERNAME $COGNITO_PASSWORD) && echo $TOKEN && echo $TOKEN | pbcopy'
+alias gt='gettokenme'
+
+# Terminal markdown reader - got to have pandoc and lynx installed
+read_md () {
+  pandoc $1 | lynx -stdin
+}
+
+# Clone a repo or all repos
+# gclone() {
+#   repo="$1";
+#   clean="$2";
+#   if [ "$1" = "all" ]; then
+#     cd "$PATH_TO_REPOS"
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/client;
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/storage;
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/graphql-storage;
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/reporting;
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/html-report-server;
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/data-science;
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/cypress;
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/admin-ui;
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/build-deploy;
+#     return;
+#   else
+#     git clone axiodev@vs-ssh.visualstudio.com:v3/axiodev/Axio360/"$repo";
+#   fi
+# }
+
+# add title to each tab
+titleTab() {
+    echo -ne "\033]0;"$*"\007"
+}
+
+# add color to each tab
+# Marcus Perl's answer here (second answer at time of writing)
+# https://superuser.com/questions/403650/programmatically-set-the-color-of-a-tab-in-iterm214
+# client is 0,149,255 #0095ff
+# storage is 53,180,81 #35b451
+# graphqlstorage 121,88,218 #7958da
+# reporting 198,56,81 #c63851
+# htmlreporting is 252,70,170 #fc46aa
+# data 254,162,64 #fea240
+# cypress 6,112,120 #067078
+# builddeploy 213,74,221 #d54add
+# adminui 0,0,128 #000099
+
+# color() {
+#     case $1 in
+#     client)
+#     echo -n -e "\033]6;1;bg;red;brightness;0\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;149\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;255\a"
+#     ;;
+#     storage)
+#     echo -n -e "\033]6;1;bg;red;brightness;53\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;180\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;81\a"
+#     ;;
+#     graphqlstorage)
+#     echo -n -e "\033]6;1;bg;red;brightness;121\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;88\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;219\a"
+#     ;;
+#     reporting)
+#     echo -n -e "\033]6;1;bg;red;brightness;198\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;56\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;81\a"
+#     ;;
+#     htmlreporting)
+#     echo -n -e "\033]6;1;bg;red;brightness;252\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;70\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;170\a"
+#     ;;
+#     data)
+#     echo -n -e "\033]6;1;bg;red;brightness;254\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;162\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;64\a"
+#     ;;
+#     cypress)
+#     echo -n -e "\033]6;1;bg;red;brightness;6\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;112\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;20\a"
+#     ;;
+#     builddeploy)
+#     echo -n -e "\033]6;1;bg;red;brightness;213\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;74\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;221\a"
+#     ;;
+#     adminui)
+#     echo -n -e "\033]6;1;bg;red;brightness;0\a"
+#     echo -n -e "\033]6;1;bg;green;brightness;0\a"
+#     echo -n -e "\033]6;1;bg;blue;brightness;128\a"
+#     ;;
+#     default)
+#     echo -n -e "\033]6;1;bg;*;default\a"
+#     ;;
+#     esac
+# }
+
+# cd to individual apps
+# alias cdclient='cd "$PATH_TO_REPOS/client" && color client'
+alias cdclient='cd "$PATH_TO_REPOS/client"'
+alias cdstorage='cd "$PATH_TO_REPOS/storage"'
+alias cdgraphql='cd "$PATH_TO_REPOS/graphql-storage"'
+alias cdreport='cd "$PATH_TO_REPOS/reporting"'
+alias cdhtmlreport='cd "$PATH_TO_REPOS/html-report-server"'
+alias cdbd='cd "$PATH_TO_REPOS/build-deploy"'
+alias cdadmin='cd "$PATH_TO_REPOS/admin-ui" '
+alias cddata='cd "$PATH_TO_REPOS/data-science"'
+alias cdcypress='cd "$PATH_TO_REPOS/cypress"'
+alias cddb='cd "$PATH_TO_REPOS/db_listener"'
+alias cddash='cd "$PATH_TO_REPOS/dashboards"'
+alias cdservices='cd "$PATH_TO_REPOS/services"'
+alias cdmonorepo='cd "$PATH_TO_REPOS/monorepo"'
+alias cdops='cd "$PATH_TO_REPOS_OPS/z-ops-Axio%20Operations"'
+
+# Start up individual apps
+alias appme='cdclient && gpp && npm start'
+alias appmeclean='cdclient && gpp && fucknode && npm run start'
+alias storeme='cdstorage && gpp && ./migrations/run_migrations.sh && ./run_server.sh'
+alias storeme-docker='cdstorage && gpp && ./runDevContainer.sh'
+alias gstoreme='cdgraphql && gpp && ./run_server.sh'
+alias gstoreme-custom='cdgraphql && gpp && npm run start'
+alias gstoreme-custom-clean='cdclient && gpp && fucknode && npm run start'
+alias reportme='cdreport && gpp && docker compose up --build'
+alias htmlreportme='cdhtmlreport && gpp && npm run start'
+alias ocrme='cddata && cd ocr_pipeline && data && ./run_server.sh'
+alias adminme='cdadmin && gpp && npm start'
+# alias setupdt='cddt && ./setup.sh && source ~/.bash_profile && source ~/.bashrc && source ~/.zshrc'
+alias testgui='cdcypress && unset NODE_OPTIONS && echo "NODE_OPTIONS unset" && ./dbResetForTests.sh && echo "dbResetForTests executed DB ready for tests" && npx cypress open'
+
+# blastoff takes three arguments
+# $1 is the tab layout
+#   <2> will have a tab running the process and an adjacent tab in the repo
+#   <1> will just start the processess with no adjacent tab
+# $2 is the set of things to run
+#   <full> will run everything
+#   <fast> will run client, storage, graphql-storage
+# $3 is the optional dev flag
+#   <dev> will checkout dev for everything first before running
+blastoff() {
+  layout=${1:-"1"}
+  things=${2:-"fast"}
+  pull_dev=$3
+
+  echo "layout: arg 1:" "$layout"
+  echo "things: arg 2:" "$things"
+
+  if [ "$1" = "--help" ]; then
+    echo "blastoff takes three arguments"
+    echo "arg1 is the tab layout"
+    echo "  <2> will have a tab running the process and an adjacent tab in the repo"
+    echo "  <1> will just start the processess with no adjacent tab"
+    echo "arg2 is the set of things to run"
+    echo "  <full> will run everything"
+    echo "  <fast> will run client, storage, graphql-storage"
+    echo "arg3 is the optional dev flag"
+    echo "  <dev> will checkout dev for everything first before running"
+    return 1;
+  fi
+
+  if [ "$pull_dev" = "dev" ]; then
+    gda
+  fi
+
+  # the original funcitonality of blastoff remains
+  # if [ $# -eq 0 ]; then
+  #   ttab 'titleTab ClIeNt && appme'
+  #   ttab 'cdclient && titleTab ClIeNt'
+  #   ttab 'titleTab StOrAgE && storeme'
+  #   ttab 'cdstorage && titleTab StOrAgE'
+  #   ttab 'titleTab gStOrAgE && gstoreme'
+  #   ttab 'cdgraphql && titleTab gStOrAgE'
+  #   ttab 'titleTab RePoRt && reportme'
+  #   ttab 'cdreport && titleTab RePoRt'
+  #   ttab 'titleTab hTmLRePoRt && htmlreportme'
+  #   ttab 'cdhtmlreport && titleTab hTmLRePoRt'
+  #   ttab 'titleTab OcRpIpElInE && ocrme'
+  #   ttab 'cddata && titleTab dAtAsCiEnCe'
+
+  #   echo "I am fired in -> the original funcitonality of blastoff remains"
+  #   # exit;
+  # fi
+
+  # # for dual-tab layout
+  # # first then is the same as the default
+  # if [ "$layout" = "2" ] && [ "$things" = "full" ]; then
+  #   ttab 'titleTab ClIeNt && appme'
+  #   ttab 'cdclient && titleTab ClIeNt'
+  #   ttab 'titleTab StOrAgE && storeme'
+  #   ttab 'cdstorage && titleTab StOrAgE'
+  #   ttab 'titleTab gStOrAgE && gstoreme'
+  #   ttab 'cdgraphql && titleTab gStOrAgE'
+  #   ttab 'titleTab RePoRt && reportme'
+  #   ttab 'cdreport && titleTab RePoRt'
+  #   ttab 'titleTab hTmLRePoRt && htmlreportme'
+  #   ttab 'cdhtmlreport && titleTab hTmLRePoRt'
+  #   ttab 'titleTab OcRpIpElInE && ocrme'
+  #   ttab 'cddata && titleTab dAtAsCiEnCe'
+
+  #   echo "I am fired in -> 2 Full"
+  #   # exit;
+  # elif [ "$layout" = "2" ] && [ "$things" = "fast" ]; then
+  #   ttab 'titleTab ClIeNt && appme'
+  #   ttab 'cdclient && titleTab ClIeNt'
+  #   ttab 'titleTab StOrAgE && storeme'
+  #   ttab 'cdstorage && titleTab StOrAgE'
+  #   ttab 'titleTab gStOrAgE && gstoreme'
+  #   ttab 'cdgraphql && titleTab gStOrAgE'
+  #   ttab 'cdreport && titleTab RePoRt && echo "Reporting intentionally not started, reportme to start"'
+  #   ttab 'cdreport && titleTab RePoRt'
+  #   ttab 'cdhtmlreport && titleTab hTmLRePoRt && echo "HTMLReporting intentionally not started, htmlreportme to start"'
+  #   ttab 'cdhtmlreport && titleTab hTmLRePoRt'
+  #   ttab 'cddata && cd ocr_pipeline && titleTab dAtAsCiEnCe && echo "OCRPipeline intentionally not started, ocrme to start"'
+  #   ttab 'cddata && titleTab dAtAsCiEnCe'
+
+  #   echo "I am fired in -> things === fast (2)"
+  #   # exit;
+  # fi
+
+  # single tab layout
+  if [ "$layout" = "1" ] && [ "$things" = "full" ]; then
+    # ttab 'titleTab ClIeNt && appme'
+    # ttab 'titleTab StOrAgE && storeme'
+    # ttab 'titleTab gStOrAgE && gstoreme'
+    ttab 'titleTab Client && appme'
+    ttab 'titleTab GraphQL-Storage && gstoreme-custom'
+    ttab 'titleTab Storage && storeme-docker'
+    ttab 'titleTab Report && echo "Reporting intentionally not started, reportme to start"'
+    ttab 'titleTab HTML-Report && echo "HTMLReporting intentionally not started, htmlreportme to start"'
+    ttab 'titleTab OCR-Pipeline && echo "OCRPipeline intentionally not started, ocrme to start"'
+
+    echo "I am fired in -> in 1 full"
+    # exit;
+
+  elif [ "$layout" = "1" ] && [ "$things" = "fast" ]; then
+    ttab 'titleTab Client && appme'
+    ttab 'titleTab GraphQL-Storage && gstoreme-custom'
+    ttab 'titleTab Storage && storeme-docker'
+    # ttab 'titleTab StOrAgE && storeme'
+    # ttab 'titleTab gStOrAgE && gstoreme'
+
+    echo "I am fired in -> things === fast"
+    # exit;
+
+  elif [ "$layout" = "1" ] && [ "$things" = "faster" ]; then
+    ttab 'titleTab Client && appme'
+    ttab 'titleTab GraphQL-Storage && gstoreme-custom'
+    # ttab 'titleTab Storage && storeme-docker'
+    # ttab 'titleTab StOrAgE && storeme'
+    # ttab 'titleTab gStOrAgE && gstoreme'
+
+    echo "I am fired in -> things === faster"
+    # exit;
+  fi
+}
+
+# Pull all repos on their current branch
+gpa() {
+  startdir=$(pwd);
+  echo '******Pulling Client******';
+  cdclient && gpp;
+  echo '******Pulling Storage******';
+  cdstorage && gpp;
+  echo '******Pulling Reporting******';
+  cdreport && gpp;
+  echo '******Pulling HTML-Reporting******';
+  cdhtmlreport && gpp;
+  echo '******Pulling GraphQL Storage******';
+  cdgraphql && gpp;
+  echo '******Pulling Data-Science******';
+  cddata && gpp;
+  echo '******Pulling Cypress******';
+  cdcypress && gpp;
+  echo '******Pulling Build Deploy******';
+  cdbd && gpp;
+  echo '******Pulling Admin UI******';
+  cdadmin && gpp;
+  echo '******Pulling Db-listener ******';
+  cddb && gpp;
+  echo '******Pulling Dashboards ******';
+  cddash && gpp;
+  echo '******Pulling Services ******';
+  cdservices && gpp;
+  echo '******Pulling Monorepo ******';
+  cdmonorepo && gpp;
+  cd "$startdir";
+}
+
+# Pull all repos on master branch
+gda() {
+  startdir=$(pwd);
+  echo '******Pulling Client ******';
+  cdclient && git checkout master && gpp;
+  echo '******Pulling Storage ******';
+  cdstorage && git checkout master && gpp;
+  echo '******Pulling Reporting ******';
+  cdreport && git checkout master && gpp;
+  echo '******Pulling HTML-Reporting ******';
+  cdreport && git checkout develop && gpp;
+  echo '******Pulling GraphQL Storage ******';
+  cdgraphql && git checkout master && gpp;
+  echo '******Pulling Data-Science ******';
+  cddata && git checkout master && gpp;
+  echo '******Pulling Cypress ******';
+  cdcypress && git checkout develop && gpp;
+  echo '******Pulling Build Deploy ******';
+  cdbd && git checkout master && gpp;
+  echo '******Pulling Admin UI ******';
+  cdadmin && git checkout master && gpp;
+  echo '******Pulling Db-listener ******';
+  cddb && git checkout master && gpp;
+  echo '******Pulling Dashboards ******';
+  cddash && git checkout develop && gpp;
+  echo '******Pulling Services ******';
+  cdservices && git checkout main && gpp;
+  echo '******Pulling Monorepo ******';
+  cdmonorepo && git checkout main && gpp;
+  cd "$startdir";
+}
+
+# Updates brew packages, pulls down latest code for all repos, and reloads this profile to pick up changes
+goodMorning() {
+  brew update && brew upgrade
+  . ~/Developer/.bash_profile_dev
+  gpa
+  gda
+  code
+}
