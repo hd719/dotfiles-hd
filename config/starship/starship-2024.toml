@@ -1,0 +1,85 @@
+format = """
+$sudo\
+$username\
+$hostname\
+$cmd_duration\
+$memory_usage
+$gcloud
+$kubernetes
+$directory\
+$git_branch\
+$git_state\
+$git_status\
+$nodejs\
+$golang\
+$helm\
+$python\
+cmd_duration\
+$character"""
+
+
+[nodejs]
+format = '[$version](bold green) '
+
+[gcloud]
+symbol = '🌩️  '
+format = '[$symbol$account(@$domain) (\($project\))]($style) '
+[gcloud.region_aliases]
+us-east1 = 'ue1'
+asia-northeast1 = 'an1'
+
+[kubernetes]
+format = '[🚢 ($user on )($cluster in )$context \($namespace\)](bright-green) '
+disabled = false
+contexts = [
+  { context_pattern = "dev.local.cluster.k8s", style = "green", symbol = "💔 " },
+]
+
+[docker_context]
+format = '[🐋 $context](blue bold)'
+
+[golang]
+format = '[$version](bold cyan) '
+
+[directory]
+style = "blue"
+truncation_length = 8
+truncation_symbol = '…/'
+
+[character]
+success_symbol = "[❯](purple)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](green)"
+
+[git_branch]
+format = "[$branch]($style)"
+style = "bright-black"
+
+[git_status]
+format = "[[( *$conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind $stashed)]($style)"
+style = "cyan"
+conflicted = "=​"
+untracked = "?​"
+modified = "!​"
+staged = "+​"
+renamed = "​»"
+deleted = "​"
+stashed = "≡"
+
+[git_state]
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+style = "bright-black"
+
+[cmd_duration]
+min_time = 500
+format = 'underwent [$duration](bold yellow)'
+
+[python]
+format = "[$virtualenv]($style) "
+style = "bright-black"
+
+[memory_usage]
+format = '[$symbol$ram]($style)'
+disabled = false
+threshold = -1
+style = 'yellow'
