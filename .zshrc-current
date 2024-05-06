@@ -1,0 +1,130 @@
+# Fig pre block. Keep at the top of this file.
+[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
+# --------------------------------------------------------------------------------------------------------
+. /opt/homebrew/opt/asdf/libexec/asdf.sh
+eval "$(/opt/homebrew/bin/brew shellenv)"
+source /Users/hameldesai/.docker/init-zsh.sh || true # Added by Docker Desktop
+autoload -Uz compinit && compinit
+if type brew &>/dev/null
+then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+fi
+# --------------------------------------------------------------------------------------------------------
+
+# [Axio Conifig]
+# --------------------------------------------------------------------------------------------------------
+COGNITO_USERNAME=${COGNITO_USERNAME:-'jlismore@axio.com'}
+COGNITO_PASSWORD=${COGNITO_PASSWORD:-'testpassword'}
+PATH_TO_REPOS=~/Developer/Axio/
+SETUP_USER_ID="${USER}"
+PATH="/opt/homebrew/opt/mongodb-community@4.2/bin:$PATH"
+PATH_TO_REPOS=${PATH_TO_REPOS:-'$HOME/axio'}
+EDITOR=${EDITOR:-'code'}
+COGNITO_USERNAME=${COGNITO_USERNAME:-'jlismore@axio.com'}
+COGNITO_PASSWORD=${COGNITO_PASSWORD:-'testpassword'}
+source ~/.bash_profile_dev
+
+# Aliases for Directories
+alias admin-ui="cd ~/Developer/Axio/admin-ui"
+alias client="cd ~/Developer/Axio/client"
+alias client-path="cd; ~/Developer/Axio/client"
+alias cypress="cd ~/Developer/Axio/cypress"
+alias graphql-storage="cd ~/Developer/Axio/graphql-storage"
+alias reporting="cd ~/Developer/Axio/reporting"
+alias storage="cd ~/Developer/Axio/storage"
+alias docs="cd ~/Developer/Axio/docs"
+alias dev-tools="cd ~/Developer/Axio/dev-tools"
+
+alias code-client="client && code ."
+alias code-storage="storage && code ."
+alias code-graphql-storage="graphql-storage && code ."
+alias code-admin-ui="admin-ui && code ."
+alias code-cypress="cypress && code ."
+alias code-reporting="reporting && code ."
+alias code-dev-tools="dev-tools && code ."
+alias code-docs="docs && code ."
+# --------------------------------------------------------------------------------------------------------
+
+# Aliases
+# --------------------------------------------------------------------------------------------------------
+# Config
+alias open-ssh="code ~/.ssh;"
+alias open-brew="cd /opt/homebrew"
+alias home="cd ~"
+alias open-home="cd ~ && open ."
+alias desktop="cd ~/Desktop/"
+alias open-desktop="cd ~/Desktop/ && open ."
+alias c="clear"
+alias ll='ls -a -l'
+alias readme='cat README.md'
+
+# Node
+alias nps="npm run start"
+alias npd="npm run dev"
+alias npb="npm run build"
+alias npt="npm run test"
+alias npl="npm run lint"
+alias npp="npm run prettier"
+alias npserved="npm run serve:dev"
+alias npserve="npm run serve"
+alias ys="yarn start"
+alias ysd="yarn dev"
+alias yb="yarn build"
+alias yt="yarn test"
+alias yl="yarn lint"
+alias yp="yarn prettier"
+alias ysd="yarn serve:dev"
+alias yserve="yarn serve"
+
+# Rails
+alias rs="bundle exec rails s"
+alias sidekiq="bundle exec sidekiq"
+alias reds="redis-server"
+
+# iOS
+alias pods="cd ios && pod install; cd .."
+alias clean="git clean -fd && git checkout ."
+
+# Git
+alias g="git"
+alias gsoft='git reset --soft HEAD~1'
+# lists the branches you have locally with no upstream branch
+alias glist='git branch --merged develop | grep -v develop | grep -v master'
+# nukes the above branches
+alias gclean='git branch --merged develop | grep -v develop | grep -v master | xargs git branch -D'
+# Remove old git branches
+alias gitprune='gdeletemerged && gdeletesquashed'
+
+# Mongodb
+alias start-mongo="brew services start mongodb-community@4.2"
+alias start-mongo-admin="sudo brew services start mongodb-community@4.2"
+alias stop-mongo="brew services stop mongodb-community@4.2"
+alias stop-mongo-admin="sudo brew services stop mongodb-community@4.2"
+alias logs-mongo="cat /opt/homebrew/var/log/mongodb/mongo.log"
+
+# Kubernetes
+alias kc='kubectl'
+alias kcg='kc get'
+alias kcv='kc config view'k
+alias kcgnet='kcg networkPolicy'
+alias kcgpod='kcg pods'
+alias kcdes='kc describe'
+alias kcdel='kc delete'
+alias kce='kc exec -it'
+alias kca='kc apply -f'
+
+### Docker stuff
+# stop all docker processes
+alias dockerstop='docker stop $(docker ps -a -q)'
+# kill all docker processes
+alias dockerkill='docker kill $(docker ps -a -q)'
+# remove all docker processes
+alias dockerrm='docker rm $(docker ps -a -q)'
+# remove all docker images
+alias dockerrmi='docker rmi $(docker ps -a -q)'
+# Cleans up all the docker stuff on your machine
+alias dockercleanup='docker system prune --force'
+# --------------------------------------------------------------------------------------------------------
+
+# Fig post block. Keep at the bottom of this file.
+[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
