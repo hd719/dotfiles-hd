@@ -1,0 +1,69 @@
+# Config (HomeBrew/asdf/oh-my-zsh/z/python/mongodb)
+# --------------------------------------------------------------------------------------------------------
+. /opt/homebrew/opt/asdf/libexec/asdf.sh
+source ~/.oh-my-zsh/oh-my-zsh.sh
+eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+autoload -Uz compinit && compinit
+
+if type brew &>/dev/null
+then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+fi
+
+export PATH="/opt/homebrew/opt/mongodb-community@4.2/bin:$PATH"
+
+# --------------------------------------------------------------------------------------------------------
+
+# [Axio Env Variables]
+# --------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+
+# Aliases
+# --------------------------------------------------------------------------------------------------------
+# Node
+alias nps="npm run start"
+alias npd="npm run dev"
+alias npb="npm run build"
+alias npt="npm run test"
+alias npl="npm run lint"
+alias npp="npm run prettier"
+alias npserved="npm run serve:dev"
+alias npserve="npm run serve"
+alias ys="yarn start"
+alias ysd="yarn dev"
+alias yb="yarn build"
+alias yt="yarn test"
+alias yl="yarn lint"
+alias yp="yarn prettier"
+alias ysd="yarn serve:dev"
+alias yserve="yarn serve"
+
+# Rails
+alias rs="bundle exec rails s"
+alias sidekiq="bundle exec sidekiq"
+alias reds="redis-server"
+
+# Universal
+alias home="cd ~"
+alias open-home="cd ~ && open ."
+alias desktop="cd ~/Desktop/"
+alias open-desktop="cd ~/Desktop/ && open ."
+alias c="clear"
+
+# iOS
+alias pods="cd ios && pod install; cd .."
+alias clean="git clean -fd && git checkout ."
+
+# Git
+alias g="git"
+
+# Mongodb
+alias start-mongo="brew services start mongodb-community@4.2"
+alias start-mongo-admin="sudo brew services start mongodb-community@4.2"
+alias stop-mongo="brew services stop mongodb-community@4.2"
+alias stop-mongo-admin="sudo brew services stop mongodb-community@4.2"
+alias logs-mongo="cat /opt/homebrew/var/log/mongodb/mongo.log"
+# --------------------------------------------------------------------------------------------------------
+
