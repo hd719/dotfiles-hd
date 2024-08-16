@@ -1,34 +1,18 @@
 # [ZSH/System Config]
 # --------------------------------------------------------------------------------------------------------
-# . "$HOME/.asdf/asdf.sh" -> Using devbox now
 eval "$(/opt/homebrew/bin/brew shellenv)"
 if type brew &>/dev/null
 then
   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
 fi
 autoload -U +X bashcompinit && bashcompinit
-# complete -o nospace -C /opt/homebrew/bin/terraform terraform
-# source /Users/hameldesai/.docker/init-zsh.sh || true # Added by Docker Desktop
-
-# [NVM Config] -> Try not to use this and use devbox or asdf instead
-# --------------------------------------------------------------------------------------------------------
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-# nvm use system; nvm use 18.16.0;
-# --------------------------------------------------------------------------------------------------------
-
-# [Kubernetes Config]
-# --------------------------------------------------------------------------------------------------------
-export KUBE_EDITOR='code --wait'
-alias kubectl="kubecolor"
-command -v kubecolor >/dev/null 2>&1 && alias kubectl="kubecolor"
 # --------------------------------------------------------------------------------------------------------
 
 # [Prompt]
 # --------------------------------------------------------------------------------------------------------
 eval "$(starship init zsh)"
 export STARSHIP_CONFIG=~/Developer/dotfiles-hd/2024-config/starship-personal.toml
+source ~/Developer/zsh-you-should-use/you-should-use.plugin.zsh
 # --------------------------------------------------------------------------------------------------------
 
 # [Job Config]
@@ -139,7 +123,6 @@ alias dbclean="devbox run -- nix store gc --extra-experimental-features nix-comm
 # Remove the Devbox binaries using rm -rf ~/.cache/devbox
 # Remove your Devbox global config using rm -rf .local/share/devbox
 # Remove nix https://nix.dev/manual/nix/2.22/installation/uninstall
-
 # --------------------------------------------------------------------------------------------------------
 
 # [Functions]
@@ -168,5 +151,12 @@ goodMorning() {
   brew update && brew upgrade
   echo "Om Shree Ganeshaya Namaha 🙏"
 }
+# --------------------------------------------------------------------------------------------------------
+
+# [Kubernetes Config]
+# --------------------------------------------------------------------------------------------------------
+export KUBE_EDITOR='code --wait'
+alias kubectl="kubecolor"
+command -v kubecolor >/dev/null 2>&1 && alias kubectl="kubecolor"
 # --------------------------------------------------------------------------------------------------------
 PATH=~/.console-ninja/.bin:$PATH
