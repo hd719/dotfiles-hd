@@ -3,7 +3,7 @@
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-nvm use system; nvm use 21.6.2;
+nvm use 21.6.2;
 eval "$(/opt/homebrew/bin/brew shellenv)"
 autoload -Uz compinit && compinit
 if type brew &>/dev/null
@@ -13,10 +13,6 @@ fi
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /opt/homebrew/bin/terraform terraform
 source /Users/hameldesai/.docker/init-zsh.sh || true # Added by Docker Desktop
-
-# Ruby
-source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-chruby ruby-3.1.3
 
 # [Kubernetes Config]
 # --------------------------------------------------------------------------------------------------------
@@ -34,13 +30,6 @@ export STARSHIP_CONFIG=~/starship.toml
 
 # [Axio Conifig]
 # --------------------------------------------------------------------------------------------------------
-DOCKER_DEFAULT_PLATFORM=linux/amd64
-PATH_TO_REPOS=~/Developer/Axio/
-SETUP_USER_ID="${USER}"
-PATH_TO_REPOS=/Users/hameldesai/Developer/Axio-ADO/Axio360-Project
-EDITOR=${EDITOR:-'code'}
-GOOGLE_APPLICATION_CREDENTIALS="~/.config/gcloud/application_default_credentials.json"
-USE_GKE_GCLOUD_AUTH_PLUGIN=true
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 export JAVA_HOME=/Users/hameldesai/.sdkman/candidates/java/current
 export SDKMAN_DIR="$HOME/.sdkman"
@@ -48,11 +37,25 @@ export SDKMAN_DIR="$HOME/.sdkman"
 export PATH=~/Developer/apache-maven-3.9.4/bin:$PATH
 # mvn --version
 # java --version
+
+GITLAB_TOKEN=op://Development/Gitlab-Token/password
+COGNITO_TOKEN=op://Development/Cognito-Token/password
+ADO_TOKEN=op://Development/ADO-Token/password
+B64_PAT=op://Development/ADO-Token/password
+MY_PAT=op://Development/ADO-Token/password
+ADO_GIT_PAT=op://Development/ADO-Git-PAT/password
+GOOGLE_APPLICATION_CREDENTIALS="op://Development/Axio-GAC/password"
+
+DOCKER_DEFAULT_PLATFORM=linux/amd64
+PATH_TO_REPOS=~/Developer/Axio/
+SETUP_USER_ID="${USER}"
+PATH_TO_REPOS=/Users/hameldesai/Developer/Axio-ADO/Axio360-Project
+EDITOR=${EDITOR:-'code'}
+USE_GKE_GCLOUD_AUTH_PLUGIN=true
 # --------------------------------------------------------------------------------------------------------
 
 # [Aliases]
 # --------------------------------------------------------------------------------------------------------
-
 # Repos
 alias adminme='cdadmin && gpp && npm start'
 alias appme='cdcl ient && gpp && npm start'
@@ -409,7 +412,7 @@ killport() {
 
 hex_to_decimal_ip() {
   local hex_ip="$1"
-  
+
   # Check if a hexadecimal IP is provided
   if [ -z "$hex_ip" ]; then
     echo "Usage: hex_to_decimal_ip <HEX_IP>"
@@ -439,7 +442,7 @@ hex_to_decimal_ip() {
 
 network_info() {
   local interface="$1"
-  
+
   # Check if the interface name is provided
   if [ -z "$interface" ]; then
     echo "Usage: parse_network_info <INTERFACE_NAME>"
@@ -459,10 +462,10 @@ network_info() {
   # Parse and display IPv4 address, netmask, and default gateway
   local ipv4_address
   ipv4_address=$(echo "$ifconfig_output" | grep -oE 'inet (addr:)?[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $2}')
-  
+
   local netmask
   netmask=$(echo "$ifconfig_output" | grep -o 'netmask 0x[0-9a-f]*' | awk '{print $2}' | cut -c3- | awk '{gsub(/^0[xX]/,""); print}')
-  
+
   local default_gateway
   default_gateway=$(route -n get default | grep 'gateway:' | awk '{print $2}')
 
@@ -483,8 +486,4 @@ goodMorning() {
   echo "Om Shree Ganeshaya Namaha 🙏"
 }
 # --------------------------------------------------------------------------------------------------------
-PATH=~/.console-ninja/.bin:$PATHsource /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-
-source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-chruby ruby-3.1.3
+PATH=~/.console-ninja/.bin:$PATH
