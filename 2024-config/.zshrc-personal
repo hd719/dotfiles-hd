@@ -6,6 +6,10 @@ then
   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
 fi
 autoload -U +X bashcompinit && bashcompinit
+
+# [PNPM]
+export PATH="/Users/hameldesai/pnpm:$PATH"
+export PNPM_HOME="/Users/hameldesai/pnpm"
 # --------------------------------------------------------------------------------------------------------
 
 # [Prompt]
@@ -24,6 +28,7 @@ B64_PAT=op://Development/ADO-Token/password
 # op://<vault-name>/<item-name>/[section-name/]<field-name>
 GITHUB_CLIENT_SECRET=op://Development/NextJS-Discuss-Client/credential
 GITHUB_CLIENT_ID=op://Development/NextJS-Discuss-Client-Id/credential
+
 # --------------------------------------------------------------------------------------------------------
 
 # [Aliases]
