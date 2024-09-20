@@ -2,7 +2,9 @@
 
 format = """
 $gcloud\
-[](fg:surface0 bg:blue)\
+[](fg:surface0 bg:lavender)\
+$aws\
+[](fg:lavender bg:blue)\
 $kubernetes\
 [](fg:blue)\
 $line_break\
@@ -73,8 +75,19 @@ base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
 
+[aws]
+symbol = ' '
+style = "bg:lavender"
+format = '[[$symbol ($profile)(\($region\))](fg:mantle bg:lavender)]($style)'
+# [aws.region_aliases]
+# ap-southeast-2 = 'au'
+# us-east-1 = 'va'
+# us-east-2 = 'ohio'
+# [aws.profile_aliases]
+# CompanyGroupFrobozzOnCallAccess = 'Frobozz'
+
 [gcloud]
-symbol = '󰲋 '
+symbol = ' '
 style = "bg:surface0"
 format = '[ $symbol$account(@$domain) (\($project\))]($style)'
 [gcloud.region_aliases]
@@ -83,7 +96,7 @@ asia-northeast1 = 'an1'
 
 [kubernetes]
 style = "bg:blue fg:mantle"
-format = '[ $context ctx ]($style)'
+format = '[ ⎈ $context ctx ]($style)'
 disabled = false
 contexts = [
   { context_pattern = "dev.local.cluster.k8s", style = "green", symbol = "💔 " },
@@ -99,7 +112,7 @@ Ubuntu = "󰕈"
 SUSE = ""
 Raspbian = "󰐿"
 Mint = "󰣭"
-Macos = " 󰣇"
+Macos = ' 󰀵'
 Manjaro = ""
 Linux = "󰌽"
 Gentoo = "󰣨"
