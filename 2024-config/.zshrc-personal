@@ -47,6 +47,7 @@ alias fucknode='rm -rf node_modules'
 # Docker
 alias dockercleanup='docker system prune --force'
 alias dockerkill='docker kill $(docker ps -a -q)'
+alias usedocker="docker context use desktop-linux" # change from orb to docker
 
 # Kubernetes
 alias kc=kubectl
@@ -128,6 +129,9 @@ alias dbclean="devbox run -- nix store gc --extra-experimental-features nix-comm
 # Remove the Devbox binaries using rm -rf ~/.cache/devbox
 # Remove your Devbox global config using rm -rf .local/share/devbox
 # Remove nix https://nix.dev/manual/nix/2.22/installation/uninstall
+
+### SSH
+alias work-machine="ssh axiombp-7g77nn4-hamel"
 # --------------------------------------------------------------------------------------------------------
 
 # [Functions]
