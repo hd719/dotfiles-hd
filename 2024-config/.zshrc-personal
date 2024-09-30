@@ -159,17 +159,17 @@ clean() {
   echo "Cleaning up Nix store..."
 
   # Remove old generations
-  sudo nix-env --delete-generations old
+  nix-env --delete-generations old
 
   # Run garbage collection to remove unneeded packages
-  sudo nix-store --gc
-  sudo nix-store --gc --print-roots | egrep -v "^(/nix/var|/run/\w+-system|\{memory|/proc)"
-  sudo nix-collect-garbage -d
+  nix-store --gc
+  nix-store --gc --print-roots | egrep -v "^(/nix/var|/run/\w+-system|\{memory|/proc)"
+  nix-collect-garbage -d
 
   echo "Nix store cleaned!"
 
   echo "Optimizing Nix store..."
-  sudo nix optimise-store
+  nix-store --optimise
   echo "Nix store optimized!"
 
   echo "Cleaning up homebrew"
