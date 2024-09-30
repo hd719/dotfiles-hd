@@ -132,6 +132,7 @@ alias dbclean="devbox run -- nix store gc --extra-experimental-features nix-comm
 
 ### SSH
 alias work-machine="ssh axiombp-7g77nn4-hamel"
+
 # --------------------------------------------------------------------------------------------------------
 
 # [Functions]
@@ -152,6 +153,30 @@ killport() {
         print "Killing process on port $port"
         echo "$pid" | xargs kill -9
     fi
+}
+
+clean() {
+  echo "Cleaning up Nix store..."
+
+  # Remove old generations
+  sudo nix-env --delete-generations old
+
+  # Run garbage collection to remove unneeded packages
+  sudo nix-store --gc
+  sudo nix-store --gc --print-roots | egrep -v "^(/nix/var|/run/\w+-system|\{memory|/proc)"
+  sudo nix-collect-garbage -d
+
+  echo "Nix store cleaned!"
+
+  echo "Optimizing Nix store..."
+  sudo nix optimise-store
+  echo "Nix store optimized!"
+
+  echo "Cleaning up homebrew"
+  brew cleanup
+  brew autoremove
+  brew doctor
+  echo "Homebrew cleaned!"
 }
 
 # Updates brew packages, pulls down latest code for all repos, and reloads this profile to pick up changes
