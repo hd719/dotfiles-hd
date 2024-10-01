@@ -177,6 +177,12 @@ clean() {
   brew autoremove
   brew doctor
   echo "Homebrew cleaned!"
+
+  echo "Cleaning up npm"
+  pnpm cache clean --force
+
+  echo "Cleaning up Docker"
+  docker system prune -a
 }
 
 # Updates brew packages, pulls down latest code for all repos, and reloads this profile to pick up changes
