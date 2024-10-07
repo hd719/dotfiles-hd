@@ -1,9 +1,11 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 # $gcloud\
-# [](fg:surface0 bg:blue)\
+# [](fg:surface0 bg:lavender)\
+# $aws\
+# [](fg:lavender bg:peach)\
 # $kubernetes\
-# [](fg:blue)\
+# [](fg:peach)\
 # $line_break\
 
 format = """
@@ -74,8 +76,19 @@ base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
 
+[aws]
+symbol = ' '
+style = "bg:lavender"
+format = '[[$symbol ($profile)(\($region\))](fg:mantle bg:lavender)]($style)'
+# [aws.region_aliases]
+# ap-southeast-2 = 'au'
+# us-east-1 = 'va'
+# us-east-2 = 'ohio'
+# [aws.profile_aliases]
+# CompanyGroupFrobozzOnCallAccess = 'Frobozz'
+
 [gcloud]
-symbol = '󰲋 '
+symbol = ' '
 style = "bg:surface0"
 format = '[ $symbol$account(@$domain) (\($project\))]($style)'
 [gcloud.region_aliases]
@@ -83,8 +96,8 @@ us-east1 = 'ue1'
 asia-northeast1 = 'an1'
 
 [kubernetes]
-style = "bg:blue fg:mantle"
-format = '[ $context ctx ]($style)'
+style = "bg:peach fg:mantle"
+format = '[ ⎈ $context ctx ]($style)'
 disabled = false
 contexts = [
   { context_pattern = "dev.local.cluster.k8s", style = "green", symbol = "💔 " },
@@ -122,7 +135,6 @@ style_root = "bg:surface0 fg:text"
 format = '[ $user ]($style)'
 
 [directory]
-# was originally peach
 style = "fg:mantle bg:blue"
 format = "[ $path ]($style)"
 truncation_length = 3

@@ -1,18 +1,18 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
-$gcloud\
-[](fg:surface0 bg:lavender)\
-$aws\
-[](fg:lavender bg:blue)\
-$kubernetes\
-[](fg:blue)\
-$line_break\
+# $gcloud\
+# [](fg:surface0 bg:lavender)\
+# $aws\
+# [](fg:lavender bg:peach)\
+# $kubernetes\
+# [](fg:peach)\
+# $line_break\
 $os\
 $username\
-[](bg:peach fg:surface0)\
+[](bg:blue fg:surface0)\
 $directory\
-[](fg:peach bg:green)\
+[](fg:blue bg:green)\
 $git_branch\
 $git_status\
 [](fg:green bg:purple)\
@@ -95,7 +95,7 @@ us-east1 = 'ue1'
 asia-northeast1 = 'an1'
 
 [kubernetes]
-style = "bg:blue fg:mantle"
+style = "bg:peach fg:mantle"
 format = '[ ⎈ $context ctx ]($style)'
 disabled = false
 contexts = [
@@ -134,7 +134,7 @@ style_root = "bg:surface0 fg:text"
 format = '[ $user ]($style)'
 
 [directory]
-style = "fg:mantle bg:peach"
+style = "fg:mantle bg:blue"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
