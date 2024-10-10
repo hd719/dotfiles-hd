@@ -476,6 +476,46 @@ network_info() {
   echo "Default Gateway.........: $default_gateway"
 }
 
+terraform() {
+    # Get the current AWS profile from the environment variable
+    AWS_PROFILE=${AWS_PROFILE:-default}
+
+    # Prompt the user to either proceed with the current profile or switch to a new one
+    echo "Current AWS Profile is '$AWS_PROFILE'."
+    echo -n "Do you want to proceed with this profile? (y/n): "
+    read choice
+
+    if [[ "$choice" == "y" ]]; then
+        echo "Proceeding with AWS Profile '$AWS_PROFILE'..."
+    else
+        echo "Please select a new AWS profile to switch to:"
+        select new_profile in "dev" "staging" "cancel"; do
+            case $new_profile in
+                dev)
+                    export AWS_PROFILE="dev"
+                    echo "AWS Profile is now set to 'dev'."
+                    break
+                    ;;
+                staging)
+                    export AWS_PROFILE="staging"
+                    echo "AWS Profile is now set to 'staging'."
+                    break
+                    ;;
+                cancel)
+                    echo "Profile change canceled. Exiting..."
+                    return 1
+                    ;;
+                *)
+                    echo "Invalid option. Please try again."
+                    ;;
+            esac
+        done
+    fi
+
+    # Call the original terraform command with all arguments passed to this function
+    command terraform "$@"
+}
+
 # Updates brew packages, pulls down latest code for all repos, and reloads this profile to pick up changes
 goodMorning() {
   echo "Om Shree Ganeshaya Namaha 🙏"
