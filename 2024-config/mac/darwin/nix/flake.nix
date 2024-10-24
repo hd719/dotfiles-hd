@@ -106,6 +106,8 @@
         chflags nohidden ~/Library
         # Show the /Volumes folder
         sudo chflags nohidden /Volumes
+        # Stop iTunes from responding to the keyboard media keys
+        launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null
       '';
 
       system.defaults = {
@@ -195,6 +197,13 @@
 
           # Prevent Photos from opening automatically when devices are plugged in
           "com.apple.ImageCapture".disableHotPlug = true;
+
+          "com.apple.SoftwareUpdate" = {
+            AutomaticCheckEnabled = true;
+            ScheduleFrequency = 1;
+            AutomaticDownload = 1;
+            CriticalUpdateInstall = 0;
+          };
         };
 
         loginwindow = {
@@ -212,7 +221,10 @@
       security.pam.enableSudoTouchIdAuth = true;
 
       # Create /etc/zshrc that loads the nix-darwin environment.
-      programs.zsh.enable = true;  # default shell
+      programs.zsh = {
+        enable = true;
+        enableCompletion = true;
+      };
 
       # programs.fish.enable = true;
 
