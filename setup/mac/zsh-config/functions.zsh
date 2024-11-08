@@ -66,9 +66,7 @@ terraform() {
 }
 
 goodMorning() {
-    echo "Om Shree Ganeshaya Namaha 🙏"
-    brew update && brew upgrade
-    echo "Om Shree Ganeshaya Namaha 🙏"
+    switch
 }
 
 

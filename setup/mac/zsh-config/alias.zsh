@@ -84,10 +84,10 @@ alias lla='ls -la'
 alias lt='ls --tree'
 
 ## Bat
-alias cat="bat --paging never --theme base16"
+alias cat="bat --paging never --theme ansi"
 
 ## SSH
-alias work-machine="ssh axiombp-7g77nn4-hamel"
+alias axio-work="ssh -L 27017:localhost:27017 -L 3000:localhost:3000 -L 3001:localhost:3001 -L 3002:localhost:3002 -L 4000:localhost:4000 -L 5432:localhost:5432 -L 8080:localhost:8080 axiombp-7g77nn4-hamel"
 
 ## Nix
 alias switch="darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac/darwin/nix#hameldesai"
@@ -122,3 +122,18 @@ alias obsmovevault='obsidian-cli move--vault'          # Rename note in specifie
 alias obsmoveo='obsidian-cli move--open'               # Rename note in default vault and open it
 alias obsdel='obsidian-cli delete'                     # Delete note in default vault
 alias obsdelvault='obsidian-cli delete--vault'         # Delete note in specified vault
+# Aliases for Devbox CLI commands using 'db' instead of 'devbox'
+
+# Devbox
+alias dbshell='devbox shell'       # Enter the Devbox environment
+alias dbup='devbox up'             # Start the Devbox environment
+alias dbdown='devbox down'         # Stop the Devbox environment
+alias dbrm='devbox rm'             # Remove the Devbox environment
+alias dbls='devbox ls'             # List all available Devbox environments
+alias dbinit='devbox init'         # Initialize a new Devbox environment
+alias dbbuild='devbox build'       # Build/compile the Devbox environment
+alias dbrun='devbox run'           # Run a command inside the Devbox environment
+alias dbps='devbox ps'             # Show running processes in Devbox
+alias dblogs='devbox logs'         # Display logs for the Devbox environment
+alias dbconfig='devbox config'     # Open the configuration for Devbox
+alias dbhelp='devbox help'         # Show help information for Devbox

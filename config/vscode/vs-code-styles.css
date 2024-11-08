@@ -22,7 +22,8 @@
 
 .monaco-editor .line-numbers {
   font-family: "OperatorMonoLig-BookItalic";
-  font-size: 16px !important;
+  font-size: 1em !important;
+  margin-left: -0.9375em !important;
 }
 
 .monaco-list-row.selected {
@@ -34,7 +35,7 @@
   > .monaco-scrollable-element
   > .monaco-list-rows
   span {
-  font-size: var(--font-size-m);
+  font-size: 0.875rem;
   font-family: "Hasklug Nerd Font Mono";
 }
 
@@ -42,6 +43,5 @@
   > .monaco-list
   > .monaco-scrollable-element
   > .monaco-list-rows {
-  /* margin-left: -12px; */
   font-family: "Hasklug Nerd Font Mono";
 }

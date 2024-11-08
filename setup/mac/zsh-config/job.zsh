@@ -1,4 +1,4 @@
 # [Job Config]
 # --------------------------------------------------------------------------------------------------------
-export ADO_TOKEN="op://Development/ADO-Token/password"
-export B64_PAT="op://Development/ADO-Token/password"
+export ADO_TOKEN="op://Axio/ADO-Token/password"
+export B64_PAT="op://Axio/ADO-Token/password"

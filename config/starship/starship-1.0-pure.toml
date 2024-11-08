@@ -43,45 +43,45 @@ $java\
 $terraform\
 $character"""
 
-# right_format = """
-# $docker_context\
-# $kubernetes\
-# $aws\
-# $gcloud\
-# $line_break\
-# """
+right_format = """
+$docker_context\
+$kubernetes\
+$aws\
+$gcloud\
+$line_break\
+"""
 
-# [docker_context]
-# symbol = ""
-# style = "bg:mantle"
-# format = '[[ $symbol( $context) ](fg:#74c7ec bg:mantle)]($style)'
+[docker_context]
+symbol = ""
+style = "bg:mantle"
+format = '[[ $symbol( $context) ](fg:#74c7ec bg:mantle)]($style)'
 
-# [kubernetes]
-# style = "bg:peach fg:#94e2d5"
-# format = '[󱃾 $context ctx [](fg:green)(fg:green)]($style)'
-# disabled = false
-# contexts = [
-#   { context_pattern = "dev.local.cluster.k8s", style = "green", symbol = "💔 " },
-# ]
+[kubernetes]
+style = "bg:peach fg:#94e2d5"
+format = '[󱃾 $context ctx [](fg:green)(fg:green)]($style)'
+disabled = false
+contexts = [
+  { context_pattern = "dev.local.cluster.k8s", style = "green", symbol = "💔 " },
+]
 
-# [aws]
-# symbol = ''
-# style = "bg:lavender"
-# format = '[[$symbol ($profile)(\($region\))](fg:#fab387 bg:lavender)(fg:lavender bg:peach)]($style)'
-# # [aws.region_aliases]
-# # ap-southeast-2 = 'au'
-# # us-east-1 = 'va'
-# # us-east-2 = 'ohio'
-# # [aws.profile_aliases]
-# # CompanyGroupFrobozzOnCallAccess = 'Frobozz'
+[aws]
+symbol = ''
+style = "bg:lavender"
+format = '[[$symbol ($profile)(\($region\))](fg:#fab387 bg:lavender)(fg:lavender bg:peach)]($style)'
+# [aws.region_aliases]
+# ap-southeast-2 = 'au'
+# us-east-1 = 'va'
+# us-east-2 = 'ohio'
+# [aws.profile_aliases]
+# CompanyGroupFrobozzOnCallAccess = 'Frobozz'
 
-# [gcloud]
-# symbol = ''
-# style = "bg:surface0 fg:#b4befe"
-# format = '(fg:surface0)[ $symbol (\($project\))(fg:lavender bg:surface0)]($style)'
-# [gcloud.region_aliases]
-# us-east1 = 'ue1'
-# asia-northeast1 = 'an1'
+[gcloud]
+symbol = ''
+style = "bg:surface0 fg:#b4befe"
+format = '(fg:surface0)[ $symbol (\($project\))(fg:lavender bg:surface0)]($style)'
+[gcloud.region_aliases]
+us-east1 = 'ue1'
+asia-northeast1 = 'an1'
 
 [directory]
 style = "blue"
@@ -96,7 +96,7 @@ format = "[$branch]($style)"
 style = "bright-black"
 
 [git_status]
-format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218)($ahead_behind$stashed)]($style) "
+format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind$stashed)]($style)"
 style = "cyan"
 conflicted = "​"
 untracked = "​"

@@ -1,12 +1,13 @@
 # [ZSH/System Config]
 # --------------------------------------------------------------------------------------------------------
-if [ -z "$TMUX" ]; then
-    tmux attach -t default || tmux new -s default
-fi
+# if [ -z "$TMUX" ]; then
+#     tmux attach -t default || tmux new -s default
+# fi
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 nvm use 21.6.2;
+aws configure set profile default
 eval "$(/opt/homebrew/bin/brew shellenv)"
 autoload -Uz compinit && compinit
 if type brew &>/dev/null
@@ -196,7 +197,7 @@ alias lla='ls -la'
 alias lt='ls --tree'
 
 # Bat https://github.com/sharkdp/bat
-alias cat="bat --paging never --theme DarkNeon"
+alias cat="bat --paging never --theme ansi"
 
 # Tmux
 alias tm='tmux'                             # Start tmux
@@ -207,6 +208,10 @@ alias tml='tmux list-sessions'              # List tmux sessions
 alias tmn='tmux new-session'                # Start a new tmux session
 alias tmns='tmux new -s'                    # Start a new tmux session with name
 alias tms='tmux new-session -s'             # Start a new tmux session
+
+# AWS
+alias awsdev='export AWS_PROFILE=dev'
+alias awsprod='export AWS_PROFILE=default'
 # --------------------------------------------------------------------------------------------------------
 
 # [Functions]

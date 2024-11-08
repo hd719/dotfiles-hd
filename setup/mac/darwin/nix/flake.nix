@@ -59,6 +59,7 @@
         brews = [
           "mas"
           "yakitrak/yakitrak/obsidian-cli"
+          "borders"
         ];
 
         # Update these applicatons manually.
@@ -78,7 +79,6 @@
           # "studio-3t"
           # "parsec"
           "zoom"
-          # "1password"
           # "slack"
           "tableplus"
           # "docker"
@@ -88,11 +88,13 @@
           # "arc"
           "brave-browser"
           "wezterm"
+          "jordanbaird-ice"
         ];
 
         taps = [
           "nikitabobko/tap" # emacs-mac
           "yakitrak/yakitrak"
+          "FelixKratz/formulae"
         ];
 
         masApps = {
@@ -113,6 +115,10 @@
         sudo chflags nohidden /Volumes
         # Stop iTunes from responding to the keyboard media keys
         launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null
+        # Turns off spaces in mission control
+        defaults write com.apple.spaces spans-displays -bool false
+        # Reduce Motion
+        defaults write com.apple.Accessibility reduceMotionEnabled -bool true
       '';
 
       system.defaults = {
@@ -124,6 +130,7 @@
           show-recents = false;
           orientation = "bottom";
         };
+
 
         finder = {
           _FXShowPosixPathInTitle = true;
@@ -184,6 +191,14 @@
 
             # When performing a search, search the current folder by default
             FXDefaultSearchScope = "SCcf";
+          };
+
+          "com.apple.WindowManager" = {
+            EnableStandardClickToShowDesktop = 0; # Click wallpaper to reveal desktop
+            # StandardHideDesktopIcons = 0; # Show items on desktop
+            # HideDesktop = 0; # Do not hide items on desktop & stage manager
+            # StageManagerHideWidgets = 0;
+            # StandardHideWidgets = 0;
           };
 
           "com.apple.screencapture" = {

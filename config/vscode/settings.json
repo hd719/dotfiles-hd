@@ -69,7 +69,7 @@
   // "editor.fontFamily": "Monaspace Krypton Medium", // Remember to deactive the font inorder for this to work
   // "editor.fontFamily": "'Monaspace Neon Medium'",
   // "editor.fontFamily": "LigalexMono-TextItalic", // Primary
-  "editor.fontFamily": "FantasqueSansM Nerd Font", // Primary
+  "editor.fontFamily": "FantasqueSansM Nerd Font Propo", // Primary
   // "editor.fontFamily": "Cartograph CF Light", // Primary
   "editor.letterSpacing": 0.75,
   // "editor.fontFamily": "OperatorMonoLig-BookItalic", // Secondary
@@ -97,29 +97,29 @@
   // Font Color Terminal/Editor/SideBar/StatusBar
   // ---------------------------------------------------------------------
   "workbench.colorCustomizations": {
-    "terminal.background": "#23262E",
+    "terminal.background": "#00000000",
     "workbench.useExperimentalGridLayout": true,
-    "activityBar.background": "#23262E",
+    "activityBar.background": "#282a36",
     "activityBar.foreground": "#ffffff",
-    "activityBar.border": "#23262E",
-    "statusBar.background": "#23262E",
+    "activityBar.border": "#282a36",
+    "statusBar.background": "#282a36",
     "statusBar.foreground": "#ffffff",
-    "statusBar.debuggingBackground": "#23262E",
+    "statusBar.debuggingBackground": "#282a36",
     "tab.activeForeground": "#ffffff",
-    "tab.activeBackground": "#23262E",
-    "tab.inactiveBackground": "#23262E",
+    "tab.activeBackground": "#282a36",
+    "tab.inactiveBackground": "#282a36",
     "tab.inactiveForeground": "#ffffff",
-    "tab.border": "#23262E",
+    "tab.border": "#282a36",
     "tab.activeBorderTop": "#ffffff",
     "tab.unfocusedInactiveModifiedBorder": "#ffffff",
     "tab.unfocusedHoverBorder": "#ffffff",
     "tab.activeModifiedBorder": "#ffffff",
     "tab.inactiveModifiedBorder": "#ffffff",
     "tab.hoverBorder": "#ffffff",
-    "editor.background": "#23262E",
+    "editor.background": "#282a36",
     "editor.lineHighlightBackground": "#3d484b",
     "editorCursor.foreground": "#ffffff",
-    "editorGroupHeader.tabsBackground": "#23262E",
+    "editorGroupHeader.tabsBackground": "#282a36",
     "editorGroupHeader.tabsBorder": "#ffffff",
     "editorGroup.border": "#ffffff",
     "editorLineNumber.foreground": "#FFFFFF",
@@ -127,27 +127,9 @@
     "editor.wordWrap": "on",
     "editor.bracketPairColorization.enabled": true,
     "sideBar.border": "#ffffff",
-    "sideBar.background": "#23262E",
-    "panel.background": "#23262E",
-    "titleBar.activeBackground": "#23262E",
-
-    // "terminal.ansiBlack": "#121212",
-    // "terminal.ansiBlue": "#2B4FFF",
-    // "terminal.ansiBrightBlack": "#666666",
-    // "terminal.ansiBrightBlue": "#5C78FF",
-    // "terminal.ansiBrightCyan": "#5AC8FF",
-    // "terminal.ansiBrightGreen": "#905AFF",
-    // "terminal.ansiBrightMagenta": "#5EA2FF",
-    // "terminal.ansiBrightRed": "#BA5AFF",
-    // "terminal.ansiBrightWhite": "#FFFFFF",
-    // "terminal.ansiBrightYellow": "#685AFF",
-    // "terminal.ansiCyan": "#28B9FF",
-    // "terminal.ansiGreen": "#7129FF",
-    // "terminal.ansiMagenta": "#2883FF",
-    // "terminal.ansiRed": "#A52AFF",
-    // "terminal.ansiWhite": "#F1F1F1",
-    // "terminal.ansiYellow": "#3D2AFF"
-
+    "sideBar.background": "#282a36",
+    "panel.background": "#282a36",
+    "titleBar.activeBackground": "#282a36",
     "terminal.ansiBlack": "#1D2021",
     "terminal.ansiBlue": "#40c4fe",
     "terminal.ansiBrightBlack": "#546d79",
@@ -428,5 +410,11 @@
   "terminal.integrated.env.linux": {},
   "git.openRepositoryInParentFolders": "always",
   "cSpell.userWords": ["Proxying"],
-  "workbench.activityBar.location": "top"
+  "editor.lineNumbers": "relative",
+  "workbench.activityBar.location": "hidden",
+  "workbench.settings.applyToAllProfiles": ["workbench.colorCustomizations"],
+  "extensions.ignoreRecommendations": true,
+  "window.titleBarStyle": "custom",
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.statusBar.visible": false
 }
