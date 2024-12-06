@@ -5,7 +5,7 @@
         "parameters": { "basic.to_if_held_down_threshold_milliseconds": 150 },
         "rules": [
           {
-            "description": "Left cmd + hjkl to arrow keys Vim",
+            "description": "Left ctrl + hjkl to arrow keys Vim",
             "manipulators": [
               {
                 "from": {
@@ -79,11 +79,11 @@
             ]
           },
           {
-            "description": "Change tab to left_control when held, tab when tapped.",
+            "description": "Change ' to left_control when held, ' when tapped.",
             "manipulators": [
               {
-                "from": { "key_code": "tab" },
-                "to_if_alone": [{ "key_code": "tab" }],
+                "from": { "key_code": "quote" },
+                "to_if_alone": [{ "key_code": "quote" }],
                 "to_if_held_down": [{ "key_code": "left_control" }],
                 "type": "basic"
               }
