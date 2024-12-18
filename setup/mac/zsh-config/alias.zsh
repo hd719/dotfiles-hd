@@ -87,7 +87,7 @@ alias lt='ls --tree'
 alias cat="bat --paging never --theme ansi"
 
 ## SSH
-alias axio-work="ssh -L 27017:localhost:27017 -L 3000:localhost:3000 -L 3001:localhost:3001 -L 3002:localhost:3002 -L 4000:localhost:4000 -L 5432:localhost:5432 -L 8080:localhost:8080 axiombp-7g77nn4-hamel"
+alias axio="ssh -L 27018:localhost:27018 ssh -L 27017:localhost:27017 -L 3000:localhost:3000 -L 3001:localhost:3001 -L 3002:localhost:3002 -L 4000:localhost:4000 -L 5432:localhost:5432 -L 8080:localhost:8080 axiombp-7g77nn4-hamel"
 
 ## Nix
 alias switch="darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac/darwin/nix#hameldesai"
