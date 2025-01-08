@@ -65,45 +65,10 @@ terraform() {
     command terraform "$@"
 }
 
-scpc() {
-    # Display usage information
-    echo "  scpc to <local_path> <user@host> <remote_path>    # Copy local to remote"
-    echo "  scpc from <user@host> <remote_path> <local_path>  # Copy remote to local"
-    echo ""
-
-    echo "Select transfer mode:"
-    select mode in "Local to Remote" "Remote to Local"; do
-        case "$mode" in
-            "Local to Remote")
-                read "local_path?Enter local file path: "
-                # Optionally, check if file exists
-                if [[ ! -e "$local_path" ]]; then
-                    echo "Local file '$local_path' not found!"
-                    return 1
-                fi
-                read "remote_host?Enter remote user@host: "
-                read "remote_path?Enter remote destination path: "
-                scp "$local_path" "$remote_host:$remote_path"
-                break
-                ;;
-            "Remote to Local")
-                read "remote_host?Enter remote user@host: "
-                read "remote_path?Enter remote file path: "
-                read "local_path?Enter local destination path: "
-                scp "$remote_host:$remote_path" "$local_path"
-                break
-                ;;
-            *)
-                echo "Invalid selection. Try again."
-                ;;
-        esac
-    done
-}
-
-
 goodMorning() {
-    switch
+  brew update && brew upgrade
 }
+
 
 # alias for new obsidian daily note
 function daily {

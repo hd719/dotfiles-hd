@@ -39,9 +39,6 @@
           devbox
           nix-tree
           tmux
-          # awscli2
-          # kubectl
-          # google-cloud-sdk
         ];
 
       # I'd rather not have telemetry on my package manager.
@@ -58,51 +55,33 @@
 
         brews = [
           "mas"
-          "yakitrak/yakitrak/obsidian-cli"
-          "borders"
         ];
 
-        # Update these applicatons manually.
-        # As brew would update them by unninstalling and installing the newest
-        # version, it could lead to data loss.
+        # Update these applications manually, as brew would update them by uninstalling and installing the newest version, it could lead to data loss.
         casks = [
-          "nikitabobko/tap/aerospace"
           "1password-cli"
-          "orbstack"
+          "aerospace"
           "pearcleaner"
           "obsidian"
-          # "warp"
           "raycast"
           "karabiner-elements"
           "discord"
           "daisydisk"
-          # "studio-3t"
-          # "parsec"
           "zoom"
-          # "slack"
           "tableplus"
-          # "docker"
-          # "postman"
-          # "visual-studio-code"
-          # "amphetamine"
-          # "arc"
           "brave-browser"
-          "wezterm"
-          "jordanbaird-ice"
+          "iterm2"
         ];
 
-        taps = [
-          "nikitabobko/tap" # emacs-mac
-          "yakitrak/yakitrak"
-          "FelixKratz/formulae"
-        ];
+        taps = ["nikitabobko/tap"];
 
         masApps = {
-          Tailscale = 1475387142; # App Store URL id
-          # Magnet = 441258766;
-          # Logi Options = 668584891;
-          # Microsoft Remote Desktop = 1295203466;
-          # Xcode = 497799835;
+          "Logi Options" = 668584891;
+          "Windows App" = 1295203466;
+          Xcode = 497799835;
+          "Amphetamine" = 937984704;
+          "Pure Paste" = 1611378436;
+          "HP Smart for Desktop" = 1474276998;
         };
       };
 
@@ -161,6 +140,8 @@
           InitialKeyRepeat = 15;  # normal minimum is 15 (225 ms), maximum is 120 (1800 ms)
           # sets how fast it repeats once it starts.
           KeyRepeat = 2;  # normal minimum is 2 (30 ms), maximum is 120 (1800 ms)
+
+          AppleShowAllFiles = true;  # show hidden files in Finder
         };
 
         # Customize settings that not supported by nix-darwin directly

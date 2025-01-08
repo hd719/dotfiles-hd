@@ -24,5 +24,7 @@ source $ZSH_CONFIG_DIR/k8s.zsh
 # --------------------------------------------------------------------------------------------------------
 source $ZSH_CONFIG_DIR/job.zsh
 
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # Add paths to environment variables
 PATH=~/.console-ninja/.bin:$PATH
