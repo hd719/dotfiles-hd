@@ -87,7 +87,6 @@
           # "amphetamine"
           # "arc"
           "brave-browser"
-          "wezterm"
           "jordanbaird-ice"
         ];
 
