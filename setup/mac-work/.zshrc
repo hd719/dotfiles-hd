@@ -3,6 +3,7 @@
 # if [ -z "$TMUX" ]; then
 #     tmux attach -t default || tmux new -s default
 # fi
+export TERM=xterm-256color
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -27,8 +28,7 @@ command -v kubecolor >/dev/null 2>&1 && alias kubectl="kubecolor"
 
 # [Prompt]
 # --------------------------------------------------------------------------------------------------------
-eval "$(starship init zsh)"
-export STARSHIP_CONFIG=~/starship.toml
+eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/base.toml)"
 eval "$(zoxide init --cmd cd zsh)"
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -551,4 +551,7 @@ goodMorning() {
   echo "Om Shree Ganeshaya Namaha 🙏"
 }
 # --------------------------------------------------------------------------------------------------------
+
+# pokeget dialga --hide-name | fastfetch --logo-type ascii
+
 PATH=~/.console-ninja/.bin:$PATH

@@ -84,10 +84,10 @@ alias lla='ls -la'
 alias lt='ls --tree'
 
 ## Bat
-alias cat="bat --paging never --theme ansi"
+alias cat="bat --paging never --theme Dracula"
 
 ## SSH
-alias axio="ssh -L 27018:localhost:27018 ssh -L 27017:localhost:27017 -L 3000:localhost:3000 -L 3001:localhost:3001 -L 3002:localhost:3002 -L 4000:localhost:4000 -L 5432:localhost:5432 -L 8080:localhost:8080 axiombp-7g77nn4-hamel"
+alias axio="ssh axiombp-7g77nn4-hamel"
 
 ## Nix
 alias switch="darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac/darwin/nix#hameldesai"
@@ -102,27 +102,6 @@ alias tml='tmux list-sessions'              # List tmux sessions
 alias tmn='tmux new-session'                # Start a new tmux session
 alias tmns='tmux new -s'                    # Start a new tmux session with name
 alias tms='tmux new-session -s'             # Start a new tmux session
-
-# Obsidian CLI
-alias obshelp='obsidian-cli --help'                    # Print help
-alias obsset='obsidian-cli set-default'                # Set default vault
-alias obsdefault='obsidian-cli print-default'          # Print default vault
-alias obsopen='obsidian-cli open'                      # Open note in default vault
-alias obsopenvault='obsidian-cli open--vault'          # Open note in specified vault
-alias obssearch='obsidian-cli search'                  # Search in default vault
-alias obssearchvault='obsidian-cli search--vault'      # Search in specified vault
-alias obscreate='obsidian-cli create'                  # Create empty note in default vault and open it
-alias obscreatevault='obsidian-cli create--vault'      # Create empty note in specified vault and open it
-alias obscreatec='obsidian-cli create--content'        # Create note with content in default vault
-alias obscreateow='obsidian-cli create--content--overwrite' # Create note with content and overwrite existing note
-alias obscreateap='obsidian-cli create--content--append'    # Create note with content and append to existing note
-alias obscreateo='obsidian-cli create--content--open'       # Create note with content and open it
-alias obsmove='obsidian-cli move'                      # Rename note in default vault
-alias obsmovevault='obsidian-cli move--vault'          # Rename note in specified vault
-alias obsmoveo='obsidian-cli move--open'               # Rename note in default vault and open it
-alias obsdel='obsidian-cli delete'                     # Delete note in default vault
-alias obsdelvault='obsidian-cli delete--vault'         # Delete note in specified vault
-# Aliases for Devbox CLI commands using 'db' instead of 'devbox'
 
 # Devbox
 alias dbshell='devbox shell'       # Enter the Devbox environment

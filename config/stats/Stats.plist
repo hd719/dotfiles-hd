@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>35F9FAD6-C1EF-45D4-9D92-E9CD6948FE91_details</key>
+	<false/>
+	<key>CPU_barChart_position</key>
+	<integer>3</integer>
+	<key>CPU_label_position</key>
+	<integer>1</integer>
+	<key>CPU_lineChart_position</key>
+	<integer>2</integer>
+	<key>CPU_mini_alignment</key>
+	<string>left</string>
+	<key>CPU_mini_color</key>
+	<string>utilization</string>
+	<key>CPU_mini_label</key>
+	<true/>
+	<key>CPU_mini_position</key>
+	<integer>0</integer>
+	<key>CPU_oneView</key>
+	<false/>
+	<key>CPU_pieChart_position</key>
+	<integer>4</integer>
+	<key>CPU_tachometer_position</key>
+	<integer>5</integer>
+	<key>CPU_widget</key>
+	<string>mini</string>
+	<key>Disk_barChart_position</key>
+	<integer>3</integer>
+	<key>Disk_label_position</key>
+	<integer>2</integer>
+	<key>Disk_memory_color</key>
+	<string>utilization</string>
+	<key>Disk_memory_orderReversed</key>
+	<true/>
+	<key>Disk_memory_position</key>
+	<integer>1</integer>
+	<key>Disk_memory_symbols</key>
+	<true/>
+	<key>Disk_mini_position</key>
+	<integer>0</integer>
+	<key>Disk_networkChart_position</key>
+	<integer>6</integer>
+	<key>Disk_oneView</key>
+	<false/>
+	<key>Disk_pieChart_position</key>
+	<integer>4</integer>
+	<key>Disk_speed_position</key>
+	<integer>5</integer>
+	<key>Disk_widget</key>
+	<string>mini,memory</string>
+	<key>GPU_barChart_position</key>
+	<integer>3</integer>
+	<key>GPU_label_position</key>
+	<integer>1</integer>
+	<key>GPU_lineChart_position</key>
+	<integer>2</integer>
+	<key>GPU_mini_color</key>
+	<string>utilization</string>
+	<key>GPU_mini_label</key>
+	<true/>
+	<key>GPU_mini_position</key>
+	<integer>0</integer>
+	<key>GPU_oneView</key>
+	<false/>
+	<key>GPU_state</key>
+	<true/>
+	<key>GPU_tachometer_position</key>
+	<integer>4</integer>
+	<key>GPU_widget</key>
+	<string>mini</string>
+	<key>NSStatusItem Preferred Position Battery_battery</key>
+	<real>6512</real>
+	<key>NSStatusItem Preferred Position CPU_mini</key>
+	<integer>419</integer>
+	<key>NSStatusItem Preferred Position Disk_memory</key>
+	<real>638</real>
+	<key>NSStatusItem Preferred Position Disk_mini</key>
+	<real>716</real>
+	<key>NSStatusItem Preferred Position GPU_mini</key>
+	<real>466</real>
+	<key>NSStatusItem Preferred Position Network_label</key>
+	<real>397</real>
+	<key>NSStatusItem Preferred Position Network_speed</key>
+	<real>326</real>
+	<key>NSStatusItem Preferred Position RAM_memory</key>
+	<real>513</real>
+	<key>NSStatusItem Preferred Position RAM_mini</key>
+	<real>591</real>
+	<key>NSStatusItem Restore Position CPU_label</key>
+	<integer>471</integer>
+	<key>NSStatusItem Restore Position Disk</key>
+	<integer>673</integer>
+	<key>NSStatusItem Restore Position Disk_label</key>
+	<integer>849</integer>
+	<key>NSStatusItem Restore Position GPU_label</key>
+	<integer>545</integer>
+	<key>NSStatusItem Restore Position RAM_label</key>
+	<integer>697</integer>
+	<key>NSWindow Frame NSNavPanelAutosaveName</key>
+	<string>1505 939 430 163 0 0 3440 1415 </string>
+	<key>Network_label_position</key>
+	<integer>0</integer>
+	<key>Network_networkChart_position</key>
+	<integer>2</integer>
+	<key>Network_speed_displayValue</key>
+	<string>oi</string>
+	<key>Network_speed_icon</key>
+	<string>arrows</string>
+	<key>Network_speed_mode</key>
+	<string>twoRows</string>
+	<key>Network_speed_monochrome</key>
+	<false/>
+	<key>Network_speed_position</key>
+	<integer>1</integer>
+	<key>Network_state_position</key>
+	<integer>3</integer>
+	<key>Network_text_position</key>
+	<integer>4</integer>
+	<key>Network_widget</key>
+	<string>speed,label</string>
+	<key>RAM_barChart_position</key>
+	<integer>4</integer>
+	<key>RAM_label_position</key>
+	<integer>2</integer>
+	<key>RAM_lineChart_position</key>
+	<integer>3</integer>
+	<key>RAM_memory_color</key>
+	<string>utilization</string>
+	<key>RAM_memory_orderReversed</key>
+	<true/>
+	<key>RAM_memory_position</key>
+	<integer>1</integer>
+	<key>RAM_mini_color</key>
+	<string>utilization</string>
+	<key>RAM_mini_label</key>
+	<true/>
+	<key>RAM_mini_position</key>
+	<integer>0</integer>
+	<key>RAM_oneView</key>
+	<false/>
+	<key>RAM_pieChart_position</key>
+	<integer>5</integer>
+	<key>RAM_tachometer_position</key>
+	<integer>6</integer>
+	<key>RAM_text_position</key>
+	<integer>7</integer>
+	<key>RAM_widget</key>
+	<string>mini,memory</string>
+	<key>SSD_mini_color</key>
+	<string>utilization</string>
+	<key>SSD_mini_label</key>
+	<true/>
+	<key>runAtLoginInitialized</key>
+	<true/>
+	<key>setupProcess</key>
+	<true/>
+	<key>support_ts</key>
+	<integer>1737469153</integer>
+	<key>telemetry</key>
+	<false/>
+	<key>updater_check_ts</key>
+	<integer>1737469153</integer>
+	<key>version</key>
+	<string>2.11.26</string>
+</dict>
+</plist>

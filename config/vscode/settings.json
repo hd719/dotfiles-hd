@@ -5,6 +5,9 @@
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+
   // ---------------------------------------------------------------------
   // Explorer
   // ---------------------------------------------------------------------
@@ -14,7 +17,7 @@
   // ---------------------------------------------------------------------
   // Intellisense and VSCode settings
   // ---------------------------------------------------------------------
-  "breadcrumbs.enabled": true,
+  "breadcrumbs.enabled": false,
   "security.workspace.trust.untrustedFiles": "open",
   "security.promptForLocalFileProtocolHandling": false,
 
@@ -82,7 +85,6 @@
   "workbench.editor.scrollToSwitchTabs": true,
   "workbench.startupEditor": "newUntitledFile",
   "workbench.colorTheme": "Snazzy Operator",
-  "workbench.iconTheme": "material-icon-theme",
   "workbench.settings.editor": "ui",
   "workbench.editor.wrapTabs": true,
   "workbench.editor.decorations.badges": true,
@@ -120,13 +122,13 @@
     "editor.lineHighlightBackground": "#3d484b",
     "editorCursor.foreground": "#ffffff",
     "editorGroupHeader.tabsBackground": "#282a36",
-    "editorGroupHeader.tabsBorder": "#ffffff",
+    "editorGroupHeader.tabsBorder": "#282a36",
     "editorGroup.border": "#ffffff",
     "editorLineNumber.foreground": "#FFFFFF",
     "editorGroup.focusedEmptyBorder": "#ffffff",
     "editor.wordWrap": "on",
     "editor.bracketPairColorization.enabled": true,
-    "sideBar.border": "#ffffff",
+    "sideBar.border": "#282a36",
     "sideBar.background": "#282a36",
     "panel.background": "#282a36",
     "titleBar.activeBackground": "#282a36",
@@ -207,7 +209,7 @@
     "markdown": true,
     "scminput": false,
     "yaml": true,
-    "go": false
+    "go": true
   },
 
   // ---------------------------------------------------------------------
@@ -245,8 +247,8 @@
     "vscode-kubernetes.minikube-path.mac": "/Users/hameldesai/.vs-kubernetes/tools/minikube/darwin-arm64/minikube",
     "vscode-kubernetes.minikube-path-mac": "/Users/hameldesai/.vs-kubernetes/tools/minikube/darwin-arm64/minikube",
     "vscode-kubernetes.helm-path-mac": "/Users/hameldesai/.vs-kubernetes/tools/helm/darwin-arm64/helm",
-    "vs-kubernetes.minikube-show-information-expiration": "2024-12-28T14:35:29.696Z",
-    "vs-kubernetes.crd-code-completion": "enabled"
+    "vs-kubernetes.crd-code-completion": "enabled",
+    "vs-kubernetes.minikube-show-information-expiration": "2025-08-13T13:59:50.071Z"
   },
 
   // Remote Extensions
@@ -392,10 +394,10 @@
     "donjayamanne.python-environment-manager",
     "donjayamanne.python-extension-pack",
     "vscjava.vscode-java-test",
-    "redhat.java"
+    "redhat.java",
+    "vscjava.vscode-gradle",
+    "emmanuelbeziat.vscode-great-icons"
   ],
-  "window.commandCenter": false,
-  "workbench.layoutControl.enabled": false,
   "redhat.telemetry.enabled": false,
   "github.copilot.editor.enableAutoCompletions": true,
   "editor.stickyScroll.enabled": false,
@@ -416,5 +418,16 @@
   "extensions.ignoreRecommendations": true,
   "window.titleBarStyle": "custom",
   "workbench.editor.tabSizing": "shrink",
+  "docker.contexts.showInStatusBar": true,
+  "editor.accessibilitySupport": "off",
+  "github.copilot.chat.edits.codesearch.enabled": true,
+  "workbench.navigationControl.enabled": false,
+  "workbench.layoutControl.enabled": false,
+  "search.followSymlinks": false,
+  "workbench.editor.enablePreview": false,
+  "workbench.iconTheme": "catppuccin-latte",
+  "window.commandCenter": false,
+  "editor.stickyScroll.scrollWithEditor": false,
+  "workbench.tree.enableStickyScroll": false,
   "workbench.statusBar.visible": false
 }

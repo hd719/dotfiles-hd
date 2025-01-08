@@ -1,4 +1,12 @@
 /* Set italics and comments to the script font */
+.actions-container.highlight-toggled {
+  display: none !important;
+}
+
+.Monaco-breadcrumb-item {
+  display: none !important;
+}
+
 .mtk3,
 .mtk4 {
   font-family: "OperatorMonoLig-BookItalic";
@@ -22,7 +30,7 @@
 
 .monaco-editor .line-numbers {
   font-family: "OperatorMonoLig-BookItalic";
-  font-size: 1em !important;
+  font-size: 0.8\em !important;
   margin-left: -0.9375em !important;
 }
 
@@ -36,12 +44,47 @@
   > .monaco-list-rows
   span {
   font-size: 0.875rem;
-  font-family: "Hasklug Nerd Font Mono";
+  font-family: "Hasklug Nerd Font Propo";
 }
 
 .explorer-folders-view
   > .monaco-list
   > .monaco-scrollable-element
   > .monaco-list-rows {
-  font-family: "Hasklug Nerd Font Mono";
+  font-family: "Hasklug Nerd Font Propo";
+}
+
+/* Scroll Bar */
+.slider {
+  position: absolute !important;
+  right: 2px !important;
+  width: 2px !important;
+  background: #bc9abc !important;
+  left: auto !important;
+}
+
+/* Tooltip box style */
+/* .monaco-editor-hover,
+.monaco-hover {
+  box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.45) !important;
+  padding: 10px !important;
+  background-image: linear-gradient(#3c3c50 0%, #2a2b38 100%) !important;
+  backdrop-filter: blur(3px) !important;
+  border-radius: 20px !important;
+  border: none !important;
+} */
+/* Command Palette */
+.quick-input-widget {
+  transform: translateY(-50%) !important;
+  top: 50% !important;
+  box-shadow: 0px 8px 20px rgba(50, 41, 41, 0.45) !important;
+  padding: 10px 10px 18px 10px !important;
+  background-image: linear-gradient(#3c3c50 0%, #282a36 100%) !important;
+  backdrop-filter: blur(3px) !important;
+  border-radius: 20px !important;
+}
+
+/* Remove background for lists */
+.monaco-list-rows {
+  background: transparent !important;
 }

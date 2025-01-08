@@ -1,4 +1,5 @@
 ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac/zsh-config
+
 # [ZSH/System Config]
 # --------------------------------------------------------------------------------------------------------
 source $ZSH_CONFIG_DIR/prompt.zsh
