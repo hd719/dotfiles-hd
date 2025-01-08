@@ -1,87 +1,23 @@
-"$schema" = 'https://starship.rs/config-schema.json'
-
-# Colors
-# [palettes.catppuccin_mocha]
-# rosewater = "#f5e0dc"
-# flamingo = "#f2cdcd"
-# pink = "#f5c2e7"
-# orange = "#cba6f7"
-# red = "#f38ba8"
-# maroon = "#eba0ac"
-# peach = "#fab387"
-# yellow = "#f9e2af"
-# green = "#a6e3a1"
-# teal = "#94e2d5"
-# sky = "#89dceb"
-# sapphire = "#74c7ec"
-# blue = "#89b4fa"
-# lavender = "#b4befe"
-# text = "#cdd6f4"
-# subtext1 = "#bac2de"
-# subtext0 = "#a6adc8"
-# overlay2 = "#9399b2"
-# overlay1 = "#7f849c"
-# overlay0 = "#6c7086"
-# surface2 = "#585b70"
-# surface1 = "#45475a"
-# surface0 = "#313244"
-# base = "#1e1e2e"
-# mantle = "#181825"
-# crust = "#11111b"
-
 format = """
 $directory\
 $git_branch\
 $git_state\
 $git_status\
 $cmd_duration\
+$line_break\
+$custom\
+$package\
 $nodejs\
+$bun\
+$deno\
 $python\
 $golang\
+$ruby\
+$rails_version\
 $helm\
 $java\
 $terraform\
 $character"""
-
-# right_format = """
-# $docker_context\
-# $kubernetes\
-# $aws\
-# $gcloud\
-# $line_break\
-# """
-
-# [docker_context]
-# symbol = ""
-# style = "bg:mantle"
-# format = '[[ $symbol( $context) ](fg:#74c7ec bg:mantle)]($style)'
-
-# [kubernetes]
-# style = "bg:peach fg:#94e2d5"
-# format = '[󱃾 $context ctx [](fg:green)(fg:green)]($style)'
-# disabled = false
-# contexts = [
-#   { context_pattern = "dev.local.cluster.k8s", style = "green", symbol = "💔 " },
-# ]
-
-# [aws]
-# symbol = ''
-# style = "bg:lavender"
-# format = '[[$symbol ($profile)(\($region\))](fg:#fab387 bg:lavender)(fg:lavender bg:peach)]($style)'
-# # [aws.region_aliases]
-# # ap-southeast-2 = 'au'
-# # us-east-1 = 'va'
-# # us-east-2 = 'ohio'
-# # [aws.profile_aliases]
-# # CompanyGroupFrobozzOnCallAccess = 'Frobozz'
-
-# [gcloud]
-# symbol = ''
-# style = "bg:surface0 fg:#b4befe"
-# format = '(fg:surface0)[ $symbol (\($project\))(fg:lavender bg:surface0)]($style)'
-# [gcloud.region_aliases]
-# us-east1 = 'ue1'
-# asia-northeast1 = 'an1'
 
 [directory]
 style = "blue"
@@ -96,7 +32,7 @@ format = "[$branch]($style)"
 style = "bright-black"
 
 [git_status]
-format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218)($ahead_behind$stashed)]($style) "
+format = "[[ (*$conflicted$untracked$modified$staged$renamed$deleted)](218)($ahead_behind$stashed)]($style)"
 style = "cyan"
 conflicted = "​"
 untracked = "​"
@@ -107,22 +43,54 @@ deleted = "​"
 stashed = "≡"
 
 [git_state]
-format = '\([$state( $progress_current/$progress_total)]($style)\)'
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
 style = "bright-black"
 
 [cmd_duration]
-format = "[$duration]($style) "
+format = " took [$duration]($style) "
 style = "yellow"
 
+[custom.nix_version]
+symbol = "󱄅"
+command = "nix --version | awk '{print $3}'"      # Extracts only the version number
+format = "[$symbol $output](fg:#a2d2df) "
+when = "command -v nix && [[ -n $DEVBOX_SHELL ]]"
+detect_folders = [".devbox"]
+detect_files = ["devbox.json", "devbox.lock"]
+
+[package]
+symbol = ""
+format = "[$symbol ($version)](fg:#CBC3E3) "
+
 [nodejs]
-symbol = "󰌞"
+symbol = ""
 style = "fg:#f5e0dc"
 format = "[$symbol ($version)](fg:#a6e3a1) "
+
+[bun]
+symbol = "\ue76f"
+style = "fg:#f5e0dc"
+format = "[$symbol ($version)](fg:#E8D9C5) "
+
+[deno]
+symbol = "\ue7c0"
+style = "fg:#f5e0dc"
+format = "[$symbol ($version)](fg:#8f8f8f) "
 
 [python]
 symbol = ""
 style = "fg:#f5e0dc"
 format = "[$symbol ($version)](fg:#f2cdcd) "
+
+[ruby]
+symbol = ""
+style = "fg:#E10531"
+format = "[$symbol ($version)](fg:#E10531) "
+
+[custom.rails_version]
+symbol = "󰫏"
+style = "fg:#E7365A"
+format = "[$symbol ($version)](fg:#E7365A) "
 
 [golang]
 symbol = ""
@@ -130,7 +98,7 @@ style = "fg:#74c7ec"
 format = "[$symbol ($version)](fg:#74c7ec) "
 
 [helm]
-symbol = ""
+symbol = "⎈"
 style = "fg:#b4befe"
 format = "[$symbol ($version)](fg:#b4befe) "
 

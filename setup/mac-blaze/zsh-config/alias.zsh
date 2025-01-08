@@ -86,11 +86,6 @@ alias lt='ls --tree'
 ## Bat
 alias cat="bat --paging never --theme Dracula"
 
-## SSH
-alias axio="ssh axiombp-7g77nn4-hamel"
-alias blaze="ssh hamels-macbook-pro-2-1"
-alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
-
 ## Nix
 alias switch="darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac/darwin/nix#hameldesai"
 alias nix-update="nix flake update"
