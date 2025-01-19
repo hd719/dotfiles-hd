@@ -68,7 +68,7 @@
         casks = [
           "nikitabobko/tap/aerospace"
           "1password-cli"
-          "orbstack"
+          # "orbstack"
           "pearcleaner"
           "obsidian"
           # "warp"
