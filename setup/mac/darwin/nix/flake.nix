@@ -12,15 +12,11 @@
   let
     configuration = { pkgs, ... }: {
 
-      # Auto upgrade nix package and the daemon service.
-      services.nix-daemon.enable = true;
-
       nix = {
           # package = pkgs.nix;
           gc.automatic = true;
           optimise.automatic = true;
           settings = {
-            auto-optimise-store = true;
             experimental-features = "nix-command flakes";
         };
       };
@@ -71,6 +67,7 @@
           "tableplus"
           "brave-browser"
           "iterm2"
+          "slack"
         ];
 
         taps = ["nikitabobko/tap"];
@@ -219,7 +216,7 @@
       };
 
       # Add ability to used TouchID for sudo authentication
-      security.pam.enableSudoTouchIdAuth = true;
+      # security.pam.enableSudoTouchIdAuth = true; --> This is not supported anymore - TODO: look for a fix
 
       # Create /etc/zshrc that loads the nix-darwin environment.
       programs.zsh = {

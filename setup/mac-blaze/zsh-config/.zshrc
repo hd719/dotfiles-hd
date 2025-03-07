@@ -1,4 +1,4 @@
-ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac/zsh-config
+ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config
 
 # [ZSH/System Config]
 # --------------------------------------------------------------------------------------------------------
@@ -26,5 +26,10 @@ source $ZSH_CONFIG_DIR/job.zsh
 
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
 # Add paths to environment variables
 PATH=~/.console-ninja/.bin:$PATH
