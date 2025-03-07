@@ -67,6 +67,7 @@
           "tableplus"
           "brave-browser"
           "iterm2"
+          "slack"
         ];
 
         taps = ["nikitabobko/tap"];
