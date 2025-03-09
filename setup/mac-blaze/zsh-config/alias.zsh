@@ -90,6 +90,9 @@ alias cat="bat --paging never --theme Dracula"
 alias switch="darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac/darwin/nix#hameldesai"
 alias nix-update="nix flake update"
 
+#Tailscale
+alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh"
+
 # Tmux
 alias tm='tmux'                             # Start tmux
 alias tma='tmux attach-session'             # Attach to a tmux session
@@ -113,3 +116,37 @@ alias dbps='devbox ps'             # Show running processes in Devbox
 alias dblogs='devbox logs'         # Display logs for the Devbox environment
 alias dbconfig='devbox config'     # Open the configuration for Devbox
 alias dbhelp='devbox help'         # Show help information for Devbox
+
+# Blaze
+alias hydrate-s3-dev="bin/rails restore_db_and_index:from_s3"
+alias hydrate-s3-prod="bin/rails restore_db_and_index:from_live_production"
+# — this will download pre-sanitized data from S3 and restore it locally. It will then clear the Algolia indices, and reindex them. Make sure redis is running before this or the index step will fail! Alternatively, you can run bin/rails restore_db_and_index:from_live_production to get a fresh copy of prod, sanitize it, and restore it locally. This method will take multiple hours, so only use if the s3 dump is broken (Please notify engineering channel if this is the case so we can fix it).
+alias run-migration="bin/rails db:migrate RAILS_ENV=development"
+alias launch-backend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-backend.sh"
+alias launch-editor="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-editor.sh"
+alias launch-frontend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-frontend.sh"
+alias console-dev="heroku run rails c -a blaze-ai-rails"
+alias console-prod="heroku run rails c -a blaze-ai-rails"
+
+## Repos
+alias cdalmanac='cd ~/Developer/Blaze/almanac-editor'
+alias cdblazeonrails='cd ~/Developer/Blaze/blaze-on-rails'
+alias cdmonospace='cd ~/Developer/Blaze/monospace'
+alias cdprosecore='cd ~/Developer/Blaze/prose-core'
+
+## Rails
+alias be="bundle exec"
+alias r="bundle exec rails"
+alias rs="bundle exec rails s"
+alias rc="bundle exec rails c"
+alias rr="bundle exec rails routes"
+alias rdbm="bundle exec rails db:migrate"
+alias rdbs="bundle exec rails db:schema:load"
+alias rdbmr="bundle exec rails db:rollback"
+alias rdbr="bundle exec rake db:reset"
+
+## Rails Environment
+alias rdbmdev="bundle exec rails db:migrate RAILS_ENV=development"
+alias rdbmprod="bundle exec rails db:migrate RAILS_ENV=production"
+alias rdbmrdev="bundle exec rails db:rollback RAILS_ENV=development"
+alias rdbmrprod="bundle exec rails db:rollback RAILS_ENV=production"
