@@ -31,5 +31,15 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
+
+RED="\033[31m"
+RESET="\033[0m"
+
+echo -e "\n${RED}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥${RESET}"
+echo -e "${RED}🔥   You are now blazed up   🔥${RESET}"
+echo -e "${RED}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥${RESET}\n"
+
+fastfetch
+
 # Add paths to environment variables
 PATH=~/.console-ninja/.bin:$PATH
