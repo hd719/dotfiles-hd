@@ -43,3 +43,4 @@ fastfetch
 
 # Add paths to environment variables
 PATH=~/.console-ninja/.bin:$PATH
+export PATH="/opt/homebrew/opt/llvm@14/bin:$PATH"
