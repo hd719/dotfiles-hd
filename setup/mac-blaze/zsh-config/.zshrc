@@ -36,7 +36,7 @@ RED="\033[31m"
 RESET="\033[0m"
 
 echo -e "\n${RED}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥${RESET}"
-echo -e "${RED}🔥   You are now blazed up   🔥${RESET}"
+echo -e "${RED}🔥          Blaze AI          🔥${RESET}"
 echo -e "${RED}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥${RESET}\n"
 
 fastfetch
