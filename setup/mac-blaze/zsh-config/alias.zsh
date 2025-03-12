@@ -115,10 +115,12 @@ alias dbconfig='devbox config'     # Open the configuration for Devbox
 alias dbhelp='devbox help'         # Show help information for Devbox
 
 # Blaze
-alias launch-backend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-backend.sh"
 alias hydrate-s3-dev="bin/rails restore_db_and_index:from_s3"
 alias hydrate-s3-prod="bin/rails restore_db_and_index:from_live_production"
 # — this will download pre-sanitized data from S3 and restore it locally. It will then clear the Algolia indices, and reindex them. Make sure redis is running before this or the index step will fail! Alternatively, you can run bin/rails restore_db_and_index:from_live_production to get a fresh copy of prod, sanitize it, and restore it locally. This method will take multiple hours, so only use if the s3 dump is broken (Please notify engineering channel if this is the case so we can fix it).
 alias run-migration="bin/rails db:migrate RAILS_ENV=development"
+alias launch-backend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-backend.sh"
 alias launch-editor="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-editor.sh"
 alias launch-frontend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-frontend.sh"
+alias console-dev="heroku run rails c -a blaze-ai-rails"
+alias console-prod="heroku run rails c -a blaze-ai-rails"

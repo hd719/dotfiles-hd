@@ -22,7 +22,7 @@ tell application "iTerm"
     -- Write commands to each session in the tab
     tell session 1 of T
         write text "cd ~/Developer/Blaze/almanac-editor/apps/blaze"
-        write text "nvm use 16.5.0; pnpm i; pnpm exec vite"
+        write text "nvm use 18.17.1; pnpm i; pnpm exec vite"
     end tell
     tell session 2 of T
         write text "cd ~/Developer/Blaze/almanac-editor/apps/blaze"
