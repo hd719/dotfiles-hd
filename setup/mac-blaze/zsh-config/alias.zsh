@@ -124,3 +124,26 @@ alias launch-editor="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/
 alias launch-frontend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-frontend.sh"
 alias console-dev="heroku run rails c -a blaze-ai-rails"
 alias console-prod="heroku run rails c -a blaze-ai-rails"
+
+## Repos
+alias cdalmanac='cd ~/Developer/Blaze/almanac-editor'
+alias cdblazeonrails='cd ~/Developer/Blaze/blaze-on-rails'
+alias cdmonospace='cd ~/Developer/Blaze/monospace'
+alias cdprosecore='cd ~/Developer/Blaze/prose-core'
+
+## Rails
+alias be="bundle exec"
+alias r="bundle exec rails"
+alias rs="bundle exec rails s"
+alias rc="bundle exec rails c"
+alias rr="bundle exec rails routes"
+alias rdbm="bundle exec rails db:migrate"
+alias rdbs="bundle exec rails db:schema:load"
+alias rdbmr="bundle exec rails db:rollback"
+alias rdbr="bundle exec rake db:reset"
+
+## Rails Environment
+alias rdbmdev="bundle exec rails db:migrate RAILS_ENV=development"
+alias rdbmprod="bundle exec rails db:migrate RAILS_ENV=production"
+alias rdbmrdev="bundle exec rails db:rollback RAILS_ENV=development"
+alias rdbmrprod="bundle exec rails db:rollback RAILS_ENV=production"

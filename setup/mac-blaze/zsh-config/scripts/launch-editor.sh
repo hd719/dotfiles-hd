@@ -14,7 +14,6 @@ tell application "iTerm"
     -- Split horizontally 2 times
     tell W's current session
         split horizontally with default profile
-        split horizontally with default profile
     end tell
 
     -- Get the current tab

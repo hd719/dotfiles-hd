@@ -11,11 +11,6 @@ tell application "iTerm"
     set W to current window
     if W = missing value then set W to create window with default profile
 
-    -- Split horizontally 1 times
-    tell W's current session
-        split horizontally with default profile
-    end tell
-
     -- Get the current tab
     set T to W's current tab
 
@@ -23,9 +18,6 @@ tell application "iTerm"
     tell session 1 of T
         write text "cd ~/Developer/Blaze/almanac-editor/apps/blaze"
         write text "nvm use 18.17.1; pnpm i; pnpm exec vite"
-    end tell
-    tell session 2 of T
-        write text "cd ~/Developer/Blaze/almanac-editor/apps/blaze"
     end tell
 end tell
 EOF

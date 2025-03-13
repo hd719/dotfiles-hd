@@ -20,12 +20,12 @@ killport() {
 }
 
 clean() {
-    echo "Cleaning up Nix store..."
-    nix-env --delete-generations old
-    nix-store --gc
-    nix-collect-garbage -d
-    nix-store --optimise
-    echo "Nix store cleaned and optimized!"
+    # echo "Cleaning up Nix store..."
+    # nix-env --delete-generations old
+    # nix-store --gc
+    # nix-collect-garbage -d
+    # nix-store --optimise
+    # echo "Nix store cleaned and optimized!"
 
     echo "Cleaning up Homebrew..."
     brew cleanup
@@ -65,8 +65,30 @@ terraform() {
     command terraform "$@"
 }
 
+# Pull all repos on master branch
+gda() {
+  startdir=$(pwd);
+
+	echo '******Pulling Almanac Editor  ******';
+	cdalmanac && git checkout master && gpp;
+
+	echo '******Pulling Blaze on Rails ******';
+	cdblazeonrails && git checkout master && gpp;
+
+	echo '******Pulling Monospace ******';
+	cdmonospace && git checkout master && gpp;
+
+	echo '******Pulling Prosecore ******';
+	cdprosecore && git checkout master && gpp;
+
+  cd "$startdir";
+}
+
 goodMorning() {
+  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
   brew update && brew upgrade
+	gda
+  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 }
 
 
