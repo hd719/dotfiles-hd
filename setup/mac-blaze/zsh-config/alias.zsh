@@ -90,6 +90,9 @@ alias cat="bat --paging never --theme Dracula"
 alias switch="darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac/darwin/nix#hameldesai"
 alias nix-update="nix flake update"
 
+#Tailscale
+alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh"
+
 # Tmux
 alias tm='tmux'                             # Start tmux
 alias tma='tmux attach-session'             # Attach to a tmux session
