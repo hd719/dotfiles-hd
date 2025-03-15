@@ -1,0 +1,1 @@
+# pokeget dialga --hide-name | fastfetch --logo-type ascii
