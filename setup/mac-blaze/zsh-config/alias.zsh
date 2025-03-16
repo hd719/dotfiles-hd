@@ -102,6 +102,7 @@ alias tml='tmux list-sessions'              # List tmux sessions
 alias tmn='tmux new-session'                # Start a new tmux session
 alias tmns='tmux new -s'                    # Start a new tmux session with name
 alias tms='tmux new-session -s'             # Start a new tmux session
+alias tmk='tmux kill-server'
 
 # Devbox
 alias dbshell='devbox shell'       # Enter the Devbox environment
@@ -122,12 +123,13 @@ alias hydrate-s3-dev="bin/rails restore_db_and_index:from_s3"
 alias hydrate-s3-prod="bin/rails restore_db_and_index:from_live_production"
 # — this will download pre-sanitized data from S3 and restore it locally. It will then clear the Algolia indices, and reindex them. Make sure redis is running before this or the index step will fail! Alternatively, you can run bin/rails restore_db_and_index:from_live_production to get a fresh copy of prod, sanitize it, and restore it locally. This method will take multiple hours, so only use if the s3 dump is broken (Please notify engineering channel if this is the case so we can fix it).
 alias run-migration="bin/rails db:migrate RAILS_ENV=development"
-alias launch-backend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-backend.sh"
-alias launch-editor="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-editor.sh"
-alias launch-frontend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-frontend.sh"
-alias launch-fe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-fe.sh"
-alias launch-ed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-ed.sh"
-alias launch-be="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-be.sh"
+alias it-be="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/it-be.sh"
+alias it-ed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/ie-ed.sh"
+alias it-fe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/it-fe.sh"
+alias tm-fe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-fe.sh"
+alias tm-ed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-ed.sh"
+alias tm-be="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-be.sh"
+alias tm-all="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-all.sh"
 alias console-dev="heroku run rails c -a blaze-ai-rails"
 alias console-prod="heroku run rails c -a blaze-ai-rails"
 
