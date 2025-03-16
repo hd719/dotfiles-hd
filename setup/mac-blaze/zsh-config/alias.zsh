@@ -133,9 +133,6 @@ alias tm-fe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-
 alias tm-ed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-ed.sh"
 alias tm-be="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-be.sh"
 alias tm-all="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-all.sh"
-alias launch-backend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-backend.sh"
-alias launch-editor="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-editor.sh"
-alias launch-frontend="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/launch-frontend.sh"
 alias console-dev="heroku run rails c -a blaze-ai-rails"
 alias console-prod="heroku run rails c -a blaze-ai-rails"
 
