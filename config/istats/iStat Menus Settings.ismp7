@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>build</key>
-	<string>2247</string>
+	<string>2250</string>
 	<key>preferences</key>
 	<dict>
 		<key>Battery.Menubar.Mode.DualValue.Font.Name</key>
@@ -20,10 +20,26 @@
 		<string>semibold</string>
 		<key>CPU.Menubar.Mode.LabelValue.Value.Dark.Text.Color</key>
 		<string>0 0.4784313725490196 1 1</string>
+		<key>Combined.Menu.Items</key>
+		<array>
+			<string>time-cities</string>
+			<string>battery-combined</string>
+			<string>disks-physical</string>
+			<string>sensors-overview</string>
+			<string>cpu-cpu</string>
+			<string>cpu-cores</string>
+			<string>cpu-gpu</string>
+			<string>memory-overview</string>
+			<string>memory-memory</string>
+			<string>network-bandwidth</string>
+			<string>weather-conditions</string>
+			<string>weather-hourly</string>
+			<string>processes</string>
+		</array>
 		<key>Combined.Menubar.Items</key>
 		<array/>
 		<key>Device.Auth-Identifier</key>
-		<string>DED60DDA-13DE-4CD5-9AAE-32F0029652F8</string>
+		<string>F88031EB-B1B8-47A7-B867-D3C544EAE5EC</string>
 		<key>Device.Device</key>
 		<string>6d296a334c22afe6f5469526979f9d8e785dc02d</string>
 		<key>Device.Model</key>
@@ -38,6 +54,16 @@
 		<false/>
 		<key>GPU.Menubar.Mode.LabelValue.Processor.Value.Dark.Text.Color</key>
 		<string>0 0.4784313725490196 1 1</string>
+		<key>License.License</key>
+		<string>ammo-stub-heel-puma-8405-7</string>
+		<key>License.Validation.hashversion</key>
+		<string>3</string>
+		<key>License.Validation.license</key>
+		<string>ammo-stub-heel-puma-8405-7</string>
+		<key>License.Validation.signature</key>
+		<string>MIGIAkIBg2TQ2XRn283YPtlbVJ7fuBxkDa++mMVZgBaW0VKAov4sAMdp9KaZfQi6cmtV1djF6GxLdH+NRrt7asX+5+bVQooCQgCB5qCIE0dG1y3W9BXdEZRAs/U6Kk1c+o5cz0nfVsPv2M0g/IelPIfFermTF/BAQ+J3j6cM9FXnd16r6cJjUUVFCw==</string>
+		<key>License.Validation.time</key>
+		<string>1742477394</string>
 		<key>Memory.Menubar.Mode.LabelValue.Pressure.Value.Dark.Text.Color</key>
 		<string>0 0.4784313725490196 1 1</string>
 		<key>Memory.Menubar.Mode.UsedFree.Font.Name</key>
@@ -175,9 +201,18 @@
 			</dict>
 		</array>
 		<key>Profiles.Settings.default.Combined.Menubar.Enabled</key>
-		<integer>0</integer>
+		<integer>1</integer>
 		<key>Profiles.Settings.default.Combined.Menubar.Items</key>
-		<array/>
+		<array>
+			<dict>
+				<key>source</key>
+				<integer>9</integer>
+				<key>subtype</key>
+				<integer>6</integer>
+				<key>type</key>
+				<integer>7</integer>
+			</dict>
+		</array>
 		<key>Profiles.Settings.default.Disks.Menubar.Enabled</key>
 		<integer>1</integer>
 		<key>Profiles.Settings.default.Disks.Menubar.Items</key>
@@ -187,14 +222,6 @@
 				<integer>4</integer>
 				<key>subtype</key>
 				<integer>8</integer>
-				<key>type</key>
-				<integer>7</integer>
-			</dict>
-			<dict>
-				<key>source</key>
-				<integer>4</integer>
-				<key>subtype</key>
-				<integer>7</integer>
 				<key>type</key>
 				<integer>7</integer>
 			</dict>
@@ -211,28 +238,11 @@
 				<key>type</key>
 				<integer>7</integer>
 			</dict>
-			<dict>
-				<key>source</key>
-				<integer>3</integer>
-				<key>subtype</key>
-				<integer>7</integer>
-				<key>type</key>
-				<integer>7</integer>
-			</dict>
 		</array>
 		<key>Profiles.Settings.default.Network.Menubar.Enabled</key>
-		<integer>1</integer>
+		<integer>0</integer>
 		<key>Profiles.Settings.default.Network.Menubar.Items</key>
-		<array>
-			<dict>
-				<key>source</key>
-				<integer>6</integer>
-				<key>subtype</key>
-				<integer>7</integer>
-				<key>type</key>
-				<integer>7</integer>
-			</dict>
-		</array>
+		<array/>
 		<key>Profiles.Settings.default.Sensors.Menubar.Enabled</key>
 		<integer>1</integer>
 		<key>Profiles.Settings.default.Sensors.Menubar.Items</key>
@@ -257,22 +267,120 @@
 					<array>
 						<dict>
 							<key>format</key>
-							<string>icon-calendar-color-fill-day</string>
+							<string>hh</string>
 							<key>format-type</key>
-							<string>icons</string>
+							<string>hour</string>
+							<key>type</key>
+							<string>token</string>
+						</dict>
+						<dict>
+							<key>type</key>
+							<string>string</string>
+							<key>value</key>
+							<string> : </string>
+						</dict>
+						<dict>
+							<key>format</key>
+							<string>mm</string>
+							<key>format-type</key>
+							<string>minute</string>
+							<key>type</key>
+							<string>token</string>
+						</dict>
+						<dict>
+							<key>type</key>
+							<string>string</string>
+							<key>value</key>
+							<string> </string>
+						</dict>
+						<dict>
+							<key>format</key>
+							<string>a</string>
+							<key>format-type</key>
+							<string>ampm</string>
+							<key>type</key>
+							<string>token</string>
+						</dict>
+						<dict>
+							<key>type</key>
+							<string>string</string>
+							<key>value</key>
+							<string> - </string>
+						</dict>
+						<dict>
+							<key>format</key>
+							<string>D</string>
+							<key>format-type</key>
+							<string>daynumber</string>
+							<key>type</key>
+							<string>token</string>
+						</dict>
+					</array>
+				</dict>
+				<key>line2</key>
+				<dict>
+					<key>items</key>
+					<array>
+						<dict>
+							<key>format</key>
+							<string>MM</string>
+							<key>format-type</key>
+							<string>month</string>
+							<key>type</key>
+							<string>token</string>
+						</dict>
+						<dict>
+							<key>type</key>
+							<string>string</string>
+							<key>value</key>
+							<string> / </string>
+						</dict>
+						<dict>
+							<key>format</key>
+							<string>d</string>
+							<key>format-type</key>
+							<string>day</string>
+							<key>type</key>
+							<string>token</string>
+						</dict>
+						<dict>
+							<key>type</key>
+							<string>string</string>
+							<key>value</key>
+							<string> / </string>
+						</dict>
+						<dict>
+							<key>format</key>
+							<string>yy</string>
+							<key>format-type</key>
+							<string>year</string>
+							<key>type</key>
+							<string>token</string>
+						</dict>
+						<dict>
+							<key>type</key>
+							<string>string</string>
+							<key>value</key>
+							<string> - </string>
+						</dict>
+						<dict>
+							<key>format</key>
+							<string>w</string>
+							<key>format-type</key>
+							<string>weeknumber</string>
 							<key>type</key>
 							<string>token</string>
 						</dict>
 					</array>
 				</dict>
 				<key>lines</key>
-				<string>1</string>
+				<string>2</string>
 			</dict>
 		</array>
 		<key>Profiles.Settings.default.Time.Menubar.Enabled</key>
-		<integer>1</integer>
+		<integer>0</integer>
 		<key>Profiles.Settings.default.Weather.Menubar.Enabled</key>
-		<integer>1</integer>
+		<integer>0</integer>
 		<key>Profiles.Settings.default.Weather.Menubar.Items</key>
 		<array>
 			<dict>
@@ -386,9 +494,11 @@
 		<key>Sensors.Menubar.Mode.LabelValue.Value.Dark.Text.Color</key>
 		<string>0 0.4784313725490196 1 1</string>
 		<key>Status.Build.Last</key>
-		<real>2247</real>
+		<real>2250</real>
 		<key>Status.Version.Last</key>
-		<real>7.0199999809265137</real>
+		<real>7.0999999046325684</real>
+		<key>UpdateFrequency</key>
+		<integer>0</integer>
 		<key>Weather.Global.AvailableProviders</key>
 		<array>
 			<dict>
@@ -426,6 +536,18 @@
 				<string>willyweather</string>
 				<key>name</key>
 				<string>🇦🇺 WillyWeather (BoM)</string>
+			</dict>
+			<dict>
+				<key>key</key>
+				<string>dwd</string>
+				<key>name</key>
+				<string>🇩🇪 DWD</string>
+			</dict>
+			<dict>
+				<key>key</key>
+				<string>meteofrance</string>
+				<key>name</key>
+				<string>🇫🇷 Meteo France</string>
 			</dict>
 		</array>
 		<key>Weather.Global.Units.Degrees</key>

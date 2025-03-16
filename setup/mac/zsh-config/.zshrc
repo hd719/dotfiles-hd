@@ -20,9 +20,16 @@ source $ZSH_CONFIG_DIR/functions.zsh
 # --------------------------------------------------------------------------------------------------------
 source $ZSH_CONFIG_DIR/k8s.zsh
 
-# [Job Config]
+# [Syntax Highlighting]
 # --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/job.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# [Autosuggestions]
+# --------------------------------------------------------------------------------------------------------
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # Add paths to environment variables
 PATH=~/.console-ninja/.bin:$PATH
+
+# [Job Config]
+# --------------------------------------------------------------------------------------------------------
