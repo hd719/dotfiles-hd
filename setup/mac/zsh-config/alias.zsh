@@ -16,6 +16,7 @@ alias fucknode='rm -rf node_modules'
 alias dockercleanup='docker system prune --force'
 alias dockerkill='docker kill $(docker ps -a -q)'
 alias usedocker='docker context use desktop-linux'
+alias docker-nuke='docker rm -f $(docker ps -aq) && docker volume rm -f $(docker volume ls -q) && docker rmi -f $(docker images -q) && docker builder prune -a -f'
 
 ## Kubernetes
 alias kc=kubectl
@@ -104,6 +105,7 @@ alias tml='tmux list-sessions'              # List tmux sessions
 alias tmn='tmux new-session'                # Start a new tmux session
 alias tmns='tmux new -s'                    # Start a new tmux session with name
 alias tms='tmux new-session -s'             # Start a new tmux session
+alias tmk='tmux kill-server'                # Kill all tmux sessions
 
 # Devbox
 alias dbshell='devbox shell'       # Enter the Devbox environment
@@ -118,3 +120,6 @@ alias dbps='devbox ps'             # Show running processes in Devbox
 alias dblogs='devbox logs'         # Display logs for the Devbox environment
 alias dbconfig='devbox config'     # Open the configuration for Devbox
 alias dbhelp='devbox help'         # Show help information for Devbox
+
+#Tailscale
+alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh; ./tailscale status"
