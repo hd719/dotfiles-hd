@@ -118,3 +118,6 @@ alias dbps='devbox ps'             # Show running processes in Devbox
 alias dblogs='devbox logs'         # Display logs for the Devbox environment
 alias dbconfig='devbox config'     # Open the configuration for Devbox
 alias dbhelp='devbox help'         # Show help information for Devbox
+
+#Tailscale
+alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh"

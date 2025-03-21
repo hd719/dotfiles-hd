@@ -2,6 +2,8 @@
 # --------------------------------------------------------------------------------------------------------
 export PATH="/opt/homebrew/bin:$PATH"
 
+export TERM=xterm-256color
+
 autoload -U +X bashcompinit && bashcompinit
 
 eval "$(starship init zsh)"
