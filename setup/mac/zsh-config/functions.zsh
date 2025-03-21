@@ -42,27 +42,53 @@ clean() {
 }
 
 terraform() {
+    # Set the default AWS profile if not set
     AWS_PROFILE=${AWS_PROFILE:-default}
 
-    echo "Current AWS Profile is '$AWS_PROFILE'."
-    echo -n "Do you want to proceed with this profile? (y/n): "
+    # Get the list of AWS profiles from the ~/.aws/credentials file
+    profiles=( $(awk -F '[][\n]' '/\[/ {print $2}' ~/.aws/credentials) )
+
+    # If no profiles exist, print an error and exit
+    if [[ ${#profiles[@]} -eq 0 ]]; then
+        echo -e "\033[0;31mNo AWS profiles found in ~/.aws/credentials file.\033[0m"
+        return 1
+    fi
+
+    # Show current AWS profile in Cyan
+    echo -e "\033[0;36mCurrent AWS Profile is '$AWS_PROFILE'.\033[0m"
+    echo -n -e "\033[0;33mDo you want to proceed with this profile? (y/n): \033[0m"
     read choice
 
     if [[ "$choice" == "y" ]]; then
-        echo "Proceeding with AWS Profile '$AWS_PROFILE'..."
+        echo -e "\033[0;32mProceeding with AWS Profile '$AWS_PROFILE'...\033[0m"
     else
-        echo "Select a new AWS profile:"
-        select new_profile in "dev" "staging" "cancel"; do
+        echo -e "\033[0;33mSelect a new AWS profile:\033[0m"
+        # Add "cancel" as an option
+        PS3="Please select an option: "
+        select new_profile in "${profiles[@]}" "cancel"; do
             case $new_profile in
-                dev) export AWS_PROFILE="dev"; break;;
-                staging) export AWS_PROFILE="staging"; break;;
-                cancel) return 1;;
-                *) echo "Invalid option.";;
+                cancel)
+                    echo -e "\033[0;31mOperation canceled.\033[0m"
+                    return 1 ;;  # Cancel the operation
+                *)
+                    if [[ -n "$new_profile" ]]; then
+                        export AWS_PROFILE="$new_profile"
+                        echo -e "\033[0;32mNow using AWS Profile '\033[1;36m$AWS_PROFILE\033[0m\033[0;32m'\033[0m"
+                        break
+                    else
+                        echo -e "\033[0;31mInvalid option. Please select a valid profile.\033[0m"
+                    fi
+                    ;;
             esac
         done
     fi
 
+    # Run terraform with the selected profile (in Blue)
+    echo -e "\033[0;34mRunning Terraform with AWS Profile: $AWS_PROFILE\033[0m"
     command terraform "$@"
+    echo ""
+    echo ""
+    echo -e "\033[0;34mRan Terraform with AWS Profile: $AWS_PROFILE\033[0m"
 }
 
 scpc() {
