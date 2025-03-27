@@ -324,6 +324,25 @@ open_ports() {
   sudo lsof -i -P -n | grep LISTEN
 }
 
+check_ports() {
+  local suspicious_ports=("22" "3283" "5900" "5000" "7000" "63743")
+  local open_ports=$(netstat -an | grep LISTEN | awk '{print $4}' | awk -F. '{print $NF}' | sort -u)
+  local found=()
+
+  for port in "${suspicious_ports[@]}"; do
+    if echo "$open_ports" | grep -q "^$port$"; then
+      found+=("$port")
+    fi
+  done
+
+  if [[ ${#found[@]} -eq 0 ]]; then
+    echo "✅ No suspicious ports open."
+  else
+    echo "⚠️  Suspicious ports open: ${found[*]}"
+  fi
+}
+
+
 goodMorning() {
   echo ""
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
