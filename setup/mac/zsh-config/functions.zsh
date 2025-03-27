@@ -3,7 +3,7 @@
 
 # Lazy loading functions
 
-kubectl() {
+lazy_kubectl() {
     unset -f kubectl
     source <(command kubectl completion zsh)
     kubectl "$@"
