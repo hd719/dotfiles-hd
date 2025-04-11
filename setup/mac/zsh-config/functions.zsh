@@ -62,17 +62,17 @@ terraform() {
     echo -e "\033[0;34mRan Terraform with AWS Profile: $AWS_PROFILE\033[0m"
 }
 
-docker() {
-    unset -f docker
-    source <(command docker completion zsh)
-    docker "$@"
-}
+# docker() {
+#     unset -f docker
+#     source <(command docker completion zsh)
+#     docker "$@"
+# }
 
-docker-compose() {
-    unset -f docker-compose
-    source <(command docker-compose completion zsh)
-    docker-compose "$@"
-}
+# docker-compose() {
+#     unset -f docker-compose
+#     source <(command docker-compose completion zsh)
+#     docker-compose "$@"
+# }
 
 hex_to_decimal_ip() {
   local hex_ip="$1"
