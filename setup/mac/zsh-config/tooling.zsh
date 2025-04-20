@@ -6,7 +6,7 @@ export EDITOR="cursor --wait"
 # [PNPM]
 # --------------------------------------------------------------------------------------------------------
 # pnpm
-export PNPM_HOME="/Users/hameldesai/pnpm"
+export PNPM_HOME="/Users/hd-dev/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
