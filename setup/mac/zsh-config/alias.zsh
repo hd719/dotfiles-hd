@@ -123,3 +123,6 @@ alias dbhelp='devbox help'         # Show help information for Devbox
 
 #Tailscale
 alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh; ./tailscale status"
+
+# Blaze
+alias blaze-env='export ZSH_PROFILE=blaze && source ~/.zshrc'

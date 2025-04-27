@@ -14,3 +14,6 @@ This shell syntax is often used to **run commands in the background** while supp
 ### ✅ Full Meaning
 
 > "Run the command in the background and discard
+
+export ZSH_PROFILE=blaze
+source ~/.zshrc

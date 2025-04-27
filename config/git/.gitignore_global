@@ -1,0 +1,16 @@
+# Give me global list of files to ignore
+
+.DS_Store
+.vscode
+.cursor/
+node_modules/
+.env
+.env.local
+.env.dev
+.env.prod
+.env.test
+.env.development
+.env.production
+.env.test
+.env
+.env.*
