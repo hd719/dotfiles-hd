@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should
@@ -80,4 +80,49 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  # Add wallpaper setup
+  home.activation = {
+    setWallpaper = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      echo "=== Setting up wallpaper ==="
+      WALLPAPER_SOURCE="/Volumes/My Shared Files/Mac-VM-Shared/nighttime-nature-landscape-galaxy-mountain-water-star-beauty-generative-ai.jpg"
+      WALLPAPER_DEST="$HOME/Developer/dotfiles-hd/setup/mac/darwin/nix/wallpaper.jpg"
+
+      # Check if shared volume is mounted
+      if [ -f "$WALLPAPER_SOURCE" ]; then
+        echo "Found wallpaper on shared volume"
+        # Create destination directory if it doesn't exist
+        mkdir -p "$(dirname "$WALLPAPER_DEST")"
+        # Copy the wallpaper
+        echo "Copying wallpaper to dotfiles repository..."
+        cp "$WALLPAPER_SOURCE" "$WALLPAPER_DEST"
+        if [ $? -eq 0 ]; then
+          echo "Wallpaper copied successfully to $WALLPAPER_DEST"
+        else
+          echo "Failed to copy wallpaper"
+          exit 1
+        fi
+      else
+        echo "Shared volume not mounted or wallpaper not found at $WALLPAPER_SOURCE"
+        # Check if we have a local copy
+        if [ -f "$WALLPAPER_DEST" ]; then
+          echo "Using existing local wallpaper copy at $WALLPAPER_DEST"
+        else
+          echo "No wallpaper available"
+          exit 1
+        fi
+      fi
+ 
+      # Set the wallpaper
+      echo "Setting wallpaper using AppleScript..."
+      /usr/bin/osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$WALLPAPER_DEST"'"'
+      if [ $? -eq 0 ]; then
+        echo "Wallpaper set successfully"
+      else
+        echo "Failed to set wallpaper"
+        exit 1
+      fi
+      echo "=== Wallpaper setup complete ==="
+    '';
+  };
 }

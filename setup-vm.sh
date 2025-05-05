@@ -9,6 +9,70 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Check network connectivity
+check_network() {
+    echo -e "${YELLOW}🔍 Checking network connectivity...${NC}"
+    if ! ping -c 1 github.com &> /dev/null; then
+        echo -e "${RED}❌ No internet connection. Please check your network.${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Network connection verified${NC}"
+}
+
+# Check directory permissions
+check_permissions() {
+    echo -e "${YELLOW}🔍 Checking directory permissions...${NC}"
+
+    # Check home directory
+    if [ ! -w "$HOME" ]; then
+        echo -e "${RED}❌ No write permission in home directory${NC}"
+        exit 1
+    fi
+
+    # Check Developer directory
+    if [ -d "$HOME/Developer" ] && [ ! -w "$HOME/Developer" ]; then
+        echo -e "${RED}❌ No write permission in Developer directory${NC}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}✓ Directory permissions verified${NC}"
+}
+
+# Check system requirements
+check_system_requirements() {
+    echo -e "${YELLOW}🔍 Checking system requirements...${NC}"
+
+    # Check if running as root
+    if [ "$EUID" -eq 0 ]; then
+        echo -e "${RED}❌ Please do not run this script as root${NC}"
+        exit 1
+    fi
+
+    # Check macOS version
+    MACOS_VERSION=$(sw_vers -productVersion)
+    if [[ $(echo "$MACOS_VERSION" | cut -d. -f1) -lt 12 ]]; then
+        echo -e "${RED}❌ This script requires macOS 12 or later${NC}"
+        exit 1
+    fi
+
+    # Check available disk space (need at least 10GB)
+    AVAILABLE_SPACE=$(df -g / | awk 'NR==2 {print $4}')
+    if [ "$AVAILABLE_SPACE" -lt 10 ]; then
+        echo -e "${RED}❌ Insufficient disk space. Please ensure at least 10GB is available${NC}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}✓ System requirements met${NC}"
+}
+
+# Progress tracking
+TOTAL_STEPS=9
+CURRENT_STEP=0
+update_progress() {
+    CURRENT_STEP=$((CURRENT_STEP + 1))
+    echo -e "${YELLOW}[Step $CURRENT_STEP/$TOTAL_STEPS] $1${NC}"
+}
+
 # Default values
 SKIP_XCODE=false
 SKIP_SSH=false
@@ -17,6 +81,7 @@ SKIP_DOTFILES=false
 SKIP_RELOAD=false
 SKIP_SWITCH=false
 SKIP_KEYCHAIN=false
+SKIP_VERSIONS=false
 
 # Function to show help
 show_help() {
@@ -25,8 +90,10 @@ show_help() {
     echo "Options:"
     echo "  --new-key          Force creation of a new SSH key"
     echo "  --skip=<step>      Skip specific step(s)"
-    echo "                     Available steps: xcode, ssh, nix, dotfiles, reload, switch, keychain"
+    echo "                     Available steps: xcode, ssh, nix, dotfiles, reload, switch, keychain, versions"
     echo "                     Example: --skip=xcode,ssh"
+    echo "  --resume=<step>    Resume from a specific step"
+    echo "                     Available steps: xcode, ssh, nix, dotfiles, reload, switch, keychain"
     echo ""
     echo "Example:"
     echo "  $0 username pat --new-key --skip=xcode,dotfiles"
@@ -47,6 +114,7 @@ parse_skip_args() {
                     reload) SKIP_RELOAD=true ;;
                     switch) SKIP_SWITCH=true ;;
                     keychain) SKIP_KEYCHAIN=true ;;
+                    versions) SKIP_VERSIONS=true ;;
                     *) echo -e "${RED}❌ Unknown skip option: $skip${NC}"; show_help ;;
                 esac
             done
@@ -193,7 +261,9 @@ install_nix() {
     fi
 
     echo -e "${YELLOW}📦 Checking Nix installation...${NC}"
-    if ! command -v nix &> /dev/null; then
+    if nix --version &> /dev/null; then
+        echo -e "${GREEN}✓ Nix is already installed${NC}"
+    else
         echo -e "${YELLOW}Installing Nix Determinate...${NC}"
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
         if [ $? -ne 0 ]; then
@@ -201,8 +271,44 @@ install_nix() {
             exit 1
         fi
         echo -e "${GREEN}✓ Nix installed successfully${NC}"
+
+        # Source Nix environment variables
+        echo -e "${YELLOW}Sourcing Nix environment variables...${NC}"
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}❌ Failed to source Nix environment variables${NC}"
+            exit 1
+        fi
+        echo -e "${GREEN}✓ Nix environment variables sourced${NC}"
+    fi
+
+    # Verify installation and show version
+    NIX_VERSION=$(nix --version)
+    echo -e "${GREEN}✓ Nix version: ${NIX_VERSION}${NC}"
+
+    # Run nix doctor to verify installation
+    echo -e "${YELLOW}Running Nix doctor to verify installation...${NC}"
+    nix doctor
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Nix installation verified successfully${NC}"
     else
-        echo -e "${GREEN}✓ Nix is already installed${NC}"
+        echo -e "${YELLOW}⚠️ Nix doctor reported some issues. Please review the output above.${NC}"
+    fi
+}
+
+# Add GitHub to known hosts
+configure_known_hosts() {
+    echo -e "${YELLOW}🔑 Configuring SSH known hosts...${NC}"
+    if [ ! -f ~/.ssh/known_hosts ] || ! grep -q "github.com" ~/.ssh/known_hosts; then
+        mkdir -p ~/.ssh
+        ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Added GitHub to known hosts${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Failed to add GitHub to known hosts${NC}"
+        fi
+    else
+        echo -e "${GREEN}✓ GitHub already in known hosts${NC}"
     fi
 }
 
@@ -215,7 +321,10 @@ clone_dotfiles() {
 
     local github_username=$1
     echo -e "${YELLOW}📂 Setting up dotfiles...${NC}"
-    
+
+    # Configure known hosts before git operations
+    configure_known_hosts
+
     # Create Developer directory if it doesn't exist
     if [ ! -d ~/Developer ]; then
         echo -e "${YELLOW}Creating Developer directory...${NC}"
@@ -229,27 +338,35 @@ clone_dotfiles() {
     # Handle dotfiles repository
     if [ ! -d ~/Developer/dotfiles-hd ]; then
         echo -e "${YELLOW}Cloning dotfiles repository...${NC}"
-        git clone git@github.com:${github_username}/dotfiles-hd.git ~/Developer/dotfiles-hd
+        # Use HTTPS instead of SSH for initial clone
+        git clone https://github.com/${github_username}/dotfiles-hd.git ~/Developer/dotfiles-hd
         if [ $? -ne 0 ]; then
             echo -e "${RED}❌ Failed to clone dotfiles${NC}"
             exit 1
         fi
         echo -e "${GREEN}✓ Dotfiles cloned successfully${NC}"
+
+        # After successful clone, update remote to use SSH
+        cd ~/Developer/dotfiles-hd || exit 1
+        git remote set-url origin git@github.com:${github_username}/dotfiles-hd.git
+        if [ $? -ne 0 ]; then
+            echo -e "${YELLOW}⚠️ Warning: Failed to update remote URL to SSH${NC}"
+        fi
     else
         echo -e "${YELLOW}Updating existing dotfiles repository...${NC}"
         cd ~/Developer/dotfiles-hd || exit 1
-        
+
         # Get the default branch name
         DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
         if [ -z "$DEFAULT_BRANCH" ]; then
             DEFAULT_BRANCH=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
         fi
-        
+
         if [ -z "$DEFAULT_BRANCH" ]; then
             echo -e "${RED}❌ Could not determine default branch${NC}"
             exit 1
         fi
-        
+
         git pull origin "$DEFAULT_BRANCH"
         if [ $? -ne 0 ]; then
             echo -e "${RED}❌ Failed to update dotfiles${NC}"
@@ -279,6 +396,65 @@ clone_dotfiles() {
     fi
 }
 
+# Install specific Node.js and Ruby versions
+install_versions() {
+    if [ "$SKIP_VERSIONS" = true ]; then
+        echo -e "${YELLOW}⚠️ Skipping version installations${NC}"
+        return
+    fi
+
+    update_progress "Installing specific Node.js and Ruby versions"
+
+    # Install Node.js versions
+    echo -e "${YELLOW}📦 Installing Node.js versions...${NC}"
+
+    # Install nvm
+    echo -e "${YELLOW}Installing nvm...${NC}"
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+    # Install Node.js versions
+    echo -e "${YELLOW}Installing Node.js LTS...${NC}"
+    nvm install --lts
+    echo -e "${YELLOW}Installing Node.js 18.7.1...${NC}"
+    nvm install node 18.7.1
+    echo -e "${YELLOW}Installing Node.js 16.5.0...${NC}"
+    nvm install node 16.5.0
+
+    # Set default Node.js version (lts is the default)
+    nvm use default
+    nvm use global default
+    echo -e "${GREEN}✓ Node.js versions installed successfully${NC}"
+
+    # Install Ruby version
+    echo -e "${YELLOW}📦 Installing Ruby version...${NC}"
+
+    # Initialize rbenv (already installed through Nix)
+    eval "$(rbenv init -)"
+
+    # Install Ruby 3.1.3
+    echo -e "${RED}Installing Ruby 3.1.3...${NC}"
+    rbenv install 3.1.3
+
+    # Get latest stable version (e.g., 3.x, filters out preview/dev)
+    LATEST_RUBY_VERSION=$(rbenv install -l | grep -E '^\s*3\.[0-9]+\.[0-9]+$' | tail -1 | tr -d '[:space:]')
+
+    echo -e "${RED}Installing Ruby ${LATEST_RUBY_VERSION}...${NC}"
+    rbenv install -s "$LATEST_RUBY_VERSION"
+
+    echo -e "${YELLOW}Setting Ruby ${LATEST_RUBY_VERSION} as global...${NC}"
+    rbenv global "$LATEST_RUBY_VERSION"
+
+    # Ensure shims are updated
+    rbenv rehash
+
+    # Install bundler
+    gem install bundler
+
+    echo -e "${GREEN}✓ Ruby version installed successfully${NC}"
+}
+
 # Main execution
 if [ $# -lt 2 ]; then
     show_help
@@ -302,21 +478,32 @@ for arg in "$@"; do
     fi
 done
 
+echo -e "🙏 Om Shree Ganeshaya Namaha 🙏"
 echo -e "${GREEN}🚀 Starting setup process...${NC}"
 
+# Run all checks
+check_network
+check_permissions
+check_system_requirements
+
 # 1. Install Xcode Command Line Tools
+update_progress "Installing Xcode Command Line Tools"
 install_xcode
 
 # 2. Setup SSH and GitHub
+update_progress "Setting up SSH and GitHub"
 setup_ssh "$FORCE_NEW_KEY" "$GITHUB_USERNAME" "$GITHUB_PAT"
 
 # 3. Install Nix
+update_progress "Installing Nix"
 install_nix
 
 # 4. Clone dotfiles
+update_progress "Cloning dotfiles"
 clone_dotfiles "$GITHUB_USERNAME"
 
 # 5. Reload shell
+update_progress "Reloading shell"
 if [ "$SKIP_RELOAD" = true ]; then
     echo -e "${YELLOW}⚠️ Skipping shell reload${NC}"
 else
@@ -324,10 +511,80 @@ else
     # Switch to Zsh and source .zshrc
     echo -e "${YELLOW}Switching to Zsh...${NC}"
     source ~/Developer/dotfiles-hd/setup/.zshrc 2>/dev/null || true
-    echo -e "${GREEN}✓ Shell reloaded${NC}"
+
+    # Wait for shell reload to complete with timeout
+    echo -e "${YELLOW}Waiting for shell reload to complete...${NC}"
+    TIMEOUT=15  # 30 seconds timeout
+    START_TIME=$(date +%s)
+
+    while true; do
+        if [ -n "$ZSH_VERSION" ]; then
+            echo -e "${GREEN}✓ Successfully reloaded into Zsh (version: $ZSH_VERSION)${NC}"
+            break
+        fi
+
+        CURRENT_TIME=$(date +%s)
+        ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+
+        if [ $ELAPSED_TIME -ge $TIMEOUT ]; then
+            echo -e "${RED}❌ Shell reload timed out after ${TIMEOUT} seconds${NC}"
+            echo -e "${YELLOW}Attempting to force Zsh...${NC}"
+            exec /bin/zsh -l
+            break
+        fi
+
+        echo -e "${YELLOW}Waiting for shell reload... (${ELAPSED_TIME}s)${NC}"
+        sleep 2
+    done
+
+    # Verify dotfiles are loaded
+    if [ -d "$HOME/Developer/dotfiles-hd" ] && [ -f "$HOME/Developer/dotfiles-hd/setup/.zshrc" ]; then
+        echo -e "${GREEN}✓ Dotfiles directory and .zshrc found${NC}"
+    else
+        echo -e "${RED}❌ Dotfiles not properly loaded${NC}"
+        exit 1
+    fi
 fi
 
-# 6. Run darwin rebuild
+# Add a small pause before proceeding to next step
+echo -e "${YELLOW}Waiting before proceeding to next step...${NC}"
+sleep 3
+
+# 6. Run nix-darwin switch
+update_progress "Running nix-darwin switch"
+echo -e "${YELLOW}🔄 Running nix-darwin ${NC}"
+if [ ! -d ~/Developer/dotfiles-hd/setup/mac/darwin/nix ]; then
+    echo -e "${RED}❌ Dotfiles directory not found. Please ensure dotfiles were cloned successfully.${NC}"
+    exit 1
+fi
+
+# Check for flake.nix
+if [ ! -f ~/Developer/dotfiles-hd/setup/mac/darwin/nix/flake.nix ]; then
+    echo -e "${RED}❌ flake.nix not found in nix directory${NC}"
+    exit 1
+fi
+
+# Change to nix directory with error handling
+if ! cd ~/Developer/dotfiles-hd/setup/mac/darwin/nix; then
+    echo -e "${RED}❌ Failed to change to nix directory${NC}"
+    exit 1
+fi
+
+# Check if nix-darwin is available
+if ! command -v nix &> /dev/null; then
+    echo -e "${RED}❌ nix command not found. Please ensure Nix is installed correctly.${NC}"
+    exit 1
+fi
+
+nix run nix-darwin -- switch --flake .#hameldesai
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Failed to run nix-darwin switch${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ nix-darwin switch completed successfully${NC}"
+
+# 7. Run darwin rebuild
+update_progress "Running darwin rebuild"
 if [ "$SKIP_SWITCH" = true ]; then
     echo -e "${YELLOW}⚠️ Skipping darwin rebuild${NC}"
 else
@@ -336,15 +593,25 @@ else
         echo -e "${RED}❌ Dotfiles directory not found. Please ensure dotfiles were cloned successfully.${NC}"
         exit 1
     fi
-    cd ~/Developer/dotfiles-hd/setup/mac/darwin/nix || exit 1
-    if ! command -v switch &> /dev/null; then
-        echo -e "${RED}❌ 'switch' command not found. Please ensure Nix is installed correctly.${NC}"
+
+    # Change to nix directory with error handling
+    if ! cd ~/Developer/dotfiles-hd/setup/mac/darwin/nix; then
+        echo -e "${RED}❌ Failed to change to nix directory${NC}"
         exit 1
     fi
-    switch
+
+    # Use nix-darwin command directly
+    echo -e "${YELLOW}Running nix-darwin switch...${NC}"
+    nix run nix-darwin -- switch --flake .#hameldesai
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ Failed to run nix-darwin switch${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ nix-darwin switch completed successfully${NC}"
 fi
 
-# 7. Add SSH key to keychain
+# 8. Add SSH key to keychain
+update_progress "Adding SSH key to keychain"
 if [ "$SKIP_KEYCHAIN" = true ]; then
     echo -e "${YELLOW}⚠️ Skipping SSH key addition to keychain${NC}"
 elif [ "$SKIP_SSH" = false ]; then
@@ -353,6 +620,13 @@ elif [ "$SKIP_SSH" = false ]; then
         echo -e "${RED}❌ SSH key not found. Please ensure SSH setup completed successfully.${NC}"
         exit 1
     fi
+
+    # Check if ssh-add is available
+    if ! command -v ssh-add &> /dev/null; then
+        echo -e "${RED}❌ ssh-add command not found${NC}"
+        exit 1
+    fi
+
     /usr/bin/ssh-add --apple-use-keychain ~/.ssh/id_ed25519
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ Failed to add SSH key to keychain${NC}"
@@ -361,4 +635,23 @@ elif [ "$SKIP_SSH" = false ]; then
     echo -e "${GREEN}✓ SSH key added to keychain${NC}"
 fi
 
-echo -e "${GREEN}✅ Environment setup complete!${NC}"
+# 9. Install specific Node.js and Ruby versions
+update_progress "Installing specific Node.js and Ruby versions"
+install_versions
+
+# Print summary
+echo -e "\n${GREEN}✅ Environment setup complete!${NC}"
+echo -e "${YELLOW}Summary of steps:${NC}"
+echo "1. Xcode Command Line Tools: ${SKIP_XCODE:+Skipped}${SKIP_XCODE:-Completed}"
+echo "2. SSH Setup: ${SKIP_SSH:+Skipped}${SKIP_SSH:-Completed}"
+echo "3. Nix Installation: ${SKIP_NIX:+Skipped}${SKIP_NIX:-Completed}"
+echo "4. Dotfiles Setup: ${SKIP_DOTFILES:+Skipped}${SKIP_DOTFILES:-Completed}"
+echo "5. Shell Reload: ${SKIP_RELOAD:+Skipped}${SKIP_RELOAD:-Completed}"
+echo "6. Nix-Darwin Switch: Completed"
+echo "7. Darwin Rebuild: ${SKIP_SWITCH:+Skipped}${SKIP_SWITCH:-Completed}"
+echo "8. Keychain Setup: ${SKIP_KEYCHAIN:+Skipped}${SKIP_KEYCHAIN:-Completed}"
+echo "9. Node.js and Ruby Versions: ${SKIP_VERSIONS:+Skipped}${SKIP_VERSIONS:-Completed}"
+
+echo -e "🎉${GREEN}🎉 Setup completed successfully!${NC}"
+echo -e "${MAGENTA}Please restart your shell to apply all changes.${NC}"
+echo -e "🙏 Om Shree Ganeshaya Namaha 🙏"

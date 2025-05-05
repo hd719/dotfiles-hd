@@ -138,7 +138,20 @@
           zsh-completions
           zsh-fast-syntax-highlighting
           zstd
+          go
+          pnpm
         ];
+
+      # Environment variables for development tools
+      environment.variables = {
+        # Go environment variables
+        GOPATH = "$HOME/go";
+        GOBIN = "$HOME/go/bin";
+        PATH = "$HOME/go/bin:$PATH";
+
+        # PNPM configuration
+        PNPM_HOME = "$HOME/pnpm";
+      };
 
       # I'd rather not have telemetry on my package manager.
       environment.variables.HOMEBREW_NO_ANALYTICS = "1";
@@ -155,17 +168,25 @@
         brews = [
           "anycable-go"
           "postgresql@17"
+          "mongodb-community@8.0"
           "redis"
           "zsh-autosuggestions"
           "zsh-you-should-use"
           "zsh-syntax-highlighting"
+          "pgvector"
+          "imagemagick"
+          "ffmpeg"
+          "vips"
+          "llvm@14"
+          "ruby-build"
+          "ruby-lsp"
         ];
 
         casks = [
           "iterm2"
         ];
 
-        taps = [];
+        taps = ["mongodb/brew"];
 
         masApps = {};
       };
