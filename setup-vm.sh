@@ -488,7 +488,7 @@ setup_tmux() {
 
     # Clone catppuccin theme
     echo -e "${YELLOW}Cloning catppuccin theme...${NC}"
-    git clone git@github.com:hd719/hd-tmux.git ~/.config/tmux/plugins/catppuccin
+    git clone git@github.com:hd719/hd-tmux.git ~/.config/tmux/plugins/catppuccin/hd-tmux
 
     # Clone tpm
     echo -e "${YELLOW}Cloning tpm...${NC}"
