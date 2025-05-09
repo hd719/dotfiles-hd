@@ -184,6 +184,8 @@
 
         casks = [
           "iterm2"
+          "cursor"
+          "visual-studio-code"      
         ];
 
         taps = ["mongodb/brew"];
