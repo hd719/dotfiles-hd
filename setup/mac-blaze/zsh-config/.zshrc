@@ -30,6 +30,7 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # [Job Config]
 # --------------------------------------------------------------------------------------------------------
+eval "$(rbenv init - zsh)"
 export PATH="/opt/homebrew/opt/llvm@14/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@15/lib/pkgconfig"

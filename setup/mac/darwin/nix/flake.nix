@@ -167,6 +167,7 @@
 
         brews = [
           "anycable-go"
+          "postgresql@15"
           "postgresql@17"
           "mongodb-community@8.0"
           "redis"
@@ -185,7 +186,7 @@
         casks = [
           "iterm2"
           "cursor"
-          "visual-studio-code"      
+          "visual-studio-code"
         ];
 
         taps = ["mongodb/brew"];
