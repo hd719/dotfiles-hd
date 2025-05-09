@@ -433,15 +433,29 @@ install_versions() {
     # Initialize rbenv (already installed through Nix)
     eval "$(rbenv init -)"
 
-    # Install Ruby 3.1.3
-    echo -e "${RED}Installing Ruby 3.1.3...${NC}"
-    rbenv install 3.1.3
+    # Function to check if Ruby version exists
+    ruby_version_exists() {
+        rbenv versions | grep -q "$1"
+    }
+
+    # Install Ruby 3.1.3 if it doesn't exist
+    if ! ruby_version_exists "3.1.3"; then
+        echo -e "${YELLOW}Installing Ruby 3.1.3...${NC}"
+        rbenv install 3.1.3
+    else
+        echo -e "${GREEN}✓ Ruby 3.1.3 is already installed${NC}"
+    fi
 
     # Get latest stable version (e.g., 3.x, filters out preview/dev)
     LATEST_RUBY_VERSION=$(rbenv install -l | grep -E '^\s*3\.[0-9]+\.[0-9]+$' | tail -1 | tr -d '[:space:]')
 
-    echo -e "${RED}Installing Ruby ${LATEST_RUBY_VERSION}...${NC}"
-    rbenv install -s "$LATEST_RUBY_VERSION"
+    # Install latest Ruby version if it doesn't exist
+    if ! ruby_version_exists "$LATEST_RUBY_VERSION"; then
+        echo -e "${YELLOW}Installing Ruby ${LATEST_RUBY_VERSION}...${NC}"
+        rbenv install -s "$LATEST_RUBY_VERSION"
+    else
+        echo -e "${GREEN}✓ Ruby ${LATEST_RUBY_VERSION} is already installed${NC}"
+    fi
 
     echo -e "${YELLOW}Setting Ruby ${LATEST_RUBY_VERSION} as global...${NC}"
     rbenv global "$LATEST_RUBY_VERSION"
@@ -449,10 +463,39 @@ install_versions() {
     # Ensure shims are updated
     rbenv rehash
 
-    # Install bundler
-    gem install bundler
+    # Install bundler if not already installed
+    if ! gem list bundler -i &>/dev/null; then
+        echo -e "${YELLOW}Installing bundler...${NC}"
+        gem install bundler
+    else
+        echo -e "${GREEN}✓ Bundler is already installed${NC}"
+    fi
 
-    echo -e "${GREEN}✓ Ruby version installed successfully${NC}"
+    echo -e "${GREEN}✓ Ruby version setup completed successfully${NC}"
+}
+
+setup_tmux() {
+    echo -e "${YELLOW}🎭 Setting up tmux configuration...${NC}"
+
+    # Create .config directory if it doesn't exist
+    mkdir -p ~/.config
+
+    # Copy tmux configuration
+    cp -r /Users/hameldesai/Developer/dotfiles-hd/config/tmux ~/.config/
+
+    # Create plugins directory
+    mkdir -p ~/.config/tmux/plugins
+
+    # Clone catppuccin theme
+    echo -e "${YELLOW}Cloning catppuccin theme...${NC}"
+    git clone git@github.com:hd719/hd-tmux.git ~/.config/tmux/plugins/catppuccin
+
+    # Clone tpm
+    echo -e "${YELLOW}Cloning tpm...${NC}"
+    git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+
+    echo -e "${GREEN}✓ Tmux setup complete!${NC}"
+    echo -e "${YELLOW}To install plugins, start tmux and press Escape + Shift + i${NC}"
 }
 
 # Main execution
@@ -639,6 +682,10 @@ fi
 update_progress "Installing specific Node.js and Ruby versions"
 install_versions
 
+# 10. Setup tmux
+update_progress "Setting up tmux"
+setup_tmux
+
 # Print summary
 echo -e "\n${GREEN}✅ Environment setup complete!${NC}"
 echo -e "${YELLOW}Summary of steps:${NC}"
@@ -651,7 +698,7 @@ echo "6. Nix-Darwin Switch: Completed"
 echo "7. Darwin Rebuild: ${SKIP_SWITCH:+Skipped}${SKIP_SWITCH:-Completed}"
 echo "8. Keychain Setup: ${SKIP_KEYCHAIN:+Skipped}${SKIP_KEYCHAIN:-Completed}"
 echo "9. Node.js and Ruby Versions: ${SKIP_VERSIONS:+Skipped}${SKIP_VERSIONS:-Completed}"
-
+echo "10. Tmux Setup: ${SKIP_TMUX:+Skipped}${SKIP_TMUX:-Completed}"
 echo -e "🎉${GREEN}🎉 Setup completed successfully!${NC}"
 echo -e "${MAGENTA}Please restart your shell to apply all changes.${NC}"
 echo -e "🙏 Om Shree Ganeshaya Namaha 🙏"
