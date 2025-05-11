@@ -187,9 +187,21 @@
           "iterm2"
           "cursor"
           "visual-studio-code"
+          "tableplus"
+          "1password"
+          "aerospace"
+          "brave-browser"
+          "figma"
+          "karabiner-elements"
+          "obsidian"
+          "raycast"
+          "slack"
         ];
 
-        taps = ["mongodb/brew"];
+        taps = [
+          "mongodb/brew"
+          "nikitabobko/tap"
+        ];
 
         masApps = {};
       };
@@ -234,10 +246,14 @@
           tilesize = 48; # Set icon size
           magnification = true; # Enable magnification
           largesize = 64; # Set magnification size
-          minimize-to-application = true; # Minimize windows into application icon
+          minimize-to-application = false; # Minimize windows into application icon
           # Set persistent apps
           persistent-apps = [
-            "/Applications/Safari.app"
+            "/Applications/Brave Browser.app"
+            "/Applications/Figma.app"
+            "/Applications/TablePlus.app"
+            "/Applications/Slack.app"
+            "/Applications/Cursor.app"
             "/Applications/iTerm.app"
           ];
         };

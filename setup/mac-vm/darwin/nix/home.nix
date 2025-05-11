@@ -23,23 +23,19 @@
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
   home.file = {
-    # Create .gitconfig symlink
     ".gitconfig" = {
       source = ../../../../config/git/.gitconfig;
       recursive = false;
     };
-    # Create .zshrc symlink
     ".zshrc" = {
       source = ../../../../setup/.zshrc;
       recursive = true;
       force = true;
     };
-    # Create global gitignore symlink
     ".gitignore_global" = {
       source = ../../../../config/git/.gitignore_global;
       recursive = false;
     };
-    # Create config directory symlinks
     ".config/bat" = {
       source = ../../../../config/bat;
       recursive = true;
@@ -58,6 +54,10 @@
     };
     ".config/aerospace" = {
       source = ../../../../config/aerospace;
+      recursive = true;
+    };
+    ".config/karabiner" = {
+      source = ../../../../config/karabiner;
       recursive = true;
     };
   };
@@ -85,8 +85,8 @@
   home.activation = {
     setWallpaper = lib.hm.dag.entryAfter ["writeBoundary"] ''
       echo "=== Setting up wallpaper ==="
-      WALLPAPER_SOURCE="~/Developer/dotfiles-hd/config/wallpaper/wallpaper.jpg"
-      WALLPAPER_DEST="$HOME/Developer/dotfiles-hd/config/wallpaper/wallpaper.jpg"
+      WALLPAPER_SOURCE="~/Developer/dotfiles-hd/config/wallpaper/wallpaper.png"
+      WALLPAPER_DEST="$HOME/Developer/dotfiles-hd/config/wallpaper/wallpaper.png"
 
       # Check if source wallpaper exists
       if [ -f "$WALLPAPER_SOURCE" ]; then
