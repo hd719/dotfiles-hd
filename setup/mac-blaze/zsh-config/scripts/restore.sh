@@ -174,6 +174,22 @@ if [[ "$RESTORE_METHOD" == "docker" ]]; then
   }
   echo "✅ User check/creation complete"
 
+  # Ensure the 'postgres' user exists and is a superuser
+  echo "🔧 Step 3.1b: Creating PostgreSQL user 'postgres' as superuser if not exists..."
+  docker exec almanac_db psql -U postgres -c "DO \$\$
+  BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'postgres') THEN
+      CREATE USER postgres WITH SUPERUSER LOGIN;
+    ELSE
+      EXECUTE 'ALTER ROLE postgres WITH SUPERUSER';
+    END IF;
+  END
+  \$\$;" || {
+      echo "❌ Failed to create or alter user 'postgres'"
+      exit 1
+  }
+  echo "✅ 'postgres' user check/creation complete"
+
   # Now attempt the restore
   echo "🔄 Step 3.2: Restoring database..."
   if ! docker exec -i almanac_db psql -U postgres -d almanac_development < "$PG_BACKUP" 2>&1 | tee /tmp/pg_restore.log; then
@@ -211,6 +227,22 @@ else
       exit 1
   }
   echo "✅ User check/creation complete"
+
+  # Ensure the 'postgres' user exists and is a superuser
+  echo "🔧 Step 3.1b: Creating PostgreSQL user 'postgres' as superuser if not exists..."
+  psql postgres -c "DO \$\$
+  BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'postgres') THEN
+      CREATE USER postgres WITH SUPERUSER LOGIN;
+    ELSE
+      EXECUTE 'ALTER ROLE postgres WITH SUPERUSER';
+    END IF;
+  END
+  \$\$;" || {
+      echo "❌ Failed to create or alter user 'postgres'"
+      exit 1
+  }
+  echo "✅ 'postgres' user check/creation complete"
 
   # Create database if it doesn't exist
   echo "🔧 Creating database if it doesn't exist..."

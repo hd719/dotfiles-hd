@@ -596,19 +596,19 @@ sleep 3
 # 6. Run nix-darwin switch
 update_progress "Running nix-darwin switch"
 echo -e "${YELLOW}🔄 Running nix-darwin ${NC}"
-if [ ! -d ~/Developer/dotfiles-hd/setup/mac/darwin/nix ]; then
+if [ ! -d ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix ]; then
     echo -e "${RED}❌ Dotfiles directory not found. Please ensure dotfiles were cloned successfully.${NC}"
     exit 1
 fi
 
 # Check for flake.nix
-if [ ! -f ~/Developer/dotfiles-hd/setup/mac/darwin/nix/flake.nix ]; then
+if [ ! -f ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix/flake.nix ]; then
     echo -e "${RED}❌ flake.nix not found in nix directory${NC}"
     exit 1
 fi
 
 # Change to nix directory with error handling
-if ! cd ~/Developer/dotfiles-hd/setup/mac/darwin/nix; then
+if ! cd ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix; then
     echo -e "${RED}❌ Failed to change to nix directory${NC}"
     exit 1
 fi
@@ -632,13 +632,13 @@ if [ "$SKIP_SWITCH" = true ]; then
     echo -e "${YELLOW}⚠️ Skipping darwin rebuild${NC}"
 else
     echo -e "${YELLOW}🔄 Running darwin rebuild...${NC}"
-    if [ ! -d ~/Developer/dotfiles-hd/setup/mac/darwin/nix ]; then
+    if [ ! -d ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix ]; then
         echo -e "${RED}❌ Dotfiles directory not found. Please ensure dotfiles were cloned successfully.${NC}"
         exit 1
     fi
 
     # Change to nix directory with error handling
-    if ! cd ~/Developer/dotfiles-hd/setup/mac/darwin/nix; then
+    if ! cd ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix; then
         echo -e "${RED}❌ Failed to change to nix directory${NC}"
         exit 1
     fi

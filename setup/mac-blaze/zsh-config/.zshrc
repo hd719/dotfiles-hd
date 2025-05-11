@@ -1,4 +1,4 @@
-ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac/zsh-config
+ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-vm/zsh-config
 
 # [ZSH/System Config]
 # --------------------------------------------------------------------------------------------------------
