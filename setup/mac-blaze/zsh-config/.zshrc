@@ -104,17 +104,22 @@ gda() {
 goodMorning() {
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 
-  # Optional flag for Homebrew updates
-  if [[ "$1" != "--no-brew" ]]; then
-    echo "Updating Homebrew..."
-    brew update
-    if brew outdated | grep -q .; then
-      brew upgrade --greedy
-      brew cleanup
-      brew autoremove
-    else
-      echo "No Homebrew packages to upgrade"
+  # Skip Homebrew updates if hostname contains 'virtual' (case insensitive)
+  if [[ ! "$(hostname)" =~ [Vv]irtual ]]; then
+    # Optional flag for Homebrew updates
+    if [[ "$1" != "--no-brew" ]]; then
+      echo "Updating Homebrew..."
+      brew update
+      if brew outdated | grep -q .; then
+        brew upgrade --greedy
+        brew cleanup
+        brew autoremove
+      else
+        echo "No Homebrew packages to upgrade"
+      fi
     fi
+  else
+    echo "Skipping Homebrew update (virtual environment detected)"
   fi
 
   echo "Updating Git repositories..."
