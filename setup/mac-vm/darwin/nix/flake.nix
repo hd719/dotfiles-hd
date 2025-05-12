@@ -196,6 +196,7 @@
           "obsidian"
           "raycast"
           "slack"
+          "syncthing"
         ];
 
         taps = [
