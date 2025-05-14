@@ -181,6 +181,7 @@
           "llvm@14"
           "ruby-build"
           "ruby-lsp"
+          "heroku"
         ];
 
         casks = [
@@ -188,7 +189,6 @@
           "cursor"
           "visual-studio-code"
           "tableplus"
-          "1password"
           "aerospace"
           "brave-browser"
           "figma"
@@ -202,6 +202,7 @@
         taps = [
           "mongodb/brew"
           "nikitabobko/tap"
+          "heroku/brew"
         ];
 
         masApps = {};
