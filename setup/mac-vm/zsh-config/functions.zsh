@@ -304,49 +304,185 @@ flushdns() {
   sudo killall -HUP mDNSResponder 2>/dev/null || sudo systemctl restart systemd-resolved
 }
 
-speedtest() {
+# Add spinner function before internet_speed_test
+spinner() {
+    local pid=$1
+    local delay=0.1
+    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local progress=0
+    while ps -p $pid > /dev/null; do
+        local temp=${spinstr#?}
+        printf "\r${spinstr:0:1} Running speed test... %d%%" $progress
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        progress=$(( (progress + 5) % 100 ))
+    done
+    printf "\r✅ Speed test completed!     \n"
+}
+
+version_check_spinner() {
+    local delay=0.1
+    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0
+    while true; do
+        local temp=${spinstr#?}
+        printf "\r${spinstr:0:1} Checking version... %s" "${spinstr:$i:1}"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        i=$(( (i + 1) % ${#spinstr} ))
+    done
+}
+
+# Rename speedtest to internet_speed_test
+internet_speed_test() {
     echo "\n🚀 Running Speed Test...\n"
-    
-    # Run speedtest with JSON output and progress disabled for cleaner output
-    local result=$(command speedtest --format=json --progress=no)
-    
-    # Extract values using jq
-    local download=$(echo $result | jq '.download.bandwidth')
-    local upload=$(echo $result | jq '.upload.bandwidth')
-    local latency=$(echo $result | jq '.ping.latency')
-    local server_name=$(echo $result | jq -r '.server.name')
-    local server_location=$(echo $result | jq -r '.server.location')
-    local isp=$(echo $result | jq -r '.isp')
-    
+
+    local result
+    local tool=""
+
+    echo "🔍 Checking available speed test tools..."
+    # Detect which speedtest is installed and which version
+    if command -v speedtest &>/dev/null; then
+        echo "📡 Found speedtest command"
+        echo "🔎 Checking if it's Ookla's version..."
+
+        # Start version check spinner in background
+        version_check_spinner &
+        local spinner_pid=$!
+
+        # Run the version check
+        local is_ookla=false
+        if speedtest --help 2>&1 | grep -q -- '--format'; then
+            is_ookla=true
+        fi
+
+        # Kill the spinner
+        kill $spinner_pid 2>/dev/null
+        printf "\r\033[K"  # Clear the spinner line
+
+        if $is_ookla; then
+            tool="ookla"
+            echo "✅ Confirmed: This is Ookla's speedtest"
+            echo "🌐 Finding best server..."
+            # Start the speed test in background
+            command speedtest --format=json --progress=no 2>&1 > /tmp/speedtest_result &
+            local pid=$!
+            # Show spinner while test is running
+            spinner $pid
+            # Get the result
+            result=$(cat /tmp/speedtest_result)
+            rm /tmp/speedtest_result
+            if ! echo "$result" | jq empty 2>/dev/null; then
+                echo "❌ Error: Invalid JSON output from Ookla speedtest"
+                echo "Raw output: $result"
+                return 1
+            fi
+        else
+            # It's actually speedtest-cli installed as speedtest
+            tool="cli"
+            echo "✅ Confirmed: This is speedtest-cli (installed as speedtest)"
+            echo "🌐 Finding best server..."
+            # Start the speed test in background
+            command speedtest --json 2>&1 > /tmp/speedtest_result &
+            local pid=$!
+            # Show spinner while test is running
+            spinner $pid
+            # Get the result
+            result=$(cat /tmp/speedtest_result)
+            rm /tmp/speedtest_result
+            if ! echo "$result" | jq empty 2>/dev/null; then
+                echo "❌ Error: Invalid JSON output from speedtest-cli (as speedtest)"
+                echo "Raw output: $result"
+                return 1
+            fi
+        fi
+    elif command -v speedtest-cli &>/dev/null; then
+        tool="cli"
+        echo "✅ Found speedtest-cli"
+        echo "🌐 Finding best server..."
+        # Start the speed test in background
+        command speedtest-cli --json 2>&1 > /tmp/speedtest_result &
+        local pid=$!
+        # Show spinner while test is running
+        spinner $pid
+        # Get the result
+        result=$(cat /tmp/speedtest_result)
+        rm /tmp/speedtest_result
+        if ! echo "$result" | jq empty 2>/dev/null; then
+            echo "❌ Error: Invalid JSON output from speedtest-cli"
+            echo "Raw output: $result"
+            return 1
+        fi
+    else
+        echo "❌ No speed test tools found"
+        echo "💡 Tip: Install speedtest-cli with 'brew install speedtest-cli' or Ookla's speedtest with 'brew install --cask speedtest'"
+        return 1
+    fi
+
+    echo "📊 Processing results..."
+
+    # Debug: Print the raw JSON output
+    echo "Debug: Raw JSON output:"
+    echo "$result" | jq '.'
+
+    if [[ "$tool" == "ookla" ]]; then
+        # Ookla JSON fields
+        local download=$(echo "$result" | jq -r '.download.bandwidth // 0')
+        local upload=$(echo "$result" | jq -r '.upload.bandwidth // 0')
+        local latency=$(echo "$result" | jq -r '.ping.latency // 0')
+        local server_name=$(echo "$result" | jq -r '.server.name // "Unknown"')
+        local server_location=$(echo "$result" | jq -r '.server.location // "Unknown"')
+        local isp=$(echo "$result" | jq -r '.isp // "Unknown"')
+    else
+        # speedtest-cli JSON fields
+        local download=$(echo "$result" | jq -r '.download // 0')
+        local upload=$(echo "$result" | jq -r '.upload // 0')
+        local latency=$(echo "$result" | jq -r '.ping // 0')
+        local server_name=$(echo "$result" | jq -r '.server.name // "Unknown"')
+        local server_location=$(echo "$result" | jq -r '.server.location // "Unknown"')
+        local isp=$(echo "$result" | jq -r '.client.isp // "Unknown"')
+    fi
+
+    # Validate numeric values
+    if ! [[ "$download" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$upload" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$latency" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        echo "❌ Error: Invalid numeric values in speed test results"
+        echo "Download: $download"
+        echo "Upload: $upload"
+        echo "Latency: $latency"
+        return 1
+    fi
+
     # Convert from bytes/sec to various units
     # To Gbps (Gigabits per second - what ISPs advertise)
     local download_gbps=$(printf "%.2f" $(echo "$download * 8 / 1000000000" | bc -l))
     local upload_gbps=$(printf "%.2f" $(echo "$upload * 8 / 1000000000" | bc -l))
-    
+
     # To Mbps (Megabits per second - common speed unit)
     local download_mbps=$(printf "%.2f" $(echo "$download * 8 / 1000000" | bc -l))
     local upload_mbps=$(printf "%.2f" $(echo "$upload * 8 / 1000000" | bc -l))
-    
+
     # To GB/s (Gigabytes per second - actual file transfer speeds)
     local download_GBs=$(printf "%.2f" $(echo "$download / 1000000000" | bc -l))
     local upload_GBs=$(printf "%.2f" $(echo "$upload / 1000000000" | bc -l))
-    
+
     echo "💡 Speed Test Results:"
     echo "📍 Server: $server_name, $server_location"
     echo "🏢 ISP: $isp"
     echo "🏓 Latency: ${latency}ms\n"
-    
+
     echo "⬇️  Download Speed:"
     echo "   $download_gbps Gbps (ISP advertised speed unit)"
     echo "   $download_mbps Mbps"
     echo "   $download_GBs GB/s (actual file transfer speed)"
-    
+
     # Calculate percentage of advertised 1Gbps
-    local download_percentage=$(printf "%.1f" $(echo "$download_gbps / 1 * 100" | bc -l))
+    local download_percentage=$(printf "%.1f" $(echo "min($download_gbps / 1 * 100, 100)" | bc -l))
     echo "   📊 You're getting $download_percentage% of advertised 1 Gbps speed"
-    
+
     # Download speed analysis
-    if (( $(echo "$download_gbps >= 0.9" | bc -l) )); then
+    if (( $(echo "$download_gbps >= 1" | bc -l) )); then
+        echo "   ✅ Excellent - Exceeding advertised speed"
+    elif (( $(echo "$download_gbps >= 0.9" | bc -l) )); then
         echo "   ✅ Excellent - Near maximum advertised speed"
     elif (( $(echo "$download_gbps >= 0.7" | bc -l) )); then
         echo "   👍 Very Good - Above 70% of advertised speed"
@@ -357,18 +493,20 @@ speedtest() {
         echo "   💡 Tip: Try running test with ethernet cable or closer to router"
     fi
     echo ""
-    
+
     echo "⬆️  Upload Speed:"
     echo "   $upload_gbps Gbps (ISP advertised speed unit)"
     echo "   $upload_mbps Mbps"
     echo "   $upload_GBs GB/s (actual file transfer speed)"
-    
+
     # Calculate percentage of advertised upload (assuming symmetric 1Gbps)
-    local upload_percentage=$(printf "%.1f" $(echo "$upload_gbps / 1 * 100" | bc -l))
+    local upload_percentage=$(printf "%.1f" $(echo "min($upload_gbps / 1 * 100, 100)" | bc -l))
     echo "   📊 You're getting $upload_percentage% of advertised 1 Gbps speed"
-    
+
     # Upload speed analysis
-    if (( $(echo "$upload_gbps >= 0.9" | bc -l) )); then
+    if (( $(echo "$upload_gbps >= 1" | bc -l) )); then
+        echo "   ✅ Excellent - Exceeding advertised speed"
+    elif (( $(echo "$upload_gbps >= 0.9" | bc -l) )); then
         echo "   ✅ Excellent - Near maximum advertised speed"
     elif (( $(echo "$upload_gbps >= 0.7" | bc -l) )); then
         echo "   👍 Very Good - Above 70% of advertised speed"
