@@ -31,5 +31,9 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 # Add paths to environment variables
 PATH=~/.console-ninja/.bin:$PATH
 
+# [Python Config]
+# --------------------------------------------------------------------------------------------------------
+export PATH="/Users/hameldesai/.local/bin:$PATH"
+
 # [Job Config]
 # --------------------------------------------------------------------------------------------------------
