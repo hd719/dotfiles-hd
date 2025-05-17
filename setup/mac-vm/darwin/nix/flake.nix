@@ -182,6 +182,7 @@
           "ruby-build"
           "ruby-lsp"
           "heroku"
+          "uv"
         ];
 
         casks = [
