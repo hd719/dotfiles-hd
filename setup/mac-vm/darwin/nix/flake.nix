@@ -197,6 +197,7 @@
           "raycast"
           "slack"
           "syncthing"
+          "pycharm"
         ];
 
         taps = [
