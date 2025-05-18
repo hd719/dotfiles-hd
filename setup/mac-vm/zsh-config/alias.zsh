@@ -93,7 +93,7 @@ alias blaze="ssh hamels-macbook-pro-2-1"
 alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
 
 ## Nix
-alias switch="darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix#hameldesai"
+alias switch="sudo darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix#hameldesai" # sudo temporarily (will change in future)
 alias nix-update="nix flake update"
 
 # Tmux

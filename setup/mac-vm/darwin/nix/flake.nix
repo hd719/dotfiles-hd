@@ -116,7 +116,7 @@
           kubectl
           bat
           btop
-          devbox
+          # devbox
           diff-so-fancy
           fastfetch
           ffmpeg
@@ -167,38 +167,48 @@
 
         brews = [
           "anycable-go"
-          "postgresql@15"
-          "postgresql@17"
-          "mongodb-community@8.0"
-          "redis"
-          "zsh-autosuggestions"
-          "zsh-you-should-use"
-          "zsh-syntax-highlighting"
-          "pgvector"
-          "imagemagick"
           "ffmpeg"
-          "vips"
+          "imagemagick"
           "llvm@14"
           "ruby-build"
           "ruby-lsp"
-          "heroku"
           "uv"
+          "vips"
+          "zsh-autosuggestions"
+          "zsh-syntax-highlighting"
+          "zsh-you-should-use"
+          # "postgresql@15"
+          # "postgresql@17"
+          # "redis"
+          #"pgvector"
         ];
 
         casks = [
-          "iterm2"
-          "cursor"
-          "visual-studio-code"
-          "tableplus"
+          "1password"
           "aerospace"
+          "bartender"
           "brave-browser"
+          "cursor"
+          "daisydisk"
+          "discord"
           "figma"
+          "istat-menus"
+          "iterm2"
           "karabiner-elements"
+          "little-snitch"
+          "logi-options+"
+          "micro-snitch"
+          "microsoft-edge"
           "obsidian"
+          "obsidian"
+          "pearcleaner"
+          "pycharm"
           "raycast"
           "slack"
-          "syncthing"
-          "pycharm"
+          "tableplus"
+          "tableplus"
+          "visual-studio-code"
+          "zoom"
         ];
 
         taps = [
@@ -210,24 +220,44 @@
         masApps = {};
       };
 
-      system.activationScripts.postUserActivation.text = ''
+      # NOTE: Important nix-darwin Activation Changes
+      # ============================================
+      # As of recent nix-darwin updates, all activation scripts now run as root instead of the user level.
+      # This is a significant architectural change made to:
+      # 1. Improve multi-user support
+      # 2. Provide more consistent system-wide configuration
+      # 3. Better align with macOS's security model
+      #
+      # Current Workarounds:
+      # - Use 'sudo -u username' for user-specific commands (current approach)
+      # - Set system.primaryUser (as done above) for user-specific settings
+      #
+      # Future Migration Options:
+      # 1. Move user-specific configurations to Home Manager
+      # 2. Wait for nix-darwin to move more settings under users.users.* namespace
+      # 3. Use Home Manager's activation scripts for user-level changes
+      #
+      # Reference: https://github.com/nix-darwin/nix-darwin/issues/
+
+      # System activation scripts that run as root for the time being
+      system.activationScripts.extraActivation.text = ''
         # Following line should allow us to avoid a logout/login cycle
         /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 
         # Show the ~/Library folder
-        chflags nohidden ~/Library
+        sudo -u hameldesai chflags nohidden /Users/hameldesai/Library
 
         # Show the /Volumes folder
-        sudo chflags nohidden /Volumes
+        chflags nohidden /Volumes
 
         # Stop iTunes from responding to the keyboard media keys
-        launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null
+        sudo -u hameldesai launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null
 
         # Turns off spaces in mission control
-        defaults write com.apple.spaces spans-displays -bool false
+        sudo -u hameldesai defaults write com.apple.spaces spans-displays -bool false
 
         # Reduce Motion
-        defaults write com.apple.Accessibility reduceMotionEnabled -bool false
+        sudo -u hameldesai defaults write com.apple.Accessibility reduceMotionEnabled -bool false
 
         # Install Rosetta if not already installed
         if ! /usr/bin/pgrep -q oahd; then
@@ -245,7 +275,7 @@
           autohide-time-modifier = 0.2;
           showhidden = true;
           show-recents = false;
-          orientation = "right";
+          orientation = "bottom";
           # Newer macOS features
           tilesize = 48; # Set icon size
           magnification = true; # Enable magnification
@@ -254,9 +284,7 @@
           # Set persistent apps
           persistent-apps = [
             "/Applications/Brave Browser.app"
-            "/Applications/Figma.app"
-            "/Applications/TablePlus.app"
-            "/Applications/Slack.app"
+            "/Applications/Obsidian.app"
             "/Applications/Cursor.app"
             "/Applications/iTerm.app"
           ];
@@ -285,7 +313,7 @@
         };
 
         # Customize settings that not supported by nix-darwin directly
-        # Incomplete list of macOS `defaults` commands :
+        # Incomplete list of ma cOS `defaults` commands :
         # https://github.com/yannbertrand/macos-defaults
         NSGlobalDomain = {
           "com.apple.swipescrolldirection" = false; # enable natural scrolling(default to true)
@@ -405,6 +433,9 @@
 
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
+
+      # Set the primary user for user-specific configurations
+      system.primaryUser = "hameldesai";
     };
   in
   {

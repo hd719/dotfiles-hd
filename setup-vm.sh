@@ -9,6 +9,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Heads up for brave browser - make sure to create a new browser pass code
 # Check network connectivity
 check_network() {
     echo -e "${YELLOW}🔍 Checking network connectivity...${NC}"
@@ -619,7 +620,7 @@ if ! command -v nix &> /dev/null; then
     exit 1
 fi
 
-nix run nix-darwin -- switch --flake .#hameldesai
+sudo nix run nix-darwin -- switch --flake .#hameldesai # sudo temporarily (will change in future)
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Failed to run nix-darwin switch${NC}"
     exit 1
@@ -645,7 +646,7 @@ else
 
     # Use nix-darwin command directly
     echo -e "${YELLOW}Running nix-darwin switch...${NC}"
-    nix run nix-darwin -- switch --flake .#hameldesai
+    sudo nix run nix-darwin -- switch --flake .#hameldesai # sudo temporarily (will change in future)
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ Failed to run nix-darwin switch${NC}"
         exit 1
