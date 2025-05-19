@@ -297,14 +297,16 @@
 
         finder = {
           _FXShowPosixPathInTitle = false;
-          ShowPathbar = true;
           AppleShowAllExtensions = true;
-          FXPreferredViewStyle = "clmv";
-          ShowStatusBar = true;
-          # Newer macOS features
-          # FXEnableExtensionChangeWarning = false; # Disable extension change warning
-          # QuitMenuItem = true; # Enable quit menu item
+          AppleShowAllFiles = true;
           CreateDesktop = false; # Don't create .DS_Store files
+          FXDefaultSearchScope = "SCcf"; # Search the current folder by default
+          FXEnableExtensionChangeWarning = false; # Disable extension change warning
+          FXPreferredViewStyle = "Nlsv"; # List view
+          FXRemoveOldTrashItems = true; # Remove old trash items
+          QuitMenuItem = true; # Enable quit menu item
+          ShowPathbar = true;
+          ShowStatusBar = true;
         };
 
         trackpad = {
@@ -324,11 +326,19 @@
 
         # https://mynixos.com/options/system.defaults.NSGlobalDomain
         NSGlobalDomain = {
-          "com.apple.swipescrolldirection" = false; # enable natural scrolling(default to true)
+          "com.apple.mouse.tapBehavior" = 1; # enables tap to click
+          "com.apple.trackpad.enableSecondaryClick" = true; # enables right click on trackpad
+          "com.apple.trackpad.forceClick" = true; # enables force click on trackpad
+          # "com.apple.swipescrolldirection" = false; # enable natural scrolling(default to true)
           "com.apple.sound.beep.feedback" = 0; # disable beep sound when pressing volume up/down key
           # AppleInterfaceStyle = "dark"; # dark mode or light mode
           AppleInterfaceStyleSwitchesAutomatically = true;
           AppleICUForce24HourTime = false;
+          AppleMeasurementUnits = "Inches";
+          AppleMetricUnits = 0;
+          AppleTemperatureUnit = "Fahrenheit";
+          AppleShowAllExtensions = true; # show all file extensions
+          AppleShowScrollBars = "WhenScrolling";
 
           # If you press and hold certain keyboard keys when in a text area, the key's character begins to repeat.
           # This is very useful for vim users, they use `hjkl` to move cursor.
@@ -338,6 +348,8 @@
           KeyRepeat = 2;  # normal minimum is 2 (30 ms), maximum is 120 (1800 ms)
 
           AppleShowAllFiles = true;  # show hidden files in Finder
+
+          NSScrollAnimationEnabled = true; # enable scroll animation
         };
 
         # Customize settings that not supported by nix-darwin directly
