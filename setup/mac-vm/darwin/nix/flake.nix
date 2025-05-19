@@ -185,9 +185,11 @@
 
         casks = [
           "1password"
+          "1password-cli"
           "aerospace"
           "bartender"
           "brave-browser"
+          "chatgpt"
           "cursor"
           "daisydisk"
           "deskflow"
