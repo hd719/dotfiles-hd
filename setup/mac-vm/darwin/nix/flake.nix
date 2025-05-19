@@ -177,10 +177,10 @@
           "zsh-autosuggestions"
           "zsh-syntax-highlighting"
           "zsh-you-should-use"
-          # "postgresql@15"
-          # "postgresql@17"
-          # "redis"
-          #"pgvector"
+          # "postgresql@15" -> Run through docker
+          # "postgresql@17" -> Run through docker
+          # "redis" -> Run through docker
+          # "pgvector" -> Docker image has this already installed
         ];
 
         casks = [
@@ -212,15 +212,18 @@
         ];
 
         taps = [
-          "mongodb/brew"
+          # "mongodb/brew" -> Run through docker
           "nikitabobko/tap"
           "heroku/brew"
+          "deskflow/homebrew-tap"
         ];
 
         masApps = {};
       };
 
       # NOTE: Important nix-darwin Activation Changes
+      # Changelog: https://github.com/nix-darwin/nix-darwin/commit/b9e580c1130307c3aee715956a11824c0d8cdc5e#diff-ecec88c33adb7591ee6aa88e29b62ad52ef443611cba5e0f0ecac9b5725afdba
+      # Github Issue: https://github.com/nix-darwin/nix-darwin/issues/1455
       # ============================================
       # As of recent nix-darwin updates, all activation scripts now run as root instead of the user level.
       # This is a significant architectural change made to:
@@ -240,6 +243,7 @@
       # Reference: https://github.com/nix-darwin/nix-darwin/issues/
 
       # System activation scripts that run as root for the time being
+      # TODO: Move to home-manager activation script
       system.activationScripts.extraActivation.text = ''
         # Following line should allow us to avoid a logout/login cycle
         /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
@@ -276,6 +280,7 @@
           showhidden = true;
           show-recents = false;
           orientation = "bottom";
+
           # Newer macOS features
           tilesize = 48; # Set icon size
           magnification = true; # Enable magnification
@@ -306,6 +311,7 @@
           Clicking = true;
           TrackpadRightClick = true;
           TrackpadThreeFingerDrag = true;
+
           # Newer macOS features
           Dragging = true; # Enable dragging
           # FirstClickThreshold = 1; # Light click threshold
@@ -315,10 +321,13 @@
         # Customize settings that not supported by nix-darwin directly
         # Incomplete list of ma cOS `defaults` commands :
         # https://github.com/yannbertrand/macos-defaults
+
+        # https://mynixos.com/options/system.defaults.NSGlobalDomain
         NSGlobalDomain = {
           "com.apple.swipescrolldirection" = false; # enable natural scrolling(default to true)
           "com.apple.sound.beep.feedback" = 0; # disable beep sound when pressing volume up/down key
-          # AppleInterfaceStyle = "Dark"; # dark mode
+          # AppleInterfaceStyle = "dark"; # dark mode or light mode
+          AppleInterfaceStyleSwitchesAutomatically = true;
           AppleICUForce24HourTime = false;
 
           # If you press and hold certain keyboard keys when in a text area, the key's character begins to repeat.

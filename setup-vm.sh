@@ -10,6 +10,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Heads up for brave browser - make sure to create a new browser pass code
+# Copy over ssh config and keys from current machine to vm or host
+
 # Check network connectivity
 check_network() {
     echo -e "${YELLOW}🔍 Checking network connectivity...${NC}"
