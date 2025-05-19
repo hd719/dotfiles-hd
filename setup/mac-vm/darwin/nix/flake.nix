@@ -190,6 +190,7 @@
           "brave-browser"
           "cursor"
           "daisydisk"
+          "deskflow"
           "discord"
           "figma"
           "istat-menus"
@@ -329,7 +330,7 @@
           "com.apple.mouse.tapBehavior" = 1; # enables tap to click
           "com.apple.trackpad.enableSecondaryClick" = true; # enables right click on trackpad
           "com.apple.trackpad.forceClick" = true; # enables force click on trackpad
-          # "com.apple.swipescrolldirection" = false; # enable natural scrolling(default to true)
+          "com.apple.swipescrolldirection" = false; # enable natural scrolling(default to true)
           "com.apple.sound.beep.feedback" = 0; # disable beep sound when pressing volume up/down key
           # AppleInterfaceStyle = "dark"; # dark mode or light mode
           AppleInterfaceStyleSwitchesAutomatically = true;
