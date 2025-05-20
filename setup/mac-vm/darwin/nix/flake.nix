@@ -205,7 +205,7 @@
           "obsidian"
           "obsidian"
           "pearcleaner"
-          "pycharm"
+          "pycharm-ce"
           "raycast"
           "slack"
           "tableplus"
@@ -320,7 +320,7 @@
           # Newer macOS features
           Dragging = true; # Enable dragging
           # FirstClickThreshold = 1; # Light click threshold
-          #SecondClickThreshold = 1; # Force click threshold
+          # SecondClickThreshold = 1; # Force click threshold
         };
 
         # Customize settings that not supported by nix-darwin directly
@@ -519,6 +519,7 @@
             useGlobalPkgs = true;
             useUserPackages = true;
             users.hameldesai = import ./home.nix;
+            backupFileExtension = "backup";
           };
         }
        ];
