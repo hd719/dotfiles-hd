@@ -1,0 +1,155 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "auto",
+    "source": "~/.config/fastfetch/logo2.txt",
+    "width": 40,
+    "height": 16,
+    "padding": {
+      "top": 2,
+      "left": 4
+    },
+    "color": {
+      "1": "blue",
+      "2": "green"
+    }
+  },
+  "modules": [
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[90m┌────────────────────── Hardware ──────────────────────┐"
+    },
+    {
+      "type": "host",
+      "key": " PC ",
+      "keyColor": "green"
+    },
+    {
+      "type": "cpu",
+      "key": "│ ├ ",
+      "showPeCoreCount": true,
+      "keyColor": "green"
+    },
+    {
+      "type": "gpu",
+      "key": "│ ├ ",
+      "detectionMethod": "pci",
+      "keyColor": "green"
+    },
+    {
+      "type": "display",
+      "key": "│ ├󱄄 ",
+      "keyColor": "green"
+    },
+    {
+      "type": "disk",
+      "key": "│ ├󰋊 ",
+      "keyColor": "green"
+    },
+    {
+      "type": "memory",
+      "key": "│ ├ ",
+      "keyColor": "green"
+    },
+    {
+      "type": "swap",
+      "key": "└ └󰓡 ",
+      "keyColor": "green"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m└──────────────────────────────────────────────────────┘"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m┌────────────────────── Software ──────────────────────┐"
+    },
+    {
+      "type": "os",
+      "key": " OS ",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "kernel",
+      "key": "│ ├ ",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "packages",
+      "key": "│ ├󰏖 ",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "shell",
+      "key": "└ └ ",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "terminal",
+      "key": "└ └ ",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m└──────────────────────────────────────────────────────┘"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m┌───────────────────── Uptime / Age ───────────────────┐"
+    },
+    {
+      "type": "command",
+      "key": "  OS Age ",
+      "keyColor": "magenta",
+      "text": "birth_install=$(stat -c %W /); current=$(date +%s); time_progression=$((current - birth_install)); days_difference=$((time_progression / 86400)); echo $days_difference days"
+    },
+    {
+      "type": "uptime",
+      "key": "  Uptime ",
+      "keyColor": "magenta"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m└──────────────────────────────────────────────────────┘"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m┌────────────────────── Local ─────────────────────────┐"
+    },
+    {
+      "key": "  󰩟 network",
+      "type": "localip",
+      "format": "{1}",
+      "keyColor": "blue"
+    },
+    {
+      "type": "battery",
+      "key": "  󰁹 battery",
+      "keyColor": "blue"
+    },
+    {
+      "type": "command",
+      "key": "  󰖌 weather",
+      "keyColor": "blue",
+      "text": "curl -s 'wttr.in/?format=1'"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m└──────────────────────────────────────────────────────┘"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m┌────────────────────── Colors ────────────────────────┐"
+    },
+    {
+      "key": "  {#39} colors",
+      "type": "colors",
+      "symbol": "circle"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m└──────────────────────────────────────────────────────┘"
+    }
+  ]
+}
