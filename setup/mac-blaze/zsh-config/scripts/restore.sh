@@ -117,8 +117,7 @@ echo "🔄 STEP 2: STOPPING LOCAL SERVICES"
 echo "=================================="
 
 if [[ "$RESTORE_METHOD" == "docker" ]]; then
-  echo "🔍 Stopping Docker containers..."
-  docker stop almanac_db almanac_redis || true
+  echo "🔍 Not stopping Docker containers"
 else
   echo "🔍 Checking local services status..."
 
