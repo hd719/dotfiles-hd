@@ -198,6 +198,7 @@
           "iterm2"
           "karabiner-elements"
           "little-snitch"
+          "local"
           "logi-options+"
           "micro-snitch"
           "microsoft-edge"

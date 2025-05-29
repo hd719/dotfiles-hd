@@ -1,6 +1,10 @@
 # [Aliases]
 # --------------------------------------------------------------------------------------------------------
 
+## Mac defaults
+alias reset-finder="defaults write com.apple.finder CreateDesktop -bool true; killall Finder; open /System/Library/CoreServices/Finder.app"
+alias reset-dock="defaults write com.apple.dock autohide -bool false; killall Dock"
+
 ## Npm
 alias npb='npm run build'
 alias npp='npm run prettier'

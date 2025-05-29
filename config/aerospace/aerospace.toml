@@ -222,9 +222,29 @@ backspace = ['close-all-windows-but-current', 'mode main']
 # alt-shift-cmd-ctrl-l = ['join-with right', 'mode main']
 
 [[on-window-detected]]
-if.app-id="com.apple.mail"
+if.app-id="com.obsidian.app"
 if.app-name-regex-substring = 'mail'
-run = "move-node-to-workspace 1"
+run = "move-node-to-workspace 5"
+
+[[on-window-detected]]
+if.app-id="com.figma.app"
+if.app-name-regex-substring = 'figma'
+run = "move-node-to-workspace 5"
+
+[[on-window-detected]]
+if.app-id = "com.cursor.app"
+if.app-name-regex-substring = 'cursor'
+run = "move-node-to-workspace 4"
+
+[[on-window-detected]]
+if.app-id = "com.iterm2.app"
+if.app-name-regex-substring = 'iterm'
+run = "move-node-to-workspace 3"
+
+[[on-window-detected]]
+if.app-id = "com.microsoft.edge"
+if.app-name-regex-substring = 'edge'
+run = "move-node-to-workspace 2"
 
 [[on-window-detected]]
 if.app-id = "com.microsoft.Outlook"
@@ -236,11 +256,6 @@ if.app-id = "com.apple.finder"
 if.app-name-regex-substring = "finder"
 run = "move-node-to-workspace 1"
 
-# [[on-window-detected]]
-# if.app-id = "com.mitchellh.ghostty"
-# if.app-name-regex-substring = "ghostty"
-# run = "move-node-to-workspace 2"
-
 [[on-window-detected]]
 if.app-id = "com.apple.MobileSMS"
 if.app-name-regex-substring = "messages"
@@ -251,10 +266,10 @@ if.app-id = "com.apple.Preview"
 if.app-name-regex-substring = "preview"
 run = "move-node-to-workspace 1"
 
-# [[on-window-detected]]
-# if.app-id = "us.zoom.xos"
-# if.app-name-regex-substring = "zoom"
-# run = "move-node-to-workspace 2"
+[[on-window-detected]]
+if.app-id = "us.zoom.xos"
+if.app-name-regex-substring = "zoom"
+run = "move-node-to-workspace 1"
 
 [[on-window-detected]]
 if.app-id = "com.apple.mail"
@@ -264,4 +279,9 @@ run = "move-node-to-workspace 1"
 [[on-window-detected]]
 if.app-id = "com.apple.findmy"
 if.app-name-regex-substring = "find my"
+run = "move-node-to-workspace 1"
+
+[[on-window-detected]]
+if.app-id="com.apple.mail"
+if.app-name-regex-substring = 'mail'
 run = "move-node-to-workspace 1"
