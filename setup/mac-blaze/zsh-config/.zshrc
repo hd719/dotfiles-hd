@@ -82,6 +82,7 @@ alias rdbmrprod="bundle exec rails db:rollback RAILS_ENV=production"
 # Pull all repos on master branch
 # Pull all repos on master branch
 gda() {
+  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
   startdir=$(pwd)
 
   # Function to update a single repo
@@ -97,8 +98,10 @@ gda() {
   update_repo ~/Developer/Blaze/blaze-on-rails "Blaze on Rails"
   update_repo ~/Developer/Blaze/monospace "Monospace"
   update_repo ~/Developer/Blaze/prose-core "Prosecore"
+  update_repo ~/Developer/Blaze/eng-cli "Eng CLI"
 
   cd "$startdir"
+  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 }
 
 goodMorning() {
