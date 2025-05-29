@@ -62,8 +62,11 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 2 = 'U34G2G4R3'               # Main monitor
 3 = 'U34G2G4R3'               # Non-main monitor in case when there are only two monitors
 4 = 'U34G2G4R3'               # Case insensitive regex substring
-5 = 'Sidecar Display'               # Case insensitive regex match
+5 = 'U34G2G4R3'         # Case insensitive regex match
 6 = 'U34G2G4R3'
+7 = 'U34G2G4R3'
+8 = 'U34G2G4R3'
+9 = 'Sidecar Display'
 # 6 = [
 #   'U34G2G4R3',
 # ] # You can specify multiple patterns. The first matching pattern will be used
@@ -101,8 +104,8 @@ outer.right =      10
 # alt-enter = 'exec-and-forget open -n /System/Applications/Utilities/Terminal.app'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
-alt-shift-cmd-ctrl-9 = 'layout tiles horizontal vertical'
-alt-shift-cmd-ctrl-0 = 'layout accordion horizontal vertical'
+alt-shift-9 = 'layout tiles horizontal vertical'
+alt-shift-0 = 'layout accordion horizontal vertical'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
 alt-h = 'focus left'
@@ -198,7 +201,7 @@ shift-alt-space = 'mode service'
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 
-0alt-shift-h = ['join-with left', 'mode main']
+alt-shift-h = ['join-with left', 'mode main']
 alt-shift-j = ['join-with down', 'mode main']
 alt-shift-k = ['join-with up', 'mode main']
 alt-shift-l = ['join-with right', 'mode main']
