@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# TODO Update this restore script so it restores test db as well docker and homebrew
+
 set -e
 
 # Paths to the backup files
@@ -443,3 +446,10 @@ fi
 # ./restore.sh              # Uses Docker (default)
 # ./restore.sh docker       # Explicitly uses Docker
 # ./restore.sh homebrew     # Uses Homebrew
+
+# Test DB
+# cat ~/Developer/Blaze/blaze-backups/pg_almanac_test.sql | docker exec -i almanac_db_test psql -U postgres -d almanac_test
+
+# docker exec -i almanac_db psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'almanac_test'" | grep -q 1 || docker exec -i almanac_db psql -U postgres -c "CREATE DATABASE almanac_test;" && \
+# docker exec -i almanac_db psql -U postgres -d almanac_test -c "DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'hameldesai') THEN CREATE ROLE hameldesai WITH SUPERUSER LOGIN; END IF; END \$\$;" && \
+# cat ~/Developer/Blaze/blaze-backups/pg_almanac_test.sql | docker exec -i almanac_db psql -U postgres -d almanac_test

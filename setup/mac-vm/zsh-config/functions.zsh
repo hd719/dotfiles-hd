@@ -557,6 +557,31 @@ check_ports() {
   fi
 }
 
+# Full generation map with size
+nix-gen-map() {
+  echo "🔗 Generation -> Nix Store Path + Size:"
+  printf "%-12s %-70s %10s\n" "Generation" "Store Path" "Size"
+  echo "-----------------------------------------------------------------------------------------------"
+  sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | while read gen rest; do
+    link="/nix/var/nix/profiles/system-${gen}-link"
+    if [[ -L "$link" ]]; then
+      target=$(readlink "$link")
+      if [[ -n "$target" && -e "$target" ]]; then
+        size=$(du -sh "$target" | awk '{print $1}')
+        printf "%-12s %-70s %10s\n" "$gen" "$target" "$size"
+      fi
+    fi
+  done
+}
+
+nix-gen-size() {
+  for link in /nix/var/nix/profiles/system-*-link; do
+    target=$(readlink "$link")
+    if [[ -n "$target" && -e "$target" ]]; then
+      du -sh "$target"
+    fi
+  done
+}
 
 goodMorning() {
   echo ""

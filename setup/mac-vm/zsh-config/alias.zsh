@@ -99,6 +99,14 @@ alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
 ## Nix
 alias switch="sudo darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix#hameldesai" # sudo temporarily (will change in future)
 alias nix-update="nix flake update"
+# Alias: List all system generations
+alias nix-gen-list='sudo nix-env --list-generations --profile /nix/var/nix/profiles/system'
+
+# Alias: List all system generations (as before)
+alias nix-gen-list='sudo nix-env --list-generations --profile /nix/var/nix/profiles/system'
+
+# Alias: Delete old generations older than 7 days
+alias nix-gen-clean='sudo nix-collect-garbage --delete-older-than 7d'
 
 # Tmux
 alias tm='tmux'                             # Start tmux
