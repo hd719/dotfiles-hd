@@ -34,6 +34,7 @@ eval "$(rbenv init - zsh)"
 export PATH="/opt/homebrew/opt/llvm@14/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@15/lib/pkgconfig"
+export DISABLE_SPRING=true
 
 # heroku autocomplete setup
 HEROKU_AC_ZSH_SETUP_PATH=/Users/hameldesai/Library/Caches/heroku/autocomplete/zsh_setup && test -f $HEROKU_AC_ZSH_SETUP_PATH && source $HEROKU_AC_ZSH_SETUP_PATH;
