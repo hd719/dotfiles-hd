@@ -60,7 +60,6 @@
       source = ../../../../config/karabiner;
       recursive = true;
     };
-    ".config/tmux"
   };
 
   # Configure Git
