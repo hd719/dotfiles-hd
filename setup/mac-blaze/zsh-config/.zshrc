@@ -58,10 +58,11 @@ alias blaze-restore="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/
 alias blaze-backup="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/db/blaze-backup.sh"
 
 ## Repos
-alias cdalmanac='cd ~/Developer/Blaze/almanac-editor'
-alias cdblazeonrails='cd ~/Developer/Blaze/blaze-on-rails'
-alias cdmonospace='cd ~/Developer/Blaze/monospace'
-alias cdprosecore='cd ~/Developer/Blaze/prose-core'
+alias cdfe='nvm use 16.5.0; cd ~/Developer/Blaze/almanac-editor'
+alias cdbe='nvm use stable; cd ~/Developer/Blaze/blaze-on-rails'
+alias cdmo='nvm use 18.17.1; cd ~/Developer/Blaze/monospace'
+alias cdpc='nvm use 18.17.1; cd ~/Developer/Blaze/prose-core'
+alias cdeng='nvm use stable; cd ~/Developer/Blaze/eng-cli'
 
 ## Rails
 alias be="bundle exec"
