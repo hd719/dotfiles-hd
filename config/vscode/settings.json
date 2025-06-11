@@ -7,17 +7,27 @@
 
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
+  // "rubyLsp.bundleGemfile": "/Users/hameldesai/Developer/ruby-udemy/.ruby-lsp/Gemfile",
+  "rubyLsp.rubyVersionManager": {
+    "identifier": "auto"
+  },
+  "rubyLsp.formatter": "auto",
+  "[ruby]": {
+    "editor.defaultFormatter": "Shopify.ruby-lsp", // Use the Ruby LSP as the default formatter
+    "editor.formatOnSave": true, // Format files automatically when saving
+    "editor.tabSize": 2, // Use 2 spaces for indentation
+    "editor.insertSpaces": true, // Use spaces and not tabs for indentation
+    "editor.semanticHighlighting.enabled": true, // Enable semantic highlighting
+    "editor.formatOnType": true // Enable formatting while typing
+  },
 
   // ---------------------------------------------------------------------
   // Explorer
   // ---------------------------------------------------------------------
   "explorer.confirmDragAndDrop": false,
   "explorer.confirmDelete": false,
-
-  // ---------------------------------------------------------------------
-  // Intellisense and VSCode settings
-  // ---------------------------------------------------------------------
-  "breadcrumbs.enabled": false,
+  "explorer.compactFolders": false,
+  "explorer.decorations.badges": false,
   "security.workspace.trust.untrustedFiles": "open",
   "security.promptForLocalFileProtocolHandling": false,
 
@@ -42,7 +52,7 @@
   // Workbench Editor
   // ---------------------------------------------------------------------
   "editor.tabSize": 2,
-  "editor.fontSize": 17.5,
+  "editor.fontSize": 15.5,
   "vscode_custom_css.imports": [
     "file:///Users/hameldesai/.vscode/vs-code-styles.css"
   ],
@@ -94,6 +104,7 @@
     "*.zip": "default"
   },
   "workbench.editor.empty.hint": "hidden",
+  "workbench.tree.renderIndentGuides": "none",
 
   // ---------------------------------------------------------------------
   // Font Color Terminal/Editor/SideBar/StatusBar
@@ -128,7 +139,7 @@
     "editorGroup.focusedEmptyBorder": "#ffffff",
     "editor.wordWrap": "on",
     "editor.bracketPairColorization.enabled": true,
-    "sideBar.border": "#282a36",
+    "sideBar.border": "#ffffff",
     "sideBar.background": "#282a36",
     "panel.background": "#282a36",
     "titleBar.activeBackground": "#282a36",
@@ -204,7 +215,7 @@
   "html.format.indentInnerHtml": true,
   "editor.inlineSuggest.enabled": true,
   "github.copilot.enable": {
-    "*": true,
+    "*": false,
     "plaintext": true,
     "markdown": true,
     "scminput": false,
@@ -411,9 +422,8 @@
   "security.workspace.trust.startupPrompt": "never",
   "terminal.integrated.env.linux": {},
   "git.openRepositoryInParentFolders": "always",
-  "cSpell.userWords": ["Proxying"],
+  "cSpell.userWords": ["hameldesai", "Hamels", "nixpkgs", "Proxying"],
   "editor.lineNumbers": "relative",
-  "workbench.activityBar.location": "hidden",
   "workbench.settings.applyToAllProfiles": ["workbench.colorCustomizations"],
   "extensions.ignoreRecommendations": true,
   "window.titleBarStyle": "custom",
@@ -421,13 +431,19 @@
   "docker.contexts.showInStatusBar": true,
   "editor.accessibilitySupport": "off",
   "github.copilot.chat.edits.codesearch.enabled": true,
-  "workbench.navigationControl.enabled": false,
-  "workbench.layoutControl.enabled": false,
   "search.followSymlinks": false,
   "workbench.editor.enablePreview": false,
-  "workbench.iconTheme": "catppuccin-latte",
-  "window.commandCenter": false,
   "editor.stickyScroll.scrollWithEditor": false,
   "workbench.tree.enableStickyScroll": false,
-  "workbench.statusBar.visible": false
+  "workbench.activityBar.location": "top",
+  "workbench.iconTheme": "catppuccin-mocha",
+  "rubyLsp.rubyExecutablePath": "/nix/store/4azmq7y8imkibv743nwjsa9d6nj3fivj-ruby-3.4.1/bin/ruby",
+  "window.commandCenter": false,
+  "workbench.layoutControl.enabled": false,
+  "remote.defaultExtensionsIfInstalledLocally": [
+    "GitHub.copilot",
+    "GitHub.copilot-chat",
+    "GitHub.vscode-pull-request-github"
+  ],
+  "window.zoomLevel": 0
 }

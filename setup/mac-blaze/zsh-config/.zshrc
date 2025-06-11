@@ -35,6 +35,9 @@ export PATH="/opt/homebrew/opt/llvm@14/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@15/lib/pkgconfig"
 export DISABLE_SPRING=true
+nvm --version
+nvm use stable
+rbenv --version
 
 # heroku autocomplete setup
 HEROKU_AC_ZSH_SETUP_PATH=/Users/hameldesai/Library/Caches/heroku/autocomplete/zsh_setup && test -f $HEROKU_AC_ZSH_SETUP_PATH && source $HEROKU_AC_ZSH_SETUP_PATH;
@@ -42,7 +45,8 @@ HEROKU_AC_ZSH_SETUP_PATH=/Users/hameldesai/Library/Caches/heroku/autocomplete/zs
 alias hydrate-s3-dev="bin/rails restore_db_and_index:from_s3"
 alias hydrate-s3-prod="bin/rails restore_db_and_index:from_live_production"
 # — this will download pre-sanitized data from S3 and restore it locally. It will then clear the Algolia indices, and reindex them. Make sure redis is running before this or the index step will fail! Alternatively, you can run bin/rails restore_db_and_index:from_live_production to get a fresh copy of prod, sanitize it, and restore it locally. This method will take multiple hours, so only use if the s3 dump is broken (Please notify engineering channel if this is the case so we can fix it).
-alias run-migration="bin/rails db:migrate RAILS_ENV=development"
+alias run-migration="bin/rails db:migrate RAILS_ENV=development"\
+
 alias itbe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/it-be.sh"
 alias ited="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/ie-ed.sh"
 alias itfe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/it-fe.sh"
@@ -51,7 +55,7 @@ alias itall="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/it
 alias tmfe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-fe.sh"
 alias tmed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-ed.sh"
 alias tmbe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-be.sh"
-alias tmall="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-all.sh"
+alias tmbl="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-all.sh"
 
 alias console-dev="heroku run rails c -a blaze-ai-rails"
 alias console-prod="heroku run rails c -a blaze-ai-rails"
@@ -61,8 +65,8 @@ alias blaze-restore="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/
 alias blaze-backup="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/db/blaze-backup.sh"
 
 ## Repos
-alias cdfe='nvm use 16.5.0; cd ~/Developer/Blaze/almanac-editor'
-alias cdbe='nvm use stable; cd ~/Developer/Blaze/blaze-on-rails'
+alias cdfe='nvm use 16.5.0; cd ~/Developer/Blaze/almanac-editor/blaze'
+alias cdbe='nvm use stable; rbenv use local 3.1.3; cd ~/Developer/Blaze/blaze-on-rails'
 alias cdmo='nvm use 18.17.1; cd ~/Developer/Blaze/monospace'
 alias cdpc='nvm use 18.17.1; cd ~/Developer/Blaze/prose-core'
 alias cdeng='nvm use stable; cd ~/Developer/Blaze/eng-cli'
