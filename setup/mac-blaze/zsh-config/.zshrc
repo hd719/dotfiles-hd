@@ -32,8 +32,10 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 # --------------------------------------------------------------------------------------------------------
 eval "$(rbenv init - zsh)"
 export PATH="/opt/homebrew/opt/llvm@14/bin:$PATH"
-export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@15/lib/pkgconfig"
+# export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
+export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+# export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@15/lib/pkgconfig"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@17/lib/pkgconfig"
 export DISABLE_SPRING=true
 nvm --version
 nvm use stable
@@ -65,7 +67,7 @@ alias blaze-restore="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/
 alias blaze-backup="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/db/blaze-backup.sh"
 
 ## Repos
-alias cdfe='nvm use 16.5.0; cd ~/Developer/Blaze/almanac-editor/blaze'
+alias cdfe='nvm use 16.5.0; cd ~/Developer/Blaze/almanac-editor/apps/blaze'
 alias cdbe='nvm use stable; rbenv use local 3.1.3; cd ~/Developer/Blaze/blaze-on-rails'
 alias cdmo='nvm use 18.17.1; cd ~/Developer/Blaze/monospace'
 alias cdpc='nvm use 18.17.1; cd ~/Developer/Blaze/prose-core'

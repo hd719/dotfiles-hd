@@ -173,11 +173,12 @@
           "ruby-lsp"
           "uv"
           "vips"
+          "libpq"
           "zsh-autosuggestions"
           "zsh-syntax-highlighting"
           "zsh-you-should-use"
-          "postgresql@15" # -> Run through docker
-          # "postgresql@17" -> Run through docker
+          # "postgresql@15" # -> Run through docker
+          "postgresql@17" # -> Run through docker
           # "redis" -> Run through docker
           # "pgvector" -> Docker image has this already installed
         ];
