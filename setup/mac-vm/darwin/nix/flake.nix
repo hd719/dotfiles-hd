@@ -211,6 +211,7 @@
           "slack"
           "tableplus"
           "visual-studio-code"
+          "warp"
           "zoom"
         ];
 
