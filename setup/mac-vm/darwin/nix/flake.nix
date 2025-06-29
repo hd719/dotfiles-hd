@@ -197,13 +197,13 @@
           "figma"
           "istat-menus"
           "iterm2"
+          "jordanbaird-ice"
           "karabiner-elements"
           "little-snitch"
           "local"
           "logi-options+"
           "micro-snitch"
           "microsoft-edge"
-          "obsidian"
           "obsidian"
           "pearcleaner"
           "pycharm-ce"
@@ -292,10 +292,12 @@
           minimize-to-application = false; # Minimize windows into application icon
           # Set persistent apps
           persistent-apps = [
+            "/Applications/Microsoft Edge.app"
             "/Applications/Brave Browser.app"
             "/Applications/Obsidian.app"
             "/Applications/Cursor.app"
-            "/Applications/iTerm.app"
+            "/Applications/Warp.app"
+            "/Applications/ChatGPT.app"
           ];
         };
 
@@ -314,9 +316,9 @@
         };
 
         trackpad = {
-          # Clicking = true;
-          # TrackpadRightClick = true;
-          # TrackpadThreeFingerDrag = true;
+          Clicking = true;
+          TrackpadRightClick = true;
+          TrackpadThreeFingerDrag = true;
 
           # Newer macOS features
           # Dragging = true; # Enable dragging
