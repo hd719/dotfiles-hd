@@ -150,3 +150,4 @@ echo -e "${RED}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥$
 
 # Add paths to environment variables
 PATH=~/.console-ninja/.bin:$PATH
+source /Users/hameldesai/.config/op/plugins.sh
