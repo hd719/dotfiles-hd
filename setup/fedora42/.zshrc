@@ -42,3 +42,6 @@ source /home/hameldesai/Developer/zsh-plugins/zsh-you-should-use/you-should-use.
 
 alias mount-shared="vmhgfs-fuse .host:/ /mnt/hgfs -o allow_other"
 
+# Alias to start Cursor editor (AppImage)
+alias cursor-app="~/Applications/Cursor-1.2.1-aarch64.AppImage"
+
