@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # Manual Steps:
-# 1. Update copy and paste commands in terminal (default)
+# 1. Update copy and paste commands in terminal (default) and change mission control to hyper
 # 2. Symlink .zshrc from dotfiles (Fedora 42)
 # 3. Copy over gitignore and gitconfig from dotfiles
 # 4. Setup tmux configq
@@ -458,7 +458,7 @@ install_uv
 install_and_configure_redis
 install_anycable_go
 # install_zsh_plugins
-clone_dotfiles
+# clone_dotfiles
 enable_vmware_shared_folder
 link_dotfiles_configs
 # link_zshrc_from_dotfiles
