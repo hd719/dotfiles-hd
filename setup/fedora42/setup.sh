@@ -10,6 +10,13 @@
 # 5. Install Pycharm
 # 6. Install Goland
 
+
+# Warp Terminal
+# Install: 
+# sudo dnf install warp-terminal
+# Known issues: https://github.com/warpdotdev/Warp/issues/5554
+# Fix: WGPU_BACKEND=Vulkan warp-terminal
+
 # TODO:
 # - Clone rails and run it
 
