@@ -439,6 +439,22 @@ link_dotfiles_configs() {
     echo -e "${GREEN}✓ Dotfiles config symlinks complete${NC}"
 }
 
+install_vscode() {
+    step "Installing Visual Studio Code (code)"
+    sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+    sudo tee /etc/yum.repos.d/vscode.repo > /dev/null <<EOF
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+EOF
+    sudo dnf check-update
+    sudo dnf install -y code
+    echo -e "${GREEN}✓ Visual Studio Code installed${NC}"
+}
+
 # Main execution
 echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
 echo -e "${GREEN}🚀 Starting Fedora 42 Dev Setup...${NC}"
@@ -462,6 +478,7 @@ install_anycable_go
 enable_vmware_shared_folder
 link_dotfiles_configs
 # link_zshrc_from_dotfiles
+install_vscode
 
 echo -e "\n${GREEN}🎉 Setup complete! Restart your shell to apply all changes.${NC}"
 echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"

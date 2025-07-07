@@ -112,6 +112,16 @@ update_anycable_go() {
     fi
 }
 
+update_vscode() {
+    step "Updating Visual Studio Code (code) via dnf"
+    if command -v code &>/dev/null; then
+        sudo dnf upgrade -y code
+        echo -e "${GREEN}✓ VS Code updated via dnf${NC}"
+    else
+        echo -e "${YELLOW}⚠️ VS Code (code) not installed. Skipping.${NC}"
+    fi
+}
+
 clean_up_old_packages() {
     step "Cleaning up old packages and cache (dnf)"
     sudo dnf autoremove -y
@@ -125,6 +135,7 @@ echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
 echo -e "${GREEN}🚀 Starting Fedora 42 Dev Environment Daily Update...${NC}"
 
 update_system_packages
+update_vscode
 update_homebrew
 update_pipx
 update_node_npm_global
