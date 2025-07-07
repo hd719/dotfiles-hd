@@ -10,6 +10,9 @@
 # 5. Install Pycharm
 # 6. Install Goland
 
+# Zoom Issue
+# gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
+# gsettings set org.gnome.desktop.interface text-scaling-factor 1.75
 
 # Warp Terminal
 # Install: 
