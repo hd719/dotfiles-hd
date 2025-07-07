@@ -223,7 +223,10 @@ install_rbenv() {
         brew install rbenv
     fi
 
-    echo 'eval "$(rbenv init - zsh)"' >> ~/.zshrc
+    # Only add rbenv init if not already present
+    if ! grep -q 'eval "$(rbenv init - zsh)"' ~/.zshrc; then
+        echo 'eval "$(rbenv init - zsh)"' >> ~/.zshrc
+    fi
     echo -e "${GREEN}✓ rbenv installed${NC}"
 }
 
