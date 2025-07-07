@@ -44,3 +44,6 @@ alias mount-shared="vmhgfs-fuse .host:/ /mnt/hgfs -o allow_other"
 
 # Alias to start Cursor editor (AppImage)
 alias cursor-app="~/Applications/Cursor-1.2.1-aarch64.AppImage"
+
+# Reset Font
+alias font="gsettings set org.gnome.mutter experimental-features \"['scale-monitor-framebuffer']\" && gsettings set org.gnome.desktop.interface text-scaling-factor 1.75"
