@@ -1,0 +1,8 @@
+[/]
+switch-to-application-1=@as []
+switch-to-application-2=@as []
+switch-to-application-3=@as []
+switch-to-application-4=@as []
+switch-to-application-9=@as []
+toggle-application-view=['<Shift><Control><Alt><Super>a']
+toggle-overview=['<Shift><Control><Alt><Super>space']

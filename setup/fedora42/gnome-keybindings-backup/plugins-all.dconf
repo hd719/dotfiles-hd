@@ -1,0 +1,16 @@
+[color]
+night-light-last-coordinates=(40.440600000000003, -79.995900000000006)
+
+[media-keys]
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']
+decrease-text-size=['<Super>minus']
+increase-text-size=['<Super>equal']
+magnifier-zoom-in=['<Shift><Control><Alt><Super>equal']
+magnifier-zoom-out=['<Shift><Control><Alt><Super>minus']
+screensaver=@as []
+search=['<Shift><Control><Alt><Super>3']
+
+[media-keys/custom-keybindings/custom0]
+binding='<Shift>space'
+command="gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell --method org.gnome.Shell.Eval 'Main.overview.toggle();'"
+name='Show Overview'

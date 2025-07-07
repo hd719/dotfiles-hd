@@ -4,27 +4,31 @@
 # 1. Update copy and paste commands in terminal (default) and change mission control to hyper
 # 2. Symlink .zshrc from dotfiles (Fedora 42)
 # 3. Copy over gitignore and gitconfig from dotfiles
-# 4. Setup tmux configq
-# 4. Install Cursor AppImage\
+# 4. Setup tmux config
+# 4. Install Cursor AppImage
 # 5. Install a browser (Brave)
 # 5. Install Pycharm
 # 6. Install Goland
 
-# Zoom Issue
+# Font Issue
 # gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
 # gsettings set org.gnome.desktop.interface text-scaling-factor 1.75
 
 # Warp Terminal
-# Install: 
+# Install:
 # sudo dnf install warp-terminal
 # Known issues: https://github.com/warpdotdev/Warp/issues/5554
 # Fix: WGPU_BACKEND=Vulkan warp-terminal
 
-# TODO:
-# - Clone rails and run it
-
 # execute chmod +x ~/setup-fedora.sh
 # ./setup-fedora.sh
+
+# Restore keybindings
+# dconf load /org/gnome/settings-daemon/plugins/media-keys/ < ~/gnome-keybindings-backup/media-keys.dconf
+# dconf load /org/gnome/desktop/wm/keybindings/ < ~/gnome-keybindings-backup/wm-keybindings.dconf
+# dconf load /org/gnome/shell/keybindings/ < ~/gnome-keybindings-backup/shell-keybindings.dconf
+# dconf load /org/gnome/mutter/keybindings/ < ~/gnome-keybindings-backup/mutter-keybindings.dconf
+# dconf load /org/gnome/settings-daemon/plugins/ < ~/gnome-keybindings-backup/plugins-all.dconf
 
 # Just incase the shared folder is not mounted, run this script again.
 # vmhgfs-fuse .host:/ /mnt/hgfs -o allow_other
