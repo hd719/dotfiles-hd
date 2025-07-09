@@ -58,3 +58,9 @@ alias cursor-app="~/Applications/Cursor-1.2.1-aarch64.AppImage"
 # Reset Font (175% scaling)
 alias font="gsettings set org.gnome.mutter experimental-features \"['scale-monitor-framebuffer']\" && gsettings set org.gnome.desktop.interface text-scaling-factor 1.75"
 PATH=~/.console-ninja/.bin:$PATH
+
+# Blaze
+alias tmfe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-fe.sh"
+alias tmed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-ed.sh"
+alias tmbe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-be.sh"
+alias tmbl="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-all.sh"
