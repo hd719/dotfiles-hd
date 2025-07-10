@@ -214,7 +214,7 @@ install_node_and_pnpm() {
     export NVM_DIR="$HOME/.nvm"
     source "$NVM_DIR/nvm.sh"
     nvm install --lts
-    curl -fsSL https://get.pnpm.io/install.sh | sh -
+    # curl -fsSL https://get.pnpm.io/install.sh | sh -
     echo -e "${GREEN}✓ Node.js and pnpm installed${NC}"
 }
 

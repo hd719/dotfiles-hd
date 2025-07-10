@@ -64,3 +64,5 @@ alias tmfe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-f
 alias tmed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-ed.sh"
 alias tmbe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-be.sh"
 alias tmbl="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-all.sh"
+export GIT_EDITOR="code --wait"
+export EDITOR="code --wait"
