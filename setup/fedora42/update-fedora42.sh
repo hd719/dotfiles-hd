@@ -16,7 +16,7 @@ YELLOW='\033[1;33m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-TOTAL_STEPS=7
+TOTAL_STEPS=8
 CURRENT_STEP=0
 step() {
     CURRENT_STEP=$((CURRENT_STEP + 1))
@@ -78,7 +78,8 @@ update_node_npm_global() {
             npm update -g || echo -e "${YELLOW}⚠️ npm global update failed${NC}"
         fi
         if command -v pnpm &>/dev/null; then
-            pnpm self-update
+            # Run pnpm self-update from home directory to avoid package.json lookup issues
+            cd "$HOME" && pnpm self-update && cd - > /dev/null
         fi
         echo -e "${GREEN}✓ Node.js and global npm/pnpm packages updated${NC}"
     else
@@ -87,13 +88,14 @@ update_node_npm_global() {
 }
 
 update_ruby_gems() {
-    step "Updating global Ruby gems (if Ruby installed)"
+    step "Updating Ruby system and checking for project-specific updates"
     if command -v gem &>/dev/null; then
+        # Only update the gem system itself, not individual gems
         gem update --system
-        gem update
-        echo -e "${GREEN}✓ Ruby gems updated${NC}"
+        echo -e "${GREEN}✓ Ruby gem system updated${NC}"
+        echo -e "${YELLOW}💡 Tip: Use 'bundle install' in individual projects for gem updates${NC}"
     else
-        echo -e "${YELLOW}⚠️ Ruby not installed. Skipping Ruby gems update.${NC}"
+        echo -e "${YELLOW}⚠️ Ruby not installed. Skipping Ruby update.${NC}"
     fi
 }
 
@@ -146,4 +148,4 @@ clean_up_old_packages
 
 
 echo -e "\n${GREEN}🎉 Update complete! Restart your shell if needed.${NC}"
-echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}" 
+echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
