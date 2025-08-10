@@ -214,7 +214,7 @@ install_node_and_pnpm() {
     export NVM_DIR="$HOME/.nvm"
     source "$NVM_DIR/nvm.sh"
     nvm install --lts
-    curl -fsSL https://get.pnpm.io/install.sh | sh -
+    # curl -fsSL https://get.pnpm.io/install.sh | sh -
     echo -e "${GREEN}✓ Node.js and pnpm installed${NC}"
 }
 
@@ -471,11 +471,11 @@ install_docker
 install_starship_zsh_config
 install_node_and_pnpm
 install_linuxbrew
-install_ruby_rails
+# install_ruby_rails
 install_rbenv
 install_ruby_lsp_and_ruby_build
 install_uv
-install_and_configure_redis
+# install_and_configure_redis
 install_anycable_go
 # install_zsh_plugins
 # clone_dotfiles
