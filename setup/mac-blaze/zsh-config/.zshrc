@@ -149,5 +149,6 @@ echo -e "${RED}🔥          Blaze AI          🔥${RESET}"
 echo -e "${RED}🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥${RESET}\n"
 
 # Add paths to environment variables
-PATH=~/.console-ninja/.bin:$PATH
-source /Users/hameldesai/.config/op/plugins.sh
+
+# source /Users/hameldesai/.config/op/plugins.sh
+ulimit -n 65536
