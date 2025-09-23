@@ -92,7 +92,7 @@ alias lt='ls --tree'
 alias cat="bat --paging never --theme Dracula"
 
 ## SSH
-alias blaze="ssh hamels-macbook-pro-2-1"
+alias blaze="ssh hamels-macbook-pro-2"
 alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
 
 ## Nix
