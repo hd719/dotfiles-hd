@@ -194,6 +194,11 @@
       "key": "└ └ ",
       "keyColor": "yellow"
     },
+    {
+      "type": "font",
+      "key": "└ └ ",
+      "keyColor": "yellow"
+    },
     "break",
     {
       "type": "command",

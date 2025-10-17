@@ -20,15 +20,18 @@ cursor-color = #E9E9E9
 selection-background = #9ABACE
 selection-foreground = #000000
 
-font-family = Hasklug Nerd Font Propo
-font-size = 15
+font-family = Hasklug Nerd Font Propo Sembd
+font-size = 11
 
 window-decoration = true
 window-padding-x = 10
 window-padding-y = 5
+fullscreen=true
+macos-non-native-fullscreen=visible-menu
+window-save-state = always
 
-gtk-titlebar = false
-gtk-adwaita = false
+gtk-titlebar = true
+gtk-tabs-location = top
 
 cursor-style = block
 cursor-style-blink = true
