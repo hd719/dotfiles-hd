@@ -30,12 +30,8 @@ fullscreen=true
 macos-non-native-fullscreen=visible-menu
 window-save-state = always
 
-<<<<<<< Updated upstream
 gtk-titlebar = true
 gtk-tabs-location = top
-=======
-gtk-titlebar = false
->>>>>>> Stashed changes
 
 cursor-style = block
 cursor-style-blink = true
