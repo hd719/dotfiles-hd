@@ -96,28 +96,34 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 #   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 # }
 
-# goodMorning() {
-#   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
+goodMorning() {
+  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 
-#   # Skip Homebrew updates if hostname contains 'virtual' (case insensitive)
-#   if [[ ! "$(hostname)" =~ [Vv]irtual ]]; then
-#     # Optional flag for Homebrew updates
-#     if [[ "$1" != "--no-brew" ]]; then
-#       echo "Updating Homebrew..."
-#       brew update
-#       if brew outdated | grep -q .; then
-#         brew upgrade --greedy
-#         brew cleanup
-#         brew autoremove
-#       else
-#         echo "No Homebrew packages to upgrade"
-#       fi
-#     fi
-#   else
-#     echo "Skipping Homebrew update (virtual environment detected)"
-#   fi
+  # Skip Homebrew updates if hostname contains 'virtual' (case insensitive)
+  if [[ ! "$(hostname)" =~ [Vv]irtual ]]; then
+    # Optional flag for Homebrew updates
+    if [[ "$1" != "--no-brew" ]]; then
+      echo "Updating Homebrew..."
+      brew update
+      if brew outdated | grep -q .; then
+        brew upgrade --greedy
+        brew cleanup
+        brew autoremove
+      else
+        echo "No Homebrew packages to upgrade"
+      fi
+    fi
+  else
+    echo "Skipping Homebrew update (virtual environment detected)"
+  fi
 
-#   echo "Updating Git repositories..."
-#   gda
-#   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
-# }
+  echo "Updating Git repositories..."
+  gda
+  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
+}
+export PATH="/opt/homebrew/opt/curl/bin:$PATH"
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/hameldesai/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
