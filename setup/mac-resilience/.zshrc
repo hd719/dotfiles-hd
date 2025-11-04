@@ -127,3 +127,7 @@ fpath=(/Users/hameldesai/.docker/completions $fpath)
 autoload -Uz compinit
 compinit
 # End of Docker CLI completions
+
+. "$HOME/.local/bin/env"
+eval "$(uv generate-shell-completion zsh)"
+export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
