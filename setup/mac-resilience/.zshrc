@@ -80,16 +80,55 @@ alias res-plat-logs="cd ~/Developer/Resilience/resilience-platform && bash docke
 # Status: Check what's running
 alias res-plat-status="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw ps"
 
-# Tmux Session Aliases
-alias tmfe="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/tm-fe.sh"
-alias tmed="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/tm-ed.sh"
-alias tmbe="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/tm-be.sh"
-alias tmplat="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/tm-all.sh"
+# [Tmux Platform Session Aliases]
+alias tm-plat-fe="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-fe.sh"
+alias tm-plat-proxy="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-ed.sh"
+alias tm-plat-be="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-be.sh"
+alias tm-plat="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-platform.sh"
 
 # Build all workspace packages (run after install or pulling changes to internal packages)
 alias res-plat-build="cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn build"
 # Install dependencies with proper authentication
 alias res-plat-install="cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn install"
+
+# [Pargasite Development]
+# Note: Pargasite depends on Platform's backend (postgres, hasura, proxy) - run res-plat-be first!
+
+# Bootstrap: Install all packages including Playwright (first time setup)
+alias res-parg-bootstrap="cd ~/Developer/Resilience/resilience-pargasite && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn bootstrap"
+
+# Doppler Setup: Configure environment variables (first time setup)
+alias res-parg-doppler="cd ~/Developer/Resilience/resilience-pargasite && yarn run doppler-setup-dev"
+
+# Git Hooks: Setup linting, formatting, and tests (first time setup)
+alias res-parg-hooks="cd ~/Developer/Resilience/resilience-pargasite && yarn init-git-hooks"
+
+# Build: Build all packages (run after install or pulling package changes)
+alias res-parg-build="cd ~/Developer/Resilience/resilience-pargasite && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn build"
+
+# Install: Install dependencies
+alias res-parg-install="cd ~/Developer/Resilience/resilience-pargasite && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn install"
+
+# Dev: Run all apps in parallel (client-suite on :3003, arc on :4004, etc.)
+alias res-parg-dev="cd ~/Developer/Resilience/resilience-pargasite && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn dev"
+
+# Client Suite: Run only the client-suite app (port 3003)
+alias res-parg-client="cd ~/Developer/Resilience/resilience-pargasite/apps/client-suite && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn dev"
+
+# Arc: Run only the arc app (port 4004)
+alias res-parg-arc="cd ~/Developer/Resilience/resilience-pargasite/apps/arc && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn dev"
+
+# Cyber Risk Calculator: Run only the cyber-risk-calculator app
+alias res-parg-calc="cd ~/Developer/Resilience/resilience-pargasite/apps/cyber-risk-calculator && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn dev"
+
+# GraphQL: Refresh GraphQL schema and codegen
+alias res-parg-gql="cd ~/Developer/Resilience/resilience-pargasite && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn refresh-gql"
+
+# [Tmux Pargasite Session Aliases]
+alias tm-parg-client="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-client.sh"
+alias tm-parg-arc="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-arc.sh"
+alias tm-parg-calc="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-calc.sh"
+alias tm-parg="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-pargasite.sh"
 
 # [Pull all repos on dev branch]
 gda() {
