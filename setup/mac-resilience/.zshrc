@@ -28,73 +28,87 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # --------------------------------------------------------------------------------------------------------
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
+# [Completion System - Must load before using compdef]
+# --------------------------------------------------------------------------------------------------------
+autoload -Uz compinit
+compinit
+
 # [Job Config]
 # --------------------------------------------------------------------------------------------------------
-# alias itbe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/it-be.sh"
-# alias ited="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/ie-ed.sh"
-# alias itfe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/it-fe.sh"
-# alias itall="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/iterm/it-all.sh"
+export PATH="/opt/homebrew/opt/curl/bin:$PATH"
+fpath=(/Users/hameldesai/.docker/completions $fpath)
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+. "$HOME/.local/bin/env"
+eval "$(uv generate-shell-completion zsh)"
+eval "$(op completion zsh)"; compdef _op op
 
-# alias tmfe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-fe.sh"
-# alias tmed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-ed.sh"
-# alias tmbe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-be.sh"
-# alias tmbl="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-all.sh"
+# [AWS Config]
+alias aws-config="aws configure list"
+# List available profiles
+alias aws-profiles="aws configure list-profiles"
+# # Select profile w/ env var
+# $ AWS_PROFILE=dev aws s3 ls
+# # Select profile w/ option
+# $ aws --profile s3 ls
 
-# alias console-dev="heroku run rails c -a blaze-ai-rails"
-# alias console-prod="heroku run rails c -a blaze-ai-rails"
+# [Repos]
+alias cdplat='cd ~/Developer/Resilience/resilience-platform'
+alias cdparg='cd ~/Developer/Resilience/resilience-pargasite'
 
-# ## Databasees
-# alias blaze-restore="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/db/blaze-restore.sh"
-# alias blaze-backup="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/db/blaze-backup.sh"
+# [Platform Development]
+# Backend: Start all Docker containers (postgres, hasura, redis, data-connector, proxies)
+alias res-plat-be="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw-initup latest"
 
-# ## Repos
-# alias cdfe='nvm use 16.5.0; cd ~/Developer/Blaze/almanac-editor/apps/blaze'
-# alias cdbe='nvm use stable; rbenv use local 3.1.3; cd ~/Developer/Blaze/blaze-on-rails'
-# alias cdmo='nvm use 18.17.1; cd ~/Developer/Blaze/monospace'
-# alias cdpc='nvm use 18.17.1; cd ~/Developer/Blaze/prose-core'
-# alias cdeng='nvm use stable; cd ~/Developer/Blaze/eng-cli'
+# Proxies (Dev Mode): Start both proxies with hot reloading for development
+# Note: Using op run for both proxies in background is complex, run them separately instead with res-platproxy-web and res-platproxy-rsc
+alias res-plat-proxy="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-proxy && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn workbench-proxy & GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn client-portal-proxy &"
 
-# ## Rails
-# alias be="bundle exec"
-# alias r="bundle exec rails"
-# alias rs="bundle exec rails s"
-# alias rc="bundle exec rails c"
-# alias rr="bundle exec rails routes"
-# alias rdbm="bundle exec rails db:migrate"
-# alias rdbs="bundle exec rails db:schema:load"
-# alias rdbmr="bundle exec rails db:rollback"
-# alias rdbr="bundle exec rake db:reset"
+# Or separate (recommended)
+alias res-plat-proxy-web="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-proxy && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn workbench-proxy"
+alias res-plat-proxy-rsc="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-proxy && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn client-portal-proxy"
 
-# ## Rails Environment
-# alias rdbmdev="bundle exec rails db:migrate RAILS_ENV=development"
-# alias rdbmprod="bundle exec rails db:migrate RAILS_ENV=production"
-# alias rdbmrdev="bundle exec rails db:rollback RAILS_ENV=development"
-# alias rdbmrprod="bundle exec rails db:rollback RAILS_ENV=production"
+# Frontend: Start the web application(s) - need to check what's in your web app
+# Injects GITHUB_TOKEN from 1Password before running yarn dev
+alias res-plat-fe="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-web && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn dev"
 
-# # Pull all repos on master branch
-# # Pull all repos on master branch
-# gda() {
-#   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
-#   startdir=$(pwd)
+# Stop/Down: Stop all Docker containers
+alias res-plat-down="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw down"
 
-#   # Function to update a single repo
-#   update_repo() {
-#     local repo_path="$1"
-#     local repo_name="$2"
-#     echo "****** Pulling $repo_name ******"
-#     cd "$repo_path" && git checkout master && git pull origin master
-#   }
+# Logs: View Docker logs
+alias res-plat-logs="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw logs -f"
 
-#   # Run all updates sequentially (no background processes)
-#   update_repo ~/Developer/Blaze/almanac-editor "Almanac Editor"
-#   update_repo ~/Developer/Blaze/blaze-on-rails "Blaze on Rails"
-#   update_repo ~/Developer/Blaze/monospace "Monospace"
-#   update_repo ~/Developer/Blaze/prose-core "Prosecore"
-#   update_repo ~/Developer/Blaze/eng-cli "Eng CLI"
+# Status: Check what's running
+alias res-plat-status="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw ps"
 
-#   cd "$startdir"
-#   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
-# }
+# Tmux Session Aliases
+alias tmfe="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/tm-fe.sh"
+alias tmed="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/tm-ed.sh"
+alias tmbe="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/tm-be.sh"
+alias tmplat="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/tm-all.sh"
+
+# Build all workspace packages (run after install or pulling changes to internal packages)
+alias res-plat-build="cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn build"
+# Install dependencies with proper authentication
+alias res-plat-install="cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn install"
+
+# [Pull all repos on dev branch]
+gda() {
+  startdir=$(pwd)
+
+  # Function to update a single repo
+  update_repo() {
+    local repo_path="$1"
+    local repo_name="$2"
+    echo "****** Pulling $repo_name ******"
+    cd "$repo_path" && git checkout dev && git pull origin dev
+  }
+
+  # Run all updates sequentially (no background processes)
+  update_repo ~/Developer/Resilience/resilience-platform "Resilience Platform"
+  update_repo ~/Developer/Resilience/resilience-pargasite "Resilience Pargasite"
+
+  cd "$startdir"
+}
 
 goodMorning() {
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
@@ -121,13 +135,3 @@ goodMorning() {
   gda
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 }
-export PATH="/opt/homebrew/opt/curl/bin:$PATH"
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/hameldesai/.docker/completions $fpath)
-autoload -Uz compinit
-compinit
-# End of Docker CLI completions
-
-. "$HOME/.local/bin/env"
-eval "$(uv generate-shell-completion zsh)"
-export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
