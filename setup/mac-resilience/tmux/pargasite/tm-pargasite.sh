@@ -55,9 +55,5 @@ tmux send-keys -t pargasite:3 "$STARTUP_DELAY && res-parg-client" C-m
 tmux new-window -t pargasite:4 -n "arc"
 tmux send-keys -t pargasite:4 "$STARTUP_DELAY && res-parg-arc" C-m
 
-# Window 5: Cyber Risk Calculator
-tmux new-window -t pargasite:5 -n "calculator"
-tmux send-keys -t pargasite:5 "$STARTUP_DELAY && res-parg-calc" C-m
-
 # Attach to the tmux session
 tmux attach -t pargasite
