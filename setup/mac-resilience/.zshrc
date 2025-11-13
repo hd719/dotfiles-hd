@@ -55,7 +55,9 @@ alias aws-profiles="aws configure list-profiles"
 alias cdplat='cd ~/Developer/Resilience/resilience-platform'
 alias cdparg='cd ~/Developer/Resilience/resilience-pargasite'
 
+# --------------------------------------------------------------------------------------------------------
 # [Platform Development]
+# --------------------------------------------------------------------------------------------------------
 # Backend: Start all Docker containers (postgres, hasura, redis, data-connector, proxies)
 alias res-plat-be="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw-initup latest"
 
@@ -80,6 +82,58 @@ alias res-plat-logs="cd ~/Developer/Resilience/resilience-platform && bash docke
 # Status: Check what's running
 alias res-plat-status="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw ps"
 
+alias res-plat-hasura="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw-console"
+
+alias res-plat-refresh-gql="cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn refresh-gql"
+
+# Hasura Migrations: Apply pending migrations
+alias res-plat-migrate-apply='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-hasura-migrate-apply")'
+
+# Hasura Migrations: Check migration status
+alias res-plat-migrate-status='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-hasura-migrate-status")'
+
+# Hasura Metadata: Apply metadata changes
+alias res-plat-metadata-apply='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-hasura-metadata-apply")'
+
+# Hasura Metadata: Export metadata to files
+alias res-plat-metadata-export='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-hasura-metadata-export")'
+
+# Database: Restore database from SQL file (usage: res-plat-db-restore <path_to_sql>)
+res-plat-db-restore() {
+    if [ -z "$1" ]; then
+        echo "Usage: res-plat-db-restore <path_to_sql>"
+        return 1
+    fi
+    (cd ~/Developer/Resilience/resilience-platform && \
+     GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- \
+     zsh -c "source bin/rsw-commands.sh && rsw-restore-db '$1'")
+}
+
+# Database: Initialize database with SQL file (usage: res-plat-db-init <path_to_sql>)
+res-plat-db-init() {
+    if [ -z "$1" ]; then
+        echo "Usage: res-plat-db-init <path_to_sql>"
+        return 1
+    fi
+    (cd ~/Developer/Resilience/resilience-platform && \
+     GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- \
+     zsh -c "source bin/rsw-commands.sh && rsw-init-db '$1'")
+}
+
+# Database: Initialize and start services (usage: res-plat-init-up [path_to_sql])
+# If no argument provided, fetches latest dump from S3
+res-plat-init-up() {
+    if [ -z "$1" ]; then
+        (cd ~/Developer/Resilience/resilience-platform && \
+         GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- \
+         zsh -c "source bin/rsw-commands.sh && rsw-init-up")
+    else
+        (cd ~/Developer/Resilience/resilience-platform && \
+         GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- \
+         zsh -c "source bin/rsw-commands.sh && rsw-init-up '$1'")
+    fi
+}
+
 # [Tmux Platform Session Aliases]
 alias tm-plat-fe="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-fe.sh"
 alias tm-plat-proxy="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-ed.sh"
@@ -91,7 +145,9 @@ alias res-plat-build="cd ~/Developer/Resilience/resilience-platform && GITHUB_TO
 # Install dependencies with proper authentication
 alias res-plat-install="cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn install"
 
+# --------------------------------------------------------------------------------------------------------
 # [Pargasite Development]
+# --------------------------------------------------------------------------------------------------------
 # Note: Pargasite depends on Platform's backend (postgres, hasura, proxy) - run res-plat-be first!
 
 # Bootstrap: Install all packages including Playwright (first time setup)
