@@ -21,6 +21,7 @@ alias dockercleanup='docker system prune --force'
 alias dockerkill='docker kill $(docker ps -a -q)'
 alias usedocker='docker context use desktop-linux'
 alias docker-nuke='docker rm -f $(docker ps -aq) && docker volume rm -f $(docker volume ls -q) && docker rmi -f $(docker images -q) && docker builder prune -a -f'
+alias ld="lazydocker"
 
 ## Kubernetes
 alias kc=kubectl
