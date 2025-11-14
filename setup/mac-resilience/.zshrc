@@ -35,6 +35,8 @@ compinit
 
 # [Job Config]
 # --------------------------------------------------------------------------------------------------------
+git config --global core.editor "code --wait"
+export GIT_EDITOR="code --wait"
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 fpath=(/Users/hameldesai/.docker/completions $fpath)
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
@@ -87,16 +89,16 @@ alias res-plat-hasura="cd ~/Developer/Resilience/resilience-platform && bash doc
 alias res-plat-refresh-gql="cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- yarn refresh-gql"
 
 # Hasura Migrations: Apply pending migrations
-alias res-plat-migrate-apply='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-hasura-migrate-apply")'
+alias res-plat-migrate-apply='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-migrate-apply")'
 
 # Hasura Migrations: Check migration status
-alias res-plat-migrate-status='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-hasura-migrate-status")'
+alias res-plat-migrate-status='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-migrate-status")'
 
 # Hasura Metadata: Apply metadata changes
-alias res-plat-metadata-apply='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-hasura-metadata-apply")'
+alias res-plat-metadata-apply='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-metadata-apply")'
 
 # Hasura Metadata: Export metadata to files
-alias res-plat-metadata-export='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-hasura-metadata-export")'
+alias res-plat-metadata-export='(cd ~/Developer/Resilience/resilience-platform && GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential op run -- zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-metadata-export")'
 
 # Database: Restore database from SQL file (usage: res-plat-db-restore <path_to_sql>)
 res-plat-db-restore() {
