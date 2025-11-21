@@ -37,3 +37,8 @@ export PATH="/Users/hameldesai/.local/bin:$PATH"
 
 # [Job Config]
 # --------------------------------------------------------------------------------------------------------
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/hameldesai/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions

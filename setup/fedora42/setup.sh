@@ -218,49 +218,49 @@ install_node_and_pnpm() {
     echo -e "${GREEN}✓ Node.js and pnpm installed${NC}"
 }
 
-install_ruby_rails() {
-    step "Installing Ruby + Rails"
-    sudo dnf install -y ruby ruby-devel
-    gem install rails
-    echo -e "${GREEN}✓ Ruby and Rails installed${NC}"
-}
+# install_ruby_rails() {
+#     step "Installing Ruby + Rails"
+#     sudo dnf install -y ruby ruby-devel
+#     gem install rails
+#     echo -e "${GREEN}✓ Ruby and Rails installed${NC}"
+# }
 
-install_rbenv() {
-    step "Installing rbenv"
-    if ! command -v rbenv &>/dev/null; then
-        echo -e "${YELLOW}📦 Installing rbenv via Homebrew (Linuxbrew)...${NC}"
-        if ! command -v brew &>/dev/null; then
-            bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-            echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zshrc
-        fi
-        brew install rbenv
-    fi
+# install_rbenv() {
+#     step "Installing rbenv"
+#     if ! command -v rbenv &>/dev/null; then
+#         echo -e "${YELLOW}📦 Installing rbenv via Homebrew (Linuxbrew)...${NC}"
+#         if ! command -v brew &>/dev/null; then
+#             bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+#             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#             echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zshrc
+#         fi
+#         brew install rbenv
+#     fi
 
-    # Only add rbenv init if not already present
-    if ! grep -q 'eval "$(rbenv init - zsh)"' ~/.zshrc; then
-        echo 'eval "$(rbenv init - zsh)"' >> ~/.zshrc
-    fi
-    echo -e "${GREEN}✓ rbenv installed${NC}"
-}
+#     # Only add rbenv init if not already present
+#     if ! grep -q 'eval "$(rbenv init - zsh)"' ~/.zshrc; then
+#         echo 'eval "$(rbenv init - zsh)"' >> ~/.zshrc
+#     fi
+#     echo -e "${GREEN}✓ rbenv installed${NC}"
+# }
 
-install_ruby_lsp_and_ruby_build() {
-    step "Installing ruby-lsp and ruby-build"
+# install_ruby_lsp_and_ruby_build() {
+#     step "Installing ruby-lsp and ruby-build"
 
-    gem install ruby-lsp
+#     gem install ruby-lsp
 
-    if [ -d "$(rbenv root)" ]; then
-        RUBY_BUILD_DIR="$(rbenv root)/plugins/ruby-build"
-        if [ -d "$RUBY_BUILD_DIR" ]; then
-            echo -e "${YELLOW}⚠️ ruby-build already exists at $RUBY_BUILD_DIR. Skipping clone.${NC}"
-        else
-            git clone https://github.com/rbenv/ruby-build.git "$RUBY_BUILD_DIR"
-            echo -e "${GREEN}✓ ruby-build installed${NC}"
-        fi
-    else
-        echo -e "${YELLOW}⚠️ rbenv not found — skipping ruby-build${NC}"
-    fi
-}
+#     if [ -d "$(rbenv root)" ]; then
+#         RUBY_BUILD_DIR="$(rbenv root)/plugins/ruby-build"
+#         if [ -d "$RUBY_BUILD_DIR" ]; then
+#             echo -e "${YELLOW}⚠️ ruby-build already exists at $RUBY_BUILD_DIR. Skipping clone.${NC}"
+#         else
+#             git clone https://github.com/rbenv/ruby-build.git "$RUBY_BUILD_DIR"
+#             echo -e "${GREEN}✓ ruby-build installed${NC}"
+#         fi
+#     else
+#         echo -e "${YELLOW}⚠️ rbenv not found — skipping ruby-build${NC}"
+#     fi
+# }
 
 install_uv() {
     step "Installing uv for Python"
@@ -285,20 +285,20 @@ install_and_configure_redis() {
     fi
 }
 
-install_anycable_go() {
-    step "Installing anycable-go"
-    mkdir -p ~/Developer/tools/anycable
-    cd ~/Developer/tools/anycable
+# install_anycable_go() {
+#     step "Installing anycable-go"
+#     mkdir -p ~/Developer/tools/anycable
+#     cd ~/Developer/tools/anycable
 
-    if [ ! -f anycable-go ]; then
-        curl -sL https://github.com/anycable/anycable-go/releases/latest/download/anycable-go-linux-amd64 -o anycable-go
-        chmod +x anycable-go
-        echo 'export PATH="$HOME/Developer/tools/anycable:$PATH"' >> ~/.zshrc
-        echo -e "${GREEN}✓ anycable-go installed${NC}"
-    else
-        echo -e "${YELLOW}⚠️ anycable-go already exists${NC}"
-    fi
-}
+#     if [ ! -f anycable-go ]; then
+#         curl -sL https://github.com/anycable/anycable-go/releases/latest/download/anycable-go-linux-amd64 -o anycable-go
+#         chmod +x anycable-go
+#         echo 'export PATH="$HOME/Developer/tools/anycable:$PATH"' >> ~/.zshrc
+#         echo -e "${GREEN}✓ anycable-go installed${NC}"
+#     else
+#         echo -e "${YELLOW}⚠️ anycable-go already exists${NC}"
+#     fi
+# }
 
 install_zsh_plugins() {
     step "Installing Zsh plugins"
@@ -352,22 +352,22 @@ link_zshrc_from_dotfiles() {
     fi
 }
 
-install_linuxbrew() {
-    step "Installing Homebrew (Linuxbrew)"
+# install_linuxbrew() {
+#     step "Installing Homebrew (Linuxbrew)"
 
-    if ! command -v brew &>/dev/null; then
-        echo -e "${YELLOW}📦 Downloading Homebrew installer...${NC}"
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+#     if ! command -v brew &>/dev/null; then
+#         echo -e "${YELLOW}📦 Downloading Homebrew installer...${NC}"
+#         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-        # Add Homebrew to PATH for this session and future ones
-        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zshrc
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#         # Add Homebrew to PATH for this session and future ones
+#         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zshrc
+#         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-        echo -e "${GREEN}✓ Homebrew installed to ~/.linuxbrew${NC}"
-    else
-        echo -e "${YELLOW}⚠️ Homebrew already installed${NC}"
-    fi
-}
+#         echo -e "${GREEN}✓ Homebrew installed to ~/.linuxbrew${NC}"
+#     else
+#         echo -e "${YELLOW}⚠️ Homebrew already installed${NC}"
+#     fi
+# }
 
 install_ghostty_if_missing() {
     step "Installing Ghostty (terminal) if not already installed"
@@ -472,11 +472,11 @@ install_starship_zsh_config
 install_node_and_pnpm
 install_linuxbrew
 # install_ruby_rails
-install_rbenv
-install_ruby_lsp_and_ruby_build
+# install_rbenv
+# install_ruby_lsp_and_ruby_build
 install_uv
 # install_and_configure_redis
-install_anycable_go
+# install_anycable_go
 # install_zsh_plugins
 # clone_dotfiles
 enable_vmware_shared_folder
