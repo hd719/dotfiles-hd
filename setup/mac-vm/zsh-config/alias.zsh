@@ -20,7 +20,7 @@ alias fucknode='rm -rf node_modules'
 alias dockercleanup='docker system prune --force'
 alias dockerkill='docker kill $(docker ps -a -q)'
 alias usedocker='docker context use desktop-linux'
-alias docker-nuke='docker rm -f $(docker ps -aq) && docker volume rm -f $(docker volume ls -q) && docker rmi -f $(docker images -q) && docker builder prune -a -f'
+alias docker-nuke='[ -n "$(docker ps -aq)" ] && docker rm -f $(docker ps -aq); [ -n "$(docker volume ls -q)" ] && docker volume rm -f $(docker volume ls -q); [ -n "$(docker images -q)" ] && docker rmi -f $(docker images -q); docker builder prune -a -f'
 alias ld="lazydocker"
 
 ## Kubernetes
