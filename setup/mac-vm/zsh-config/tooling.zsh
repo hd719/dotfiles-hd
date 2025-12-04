@@ -6,24 +6,24 @@ export EDITOR="cursor --wait"
 # [PNPM]
 # --------------------------------------------------------------------------------------------------------
 # pnpm
-export PNPM_HOME="/Users/hameldesai/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
+# export PNPM_HOME="/Users/hameldesai/pnpm"
+# case ":$PATH:" in
+#   *":$PNPM_HOME:"*) ;;
+#   *) export PATH="$PNPM_HOME:$PATH" ;;
+# esac
 # pnpm end
 
 # [FNM]
 # --------------------------------------------------------------------------------------------------------
 # fnm
-eval "$(fnm env --use-on-cd)"
+# eval "$(fnm env --use-on-cd)"
 # fnm end
 
 # [NVM]
 # --------------------------------------------------------------------------------------------------------
 # nvm
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+# export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 # nvm end
 
 # [Docker]
