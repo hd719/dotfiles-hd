@@ -22,11 +22,13 @@ source $ZSH_CONFIG_DIR/k8s.zsh
 
 # [Syntax Highlighting]
 # --------------------------------------------------------------------------------------------------------
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /nix/store/fsqqm9962hhgb4d1ghy3fbfz4vgh0s7d-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # [Autosuggestions]
 # --------------------------------------------------------------------------------------------------------
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /nix/store/fsqqm9962hhgb4d1ghy3fbfz4vgh0s7d-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # # Add paths to environment variables
 # PATH=~/.console-ninja/.bin:$PATH

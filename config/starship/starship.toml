@@ -52,7 +52,7 @@ style = "yellow"
 
 [custom.nix_version]
 symbol = "󱄅"
-command = "nix --version | awk '{print $3}'"      # Extracts only the version number
+command = "nix --version | sed 's/nix (Determinate Nix \\([0-9.]*\\)) \\([0-9.]*\\)/det:\\1 nix:\\2/'"
 format = "[$symbol $output](fg:#a2d2df) "
 when = "command -v nix && [[ -n $DEVBOX_SHELL ]]"
 detect_folders = [".devbox"]
