@@ -28,12 +28,12 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # --------------------------------------------------------------------------------------------------------
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
-# Add paths to environment variables
-PATH=~/.console-ninja/.bin:$PATH
+# # Add paths to environment variables
+# PATH=~/.console-ninja/.bin:$PATH
 
-# [Python Config]
+# [Devbox]
 # --------------------------------------------------------------------------------------------------------
-export PATH="/Users/hameldesai/.local/bin:$PATH"
+eval "$(devbox global shellenv)"
 
 # [Job Config]
 # --------------------------------------------------------------------------------------------------------
