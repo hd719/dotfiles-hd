@@ -59,6 +59,7 @@ detect_folders = [".devbox"]
 detect_files = ["devbox.json", "devbox.lock"]
 
 [package]
+display_private = true
 symbol = ""
 format = "[$symbol ($version)](fg:#CBC3E3) "
 
