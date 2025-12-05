@@ -593,6 +593,14 @@ goodMorning() {
   echo "Cleaning up Homebrew..."
   brew cleanup && brew autoremove;
   echo ""
+  echo "Upgrading Devbox"
+  devbox version update
+  echo ""
+  echo "Updating Devbox global nix packages"
+  devbox global update
+  echo "Refreshing Packages"
+  refresh-global
+  echo ""
   echo "Cleaning up Zoom folder..."
   delete_zoom_folder
   echo ""
