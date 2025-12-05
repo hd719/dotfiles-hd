@@ -37,12 +37,14 @@ compinit
 # --------------------------------------------------------------------------------------------------------
 git config --global core.editor "code --wait"
 export GIT_EDITOR="code --wait"
+export EDITOR="code --wait"
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 fpath=(/Users/hameldesai/.docker/completions $fpath)
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 . "$HOME/.local/bin/env"
 eval "$(uv generate-shell-completion zsh)"
 eval "$(op completion zsh)"; compdef _op op
+eval "$(fnm env --use-on-cd)"
 
 # Helper function: Run command with GITHUB_TOKEN (from 1Password or environment)
 # Usage: run-with-github-token <command>
