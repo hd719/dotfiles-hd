@@ -20,15 +20,17 @@ source $ZSH_CONFIG_DIR/functions.zsh
 # --------------------------------------------------------------------------------------------------------
 source $ZSH_CONFIG_DIR/k8s.zsh
 
-# [Syntax Highlighting]
-# --------------------------------------------------------------------------------------------------------
-# source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source /nix/store/fsqqm9962hhgb4d1ghy3fbfz4vgh0s7d-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+ # [Autosuggestions] from Devbox/Nix store
+    devbox_zsh_autosuggestions=(/nix/store/*-zsh-autosuggestions-*/share/zsh-autosuggestions/zsh-autosuggestions.zsh)
+    if [[ -r "${devbox_zsh_autosuggestions[1]}" ]]; then
+      source "${devbox_zsh_autosuggestions[1]}"
+    fi
 
-# [Autosuggestions]
-# --------------------------------------------------------------------------------------------------------
-# source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /nix/store/fsqqm9962hhgb4d1ghy3fbfz4vgh0s7d-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    # [Syntax Highlighting] from Devbox/Nix store
+    devbox_zsh_syntax_highlighting=(/nix/store/*-zsh-syntax-highlighting-*/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh)
+    if [[ -r "${devbox_zsh_syntax_highlighting[1]}" ]]; then
+      source "${devbox_zsh_syntax_highlighting[1]}"
+    fi
 
 # # Add paths to environment variables
 # PATH=~/.console-ninja/.bin:$PATH
