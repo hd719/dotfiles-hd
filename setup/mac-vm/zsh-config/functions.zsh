@@ -1,6 +1,39 @@
 # [Functions]
 # --------------------------------------------------------------------------------------------------------
 
+# Helper: Check if a task should run based on cooldown period
+# Usage: _should_run_task "task_name" hours
+# Returns 0 (true) if task should run, 1 (false) if still in cooldown
+_should_run_task() {
+  local task_name="$1"
+  local cooldown_hours="${2:-24}"
+  local cache_dir="$HOME/.cache/goodmorning"
+  local marker_file="$cache_dir/$task_name"
+
+  # Create cache directory if it doesn't exist
+  mkdir -p "$cache_dir"
+
+  # If marker doesn't exist, task should run
+  if [[ ! -f "$marker_file" ]]; then
+    return 0
+  fi
+
+  # Get last run timestamp (macOS stat syntax)
+  local last_run=$(stat -f %m "$marker_file" 2>/dev/null)
+  local now=$(date +%s)
+  local hours_since=$(( (now - last_run) / 3600 ))
+
+  # Return true if cooldown has passed
+  [[ $hours_since -ge $cooldown_hours ]]
+}
+
+# Helper: Mark a task as completed (writes timestamp for readability)
+_mark_task_done() {
+  local task_name="$1"
+  local cache_dir="$HOME/.cache/goodmorning"
+  echo "Last run: $(date '+%Y-%m-%d %H:%M:%S')" > "$cache_dir/$task_name"
+}
+
 # Lazy loading functions
 
 lazy_kubectl() {
@@ -587,12 +620,16 @@ goodMorning() {
   echo ""
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
   echo ""
+
+  # Always run: Homebrew updates
   echo "Updating Homebrew..."
   brew update && brew upgrade
   echo ""
   echo "Cleaning up Homebrew..."
   brew cleanup && brew autoremove;
   echo ""
+
+  # Always run: Devbox updates
   echo "Upgrading Devbox"
   devbox version update
   echo ""
@@ -601,8 +638,46 @@ goodMorning() {
   echo "Refreshing Packages"
   refresh-global
   echo ""
+
+  # Always run: Check for Nix updates (fast, just shows version)
+  echo "Checking for Nix updates..."
+  determinate-nixd version
+  echo ""
+
+  # Cooldown: 24 hours - Nix garbage collection
+  if _should_run_task "nix_gc" 24; then
+    echo "Cleaning up old Nix generations..."
+    nix-collect-garbage --delete-older-than 7d
+    _mark_task_done "nix_gc"
+  else
+    echo "Skipping Nix GC (ran within last 24h)"
+  fi
+  echo ""
+
+  # Always run: Zoom folder (fast check)
   echo "Cleaning up Zoom folder..."
   delete_zoom_folder
   echo ""
+
+  # Cooldown: 168 hours (7 days) - Old downloads cleanup
+  if _should_run_task "old_downloads" 168; then
+    echo "Clearing old Downloads (30+ days)..."
+    find ~/Downloads -type f -mtime +30 -delete 2>/dev/null && echo "Done!"
+    _mark_task_done "old_downloads"
+  else
+    echo "Skipping Downloads cleanup (ran within last 7 days)"
+  fi
+  echo ""
+
+  # Cooldown: 168 hours (7 days) - .DS_Store cleanup
+  if _should_run_task "dsstore" 168; then
+    echo "Clearing .DS_Store files..."
+    find ~ -name ".DS_Store" -type f -delete 2>/dev/null && echo "Done!"
+    _mark_task_done "dsstore"
+  else
+    echo "Skipping .DS_Store cleanup (ran within last 7 days)"
+  fi
+  echo ""
+
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 }
