@@ -83,7 +83,8 @@ alias coverage='go test -coverprofile=coverage.out ./... && go tool cover -html=
 alias code-restart="killall electron && killall node && killall code"
 
 ## LSD
-alias ls='lsd'
+alias ls='lsd --tree --depth 1'
+alias lss='lsd --tree --depth 2'
 alias l='ls -l'
 alias la='ls -a'
 alias lla='ls -la'
