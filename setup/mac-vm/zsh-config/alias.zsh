@@ -139,3 +139,22 @@ alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh; ./tail
 
 # Blaze
 alias ble='export ZSH_PROFILE=blaze && source ~/.zshrc'
+
+# Monorepo Devbox Scripts (scripts defined in devbox.json)
+# --------------------------------------------------------------------------------------------------------
+
+# HealthMetrics
+alias hm-dev='devbox run hm:dev'
+alias hm-build='devbox run hm:build'
+alias hm-prisma-studio='devbox run hm:prisma:studio'
+alias hm-prisma-migrate='devbox run hm:prisma:migrate'
+alias hm-prisma-generate='devbox run hm:prisma:generate'
+alias hms-dev='cd apps/healthmetrics && go run main.go'
+alias hms-build='cd apps/healthmetrics && go build -o healthmetrics main.go'
+alias hms-test='cd apps/healthmetrics && go test ./...'
+
+# Portfolio
+alias pf-dev='devbox run pf:dev'
+alias pf-build='devbox run pf:build'
+alias pf-start='devbox run pf:start'
+alias pf-lint='devbox run pf:lint'
