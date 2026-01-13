@@ -287,3 +287,20 @@ goodMorning() {
   gda
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 }
+
+# Create a CA Bundle with the ZScaler root CA
+#   Similar process to exporting via GUI from /System/Library/CoreServices/Applications/Keychain\ Access.app
+# More example apps at:
+#   https://help.zscaler.com/zia/adding-custom-certificate-application-specific-trust-store
+# Set python requests configuration
+if [ "$(uname -s)" = Darwin ]; then
+    export REQUESTS_CA_BUNDLE="${HOME}/.config/zscaler/ca-bundle.pem"
+    if ! [ -f "${REQUESTS_CA_BUNDLE}" ]; then
+        mkdir -p "$(dirname "${REQUESTS_CA_BUNDLE}")"
+        (
+          security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain
+          security find-certificate -a -p -c "Zscaler Root CA" /Library/Keychains/System.keychain
+        ) >"${REQUESTS_CA_BUNDLE}"
+    fi
+    export NODE_EXTRA_CA_CERTS="${REQUESTS_CA_BUNDLE}"
+fi
