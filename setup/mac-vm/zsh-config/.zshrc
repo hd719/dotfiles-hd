@@ -14,19 +14,11 @@ source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
 source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 
 # -----------------------------------------------------------------------------
-# Plugins - DEFERRED until after first prompt
-# zsh-autosuggestions and zsh-syntax-highlighting load after first command
+# Plugins - Load immediately for better UX
+# Adds ~5-10ms to startup but plugins work right away
 # -----------------------------------------------------------------------------
-_deferred_plugins_loaded=0
-_load_deferred_plugins() {
-  (( _deferred_plugins_loaded )) && return
-  _deferred_plugins_loaded=1
-  _load_nix_plugin "zsh-autosuggestions"
-  _load_nix_plugin "zsh-syntax-highlighting"
-}
-# Hook into first command execution
-autoload -Uz add-zsh-hook
-add-zsh-hook preexec _load_deferred_plugins
+_load_nix_plugin "zsh-autosuggestions"
+_load_nix_plugin "zsh-syntax-highlighting"
 
 # -----------------------------------------------------------------------------
 # Devbox Global Environment (cached for speed, using zsh native stat)

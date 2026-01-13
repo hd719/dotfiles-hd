@@ -44,11 +44,14 @@ refresh_zsh_cache() {
   /opt/homebrew/bin/brew shellenv > "$_ZSH_CACHE_DIR/brew-shellenv.zsh" 2>/dev/null
   echo "  Cached brew shellenv"
 
-  # Clear and rebuild init script caches (starship, zoxide, devbox)
-  rm -f "$_ZSH_CACHE_DIR/starship-init.zsh" 2>/dev/null
-  rm -f "$_ZSH_CACHE_DIR/zoxide-init.zsh" 2>/dev/null
-  rm -f "$_ZSH_CACHE_DIR/devbox-shellenv.zsh" 2>/dev/null
-  echo "  Cleared init script caches (will rebuild on next shell)"
+  # Rebuild init script caches (starship, zoxide, devbox)
+  echo "  Rebuilding init script caches..."
+  starship init zsh > "$_ZSH_CACHE_DIR/starship-init.zsh" 2>/dev/null
+  echo "    Cached starship init"
+  zoxide init zsh > "$_ZSH_CACHE_DIR/zoxide-init.zsh" 2>/dev/null
+  echo "    Cached zoxide init"
+  devbox global shellenv > "$_ZSH_CACHE_DIR/devbox-shellenv.zsh" 2>/dev/null
+  echo "    Cached devbox shellenv"
 
   # Clear completion cache
   rm -f ~/.zcompdump* 2>/dev/null
@@ -57,7 +60,7 @@ refresh_zsh_cache() {
   # Refresh Nix plugin paths
   refresh_nix_plugin_cache
 
-  echo "All caches refreshed! Run 'reload' to apply."
+  echo "All caches refreshed!"
 }
 
 # Get cached Nix plugin path (fast - no glob, uses zsh read instead of cat subshell)
@@ -729,7 +732,7 @@ goodMorning() {
   echo "Updating Devbox global nix packages"
   devbox global update
   echo "Refreshing Packages"
-  refresh-global
+  eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r
   echo ""
 
   # Always run after devbox updates: Refresh all zsh caches
