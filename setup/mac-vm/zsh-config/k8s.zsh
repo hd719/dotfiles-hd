@@ -1,4 +1,5 @@
 # [Kubernetes Config]
 # --------------------------------------------------------------------------------------------------------
 export KUBE_EDITOR='code --wait'
-command -v kubecolor >/dev/null 2>&1 && alias kubectl="kubecolor"
+# Use zsh native command check (faster than command -v)
+(( $+commands[kubecolor] )) && alias kubectl="kubecolor"

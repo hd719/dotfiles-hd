@@ -2,9 +2,8 @@
 # --------------------------------------------------------------------------------------------------------
 
 # [Nix Plugin Path Caching]
-# Cache directory for zsh optimizations
+# Cache directory already created in prompt.zsh - just reference it
 _ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
-mkdir -p "$_ZSH_CACHE_DIR" 2>/dev/null
 
 # Refresh Nix plugin paths cache (resolves globs once, stores paths)
 # Call this in goodMorning or after devbox updates
@@ -33,15 +32,23 @@ refresh_nix_plugin_cache() {
   echo "Nix plugin cache refreshed!"
 }
 
-# Refresh ALL zsh caches (init scripts, completions, nix plugins)
+# Refresh ALL zsh caches (init scripts, completions, nix plugins, brew)
 refresh_zsh_cache() {
   echo "Refreshing all zsh caches..."
 
-  # Clear init script caches (starship, zoxide, devbox)
+  # Ensure cache directory exists
+  mkdir -p "$_ZSH_CACHE_DIR"
+
+  # Rebuild brew shellenv cache (saves ~30ms on startup)
+  echo "  Rebuilding brew shellenv cache..."
+  /opt/homebrew/bin/brew shellenv > "$_ZSH_CACHE_DIR/brew-shellenv.zsh" 2>/dev/null
+  echo "  Cached brew shellenv"
+
+  # Clear and rebuild init script caches (starship, zoxide, devbox)
   rm -f "$_ZSH_CACHE_DIR/starship-init.zsh" 2>/dev/null
   rm -f "$_ZSH_CACHE_DIR/zoxide-init.zsh" 2>/dev/null
   rm -f "$_ZSH_CACHE_DIR/devbox-shellenv.zsh" 2>/dev/null
-  echo "  Cleared init script caches"
+  echo "  Cleared init script caches (will rebuild on next shell)"
 
   # Clear completion cache
   rm -f ~/.zcompdump* 2>/dev/null
@@ -50,17 +57,19 @@ refresh_zsh_cache() {
   # Refresh Nix plugin paths
   refresh_nix_plugin_cache
 
-  echo "All caches cleared! Run 'reload' to rebuild."
+  echo "All caches refreshed! Run 'reload' to apply."
 }
 
-# Get cached Nix plugin path (fast - no glob, just file read)
+# Get cached Nix plugin path (fast - no glob, uses zsh read instead of cat subshell)
 _get_cached_nix_plugin() {
   local plugin_name="$1"
   local cache_file="$_ZSH_CACHE_DIR/nix-$plugin_name-path"
 
   # If cache exists and the path is still valid, return it
+  # Uses zsh builtin read instead of $(cat ...) subshell for speed
   if [[ -f "$cache_file" ]]; then
-    local cached_path="$(cat "$cache_file" 2>/dev/null)"
+    local cached_path
+    read -r cached_path < "$cache_file" 2>/dev/null
     if [[ -r "$cached_path" ]]; then
       echo "$cached_path"
       return 0
@@ -93,6 +102,7 @@ _load_nix_plugin() {
 # Helper: Check if a task should run based on cooldown period
 # Usage: _should_run_task "task_name" hours
 # Returns 0 (true) if task should run, 1 (false) if still in cooldown
+# Uses zsh native zstat and EPOCHSECONDS for speed (no external commands)
 _should_run_task() {
   local task_name="$1"
   local cooldown_hours="${2:-24}"
@@ -100,17 +110,17 @@ _should_run_task() {
   local marker_file="$cache_dir/$task_name"
 
   # Create cache directory if it doesn't exist
-  mkdir -p "$cache_dir"
+  [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
 
   # If marker doesn't exist, task should run
   if [[ ! -f "$marker_file" ]]; then
     return 0
   fi
 
-  # Get last run timestamp (macOS stat syntax)
-  local last_run=$(stat -f %m "$marker_file" 2>/dev/null)
-  local now=$(date +%s)
-  local hours_since=$(( (now - last_run) / 3600 ))
+  # Get last run timestamp using zsh native zstat (loaded in prompt.zsh)
+  local last_run
+  zstat -A last_run +mtime "$marker_file" 2>/dev/null || return 0
+  local hours_since=$(( (EPOCHSECONDS - last_run) / 3600 ))
 
   # Return true if cooldown has passed
   [[ $hours_since -ge $cooldown_hours ]]
