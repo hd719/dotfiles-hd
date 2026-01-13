@@ -3,21 +3,32 @@
 export PATH="/opt/homebrew/bin:$PATH"
 export TERM=xterm-256color
 
-# Cache directory for init scripts
+# Cache directory for init scripts (created once in functions.zsh)
 _ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
-mkdir -p "$_ZSH_CACHE_DIR" 2>/dev/null
+[[ -d "$_ZSH_CACHE_DIR" ]] || mkdir -p "$_ZSH_CACHE_DIR"
+
+# Load zsh modules for fast datetime/stat (avoids external commands)
+zmodload zsh/datetime 2>/dev/null
+zmodload zsh/stat 2>/dev/null
 
 # Helper: Cache and source init scripts (avoids slow eval on every shell)
+# Uses zsh native stat instead of external stat command
 _cache_init() {
   local name="$1"
   local cmd="$2"
   local cache_file="$_ZSH_CACHE_DIR/${name}-init.zsh"
 
-  # Regenerate if missing or older than 1 day
-  if [[ ! -f "$cache_file" || $(( $(date +%s) - $(stat -f %m "$cache_file" 2>/dev/null || echo 0) )) -gt 86400 ]]; then
+  # Regenerate if missing or older than 1 day (86400 seconds)
+  # Uses zsh native $EPOCHSECONDS and zstat instead of external commands
+  if [[ ! -f "$cache_file" ]]; then
     eval "$cmd" > "$cache_file" 2>/dev/null
+  else
+    local file_mtime
+    zstat -A file_mtime +mtime "$cache_file" 2>/dev/null
+    if (( EPOCHSECONDS - file_mtime > 86400 )); then
+      eval "$cmd" > "$cache_file" 2>/dev/null
+    fi
   fi
-
   source "$cache_file"
 }
 
@@ -34,4 +45,9 @@ fi
 
 export STARSHIP_CONFIG=~/Developer/dotfiles-hd/config/starship/starship.toml
 
-source ~/Developer/zsh-you-should-use/you-should-use.plugin.zsh
+# Defer you-should-use plugin load until after first prompt (saves ~10ms startup)
+_load_ysu() {
+  unset -f _load_ysu
+  source ~/Developer/zsh-you-should-use/you-should-use.plugin.zsh
+}
+precmd_functions+=(_load_ysu)
