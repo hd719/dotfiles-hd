@@ -1,6 +1,95 @@
 # [Functions]
 # --------------------------------------------------------------------------------------------------------
 
+# [Nix Plugin Path Caching]
+# Cache directory for zsh optimizations
+_ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+mkdir -p "$_ZSH_CACHE_DIR" 2>/dev/null
+
+# Refresh Nix plugin paths cache (resolves globs once, stores paths)
+# Call this in goodMorning or after devbox updates
+refresh_nix_plugin_cache() {
+  echo "Refreshing Nix plugin path cache..."
+  mkdir -p "$_ZSH_CACHE_DIR"
+
+  # Resolve zsh-autosuggestions path
+  local autosugg=(/nix/store/*-zsh-autosuggestions-*/share/zsh-autosuggestions/zsh-autosuggestions.zsh(N[1]))
+  if [[ -n "$autosugg" && -r "$autosugg" ]]; then
+    echo "$autosugg" > "$_ZSH_CACHE_DIR/nix-zsh-autosuggestions-path"
+    echo "  Cached zsh-autosuggestions: $autosugg"
+  else
+    echo "  zsh-autosuggestions not found in Nix store"
+  fi
+
+  # Resolve zsh-syntax-highlighting path
+  local synhl=(/nix/store/*-zsh-syntax-highlighting-*/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh(N[1]))
+  if [[ -n "$synhl" && -r "$synhl" ]]; then
+    echo "$synhl" > "$_ZSH_CACHE_DIR/nix-zsh-syntax-highlighting-path"
+    echo "  Cached zsh-syntax-highlighting: $synhl"
+  else
+    echo "  zsh-syntax-highlighting not found in Nix store"
+  fi
+
+  echo "Nix plugin cache refreshed!"
+}
+
+# Refresh ALL zsh caches (init scripts, completions, nix plugins)
+refresh_zsh_cache() {
+  echo "Refreshing all zsh caches..."
+
+  # Clear init script caches (starship, zoxide, devbox)
+  rm -f "$_ZSH_CACHE_DIR/starship-init.zsh" 2>/dev/null
+  rm -f "$_ZSH_CACHE_DIR/zoxide-init.zsh" 2>/dev/null
+  rm -f "$_ZSH_CACHE_DIR/devbox-shellenv.zsh" 2>/dev/null
+  echo "  Cleared init script caches"
+
+  # Clear completion cache
+  rm -f ~/.zcompdump* 2>/dev/null
+  echo "  Cleared completion cache"
+
+  # Refresh Nix plugin paths
+  refresh_nix_plugin_cache
+
+  echo "All caches cleared! Run 'reload' to rebuild."
+}
+
+# Get cached Nix plugin path (fast - no glob, just file read)
+_get_cached_nix_plugin() {
+  local plugin_name="$1"
+  local cache_file="$_ZSH_CACHE_DIR/nix-$plugin_name-path"
+
+  # If cache exists and the path is still valid, return it
+  if [[ -f "$cache_file" ]]; then
+    local cached_path="$(cat "$cache_file" 2>/dev/null)"
+    if [[ -r "$cached_path" ]]; then
+      echo "$cached_path"
+      return 0
+    fi
+  fi
+
+  # Cache miss or stale - return empty (will fallback to glob on first run)
+  return 1
+}
+
+# Load Nix plugin with caching (fast path: cache, slow fallback: glob)
+_load_nix_plugin() {
+  local plugin_name="$1"
+  local cached_path="$(_get_cached_nix_plugin "$plugin_name")"
+
+  if [[ -n "$cached_path" && -r "$cached_path" ]]; then
+    source "$cached_path"
+  else
+    # Fallback: glob (slow, but only on first run)
+    local glob_pattern="/nix/store/*-$plugin_name-*/share/$plugin_name/$plugin_name.zsh"
+    local found=($~glob_pattern(N[1]))
+    if [[ -n "$found" && -r "$found" ]]; then
+      source "$found"
+      mkdir -p "$_ZSH_CACHE_DIR" 2>/dev/null
+      echo "$found" > "$_ZSH_CACHE_DIR/nix-$plugin_name-path"
+    fi
+  fi
+}
+
 # Helper: Check if a task should run based on cooldown period
 # Usage: _should_run_task "task_name" hours
 # Returns 0 (true) if task should run, 1 (false) if still in cooldown
@@ -94,18 +183,6 @@ terraform() {
     echo ""
     echo -e "\033[0;34mRan Terraform with AWS Profile: $AWS_PROFILE\033[0m"
 }
-
-# docker() {
-#     unset -f docker
-#     source <(command docker completion zsh)
-#     docker "$@"
-# }
-
-# docker-compose() {
-#     unset -f docker-compose
-#     source <(command docker-compose completion zsh)
-#     docker-compose "$@"
-# }
 
 hex_to_decimal_ip() {
   local hex_ip="$1"
@@ -305,7 +382,13 @@ delete_zoom_folder() {
 }
 
 reload() {
-  source ~/.zshrc && echo "Zsh configuration reloaded! 🎉"
+  # Use zsh's EPOCHREALTIME for millisecond precision (macOS compatible)
+  zmodload zsh/datetime 2>/dev/null
+  local start_time=$EPOCHREALTIME
+  source ~/.zshrc
+  local end_time=$EPOCHREALTIME
+  local duration=$(( (end_time - start_time) * 1000 ))
+  printf "Zsh configuration reloaded in %.0fms\n" $duration
 }
 
 countfiles() {
@@ -341,7 +424,7 @@ flushdns() {
 spinner() {
     local pid=$1
     local delay=0.1
-    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local spinstr='|/-\'
     local progress=0
     while ps -p $pid > /dev/null; do
         local temp=${spinstr#?}
@@ -350,16 +433,16 @@ spinner() {
         sleep $delay
         progress=$(( (progress + 5) % 100 ))
     done
-    printf "\r✅ Speed test completed!     \n"
+    printf "\rSpeed test completed!     \n"
 }
 
 version_check_spinner() {
     local delay=0.1
-    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local spinstr='|/-\'
     local i=0
     while true; do
         local temp=${spinstr#?}
-        printf "\r${spinstr:0:1} Checking version... %s" "${spinstr:$i:1}"
+        printf "\r${spinstr:0:1} Checking version..."
         local spinstr=$temp${spinstr%"$temp"}
         sleep $delay
         i=$(( (i + 1) % ${#spinstr} ))
@@ -368,16 +451,16 @@ version_check_spinner() {
 
 # Rename speedtest to internet_speed_test
 internet_speed_test() {
-    echo "\n🚀 Running Speed Test...\n"
+    echo "\nRunning Speed Test...\n"
 
     local result
     local tool=""
 
-    echo "🔍 Checking available speed test tools..."
+    echo "Checking available speed test tools..."
     # Detect which speedtest is installed and which version
     if command -v speedtest &>/dev/null; then
-        echo "📡 Found speedtest command"
-        echo "🔎 Checking if it's Ookla's version..."
+        echo "Found speedtest command"
+        echo "Checking if it's Ookla's version..."
 
         # Start version check spinner in background
         version_check_spinner &
@@ -395,8 +478,8 @@ internet_speed_test() {
 
         if $is_ookla; then
             tool="ookla"
-            echo "✅ Confirmed: This is Ookla's speedtest"
-            echo "🌐 Finding best server..."
+            echo "Confirmed: This is Ookla's speedtest"
+            echo "Finding best server..."
             # Start the speed test in background
             command speedtest --format=json --progress=no 2>&1 > /tmp/speedtest_result &
             local pid=$!
@@ -406,15 +489,15 @@ internet_speed_test() {
             result=$(cat /tmp/speedtest_result)
             rm /tmp/speedtest_result
             if ! echo "$result" | jq empty 2>/dev/null; then
-                echo "❌ Error: Invalid JSON output from Ookla speedtest"
+                echo "Error: Invalid JSON output from Ookla speedtest"
                 echo "Raw output: $result"
                 return 1
             fi
         else
             # It's actually speedtest-cli installed as speedtest
             tool="cli"
-            echo "✅ Confirmed: This is speedtest-cli (installed as speedtest)"
-            echo "🌐 Finding best server..."
+            echo "Confirmed: This is speedtest-cli (installed as speedtest)"
+            echo "Finding best server..."
             # Start the speed test in background
             command speedtest --json 2>&1 > /tmp/speedtest_result &
             local pid=$!
@@ -424,15 +507,15 @@ internet_speed_test() {
             result=$(cat /tmp/speedtest_result)
             rm /tmp/speedtest_result
             if ! echo "$result" | jq empty 2>/dev/null; then
-                echo "❌ Error: Invalid JSON output from speedtest-cli (as speedtest)"
+                echo "Error: Invalid JSON output from speedtest-cli (as speedtest)"
                 echo "Raw output: $result"
                 return 1
             fi
         fi
     elif command -v speedtest-cli &>/dev/null; then
         tool="cli"
-        echo "✅ Found speedtest-cli"
-        echo "🌐 Finding best server..."
+        echo "Found speedtest-cli"
+        echo "Finding best server..."
         # Start the speed test in background
         command speedtest-cli --json 2>&1 > /tmp/speedtest_result &
         local pid=$!
@@ -442,17 +525,17 @@ internet_speed_test() {
         result=$(cat /tmp/speedtest_result)
         rm /tmp/speedtest_result
         if ! echo "$result" | jq empty 2>/dev/null; then
-            echo "❌ Error: Invalid JSON output from speedtest-cli"
+            echo "Error: Invalid JSON output from speedtest-cli"
             echo "Raw output: $result"
             return 1
         fi
     else
-        echo "❌ No speed test tools found"
-        echo "💡 Tip: Install speedtest-cli with 'brew install speedtest-cli' or Ookla's speedtest with 'brew install --cask speedtest'"
+        echo "No speed test tools found"
+        echo "Tip: Install speedtest-cli with 'brew install speedtest-cli' or Ookla's speedtest with 'brew install --cask speedtest'"
         return 1
     fi
 
-    echo "📊 Processing results..."
+    echo "Processing results..."
 
     # Debug: Print the raw JSON output
     echo "Debug: Raw JSON output:"
@@ -478,7 +561,7 @@ internet_speed_test() {
 
     # Validate numeric values
     if ! [[ "$download" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$upload" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$latency" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        echo "❌ Error: Invalid numeric values in speed test results"
+        echo "Error: Invalid numeric values in speed test results"
         echo "Download: $download"
         echo "Upload: $upload"
         echo "Latency: $latency"
@@ -498,62 +581,62 @@ internet_speed_test() {
     local download_GBs=$(printf "%.2f" $(echo "$download / 1000000000" | bc -l))
     local upload_GBs=$(printf "%.2f" $(echo "$upload / 1000000000" | bc -l))
 
-    echo "💡 Speed Test Results:"
-    echo "📍 Server: $server_name, $server_location"
-    echo "🏢 ISP: $isp"
-    echo "🏓 Latency: ${latency}ms\n"
+    echo "Speed Test Results:"
+    echo "Server: $server_name, $server_location"
+    echo "ISP: $isp"
+    echo "Latency: ${latency}ms\n"
 
-    echo "⬇️  Download Speed:"
+    echo "Download Speed:"
     echo "   $download_gbps Gbps (ISP advertised speed unit)"
     echo "   $download_mbps Mbps"
     echo "   $download_GBs GB/s (actual file transfer speed)"
 
     # Calculate percentage of advertised 1Gbps
     local download_percentage=$(printf "%.1f" $(echo "min($download_gbps / 1 * 100, 100)" | bc -l))
-    echo "   📊 You're getting $download_percentage% of advertised 1 Gbps speed"
+    echo "   You're getting $download_percentage% of advertised 1 Gbps speed"
 
     # Download speed analysis
     if (( $(echo "$download_gbps >= 1" | bc -l) )); then
-        echo "   ✅ Excellent - Exceeding advertised speed"
+        echo "   Excellent - Exceeding advertised speed"
     elif (( $(echo "$download_gbps >= 0.9" | bc -l) )); then
-        echo "   ✅ Excellent - Near maximum advertised speed"
+        echo "   Excellent - Near maximum advertised speed"
     elif (( $(echo "$download_gbps >= 0.7" | bc -l) )); then
-        echo "   👍 Very Good - Above 70% of advertised speed"
+        echo "   Very Good - Above 70% of advertised speed"
     elif (( $(echo "$download_gbps >= 0.5" | bc -l) )); then
-        echo "   👌 Good - Above 50% of advertised speed"
+        echo "   Good - Above 50% of advertised speed"
     else
-        echo "   ⚠️  Below Expected - Less than 50% of advertised speed"
-        echo "   💡 Tip: Try running test with ethernet cable or closer to router"
+        echo "   Below Expected - Less than 50% of advertised speed"
+        echo "   Tip: Try running test with ethernet cable or closer to router"
     fi
     echo ""
 
-    echo "⬆️  Upload Speed:"
+    echo "Upload Speed:"
     echo "   $upload_gbps Gbps (ISP advertised speed unit)"
     echo "   $upload_mbps Mbps"
     echo "   $upload_GBs GB/s (actual file transfer speed)"
 
     # Calculate percentage of advertised upload (assuming symmetric 1Gbps)
     local upload_percentage=$(printf "%.1f" $(echo "min($upload_gbps / 1 * 100, 100)" | bc -l))
-    echo "   📊 You're getting $upload_percentage% of advertised 1 Gbps speed"
+    echo "   You're getting $upload_percentage% of advertised 1 Gbps speed"
 
     # Upload speed analysis
     if (( $(echo "$upload_gbps >= 1" | bc -l) )); then
-        echo "   ✅ Excellent - Exceeding advertised speed"
+        echo "   Excellent - Exceeding advertised speed"
     elif (( $(echo "$upload_gbps >= 0.9" | bc -l) )); then
-        echo "   ✅ Excellent - Near maximum advertised speed"
+        echo "   Excellent - Near maximum advertised speed"
     elif (( $(echo "$upload_gbps >= 0.7" | bc -l) )); then
-        echo "   👍 Very Good - Above 70% of advertised speed"
+        echo "   Very Good - Above 70% of advertised speed"
     elif (( $(echo "$upload_gbps >= 0.5" | bc -l) )); then
-        echo "   👌 Good - Above 50% of advertised speed"
+        echo "   Good - Above 50% of advertised speed"
     else
-        echo "   ⚠️  Below Expected - Less than 50% of advertised speed"
-        echo "   💡 Tip: Try running test with ethernet cable or closer to router"
+        echo "   Below Expected - Less than 50% of advertised speed"
+        echo "   Tip: Try running test with ethernet cable or closer to router"
     fi
-    echo "\n💻 Real-world Examples (with current speed):"
+    echo "\nReal-world Examples (with current speed):"
     echo "• 4K Netflix Movie (15GB): $(printf "%.1f" $(echo "15 / $download_GBs / 60" | bc -l)) minutes to download"
     echo "• iPhone Backup (50GB): $(printf "%.1f" $(echo "50 / $upload_GBs / 60" | bc -l)) minutes to upload"
     echo "• PS5 Game (100GB): $(printf "%.1f" $(echo "100 / $download_GBs / 60" | bc -l)) minutes to download"
-    echo "\n🕒 Test completed at $(date '+%Y-%m-%d %H:%M:%S')\n"
+    echo "\nTest completed at $(date '+%Y-%m-%d %H:%M:%S')\n"
 }
 
 ytplay() {
@@ -584,15 +667,15 @@ check_ports() {
   done
 
   if [[ ${#found[@]} -eq 0 ]]; then
-    echo "✅ No suspicious ports open."
+    echo "No suspicious ports open."
   else
-    echo "⚠️  Suspicious ports open: ${found[*]}"
+    echo "Suspicious ports open: ${found[*]}"
   fi
 }
 
 # Full generation map with size
 nix-gen-map() {
-  echo "🔗 Generation -> Nix Store Path + Size:"
+  echo "Generation -> Nix Store Path + Size:"
   printf "%-12s %-70s %10s\n" "Generation" "Store Path" "Size"
   echo "-----------------------------------------------------------------------------------------------"
   sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | while read gen rest; do
@@ -637,6 +720,10 @@ goodMorning() {
   devbox global update
   echo "Refreshing Packages"
   refresh-global
+  echo ""
+
+  # Always run after devbox updates: Refresh all zsh caches
+  refresh_zsh_cache
   echo ""
 
   # Always run: Check for Nix updates (fast, just shows version)

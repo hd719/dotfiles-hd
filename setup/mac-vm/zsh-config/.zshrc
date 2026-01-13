@@ -1,48 +1,40 @@
+# =============================================================================
+# ZSH Configuration
+# =============================================================================
+
 ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-vm/zsh-config
 
-# [ZSH/System Config]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/prompt.zsh
+# -----------------------------------------------------------------------------
+# Core Configuration (order matters)
+# -----------------------------------------------------------------------------
+source $ZSH_CONFIG_DIR/prompt.zsh      # Prompt, starship, zoxide
+source $ZSH_CONFIG_DIR/tooling.zsh     # Dev tools config
+source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
+source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
+source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 
-# [Tooling]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/tooling.zsh
+# -----------------------------------------------------------------------------
+# Plugins (Nix/Devbox - using cached paths for speed)
+# -----------------------------------------------------------------------------
+_load_nix_plugin "zsh-autosuggestions"
+_load_nix_plugin "zsh-syntax-highlighting"
 
-# [Aliases]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/alias.zsh
+# -----------------------------------------------------------------------------
+# Devbox Global Environment (cached for speed)
+# -----------------------------------------------------------------------------
+_devbox_cache="$_ZSH_CACHE_DIR/devbox-shellenv.zsh"
+if [[ ! -f "$_devbox_cache" || $(( $(date +%s) - $(stat -f %m "$_devbox_cache" 2>/dev/null || echo 0) )) -gt 86400 ]]; then
+  devbox global shellenv > "$_devbox_cache" 2>/dev/null
+fi
+source "$_devbox_cache"
 
-# [Functions]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/functions.zsh
-
-# [Kubernetes Config]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/k8s.zsh
-
- # [Autosuggestions] from Devbox/Nix store
-    devbox_zsh_autosuggestions=(/nix/store/*-zsh-autosuggestions-*/share/zsh-autosuggestions/zsh-autosuggestions.zsh)
-    if [[ -r "${devbox_zsh_autosuggestions[1]}" ]]; then
-      source "${devbox_zsh_autosuggestions[1]}"
-    fi
-
-    # [Syntax Highlighting] from Devbox/Nix store
-    devbox_zsh_syntax_highlighting=(/nix/store/*-zsh-syntax-highlighting-*/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh)
-    if [[ -r "${devbox_zsh_syntax_highlighting[1]}" ]]; then
-      source "${devbox_zsh_syntax_highlighting[1]}"
-    fi
-
-# # Add paths to environment variables
-# PATH=~/.console-ninja/.bin:$PATH
-
-# [Devbox]
-# --------------------------------------------------------------------------------------------------------
-eval "$(devbox global shellenv)"
-
-# [Job Config]
-# --------------------------------------------------------------------------------------------------------
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+# -----------------------------------------------------------------------------
+# Completions (cached compinit for speed)
+# -----------------------------------------------------------------------------
 fpath=(/Users/hameldesai/.docker/completions $fpath)
 autoload -Uz compinit
-compinit
-# End of Docker CLI completions
+if [[ -f ~/.zcompdump && $(date +'%j') == $(stat -f '%Sm' -t '%j' ~/.zcompdump 2>/dev/null) ]]; then
+  compinit -C  # Cached (fast)
+else
+  compinit     # Full rebuild (once per day)
+fi
