@@ -22,6 +22,7 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # -----------------------------------------------------------------------------
 # Completions (cached compinit for speed)
 # -----------------------------------------------------------------------------
+fpath=(/Users/hameldesai/.docker/completions $fpath)
 autoload -Uz compinit
 if [[ -f ~/.zcompdump && $(date +'%j') == $(stat -f '%Sm' -t '%j' ~/.zcompdump 2>/dev/null) ]]; then
   compinit -C  # Cached (fast)
@@ -29,18 +30,39 @@ else
   compinit     # Full rebuild (once per day)
 fi
 
-# [Job Config]
-# --------------------------------------------------------------------------------------------------------
-git config --global core.editor "code --wait"
+# -----------------------------------------------------------------------------
+# Work Environment
+# -----------------------------------------------------------------------------
 export GIT_EDITOR="code --wait"
 export EDITOR="code --wait"
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
-fpath=(/Users/hameldesai/.docker/completions $fpath)
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 . "$HOME/.local/bin/env"
-eval "$(uv generate-shell-completion zsh)"
-eval "$(op completion zsh)"; compdef _op op
-eval "$(fnm env --use-on-cd)"
+
+# -----------------------------------------------------------------------------
+# Tool Init Scripts (cached for speed)
+# -----------------------------------------------------------------------------
+# Cache uv completions
+_uv_cache="$_ZSH_CACHE_DIR/uv-completion.zsh"
+if [[ ! -f "$_uv_cache" || $(( $(date +%s) - $(stat -f %m "$_uv_cache" 2>/dev/null || echo 0) )) -gt 86400 ]]; then
+  uv generate-shell-completion zsh > "$_uv_cache" 2>/dev/null
+fi
+source "$_uv_cache"
+
+# Cache 1Password completions
+_op_cache="$_ZSH_CACHE_DIR/op-completion.zsh"
+if [[ ! -f "$_op_cache" || $(( $(date +%s) - $(stat -f %m "$_op_cache" 2>/dev/null || echo 0) )) -gt 86400 ]]; then
+  op completion zsh > "$_op_cache" 2>/dev/null
+fi
+source "$_op_cache"
+compdef _op op
+
+# Cache fnm environment
+_fnm_cache="$_ZSH_CACHE_DIR/fnm-env.zsh"
+if [[ ! -f "$_fnm_cache" || $(( $(date +%s) - $(stat -f %m "$_fnm_cache" 2>/dev/null || echo 0) )) -gt 86400 ]]; then
+  fnm env --use-on-cd > "$_fnm_cache" 2>/dev/null
+fi
+source "$_fnm_cache"
 
 # Helper function: Run command with GITHUB_TOKEN (from 1Password or environment)
 # Usage: run-with-github-token <command>
