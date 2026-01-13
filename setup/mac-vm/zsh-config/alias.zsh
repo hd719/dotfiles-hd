@@ -59,7 +59,6 @@ alias gsshort='gss | grep -e "Your branch" -e "modified"'
 ## Misc
 alias home='cd ~'
 alias c=clear
-alias ll='ls -a -l'
 alias open-desktop='cd ~/Desktop/ && open .'
 alias open-home='cd ~ && open .'
 alias dhd='cd ~/Developer/dotfiles-hd && code .'
@@ -83,13 +82,14 @@ alias coverage='go test -coverprofile=coverage.out ./... && go tool cover -html=
 ## VSCode
 alias code-restart="killall electron && killall node && killall code"
 
-## LSD
-alias ls='lsd --tree --depth 1'
-alias lss='lsd --tree --depth 2'
-alias l='ls -l'
-alias la='ls -a'
-alias lla='ls -la'
-alias lt='ls --tree'
+## LSD - Modern ls replacement with colors and icons
+alias ls='lsd'                    # Basic listing with colors
+alias ll='lsd -la'                # Long listing with all files
+alias l='lsd -l'                  # Long listing
+alias la='lsd -a'                 # Show all files (including hidden)
+alias lt='lsd --tree'             # Tree view
+alias lts='lsd --tree --depth 2'  # Tree view (depth 2)
+alias ltss='lsd --tree --depth 3' # Tree view (depth 3)
 
 ## Bat
 alias cat="bat --paging never --theme Dracula"
