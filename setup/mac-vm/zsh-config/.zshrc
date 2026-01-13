@@ -36,6 +36,11 @@ else
 fi
 source "$_devbox_cache"
 
+# Fix: Devbox sets NO_COLOR and FORCE_COLOR=0 which disables colors
+# Override these to enable colors for lsd, bat, and other CLI tools
+unset NO_COLOR
+export FORCE_COLOR=1
+
 # -----------------------------------------------------------------------------
 # Completions (cached compinit for speed)
 # Uses zsh native stat instead of external stat command
