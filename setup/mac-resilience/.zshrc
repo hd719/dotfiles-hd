@@ -1,37 +1,33 @@
+# =============================================================================
+# ZSH Configuration (Work - Resilience)
+# =============================================================================
+
 ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-vm/zsh-config
 
-# [ZSH/System Config]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/prompt.zsh
+# -----------------------------------------------------------------------------
+# Core Configuration (order matters)
+# -----------------------------------------------------------------------------
+source $ZSH_CONFIG_DIR/prompt.zsh      # Prompt, starship, zoxide
+source $ZSH_CONFIG_DIR/tooling.zsh     # Dev tools config
+source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
+source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
+source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 
-# [Tooling]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/tooling.zsh
-
-# [Aliases]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/alias.zsh
-
-# [Functions]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/functions.zsh
-
-# [Kubernetes Config]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/k8s.zsh
-
-# [Syntax Highlighting]
-# --------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# Plugins (Homebrew)
+# -----------------------------------------------------------------------------
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-# [Autosuggestions]
-# --------------------------------------------------------------------------------------------------------
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-# [Completion System - Must load before using compdef]
-# --------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# Completions (cached compinit for speed)
+# -----------------------------------------------------------------------------
 autoload -Uz compinit
-compinit
+if [[ -f ~/.zcompdump && $(date +'%j') == $(stat -f '%Sm' -t '%j' ~/.zcompdump 2>/dev/null) ]]; then
+  compinit -C  # Cached (fast)
+else
+  compinit     # Full rebuild (once per day)
+fi
 
 # [Job Config]
 # --------------------------------------------------------------------------------------------------------
