@@ -48,14 +48,17 @@ refresh_zsh_cache() {
   echo "  Rebuilding init script caches..."
   starship init zsh > "$_ZSH_CACHE_DIR/starship-init.zsh" 2>/dev/null
   echo "    Cached starship init"
-  zoxide init zsh > "$_ZSH_CACHE_DIR/zoxide-init.zsh" 2>/dev/null
+  zoxide init --cmd cd zsh > "$_ZSH_CACHE_DIR/zoxide-init.zsh" 2>/dev/null
   echo "    Cached zoxide init"
   devbox global shellenv > "$_ZSH_CACHE_DIR/devbox-shellenv.zsh" 2>/dev/null
   echo "    Cached devbox shellenv"
 
-  # Clear completion cache
+  # Rebuild completion cache (compinit)
+  echo "  Rebuilding completion cache..."
   rm -f ~/.zcompdump* 2>/dev/null
-  echo "  Cleared completion cache"
+  autoload -Uz compinit
+  compinit
+  echo "    Cached completions"
 
   # Refresh Nix plugin paths
   refresh_nix_plugin_cache
