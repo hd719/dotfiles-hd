@@ -64,6 +64,7 @@ alias open-desktop='cd ~/Desktop/ && open .'
 alias open-home='cd ~ && open .'
 alias dhd='cd ~/Developer/dotfiles-hd && code .'
 alias open-zshrc='code ~/.zshrc'
+alias ff='fastfetch'
 
 ## Brew
 alias open-brew='cd /opt/homebrew'
