@@ -14,10 +14,10 @@ source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
 source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 
 # -----------------------------------------------------------------------------
-# Plugins (Homebrew) - Deferred loading for faster startup (~32ms savings)
+# Plugins (Homebrew) - Smart deferred loading (~32ms savings)
 # -----------------------------------------------------------------------------
-# Plugins load on first command execution via preexec hook
-# This moves the ~32ms delay from startup to after you press Enter on first command
+# Plugins load before first prompt via precmd hook (better UX than preexec)
+# This keeps fast startup but plugins are active before you start typing
 _deferred_plugins_loaded=0
 _load_deferred_plugins() {
   (( _deferred_plugins_loaded )) && return
@@ -26,7 +26,7 @@ _load_deferred_plugins() {
   source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 }
 autoload -Uz add-zsh-hook
-add-zsh-hook preexec _load_deferred_plugins
+add-zsh-hook precmd _load_deferred_plugins
 
 # -----------------------------------------------------------------------------
 # Completions (cached compinit for speed)
