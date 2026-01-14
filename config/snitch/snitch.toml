@@ -1,0 +1,10 @@
+# Snitch Configuration
+# https://github.com/karol-broda/snitch
+
+[defaults]
+numeric = false       # disable name resolution
+dns_cache = true      # cache dns lookups (set to false to disable)
+theme = "catppuccin-mocha"     # color theme: auto, dark, light, mono, dracula, catppuccin-mocha, tokyo-night, nord, etc.
+
+[tui]
+remember_state = true # remember view options between sessions (filters, sort, resolution)
