@@ -93,6 +93,20 @@ alias la='lsd -a'
 ## Bat
 alias cat="bat --paging never --theme Dracula"
 
+## Snitch - Network connection inspector (https://github.com/karol-broda/snitch)
+alias sn='snitch'                    # Interactive TUI (all connections)
+alias snl='snitch -l'                # TUI - listening sockets only
+alias snt='snitch -t'                # TUI - TCP only
+alias sne='snitch -e'                # TUI - established only
+alias snls='snitch ls'               # One-shot styled table
+alias snll='snitch ls -l'            # One-shot - listening only
+alias snle='snitch ls -e'            # One-shot - established only
+alias snlte='snitch ls -t -e'        # One-shot - TCP established
+alias snlp='snitch ls -p'            # Plain output (parsable)
+alias snj='snitch json'              # JSON output for scripting
+alias snw='snitch watch'             # Stream JSON frames
+alias snth='snitch themes'           # List available themes
+
 ## SSH
 alias blaze="ssh hamels-macbook-pro-2"
 alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
@@ -144,18 +158,27 @@ alias ble='export ZSH_PROFILE=blaze && source ~/.zshrc'
 # Monorepo Devbox Scripts (scripts defined in devbox.json)
 # --------------------------------------------------------------------------------------------------------
 
-# HealthMetrics
-alias hm-dev='devbox run hm:dev'
-alias hm-build='devbox run hm:build'
-alias hm-prisma-studio='devbox run hm:prisma:studio'
-alias hm-prisma-migrate='devbox run hm:prisma:migrate'
-alias hm-prisma-generate='devbox run hm:prisma:generate'
-alias hms-dev='cd apps/healthmetrics && go run main.go'
-alias hms-build='cd apps/healthmetrics && go build -o healthmetrics main.go'
-alias hms-test='cd apps/healthmetrics && go test ./...'
+# HealthMetrics (runs from nextjs-monorepo directory where devbox.json defines these scripts)
+alias hm-dev='(cd ~/Developer/nextjs-monorepo && devbox run hm:dev)'
+alias hm-build='(cd ~/Developer/nextjs-monorepo && devbox run hm:build)'
+alias hm-prisma-studio='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:studio)'
+alias hm-prisma-migrate='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:migrate)'
+alias hm-prisma-generate='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:generate)'
+alias hms-dev='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go run main.go'
+alias hms-build='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go build -o healthmetrics main.go'
+alias hms-test='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go test ./...'
 
-# Portfolio
-alias pf-dev='devbox run pf:dev'
-alias pf-build='devbox run pf:build'
-alias pf-start='devbox run pf:start'
-alias pf-lint='devbox run pf:lint'
+# Run bun/bunx commands in healthmetrics with 1Password env vars loaded
+# Usage: hm-bun run dev | hm-bunx prisma migrate diff ...
+hm-bun() {
+  (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bun "$@")
+}
+hm-bunx() {
+  (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bunx "$@")
+}
+
+# Portfolio (runs from nextjs-monorepo directory where devbox.json defines these scripts)
+alias pf-dev='(cd ~/Developer/nextjs-monorepo && devbox run pf:dev)'
+alias pf-build='(cd ~/Developer/nextjs-monorepo && devbox run pf:build)'
+alias pf-start='(cd ~/Developer/nextjs-monorepo && devbox run pf:start)'
+alias pf-lint='(cd ~/Developer/nextjs-monorepo && devbox run pf:lint)'
