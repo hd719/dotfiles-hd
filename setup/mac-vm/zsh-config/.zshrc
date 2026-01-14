@@ -36,9 +36,10 @@ else
 fi
 source "$_devbox_cache"
 
-# Fix: Devbox sets NO_COLOR and FORCE_COLOR=0 which disables colors
-# Override these to enable colors for lsd, bat, and other CLI tools
+# Fix: Devbox sets NO_COLOR, FORCE_COLOR=0, and CI=1 which disables colors
+# Override these to enable colors for lsd, bat, snitch, and other CLI tools
 unset NO_COLOR
+unset CI
 export FORCE_COLOR=1
 
 # -----------------------------------------------------------------------------

@@ -93,6 +93,20 @@ alias la='lsd -a'
 ## Bat
 alias cat="bat --paging never --theme Dracula"
 
+## Snitch - Network connection inspector (https://github.com/karol-broda/snitch)
+alias sn='snitch'                    # Interactive TUI (all connections)
+alias snl='snitch -l'                # TUI - listening sockets only
+alias snt='snitch -t'                # TUI - TCP only
+alias sne='snitch -e'                # TUI - established only
+alias snls='snitch ls'               # One-shot styled table
+alias snll='snitch ls -l'            # One-shot - listening only
+alias snle='snitch ls -e'            # One-shot - established only
+alias snlte='snitch ls -t -e'        # One-shot - TCP established
+alias snlp='snitch ls -p'            # Plain output (parsable)
+alias snj='snitch json'              # JSON output for scripting
+alias snw='snitch watch'             # Stream JSON frames
+alias snth='snitch themes'           # List available themes
+
 ## SSH
 alias blaze="ssh hamels-macbook-pro-2"
 alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
