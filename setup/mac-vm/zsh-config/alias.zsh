@@ -154,8 +154,11 @@ alias hms-dev='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go run main.
 alias hms-build='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go build -o healthmetrics main.go'
 alias hms-test='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go test ./...'
 
-# Run bunx commands in healthmetrics with 1Password env vars loaded
-# Usage: hm-bunx prisma migrate diff --from-config-datasource ...
+# Run bun/bunx commands in healthmetrics with 1Password env vars loaded
+# Usage: hm-bun run dev | hm-bunx prisma migrate diff ...
+hm-bun() {
+  (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bun "$@")
+}
 hm-bunx() {
   (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bunx "$@")
 }
