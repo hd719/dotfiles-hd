@@ -144,18 +144,24 @@ alias ble='export ZSH_PROFILE=blaze && source ~/.zshrc'
 # Monorepo Devbox Scripts (scripts defined in devbox.json)
 # --------------------------------------------------------------------------------------------------------
 
-# HealthMetrics
-alias hm-dev='devbox run hm:dev'
-alias hm-build='devbox run hm:build'
-alias hm-prisma-studio='devbox run hm:prisma:studio'
-alias hm-prisma-migrate='devbox run hm:prisma:migrate'
-alias hm-prisma-generate='devbox run hm:prisma:generate'
-alias hms-dev='cd apps/healthmetrics && go run main.go'
-alias hms-build='cd apps/healthmetrics && go build -o healthmetrics main.go'
-alias hms-test='cd apps/healthmetrics && go test ./...'
+# HealthMetrics (runs from nextjs-monorepo directory where devbox.json defines these scripts)
+alias hm-dev='(cd ~/Developer/nextjs-monorepo && devbox run hm:dev)'
+alias hm-build='(cd ~/Developer/nextjs-monorepo && devbox run hm:build)'
+alias hm-prisma-studio='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:studio)'
+alias hm-prisma-migrate='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:migrate)'
+alias hm-prisma-generate='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:generate)'
+alias hms-dev='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go run main.go'
+alias hms-build='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go build -o healthmetrics main.go'
+alias hms-test='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go test ./...'
 
-# Portfolio
-alias pf-dev='devbox run pf:dev'
-alias pf-build='devbox run pf:build'
-alias pf-start='devbox run pf:start'
-alias pf-lint='devbox run pf:lint'
+# Run bunx commands in healthmetrics with 1Password env vars loaded
+# Usage: hm-bunx prisma migrate diff --from-config-datasource ...
+hm-bunx() {
+  (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bunx "$@")
+}
+
+# Portfolio (runs from nextjs-monorepo directory where devbox.json defines these scripts)
+alias pf-dev='(cd ~/Developer/nextjs-monorepo && devbox run pf:dev)'
+alias pf-build='(cd ~/Developer/nextjs-monorepo && devbox run pf:build)'
+alias pf-start='(cd ~/Developer/nextjs-monorepo && devbox run pf:start)'
+alias pf-lint='(cd ~/Developer/nextjs-monorepo && devbox run pf:lint)'
