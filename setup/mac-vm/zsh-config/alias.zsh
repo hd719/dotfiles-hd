@@ -83,13 +83,12 @@ alias coverage='go test -coverprofile=coverage.out ./... && go tool cover -html=
 alias code-restart="killall electron && killall node && killall code"
 
 ## LSD - Modern ls replacement with colors and icons
-alias ls='lsd'                    # Basic listing with colors
-alias ll='lsd -la'                # Long listing with all files
-alias l='lsd -l'                  # Long listing
-alias la='lsd -a'                 # Show all files (including hidden)
-alias lt='lsd --tree'             # Tree view
-alias lts='lsd --tree --depth 2'  # Tree view (depth 2)
-alias ltss='lsd --tree --depth 3' # Tree view (depth 3)
+alias ls='lsd --tree --depth 1'
+alias lss='lsd --tree --depth 2'
+alias lsss='lsd --tree --depth 3'
+alias ll='lsd -la --tree --depth 1'
+alias l='lsd -l'
+alias la='lsd -a'
 
 ## Bat
 alias cat="bat --paging never --theme Dracula"
