@@ -170,11 +170,12 @@ alias hms-test='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go test ./.
 
 # Run bun/bunx commands in healthmetrics with 1Password env vars loaded
 # Usage: hm-bun run dev | hm-bunx prisma migrate diff ...
+# Uses devbox run to ensure bun is in PATH
 hm-bun() {
-  (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bun "$@")
+  (cd ~/Developer/nextjs-monorepo && devbox run -- bash -c "cd apps/healthmetrics && op run --env-file='./.env.development.local' -- bun $*")
 }
 hm-bunx() {
-  (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bunx "$@")
+  (cd ~/Developer/nextjs-monorepo && devbox run -- bash -c "cd apps/healthmetrics && op run --env-file='./.env.development.local' -- bunx $*")
 }
 
 # Portfolio (runs from nextjs-monorepo directory where devbox.json defines these scripts)
