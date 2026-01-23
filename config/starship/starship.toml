@@ -82,6 +82,15 @@ format = "[$symbol ($version)](fg:#8f8f8f) "
 symbol = ""
 style = "fg:#f5e0dc"
 format = "[$symbol ($version)](fg:#f2cdcd) "
+detect_extensions = []
+detect_files = []
+detect_folders = []
+
+[custom.uv_python]
+symbol = ""
+command = "uv run python --version | sed 's/Python //'"
+format = "[$symbol ($output)](fg:#f2cdcd) "
+when = "command -v uv >/dev/null 2>&1 && test -f uv.lock"
 
 [ruby]
 symbol = ""
