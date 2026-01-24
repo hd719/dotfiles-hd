@@ -7,16 +7,6 @@ $cmd_duration\
 $line_break\
 $custom\
 $package\
-$nodejs\
-$bun\
-$deno\
-$python\
-$golang\
-$ruby\
-$rails_version\
-$helm\
-$java\
-$terraform\
 $character"""
 
 [directory]
@@ -54,37 +44,43 @@ style = "yellow"
 symbol = "󱄅"
 command = "nix --version | sed 's/nix (Determinate Nix \\([0-9.]*\\)) \\([0-9.]*\\)/det:\\1 nix:\\2/'"
 format = "[$symbol $output](fg:#a2d2df) "
-when = "command -v nix && [[ -n $DEVBOX_SHELL ]]"
-detect_folders = [".devbox"]
-detect_files = ["devbox.json", "devbox.lock"]
+when = "command -v nix >/dev/null 2>&1 && (test -n \"$DEVBOX_PROJECT_ROOT\" || test -n \"$DEVBOX_CONFIG_DIR\" || test -n \"$DEVBOX_PACKAGES_DIR\")"
 
-[package]
-display_private = true
-symbol = ""
-format = "[$symbol ($version)](fg:#CBC3E3) "
-
-[nodejs]
+[custom.nodejs_repo]
 symbol = ""
-style = "fg:#f5e0dc"
-format = "[$symbol ($version)](fg:#a6e3a1) "
+command = "node --version"
+format = "[$symbol ($output)](fg:#a6e3a1) "
+when = "root=$(git rev-parse --show-toplevel 2>/dev/null) && test -n \"$root\" && test -f \"$root/package.json\" && ! test -f \"$root/bun.lock\""
 
-[bun]
+[custom.bun_repo]
 symbol = "\ue76f"
-style = "fg:#f5e0dc"
-format = "[$symbol ($version)](fg:#E8D9C5) "
+command = "bun --version"
+format = "[$symbol ($output)](fg:#E8D9C5) "
+when = "root=$(git rev-parse --show-toplevel 2>/dev/null) && test -n \"$root\" && test -f \"$root/bun.lock\""
 
-[deno]
-symbol = "\ue7c0"
-style = "fg:#f5e0dc"
-format = "[$symbol ($version)](fg:#8f8f8f) "
+[custom.terraform_repo]
+symbol = "󱁢"
+command = "terraform version | head -n 1 | awk '{print $2}'"
+format = "[$symbol ($output)](fg:#b4befe) "
+when = "(test -d .terraform || test -f .terraform.lock.hcl || test -f terragrunt.hcl || ls *.tf *.tf.json >/dev/null 2>&1) || (root=$(git rev-parse --show-toplevel 2>/dev/null) && test -n \"$root\" && (test -d \"$root/.terraform\" || test -f \"$root/.terraform.lock.hcl\" || test -f \"$root/terragrunt.hcl\" || find \"$root\" -maxdepth 1 \\( -name '*.tf' -o -name '*.tf.json' \\) -print -quit 2>/dev/null | grep -q .))"
 
-[python]
-symbol = ""
-style = "fg:#f5e0dc"
-format = "[$symbol ($version)](fg:#f2cdcd) "
-detect_extensions = []
-detect_files = []
-detect_folders = []
+[custom.helm_repo]
+symbol = "⎈"
+command = "helm version --short 2>/dev/null | cut -d+ -f1"
+format = "[$symbol ($output)](fg:#b4befe) "
+when = "command -v helm >/dev/null 2>&1 && root=$(git rev-parse --show-toplevel 2>/dev/null) && test -n \"$root\" && (test -f \"$root/Chart.yaml\" || test -f \"$root/helmfile.yaml\" || test -f \"$root/helmfile.yml\" || test -d \"$root/charts\")"
+
+[custom.java_repo]
+symbol = ""
+command = "java -version 2>&1 | head -n 1 | awk -F\\\" '{print $2}'"
+format = "[$symbol ($output)](fg:#eba0ac) "
+when = "command -v java >/dev/null 2>&1 && root=$(git rev-parse --show-toplevel 2>/dev/null) && test -n \"$root\" && (test -f \"$root/pom.xml\" || test -f \"$root/build.gradle\" || test -f \"$root/build.gradle.kts\" || test -f \"$root/settings.gradle\" || test -f \"$root/settings.gradle.kts\" || test -f \"$root/.java-version\")"
+
+[custom.golang_repo]
+symbol = ""
+command = "go env GOVERSION | sed 's/^go//'"
+format = "[$symbol ($output)](fg:#74c7ec) "
+when = "command -v go >/dev/null 2>&1 && ((test -f go.mod || test -f go.work || ls *.go >/dev/null 2>&1) || (root=$(git rev-parse --show-toplevel 2>/dev/null) && test -n \"$root\" && (test -f \"$root/go.mod\" || test -f \"$root/go.work\" || find \"$root\" -maxdepth 1 -name '*.go' -print -quit 2>/dev/null | grep -q .)))"
 
 [custom.uv_python]
 symbol = ""
@@ -92,32 +88,55 @@ command = "uv run python --version | sed 's/Python //'"
 format = "[$symbol ($output)](fg:#f2cdcd) "
 when = "command -v uv >/dev/null 2>&1 && test -f uv.lock"
 
-[ruby]
-symbol = ""
-style = "fg:#E10531"
-format = "[$symbol ($version)](fg:#E10531) "
-
 [custom.rails_version]
 symbol = "󰫏"
 style = "fg:#E7365A"
 format = "[$symbol ($version)](fg:#E7365A) "
 
-[golang]
-symbol = ""
-style = "fg:#74c7ec"
-format = "[$symbol ($version)](fg:#74c7ec) "
+[package]
+display_private = true
+symbol = ""
+format = "[$symbol ($version)](fg:#CBC3E3) "
 
-[helm]
-symbol = "⎈"
-style = "fg:#b4befe"
-format = "[$symbol ($version)](fg:#b4befe) "
+# [bun]
+# symbol = "\ue76f"
+# style = "fg:#f5e0dc"
+# format = "[$symbol ($version)](fg:#E8D9C5) "
 
-[java]
-symbol = ""
-style = "fg:#eba0ac"
-format = "[$symbol ($version)](fg:#eba0ac) "
+# [deno]
+# symbol = "\ue7c0"
+# style = "fg:#f5e0dc"
+# format = "[$symbol ($version)](fg:#8f8f8f) "
 
-[terraform]
-symbol = "󱁢"
-style = "fg:#b4befe"
-format = "[$symbol ($version)](fg:#b4befe) "
+# [python]
+# symbol = ""
+# style = "fg:#f5e0dc"
+# format = "[$symbol ($version)](fg:#f2cdcd) "
+# detect_extensions = []
+# detect_files = []
+# detect_folders = []
+
+# [ruby]
+# symbol = ""
+# style = "fg:#E10531"
+# format = "[$symbol ($version)](fg:#E10531) "
+
+# [golang]
+# symbol = ""
+# style = "fg:#74c7ec"
+# format = "[$symbol ($version)](fg:#74c7ec) "
+
+# [helm]
+# symbol = "⎈"
+# style = "fg:#b4befe"
+# format = "[$symbol ($version)](fg:#b4befe) "
+
+# [java]
+# symbol = ""
+# style = "fg:#eba0ac"
+# format = "[$symbol ($version)](fg:#eba0ac) "
+
+# [terraform]
+# symbol = "󱁢"
+# style = "fg:#b4befe"
+# format = "[$symbol ($version)](fg:#b4befe) "
