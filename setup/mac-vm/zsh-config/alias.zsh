@@ -53,8 +53,7 @@ alias gpull='git pull'
 alias gpush='git push'
 alias gs='git status'
 alias gsoft='git reset --soft HEAD~1'
-alias gss='git status'
-alias gsshort='gss | grep -e "Your branch" -e "modified"'
+alias gsshort='gs | grep -e "Your branch" -e "modified"'
 
 ## Misc
 alias home='cd ~'
@@ -73,7 +72,6 @@ alias open-brew='cd /opt/homebrew'
 alias tf=terraform
 
 ## Golang
-alias go=go
 alias gomod=go mod
 alias gomodt=go mod tidy
 alias gomodv=go mod vendor
@@ -115,9 +113,6 @@ alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
 ## Nix
 alias switch="sudo darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix#hameldesai" # sudo temporarily (will change in future)
 alias nix-update="nix flake update"
-# Alias: List all system generations
-alias nix-gen-list='sudo nix-env --list-generations --profile /nix/var/nix/profiles/system'
-
 # Alias: List all system generations (as before)
 alias nix-gen-list='sudo nix-env --list-generations --profile /nix/var/nix/profiles/system'
 

@@ -14,13 +14,6 @@ source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
 source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 
 # -----------------------------------------------------------------------------
-# Plugins - Load immediately for better UX
-# Adds ~5-10ms to startup but plugins work right away
-# -----------------------------------------------------------------------------
-_load_nix_plugin "zsh-autosuggestions"
-_load_nix_plugin "zsh-syntax-highlighting"
-
-# -----------------------------------------------------------------------------
 # Devbox Global Environment (cached for speed, using zsh native stat)
 # -----------------------------------------------------------------------------
 _devbox_cache="$_ZSH_CACHE_DIR/devbox-shellenv.zsh"
@@ -35,6 +28,13 @@ else
   fi
 fi
 source "$_devbox_cache"
+
+# -----------------------------------------------------------------------------
+# Plugins - Load immediately for better UX
+# Adds ~5-10ms to startup but plugins work right away
+# -----------------------------------------------------------------------------
+_load_nix_plugin "zsh-autosuggestions"
+_load_nix_plugin "zsh-syntax-highlighting"
 
 # Fix: Devbox sets NO_COLOR, FORCE_COLOR=0, and CI=1 which disables colors
 # Override these to enable colors for lsd, bat, snitch, and other CLI tools
