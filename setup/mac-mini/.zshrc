@@ -50,12 +50,14 @@ fi
 # -----------------------------------------------------------------------------
 # Environment
 # -----------------------------------------------------------------------------
-export GIT_EDITOR="code --wait"
-export EDITOR="code --wait"
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 if [[ -f "$HOME/.local/bin/env" ]]; then
   . "$HOME/.local/bin/env"
+fi
+if [[ -n "$SSH_CONNECTION" ]]; then
+  export GIT_EDITOR="vim"
+  export EDITOR="vim"
 fi
 
 # -----------------------------------------------------------------------------
