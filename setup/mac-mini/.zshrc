@@ -54,7 +54,9 @@ export GIT_EDITOR="code --wait"
 export EDITOR="code --wait"
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-. "$HOME/.local/bin/env"
+if [[ -f "$HOME/.local/bin/env" ]]; then
+  . "$HOME/.local/bin/env"
+fi
 
 # -----------------------------------------------------------------------------
 # Tool Init Scripts (cached for speed)
