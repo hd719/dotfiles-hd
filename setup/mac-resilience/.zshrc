@@ -55,6 +55,7 @@ export EDITOR="code --wait"
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 . "$HOME/.local/bin/env"
+export HUSKY=0
 
 # -----------------------------------------------------------------------------
 # Tool Init Scripts (cached for speed)
