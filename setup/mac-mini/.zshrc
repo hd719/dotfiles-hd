@@ -94,3 +94,6 @@ if _cache_needs_refresh "$_fnm_cache"; then
   fnm env --use-on-cd > "$_fnm_cache" 2>/dev/null
 fi
 [[ -f "$_fnm_cache" ]] && source "$_fnm_cache"
+
+# Created by `pipx` on 2026-01-27 22:02:05
+export PATH="$PATH:/Users/hd/.local/bin"
