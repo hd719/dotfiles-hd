@@ -108,7 +108,9 @@ run-with-github-token() {
     fi
 }
 
-# [AWS Config]
+# --------------------------------------------------------------------------------------------------------
+# [Config]
+# --------------------------------------------------------------------------------------------------------
 alias aws-config="aws configure list"
 # List available profiles
 alias aws-profiles="aws configure list-profiles"
@@ -116,6 +118,10 @@ alias aws-profiles="aws configure list-profiles"
 # $ AWS_PROFILE=dev aws s3 ls
 # # Select profile w/ option
 # $ aws --profile s3 ls
+alias sf-doppler-env="doppler run -- env | sort | grep SNOWFLAKE"
+alias sf-configure="cd ~/Developer/Resilience/resilience-platform && ./rsw-snowflake-access.sh configure"
+alias sf-test="cd ~/Developer/Resilience/resilience-platform && ./rsw-snowflake-access.sh test"
+alias doppler-setup-dev="cd ~/Developer/Resilience/resilience-platform && run-with-github-token yarn doppler-setup-dev"
 
 # [Repos]
 alias cdplat='cd ~/Developer/Resilience/resilience-platform'
