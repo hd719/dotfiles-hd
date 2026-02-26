@@ -16,18 +16,7 @@ source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 # -----------------------------------------------------------------------------
 # Devbox Global Environment (cached for speed, using zsh native stat)
 # -----------------------------------------------------------------------------
-_devbox_cache="$_ZSH_CACHE_DIR/devbox-shellenv.zsh"
-if [[ ! -f "$_devbox_cache" ]]; then
-  devbox global shellenv > "$_devbox_cache" 2>/dev/null
-else
-  # Use zsh native zstat (loaded in prompt.zsh)
-  local _devbox_mtime
-  zstat -A _devbox_mtime +mtime "$_devbox_cache" 2>/dev/null
-  if (( EPOCHSECONDS - _devbox_mtime > 86400 )); then
-    devbox global shellenv > "$_devbox_cache" 2>/dev/null
-  fi
-fi
-source "$_devbox_cache"
+_load_devbox_shellenv_cached
 
 # -----------------------------------------------------------------------------
 # Plugins - Load immediately for better UX
