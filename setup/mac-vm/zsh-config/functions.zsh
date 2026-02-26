@@ -34,6 +34,60 @@ _load_nix_plugin() {
   fi
 }
 
+_refresh_devbox_shellenv_cache() {
+  local cache_file="$1"
+  local tmp_file="${cache_file}.tmp.$$"
+
+  if devbox global shellenv --quiet > "$tmp_file" 2>/dev/null && [[ -s "$tmp_file" ]]; then
+    mv "$tmp_file" "$cache_file"
+  else
+    rm -f "$tmp_file"
+  fi
+}
+
+_is_valid_devbox_shellenv_cache() {
+  local cache_file="$1"
+  [[ -s "$cache_file" ]] || return 1
+
+  local line first_nonempty=""
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    first_nonempty="$line"
+    break
+  done < "$cache_file"
+
+  [[ -n "$first_nonempty" ]] || return 1
+  [[ "$first_nonempty" == export\ * || "$first_nonempty" == if\ * ]]
+}
+
+_load_devbox_shellenv_cached() {
+  local cache_dir="${_ZSH_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/zsh}"
+  local cache_file="${cache_dir}/devbox-shellenv.zsh"
+  local refresh_interval_seconds=86400
+
+  [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
+  command -v devbox >/dev/null 2>&1 || return 0
+
+  if [[ ! -f "$cache_file" ]]; then
+    _refresh_devbox_shellenv_cache "$cache_file"
+  else
+    local cache_mtime
+    zstat -A cache_mtime +mtime "$cache_file" 2>/dev/null
+    if (( EPOCHSECONDS - cache_mtime > refresh_interval_seconds )); then
+      _refresh_devbox_shellenv_cache "$cache_file"
+    fi
+  fi
+
+  # Guard against plain text status output accidentally cached as shell code.
+  if ! _is_valid_devbox_shellenv_cache "$cache_file"; then
+    _refresh_devbox_shellenv_cache "$cache_file"
+  fi
+
+  if _is_valid_devbox_shellenv_cache "$cache_file"; then
+    source "$cache_file"
+  fi
+}
+
 reload() {
   # Use zsh's EPOCHREALTIME for millisecond precision (macOS compatible)
   zmodload zsh/datetime 2>/dev/null

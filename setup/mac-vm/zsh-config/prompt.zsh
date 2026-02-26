@@ -17,26 +17,38 @@ _cache_init() {
   local name="$1"
   local cmd="$2"
   local cache_file="$_ZSH_CACHE_DIR/${name}-init.zsh"
+  local refresh_cache=0
 
   # Regenerate if missing or older than 1 day (86400 seconds)
   # Uses zsh native $EPOCHSECONDS and zstat instead of external commands
-  if [[ ! -f "$cache_file" ]]; then
-    eval "$cmd" > "$cache_file" 2>/dev/null
+  if [[ ! -s "$cache_file" ]]; then
+    refresh_cache=1
   else
     local file_mtime
-    zstat -A file_mtime +mtime "$cache_file" 2>/dev/null
+    zstat -A file_mtime +mtime "$cache_file" 2>/dev/null || refresh_cache=1
     if (( EPOCHSECONDS - file_mtime > 86400 )); then
-      eval "$cmd" > "$cache_file" 2>/dev/null
+      refresh_cache=1
     fi
   fi
+
+  if (( refresh_cache )); then
+    local tmp_file="${cache_file}.tmp.$$"
+    if eval "$cmd" > "$tmp_file" 2>/dev/null && [[ -s "$tmp_file" ]]; then
+      mv "$tmp_file" "$cache_file"
+    else
+      rm -f "$tmp_file"
+    fi
+  fi
+
+  [[ -s "$cache_file" ]] || return 1
   source "$cache_file"
 }
 
 # Check if Nix/Devbox is installed (native zsh check - faster than command -v)
 if (( $+commands[nix] )); then
     # With Devbox: Use Nix-managed binaries
-    _cache_init "zoxide" "/Users/hameldesai/.local/share/devbox/global/default/.devbox/nix/profile/default/bin/zoxide init --cmd cd zsh"
-    _cache_init "starship" "/Users/hameldesai/.local/share/devbox/global/default/.devbox/nix/profile/default/bin/starship init zsh"
+    _cache_init "zoxide" "/Users/hameldesai/.local/share/devbox/global/default/.devbox/nix/profile/default/bin/zoxide init --cmd cd zsh" || _cache_init "zoxide" "zoxide init --cmd cd zsh"
+    _cache_init "starship" "/Users/hameldesai/.local/share/devbox/global/default/.devbox/nix/profile/default/bin/starship init zsh" || _cache_init "starship" "starship init zsh"
 else
     # Without Devbox: Use system binaries
     _cache_init "zoxide" "zoxide init --cmd cd zsh"
