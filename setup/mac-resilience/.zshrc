@@ -123,6 +123,7 @@ alias sf-doppler-env="doppler run -- env | sort | grep SNOWFLAKE"
 alias sf-configure="cd ~/Developer/Resilience/resilience-platform && ./rsw-snowflake-access.sh configure"
 alias sf-test="cd ~/Developer/Resilience/resilience-platform && ./rsw-snowflake-access.sh test"
 alias doppler-setup-dev="cd ~/Developer/Resilience/resilience-platform && run-with-github-token yarn doppler-setup-dev"
+alias arm64="cd ~/Developer/Resilience/resilience-platform && run-with-github-token yarn run build:docker-arm64"
 
 # [Repos]
 alias cdplat='cd ~/Developer/Resilience/resilience-platform'
