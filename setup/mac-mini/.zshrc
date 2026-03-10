@@ -59,6 +59,8 @@ if [[ -n "$SSH_CONNECTION" ]]; then
   export GIT_EDITOR="vim"
   export EDITOR="vim"
 fi
+export GOG_ACCOUNT="hameldesai3@gmail.com"
+export GOG_KEYRING_PASSWORD="REMOVED_SECRET"
 
 # -----------------------------------------------------------------------------
 # Tool Init Scripts (cached for speed)
@@ -94,3 +96,17 @@ if _cache_needs_refresh "$_fnm_cache"; then
   fnm env --use-on-cd > "$_fnm_cache" 2>/dev/null
 fi
 [[ -f "$_fnm_cache" ]] && source "$_fnm_cache"
+
+# Created by `pipx` on 2026-01-27 22:02:05
+export PATH="$PATH:/Users/hd/.local/bin"
+
+# OpenClaw Completion
+source "/Users/hd/.openclaw/completions/openclaw.zsh"
+
+# pnpm
+export PNPM_HOME="/Users/hd/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
