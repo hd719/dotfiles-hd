@@ -92,15 +92,18 @@ if _cache_needs_refresh "$_fnm_cache"; then
 fi
 [[ -f "$_fnm_cache" ]] && source "$_fnm_cache"
 
-# Helper function: Run command with GITHUB_TOKEN (from 1Password or environment)
-# Usage: run-with-github-token <command>
-run-with-github-token() {
-    if [ -n "$GITHUB_TOKEN" ]; then
-        # GITHUB_TOKEN already set in environment, use it directly
-        eval "$@"
+# Helper function: Run command with CODEARTIFACT_AUTH_TOKEN from 1Password or environment
+# Usage: run-with-codeartifact-token <command>
+run-with-codeartifact-token() {
+    if [ -n "${CODEARTIFACT_AUTH_TOKEN:-}" ]; then
+        # Token already set in environment, use it directly
+        FORCE_COLOR=1 \
+        CLICOLOR_FORCE=1 \
+        COLORTERM=truecolor \
+        TERM=xterm-256color \
+        "$@"
     else
-        # Try to get from 1Password
-        GITHUB_TOKEN=op://Employee/GITHUB_TOKEN/credential \
+        CODEARTIFACT_AUTH_TOKEN=op://Employee/CODEARTIFACT_AUTH_TOKEN/credential \
         FORCE_COLOR=1 \
         CLICOLOR_FORCE=1 \
         COLORTERM=truecolor \
@@ -122,8 +125,8 @@ alias aws-profiles="aws configure list-profiles"
 alias sf-doppler-env="doppler run -- env | sort | grep SNOWFLAKE"
 alias sf-configure="cd ~/Developer/Resilience/resilience-platform && ./rsw-snowflake-access.sh configure"
 alias sf-test="cd ~/Developer/Resilience/resilience-platform && ./rsw-snowflake-access.sh test"
-alias doppler-setup-dev="cd ~/Developer/Resilience/resilience-platform && run-with-github-token yarn doppler-setup-dev"
-alias arm64="cd ~/Developer/Resilience/resilience-platform && run-with-github-token yarn run build:docker-arm64"
+alias doppler-setup-dev="cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token yarn doppler-setup-dev"
+alias arm64="cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token yarn run build:docker-arm64"
 
 # [Repos]
 alias cdplat='cd ~/Developer/Resilience/resilience-platform'
@@ -136,11 +139,11 @@ alias cdparg='cd ~/Developer/Resilience/resilience-pargasite'
 alias res-plat-be="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw-initup latest"
 
 # Proxies (Dev Mode): Start both proxies with hot reloading for development
-alias res-plat-proxy-web="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-proxy && run-with-github-token yarn workbench-proxy"
-alias res-plat-proxy-rsc="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-proxy && run-with-github-token yarn client-portal-proxy"
+alias res-plat-proxy-web="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-proxy && run-with-codeartifact-token yarn workbench-proxy"
+alias res-plat-proxy-rsc="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-proxy && run-with-codeartifact-token yarn client-portal-proxy"
 
 # Frontend: Start the web application
-alias res-plat-fe="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-web && run-with-github-token yarn dev"
+alias res-plat-fe="cd ~/Developer/Resilience/resilience-platform/apps/resilience-security-workbench-web && run-with-codeartifact-token yarn dev"
 
 # Stop/Down: Stop all Docker containers
 alias res-plat-down="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw down"
@@ -153,19 +156,19 @@ alias res-plat-status="cd ~/Developer/Resilience/resilience-platform && bash doc
 
 alias res-plat-hasura="cd ~/Developer/Resilience/resilience-platform && bash docker/rsw-console"
 
-alias res-plat-refresh-gql="cd ~/Developer/Resilience/resilience-platform && run-with-github-token yarn refresh-gql"
+alias res-plat-refresh-gql="cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token yarn refresh-gql"
 
 # Hasura Migrations: Apply pending migrations
-alias res-plat-migrate-apply='(cd ~/Developer/Resilience/resilience-platform && run-with-github-token zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-migrate-apply")'
+alias res-plat-migrate-apply='(cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-migrate-apply")'
 
 # Hasura Migrations: Check migration status
-alias res-plat-migrate-status='(cd ~/Developer/Resilience/resilience-platform && run-with-github-token zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-migrate-status")'
+alias res-plat-migrate-status='(cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-migrate-status")'
 
 # Hasura Metadata: Apply metadata changes
-alias res-plat-metadata-apply='(cd ~/Developer/Resilience/resilience-platform && run-with-github-token zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-metadata-apply")'
+alias res-plat-metadata-apply='(cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-metadata-apply")'
 
 # Hasura Metadata: Export metadata to files
-alias res-plat-metadata-export='(cd ~/Developer/Resilience/resilience-platform && run-with-github-token zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-metadata-export")'
+alias res-plat-metadata-export='(cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token zsh -c "source bin/rsw-commands.sh && rsw-setup-hasura && rsw-hasura-metadata-export")'
 
 # Database: Restore database from SQL file (usage: res-plat-db-restore <path_to_sql>)
 res-plat-db-restore() {
@@ -174,7 +177,7 @@ res-plat-db-restore() {
         return 1
     fi
     (cd ~/Developer/Resilience/resilience-platform && \
-     run-with-github-token zsh -c "source bin/rsw-commands.sh && rsw-restore-db '$1'")
+     run-with-codeartifact-token zsh -c "source bin/rsw-commands.sh && rsw-restore-db '$1'")
 }
 
 # Database: Initialize database with SQL file (usage: res-plat-db-init <path_to_sql>)
@@ -184,7 +187,7 @@ res-plat-db-init() {
         return 1
     fi
     (cd ~/Developer/Resilience/resilience-platform && \
-     run-with-github-token zsh -c "source bin/rsw-commands.sh && rsw-init-db '$1'")
+     run-with-codeartifact-token zsh -c "source bin/rsw-commands.sh && rsw-init-db '$1'")
 }
 
 # Database: Initialize and start services (usage: res-plat-init-up [path_to_sql])
@@ -192,10 +195,10 @@ res-plat-db-init() {
 res-plat-init-up() {
     if [ -z "$1" ]; then
         (cd ~/Developer/Resilience/resilience-platform && \
-         run-with-github-token zsh -c "source bin/rsw-commands.sh && rsw-init-up")
+         run-with-codeartifact-token zsh -c "source bin/rsw-commands.sh && rsw-init-up")
     else
         (cd ~/Developer/Resilience/resilience-platform && \
-         run-with-github-token zsh -c "source bin/rsw-commands.sh && rsw-init-up '$1'")
+         run-with-codeartifact-token zsh -c "source bin/rsw-commands.sh && rsw-init-up '$1'")
     fi
 }
 
@@ -206,9 +209,9 @@ alias tm-plat-be="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-
 alias tm-plat="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-platform.sh"
 
 # Build all workspace packages (run after install or pulling changes to internal packages)
-alias res-plat-build="cd ~/Developer/Resilience/resilience-platform && run-with-github-token yarn build"
+alias res-plat-build="cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token yarn build"
 # Install dependencies with proper authentication
-alias res-plat-install="cd ~/Developer/Resilience/resilience-platform && run-with-github-token yarn install"
+alias res-plat-install="cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token yarn install"
 
 # --------------------------------------------------------------------------------------------------------
 # [Pargasite Development]
@@ -216,7 +219,7 @@ alias res-plat-install="cd ~/Developer/Resilience/resilience-platform && run-wit
 # Note: Pargasite depends on Platform's backend (postgres, hasura, proxy) - run res-plat-be first!
 
 # Bootstrap: Install all packages including Playwright (first time setup)
-alias res-parg-bootstrap="cd ~/Developer/Resilience/resilience-pargasite && run-with-github-token yarn bootstrap"
+alias res-parg-bootstrap="cd ~/Developer/Resilience/resilience-pargasite && run-with-codeartifact-token yarn bootstrap"
 
 # Doppler Setup: Configure environment variables (first time setup)
 alias res-parg-doppler="cd ~/Developer/Resilience/resilience-pargasite && yarn run doppler-setup-dev"
@@ -225,25 +228,25 @@ alias res-parg-doppler="cd ~/Developer/Resilience/resilience-pargasite && yarn r
 alias res-parg-hooks="cd ~/Developer/Resilience/resilience-pargasite && yarn init-git-hooks"
 
 # Build: Build all packages (run after install or pulling package changes)
-alias res-parg-build="cd ~/Developer/Resilience/resilience-pargasite && run-with-github-token yarn build"
+alias res-parg-build="cd ~/Developer/Resilience/resilience-pargasite && run-with-codeartifact-token yarn build"
 
 # Install: Install dependencies
-alias res-parg-install="cd ~/Developer/Resilience/resilience-pargasite && run-with-github-token yarn install"
+alias res-parg-install="cd ~/Developer/Resilience/resilience-pargasite && run-with-codeartifact-token yarn install"
 
 # Dev: Run all apps in parallel (client-suite on :3003, arc on :4004, etc.)
-alias res-parg-dev="cd ~/Developer/Resilience/resilience-pargasite && run-with-github-token yarn dev"
+alias res-parg-dev="cd ~/Developer/Resilience/resilience-pargasite && run-with-codeartifact-token yarn dev"
 
 # Client Suite: Run only the client-suite app (port 3003)
-alias res-parg-client="cd ~/Developer/Resilience/resilience-pargasite/apps/client-suite && run-with-github-token yarn dev"
+alias res-parg-client="cd ~/Developer/Resilience/resilience-pargasite/apps/client-suite && run-with-codeartifact-token yarn dev"
 
 # Arc: Run only the arc app (port 4004)
-alias res-parg-arc="cd ~/Developer/Resilience/resilience-pargasite/apps/arc && run-with-github-token yarn dev"
+alias res-parg-arc="cd ~/Developer/Resilience/resilience-pargasite/apps/arc && run-with-codeartifact-token yarn dev"
 
 # Cyber Risk Calculator: Run only the cyber-risk-calculator app
-alias res-parg-calc="cd ~/Developer/Resilience/resilience-pargasite/apps/cyber-risk-calculator && run-with-github-token yarn dev"
+alias res-parg-calc="cd ~/Developer/Resilience/resilience-pargasite/apps/cyber-risk-calculator && run-with-codeartifact-token yarn dev"
 
 # GraphQL: Refresh GraphQL schema and codegen
-alias res-parg-gql="cd ~/Developer/Resilience/resilience-pargasite && run-with-github-token yarn refresh-gql"
+alias res-parg-gql="cd ~/Developer/Resilience/resilience-pargasite && run-with-codeartifact-token yarn refresh-gql"
 
 # [Tmux Pargasite Session Aliases]
 alias tm-parg-client="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-client.sh"
