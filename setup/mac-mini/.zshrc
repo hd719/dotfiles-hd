@@ -60,7 +60,7 @@ if [[ -n "$SSH_CONNECTION" ]]; then
   export EDITOR="vim"
 fi
 export GOG_ACCOUNT="hameldesai3@gmail.com"
-export GOG_KEYRING_PASSWORD="REMOVED_SECRET"
+[ -f "$HOME/.gog-env" ] && source "$HOME/.gog-env"
 
 # -----------------------------------------------------------------------------
 # Tool Init Scripts (cached for speed)
