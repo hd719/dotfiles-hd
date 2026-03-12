@@ -95,21 +95,82 @@ fi
 # Helper function: Run command with CODEARTIFACT_AUTH_TOKEN from 1Password or environment
 # Usage: run-with-codeartifact-token <command>
 run-with-codeartifact-token() {
-    if [ -n "${CODEARTIFACT_AUTH_TOKEN:-}" ]; then
-        # Token already set in environment, use it directly
-        FORCE_COLOR=1 \
-        CLICOLOR_FORCE=1 \
-        COLORTERM=truecolor \
-        TERM=xterm-256color \
-        "$@"
+  local token="${CODEARTIFACT_AUTH_TOKEN:-}"
+
+  if [ -z "$token" ]; then
+    token="$(aws codeartifact get-authorization-token --domain arceo --query authorizationToken --output text 2>/dev/null)"
+
+    if [ -n "$token" ] && [ "$token" != "None" ]; then
+      export CODEARTIFACT_AUTH_TOKEN="$token"
+      FORCE_COLOR=1 \
+      CLICOLOR_FORCE=1 \
+      COLORTERM=truecolor \
+      TERM=xterm-256color \
+      "$@"
     else
-        CODEARTIFACT_AUTH_TOKEN=op://Employee/CODEARTIFACT_AUTH_TOKEN/credential \
-        FORCE_COLOR=1 \
-        CLICOLOR_FORCE=1 \
-        COLORTERM=truecolor \
-        TERM=xterm-256color \
-        op run -- "$@"
+      CODEARTIFACT_AUTH_TOKEN=op://Employee/CODEARTIFACT_AUTH_TOKEN/credential \
+      FORCE_COLOR=1 \
+      CLICOLOR_FORCE=1 \
+      COLORTERM=truecolor \
+      TERM=xterm-256color \
+      op run -- "$@"
     fi
+  else
+    FORCE_COLOR=1 \
+    CLICOLOR_FORCE=1 \
+    COLORTERM=truecolor \
+    TERM=xterm-256color \
+    "$@"
+  fi
+}
+
+codeartifact-login() {
+  export CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain arceo --query authorizationToken --output text)"
+}
+
+# [Pull all repos on dev branch]
+gda() {
+  startdir=$(pwd)
+
+  # Function to update a single repo
+  update_repo() {
+    local repo_path="$1"
+    local repo_name="$2"
+    echo "****** Pulling $repo_name ******"
+    cd "$repo_path" && git checkout dev && git pull origin dev
+  }
+
+  # Run all updates sequentially (no background processes)
+  update_repo ~/Developer/Resilience/resilience-platform "Resilience Platform"
+  update_repo ~/Developer/Resilience/resilience-pargasite "Resilience Pargasite"
+
+  cd "$startdir"
+}
+
+goodMorning() {
+  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
+
+  # Skip Homebrew updates if hostname contains 'virtual' (case insensitive)
+  if [[ ! "$(hostname)" =~ [Vv]irtual ]]; then
+    # Optional flag for Homebrew updates
+    if [[ "$1" != "--no-brew" ]]; then
+      echo "Updating Homebrew..."
+      brew update
+      if brew outdated | grep -q .; then
+        brew upgrade --greedy
+        brew cleanup
+        brew autoremove
+      else
+        echo "No Homebrew packages to upgrade"
+      fi
+    fi
+  else
+    echo "Skipping Homebrew update (virtual environment detected)"
+  fi
+
+  echo "Updating Git repositories..."
+  gda
+  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 }
 
 # --------------------------------------------------------------------------------------------------------
@@ -254,51 +315,9 @@ alias tm-parg-arc="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/t
 alias tm-parg-calc="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-calc.sh"
 alias tm-parg="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-pargasite.sh"
 
-# [Pull all repos on dev branch]
-gda() {
-  startdir=$(pwd)
-
-  # Function to update a single repo
-  update_repo() {
-    local repo_path="$1"
-    local repo_name="$2"
-    echo "****** Pulling $repo_name ******"
-    cd "$repo_path" && git checkout dev && git pull origin dev
-  }
-
-  # Run all updates sequentially (no background processes)
-  update_repo ~/Developer/Resilience/resilience-platform "Resilience Platform"
-  update_repo ~/Developer/Resilience/resilience-pargasite "Resilience Pargasite"
-
-  cd "$startdir"
-}
-
-goodMorning() {
-  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
-
-  # Skip Homebrew updates if hostname contains 'virtual' (case insensitive)
-  if [[ ! "$(hostname)" =~ [Vv]irtual ]]; then
-    # Optional flag for Homebrew updates
-    if [[ "$1" != "--no-brew" ]]; then
-      echo "Updating Homebrew..."
-      brew update
-      if brew outdated | grep -q .; then
-        brew upgrade --greedy
-        brew cleanup
-        brew autoremove
-      else
-        echo "No Homebrew packages to upgrade"
-      fi
-    fi
-  else
-    echo "Skipping Homebrew update (virtual environment detected)"
-  fi
-
-  echo "Updating Git repositories..."
-  gda
-  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
-}
-
+# --------------------------------------------------------------------------------------------------------
+# [Z-Scaler Development]
+# --------------------------------------------------------------------------------------------------------
 # Create a CA Bundle with the ZScaler root CA
 #   Similar process to exporting via GUI from /System/Library/CoreServices/Applications/Keychain\ Access.app
 # More example apps at:
