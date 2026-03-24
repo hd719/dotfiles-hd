@@ -180,3 +180,10 @@ alias pf-dev='(cd ~/Developer/nextjs-monorepo && devbox run pf:dev)'
 alias pf-build='(cd ~/Developer/nextjs-monorepo && devbox run pf:build)'
 alias pf-start='(cd ~/Developer/nextjs-monorepo && devbox run pf:start)'
 alias pf-lint='(cd ~/Developer/nextjs-monorepo && devbox run pf:lint)'
+
+# Stocks
+alias cday='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/daytime_flow.sh'
+alias cnight='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/nighttime_flow.sh'
+alias cday_nostream='cd /Users/hd/Developer/cortana-external/backtester && SCHWAB_STREAMER_ENABLED=0 ./scripts/daytime_flow.sh'
+alias clive='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/live_watch.sh'
+alias clive4='cd /Users/hd/Developer/cortana-external/backtester && WATCH_SYMBOLS=SPY,QQQ,DIA,NVDA FOCUS_SYMBOL=SPY ./scripts/live_watch.sh'
