@@ -181,14 +181,22 @@ alias pf-build='(cd ~/Developer/nextjs-monorepo && devbox run pf:build)'
 alias pf-start='(cd ~/Developer/nextjs-monorepo && devbox run pf:start)'
 alias pf-lint='(cd ~/Developer/nextjs-monorepo && devbox run pf:lint)'
 
-# Stocks
+# Stocks (backtester cortana-external)
 alias cday='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/daytime_flow.sh'
-alias cnight='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/nighttime_flow.sh'
 alias cday_nostream='cd /Users/hd/Developer/cortana-external/backtester && SCHWAB_STREAMER_ENABLED=0 ./scripts/daytime_flow.sh'
+
 alias clive='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/live_watch.sh'
 alias clive4='cd /Users/hd/Developer/cortana-external/backtester && WATCH_SYMBOLS=SPY,QQQ,DIA,NVDA FOCUS_SYMBOL=SPY ./scripts/live_watch.sh'
+
 alias crefresh_watchlists='cd /Users/hd/Developer/cortana-external && ./tools/market-intel/run_market_intel.sh && ./tools/stock-discovery/trend_sweep.sh'
+
 alias cwatch='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/watchlist_watch.sh'
 alias cwatch20='cd /Users/hd/Developer/cortana-external/backtester && WATCHLIST_LIMIT=20 ./scripts/watchlist_watch.sh'
+
 alias cxauth='cd /Users/hd/Developer/cortana-external && ./tools/stock-discovery/sync_bird_auth.sh'
 
+alias cnight='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/nighttime_flow.sh'
+alias cnight_fast='cd /Users/hd/Developer/cortana-external/backtester && SKIP_LIVE_PREFILTER_REFRESH=1 ./scripts/nighttime_flow.sh'
+alias cnight_force='cd /Users/hd/Developer/cortana-external/backtester && FORCE_LIVE_PREFILTER_REFRESH=1 ./scripts/nighttime_flow.sh'
+alias cnight10='cd /Users/hd/Developer/cortana-external/backtester && NIGHTLY_LIMIT=10 ./scripts/nighttime_flow.sh'
+alias cnight10_fast='cd /Users/hd/Developer/cortana-external/backtester && NIGHTLY_LIMIT=10 SKIP_LIVE_PREFILTER_REFRESH=1 ./scripts/nighttime_flow.sh'
