@@ -92,24 +92,20 @@ if _cache_needs_refresh "$_fnm_cache"; then
 fi
 [[ -f "$_fnm_cache" ]] && source "$_fnm_cache"
 
-# Helper function: Run command with CODEARTIFACT_AUTH_TOKEN from 1Password or environment
-# Usage: run-with-codeartifact-token <command>
+set_code_artifact() {
+    export CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain arceo --query authorizationToken --output text)"
+}
+
 run-with-codeartifact-token() {
-    if [ -n "${CODEARTIFACT_AUTH_TOKEN:-}" ]; then
-        # Token already set in environment, use it directly
-        FORCE_COLOR=1 \
-        CLICOLOR_FORCE=1 \
-        COLORTERM=truecolor \
-        TERM=xterm-256color \
-        "$@"
-    else
-        CODEARTIFACT_AUTH_TOKEN=op://Employee/CODEARTIFACT_AUTH_TOKEN/credential \
-        FORCE_COLOR=1 \
-        CLICOLOR_FORCE=1 \
-        COLORTERM=truecolor \
-        TERM=xterm-256color \
-        op run -- "$@"
+    if [ -z "${CODEARTIFACT_AUTH_TOKEN:-}" ]; then
+        set_code_artifact || return 1
     fi
+
+    FORCE_COLOR=1 \
+    CLICOLOR_FORCE=1 \
+    COLORTERM=truecolor \
+    TERM=xterm-256color \
+    "$@"
 }
 
 # --------------------------------------------------------------------------------------------------------
