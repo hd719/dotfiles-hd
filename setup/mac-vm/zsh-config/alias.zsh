@@ -182,13 +182,59 @@ alias pf-start='(cd ~/Developer/nextjs-monorepo && devbox run pf:start)'
 alias pf-lint='(cd ~/Developer/nextjs-monorepo && devbox run pf:lint)'
 
 # Stocks
+# Main daytime workflow.
+# Use this first when you want the full operator dashboard:
+# market regime, macro context, CANSLIM, Dip Buyer, and quick checks.
 alias cday='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/daytime_flow.sh'
+
+# Nighttime discovery workflow.
+# Use after close / overnight to refresh discovery, caches, and accuracy reporting.
 alias cnight='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/nighttime_flow.sh'
+
+# Daytime workflow with Schwab streamer disabled.
+# Use only for debugging streamer-related issues.
 alias cday_nostream='cd /Users/hd/Developer/cortana-external/backtester && SCHWAB_STREAMER_ENABLED=0 ./scripts/daytime_flow.sh'
+
+# Quick live market tape for a small default set.
+# Use when you want a fast intraday glance at SPY/QQQ.
 alias clive='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/live_watch.sh'
+
+# Expanded live tape view.
+# Use when you want SPY, QQQ, DIA, and NVDA in one quick check.
 alias clive4='cd /Users/hd/Developer/cortana-external/backtester && WATCH_SYMBOLS=SPY,QQQ,DIA,NVDA FOCUS_SYMBOL=SPY ./scripts/live_watch.sh'
+
+# Force-refresh Polymarket + X/Twitter watchlists.
+# Use before cwatch if you want the freshest upstream watchlist inputs.
 alias crefresh_watchlists='cd /Users/hd/Developer/cortana-external && ./tools/market-intel/run_market_intel.sh && ./tools/stock-discovery/trend_sweep.sh'
+
+# Watchlist pulse.
+# Use to fetch fresh prices for the current saved watchlist names.
 alias cwatch='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/watchlist_watch.sh'
+
+# Same as cwatch, but with a larger watchlist cut.
+# Use when you want a broader watchlist pulse.
 alias cwatch20='cd /Users/hd/Developer/cortana-external/backtester && WATCHLIST_LIMIT=20 ./scripts/watchlist_watch.sh'
+
+# Repair / sync X auth for the bird/OpenClaw path.
+# Use only if the X/Twitter refresh path reports auth trouble.
 alias cxauth='cd /Users/hd/Developer/cortana-external && ./tools/stock-discovery/sync_bird_auth.sh'
 
+# Compact market snapshot used by the main cron.
+# Use when you want the clean market-state JSON, including intraday breadth.
+alias cbreadth='cd /Users/hd/Developer/cortana-external/backtester && uv run python market_brief_snapshot.py --pretty'
+
+# Direct Dip Buyer run with normal thresholds.
+# Use when you want to inspect Dip Buyer without running the whole daytime flow.
+alias cdip='cd /Users/hd/Developer/cortana-external/backtester && uv run python dipbuyer_alert.py --limit 8 --min-score 6 --universe-size 120'
+
+# Direct Dip Buyer run with intraday breadth override explicitly enabled.
+# Use when the tape feels strong and you want to see whether correction-mode selective buys survive.
+alias cdip_breadth='cd /Users/hd/Developer/cortana-external/backtester && TRADING_INTRADAY_BREADTH_ENABLED=1 uv run python dipbuyer_alert.py --limit 8 --min-score 6 --universe-size 120'
+
+# Easier-to-trigger local breadth test profile.
+# Use only for debugging / local validation when you want to see the selective-buy path fire more easily.
+alias cdip_breadth_loose='cd /Users/hd/Developer/cortana-external/backtester && TRADING_INTRADAY_BREADTH_ENABLED=1 TRADING_INTRADAY_BREADTH_MAX_BUYS=3 TRADING_INTRADAY_BREADTH_SPY_MIN_PCT=1.0 TRADING_INTRADAY_BREADTH_QQQ_MIN_PCT=1.5 TRADING_INTRADAY_BREADTH_SP500_PCT_UP_MIN=0.65 TRADING_INTRADAY_BREADTH_GROWTH_PCT_UP_MIN=0.60 uv run python dipbuyer_alert.py --limit 8 --min-score 6 --universe-size 120'
+
+# Raw intraday breadth decision object.
+# Use when you want exact breadth stats, override state, and warnings for debugging.
+alias cbreadth_raw='cd /Users/hd/Developer/cortana-external/backtester && uv run python - <<\"PY\"\nfrom data.intraday_breadth import build_intraday_breadth_snapshot\nimport json\nprint(json.dumps(build_intraday_breadth_snapshot(), indent=2, sort_keys=True))\nPY'
