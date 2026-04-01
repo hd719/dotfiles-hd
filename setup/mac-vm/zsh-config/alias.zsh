@@ -221,7 +221,7 @@ alias cxauth='cd /Users/hd/Developer/cortana-external && ./tools/stock-discovery
 
 # Compact market snapshot used by the main cron.
 # Use when you want the clean market-state JSON, including intraday breadth.
-alias cbreadth='cd /Users/hd/Developer/cortana-external/backtester && uv run python market_brief_snapshot.py --pretty'
+alias cbreadth='cd /Users/hd/Developer/cortana-external/backtester && uv run python market_brief_snapshot.py --operator'
 
 # Direct Dip Buyer run with normal thresholds.
 # Use when you want to inspect Dip Buyer without running the whole daytime flow.
@@ -237,4 +237,4 @@ alias cdip_breadth_loose='cd /Users/hd/Developer/cortana-external/backtester && 
 
 # Raw intraday breadth decision object.
 # Use when you want exact breadth stats, override state, and warnings for debugging.
-alias cbreadth_raw='cd /Users/hd/Developer/cortana-external/backtester && uv run python - <<\"PY\"\nfrom data.intraday_breadth import build_intraday_breadth_snapshot\nimport json\nprint(json.dumps(build_intraday_breadth_snapshot(), indent=2, sort_keys=True))\nPY'
+alias cbreadth_raw='cd /Users/hd/Developer/cortana-external/backtester && uv run python market_brief_snapshot.py --pretty'
