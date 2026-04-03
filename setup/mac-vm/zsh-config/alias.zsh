@@ -182,6 +182,20 @@ alias pf-start='(cd ~/Developer/nextjs-monorepo && devbox run pf:start)'
 alias pf-lint='(cd ~/Developer/nextjs-monorepo && devbox run pf:lint)'
 
 # Stocks
+# Main operator workflow entrypoint.
+# Use this first for the guided day-to-day workflow.
+alias cop='cd /Users/hd/Developer/cortana-external/backtester && ./scripts/operator_workflow.sh'
+
+# Guided workflow modes.
+# Use these instead of memorizing multiple lower-level commands.
+alias cop_pre='cop premarket'
+alias cop_open='cop open'
+alias cop_mid='cop midday'
+alias cop_close='cop close'
+alias cop_night='cop night'
+alias cop_health='cop health'
+
+# Direct script access below is still useful for debugging or deeper inspection.
 # Main daytime workflow.
 # Use this first when you want the full operator dashboard:
 # market regime, macro context, CANSLIM, Dip Buyer, and quick checks.
