@@ -181,6 +181,9 @@ alias pf-build='(cd ~/Developer/nextjs-monorepo && devbox run pf:build)'
 alias pf-start='(cd ~/Developer/nextjs-monorepo && devbox run pf:start)'
 alias pf-lint='(cd ~/Developer/nextjs-monorepo && devbox run pf:lint)'
 
+# Cortana
+alias cortana-sync='bash /Users/hd/Developer/cortana/tools/repo/post-merge-sync.sh'
+
 # Stocks
 # Main daytime workflow.
 # Use this first when you want the full operator dashboard:

@@ -51,3 +51,4 @@ if [[ -f ~/.zcompdump ]]; then
 else
   compinit       # First run
 fi
+export PATH="$HOME/.local/bin:$PATH"
