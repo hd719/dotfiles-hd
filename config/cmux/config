@@ -1,4 +1,4 @@
-# This is the configuration file for Ghostty.
+	# This is the configuration file for Ghostty.
 #
 # This template file has been automatically created at the following
 # path since Ghostty couldn't find any existing config files on your system:
@@ -48,31 +48,31 @@
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
 
-palette = 0=#1D1F20
-palette = 1=#EB605A
-palette = 2=#88FB8D
-palette = 3=#F8D85D
-palette = 4=#68C1F9
-palette = 5=#EB5181
-palette = 6=#8FF8DB
-palette = 7=#FEFEFE
-palette = 8=#b2b2b2
-palette = 9=#EB554E
-palette = 10=#8EEDB2
-palette = 11=#F9DD6E
-palette = 12=#68C1F8
-palette = 13=#EB5080
-palette = 14=#8FF8DB
-palette = 15=#FEFEFE
-background = #282935
-foreground = #EFEFEB
-cursor-color = #E9E9E9
-selection-background = #9ABACE
-selection-foreground = #000001
+palette = 0=#2e3440
+palette = 1=#d06b74
+palette = 2=#b5d199
+palette = 3=#f4d68a
+palette = 4=#6b8fc0
+palette = 5=#c094bb
+palette = 6=#9ad2de
+palette = 7=#eceff4
+palette = 8=#4c566a
+palette = 9=#e2777f
+palette = 10=#c3dea3
+palette = 11=#f7dd92
+palette = 12=#8cafce
+palette = 13=#d1a9c5
+palette = 14=#a3d1c9
+palette = 15=#ffffff
+background = #3b4252
+foreground = #eceff4
+cursor-color = #d8dee9
+selection-background = #434c5e
+selection-foreground = #eceff4
 
 font-family = CaskaydiaCove Nerd Font Propo
 font-style = SemiBold
-font-size = 13
+font-size = 14.5
 
 window-decoration = true
 window-padding-x = 10
@@ -87,7 +87,6 @@ gtk-tabs-location = top
 cursor-style = block
 cursor-style-blink = true
 shell-integration-features = no-cursor
-cursor-color = #40fdbd
 
 macos-titlebar-style = transparent
 macos-titlebar-proxy-icon = hidden
@@ -130,3 +129,4 @@ keybind = cmd+s>period=move_tab:1
 # eybind = cmd+s>e=equalize_splits
 # other
 copy-on-select = clipboard
+
