@@ -13,20 +13,21 @@ source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
 source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
 source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 
-# -----------------------------------------------------------------------------
-# Devbox Global Environment (cached for speed, using zsh native stat)
-# -----------------------------------------------------------------------------
-_load_devbox_shellenv_cached
+# Remove inherited Nix/Devbox paths before the new toolchain activates.
+path=(${path:#$HOME/.local/share/devbox/global/default/.devbox/nix/profile/default/bin})
+path=(${path:#$HOME/.local/share/devbox/global/default/.devbox/virtenv/runx/bin})
+path=(${path:#$HOME/.nix-profile/bin})
+path=(${path:#/nix/var/nix/profiles/default/bin})
+export PATH="${(j/:/)path}"
 
 # -----------------------------------------------------------------------------
 # Plugins - Load immediately for better UX
 # Adds ~5-10ms to startup but plugins work right away
 # -----------------------------------------------------------------------------
-_load_nix_plugin "zsh-autosuggestions"
-_load_nix_plugin "zsh-syntax-highlighting"
+_load_homebrew_plugin "/opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+_load_homebrew_plugin "/opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
-# Fix: Devbox sets NO_COLOR, FORCE_COLOR=0, and CI=1 which disables colors
-# Override these to enable colors for lsd, bat, snitch, and other CLI tools
+# Keep color-capable CLIs from inheriting restrictive environment flags.
 unset NO_COLOR
 unset CI
 export FORCE_COLOR=1
@@ -52,3 +53,7 @@ else
   compinit       # First run
 fi
 export PATH="$HOME/.local/bin:$PATH"
+
+if [[ -x /opt/homebrew/bin/mise ]]; then
+  eval "$(/opt/homebrew/bin/mise activate zsh)"
+fi

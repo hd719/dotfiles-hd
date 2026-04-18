@@ -1,91 +1,10 @@
 # [Functions]
 # --------------------------------------------------------------------------------------------------------
 
-# Nix plugin loader with simple path cache (cache dir created in prompt.zsh)
-_get_cached_nix_plugin() {
-  local plugin_name="$1"
-  local cache_file="$_ZSH_CACHE_DIR/nix-$plugin_name-path"
-
-  if [[ -f "$cache_file" ]]; then
-    local cached_path
-    read -r cached_path < "$cache_file" 2>/dev/null
-    if [[ -r "$cached_path" ]]; then
-      echo "$cached_path"
-      return 0
-    fi
-  fi
-
-  return 1
-}
-
-_load_nix_plugin() {
-  local plugin_name="$1"
-  local cached_path="$(_get_cached_nix_plugin "$plugin_name")"
-
-  if [[ -n "$cached_path" && -r "$cached_path" ]]; then
-    source "$cached_path"
-  else
-    local glob_pattern="/nix/store/*-$plugin_name-*/share/$plugin_name/$plugin_name.zsh"
-    local found=($~glob_pattern(N[1]))
-    if [[ -n "$found" && -r "$found" ]]; then
-      source "$found"
-      echo "$found" > "$_ZSH_CACHE_DIR/nix-$plugin_name-path"
-    fi
-  fi
-}
-
-_refresh_devbox_shellenv_cache() {
-  local cache_file="$1"
-  local tmp_file="${cache_file}.tmp.$$"
-
-  if devbox global shellenv --quiet > "$tmp_file" 2>/dev/null && [[ -s "$tmp_file" ]]; then
-    mv "$tmp_file" "$cache_file"
-  else
-    rm -f "$tmp_file"
-  fi
-}
-
-_is_valid_devbox_shellenv_cache() {
-  local cache_file="$1"
-  [[ -s "$cache_file" ]] || return 1
-
-  local line first_nonempty=""
-  while IFS= read -r line; do
-    [[ -n "$line" ]] || continue
-    first_nonempty="$line"
-    break
-  done < "$cache_file"
-
-  [[ -n "$first_nonempty" ]] || return 1
-  [[ "$first_nonempty" == export\ * || "$first_nonempty" == if\ * ]]
-}
-
-_load_devbox_shellenv_cached() {
-  local cache_dir="${_ZSH_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/zsh}"
-  local cache_file="${cache_dir}/devbox-shellenv.zsh"
-  local refresh_interval_seconds=86400
-
-  [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
-  command -v devbox >/dev/null 2>&1 || return 0
-
-  if [[ ! -f "$cache_file" ]]; then
-    _refresh_devbox_shellenv_cache "$cache_file"
-  else
-    local cache_mtime
-    zstat -A cache_mtime +mtime "$cache_file" 2>/dev/null
-    if (( EPOCHSECONDS - cache_mtime > refresh_interval_seconds )); then
-      _refresh_devbox_shellenv_cache "$cache_file"
-    fi
-  fi
-
-  # Guard against plain text status output accidentally cached as shell code.
-  if ! _is_valid_devbox_shellenv_cache "$cache_file"; then
-    _refresh_devbox_shellenv_cache "$cache_file"
-  fi
-
-  if _is_valid_devbox_shellenv_cache "$cache_file"; then
-    source "$cache_file"
-  fi
+_load_homebrew_plugin() {
+  local plugin_path="$1"
+  [[ -r "$plugin_path" ]] || return 0
+  source "$plugin_path"
 }
 
 reload() {
@@ -216,57 +135,6 @@ check_ports() {
   fi
 }
 
-nix-gen-map() {
-  echo "Generation -> Nix Store Path + Size:"
-  printf "%-12s %-70s %10s\n" "Generation" "Store Path" "Size"
-  echo "-----------------------------------------------------------------------------------------------"
-  sudo -H nix-env --list-generations --profile /nix/var/nix/profiles/system | while read gen rest; do
-    link="/nix/var/nix/profiles/system-${gen}-link"
-    if [[ -L "$link" ]]; then
-      target=$(readlink "$link")
-      if [[ -n "$target" && -e "$target" ]]; then
-        size_kb=$(du -sk "$target" | awk '{print $1}')
-        printf "%-12s %-70s %10sK\n" "$gen" "$target" "$size_kb"
-      fi
-    fi
-  done
-}
-
-nix-gen-map-devbox() {
-  local profile="$HOME/.local/share/devbox/global/default/.devbox/nix/profile/default"
-  if [[ ! -e "$profile" ]]; then
-    echo "Devbox global profile not found at: $profile"
-    return 1
-  fi
-
-  local profile_dir="${profile%/*}"
-  local base="${profile##*/}"
-
-  echo "Generation -> Nix Store Path + Size (Devbox Global):"
-  printf "%-12s %-70s %10s\n" "Generation" "Store Path" "Size"
-  echo "-----------------------------------------------------------------------------------------------"
-  nix-env --list-generations --profile "$profile" | while read gen rest; do
-    link="$profile_dir/${base}-${gen}-link"
-    if [[ -L "$link" ]]; then
-      target=$(readlink "$link")
-      if [[ -n "$target" && -e "$target" ]]; then
-        size_kb=$(du -sk "$target" | awk '{print $1}')
-        size_gb=$(awk -v kb="$size_kb" 'BEGIN { printf "%.2fGB", kb/1024/1024 }')
-        printf "%-12s %-70s %10s\n" "$gen" "$target" "$size_gb"
-      fi
-    fi
-  done
-}
-
-nix-gen-size() {
-  for link in /nix/var/nix/profiles/system-*-link; do
-    target=$(readlink "$link")
-    if [[ -n "$target" && -e "$target" ]]; then
-      du -sh "$target"
-    fi
-  done
-}
-
 goodMorning() {
   emulate -L zsh
   set +x 2>/dev/null
@@ -287,24 +155,14 @@ goodMorning() {
   fi
   echo ""
 
-  echo "Upgrading Devbox"
-  if command -v devbox &> /dev/null; then
-    devbox version update
+  echo "Checking mise toolchain..."
+  if command -v mise &> /dev/null; then
+    mise install
     echo ""
-    echo "Updating Devbox global nix packages"
-    devbox global update
-    echo "Refreshing Packages"
-    eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r
+    echo "Active mise runtimes:"
+    mise ls
   else
-    echo "Devbox not found, skipping."
-  fi
-  echo ""
-
-  echo "Checking for Nix updates..."
-  if command -v determinate-nixd &> /dev/null; then
-    determinate-nixd version
-  else
-    echo "determinate-nixd not found, skipping."
+    echo "mise not found, skipping."
   fi
   echo ""
 
@@ -315,50 +173,13 @@ goodMorning() {
   mkdir -p "$cache_dir"
   zmodload zsh/stat 2>/dev/null
 
-  # Cooldown: 24 hours - Nix garbage collection
-  local -i cooldown_nix_gc_seconds=$(( 24 * 60 * 60 ))
-  local marker_file="$cache_dir/nix_gc"
-  local run_nix_gc=1
-  local nix_gc_elapsed_human=""
-  local nix_gc_last_run_human=""
-  if [[ -f "$marker_file" ]]; then
-    local nix_gc_last_run_epoch_ms
-    { nix_gc_last_run_epoch_ms=$(_get_marker_last_run_epoch_ms "$marker_file"); } >/dev/null 2>&1
-    if [[ "$nix_gc_last_run_epoch_ms" == <-> ]]; then
-      local -i elapsed_ms=$(( $(_now_epoch_ms) - nix_gc_last_run_epoch_ms ))
-      (( elapsed_ms < 0 )) && elapsed_ms=0
-      local -i elapsed_seconds=$(( elapsed_ms / 1000 ))
-      nix_gc_elapsed_human="$(_format_seconds "$elapsed_seconds")"
-      nix_gc_last_run_human="$(_format_epoch_ms_datetime "$nix_gc_last_run_epoch_ms")"
-      if (( elapsed_seconds < cooldown_nix_gc_seconds )); then
-        run_nix_gc=0
-      fi
-    fi
-  fi
-  if [[ $run_nix_gc -eq 1 ]]; then
-    echo "Cleaning up old Nix generations..."
-    if command -v nix-collect-garbage &> /dev/null; then
-      nix-collect-garbage --delete-older-than 7d
-    else
-      echo "nix-collect-garbage not found, skipping."
-    fi
-    _write_marker_last_run_epoch_ms "$marker_file"
-  else
-    if [[ -n "$nix_gc_elapsed_human" ]]; then
-      echo "Skipping Nix GC (last run: $nix_gc_last_run_human; elapsed: $nix_gc_elapsed_human; cooldown: $(_format_seconds "$cooldown_nix_gc_seconds"))"
-    else
-      echo "Skipping Nix GC (ran within last 24h)"
-    fi
-  fi
-  echo ""
-
   echo "Cleaning up Zoom folder..."
   rm -rf "$HOME/Documents/Zoom" &>/dev/null && echo "Deleted: $HOME/Documents/Zoom" || echo "No Zoom directory found at: $HOME/Documents/Zoom"
   echo ""
 
   # Cooldown: 168 hours (7 days) - Old downloads cleanup
   local -i cooldown_downloads_seconds=$(( 7 * 24 * 60 * 60 ))
-  marker_file="$cache_dir/old_downloads"
+  local marker_file="$cache_dir/old_downloads"
   local run_downloads=1
   local downloads_elapsed_human=""
   local downloads_last_run_human=""

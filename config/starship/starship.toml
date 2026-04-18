@@ -40,13 +40,6 @@ style = "bright-black"
 format = " took [$duration]($style) "
 style = "yellow"
 
-[custom.nix_version]
-symbol = "󱄅"
-command = "nix --version | sed 's/nix (Determinate Nix \\([0-9.]*\\)) \\([0-9.]*\\)/det:\\1 nix:\\2/'"
-ignore_timeout = true
-format = "[$symbol $output](fg:#a2d2df) "
-when = "command -v nix >/dev/null 2>&1 && (test -n \"$DEVBOX_PROJECT_ROOT\" || test -n \"$DEVBOX_CONFIG_DIR\" || test -n \"$DEVBOX_PACKAGES_DIR\")"
-
 [custom.nodejs_repo]
 symbol = ""
 command = "node --version"

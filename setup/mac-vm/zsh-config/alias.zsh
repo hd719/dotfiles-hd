@@ -110,15 +110,6 @@ alias snth='snitch themes'           # List available themes
 alias blaze="ssh hamels-macbook-pro-2"
 alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
 
-## Nix
-alias switch="sudo darwin-rebuild switch --flake ~/Developer/dotfiles-hd/setup/mac-vm/darwin/nix#hameldesai" # sudo temporarily (will change in future)
-alias nix-update="nix flake update"
-# Alias: List all system generations (as before)
-alias nix-gen-list='sudo nix-env --list-generations --profile /nix/var/nix/profiles/system'
-
-# Alias: Delete old generations older than 7 days
-alias nix-gen-clean='sudo nix-collect-garbage --delete-older-than 7d'
-
 # Tmux
 alias tm='tmux'                             # Start tmux
 alias tma='tmux attach-session'             # Attach to a tmux session
@@ -130,20 +121,7 @@ alias tmns='tmux new -s'                    # Start a new tmux session with name
 alias tms='tmux new-session -s'             # Start a new tmux session
 alias tmk='tmux kill-server'                # Kill all tmux sessions
 
-# Devbox
-alias dbshell='devbox shell'       # Enter the Devbox environment
-alias dbup='devbox up'             # Start the Devbox environment
-alias dbdown='devbox down'         # Stop the Devbox environment
-alias dbrm='devbox rm'             # Remove the Devbox environment
-alias dbls='devbox ls'             # List all available Devbox environments
-alias dbinit='devbox init'         # Initialize a new Devbox environment
-alias dbbuild='devbox build'       # Build/compile the Devbox environment
-alias dbrun='devbox run'           # Run a command inside the Devbox environment
-alias dbps='devbox ps'             # Show running processes in Devbox
-alias dblogs='devbox logs'         # Display logs for the Devbox environment
-alias dbconfig='devbox config'     # Open the configuration for Devbox
-alias dbhelp='devbox help'         # Show help information for Devbox
-alias refresh-global='eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r'  # Refresh Devbox global environment
+alias refresh-global='/opt/homebrew/bin/mise install && /opt/homebrew/bin/mise reshim && hash -r'
 
 #Tailscale
 alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh; ./tailscale status"
@@ -152,34 +130,33 @@ alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh; ./tail
 alias opdash='lsof -ti:18789 | xargs kill -9 2>/dev/null; ssh -L 18789:127.0.0.1:18789 hd@100.120.198.12 -f -N && open "http://127.0.0.1:18789/#token=$(op read "op://Development/OpenClaw-Gateway-Token/password")"'
 alias opmission='ssh -L 3000:127.0.0.1:3000 hd@100.120.198.12 -f -N && open "http://127.0.0.1:3000"'
 
-# Monorepo Devbox Scripts (scripts defined in devbox.json)
+# Monorepo Shell Scripts
 # --------------------------------------------------------------------------------------------------------
 
-# HealthMetrics (runs from nextjs-monorepo directory where devbox.json defines these scripts)
-alias hm-dev='(cd ~/Developer/nextjs-monorepo && devbox run hm:dev)'
-alias hm-build='(cd ~/Developer/nextjs-monorepo && devbox run hm:build)'
-alias hm-prisma-studio='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:studio)'
-alias hm-prisma-migrate='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:migrate)'
-alias hm-prisma-generate='(cd ~/Developer/nextjs-monorepo && devbox run hm:prisma:generate)'
+# HealthMetrics
+alias hm-dev='(cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bun run dev)'
+alias hm-build='(cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bun run build)'
+alias hm-prisma-studio='(cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bunx prisma studio)'
+alias hm-prisma-migrate='(cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bunx prisma migrate dev)'
+alias hm-prisma-generate='(cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bunx prisma generate)'
 alias hms-dev='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go run main.go'
 alias hms-build='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go build -o healthmetrics main.go'
 alias hms-test='cd ~/Developer/nextjs-monorepo/apps/healthmetrics && go test ./...'
 
 # Run bun/bunx commands in healthmetrics with 1Password env vars loaded
 # Usage: hm-bun run dev | hm-bunx prisma migrate diff ...
-# Uses devbox run to ensure bun is in PATH
 hm-bun() {
-  (cd ~/Developer/nextjs-monorepo && devbox run -- bash -c "cd apps/healthmetrics && op run --env-file='./.env.development.local' -- bun $*")
+  (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bun "$@")
 }
 hm-bunx() {
-  (cd ~/Developer/nextjs-monorepo && devbox run -- bash -c "cd apps/healthmetrics && op run --env-file='./.env.development.local' -- bunx $*")
+  (cd ~/Developer/nextjs-monorepo/apps/healthmetrics && op run --env-file="./.env.development.local" -- bunx "$@")
 }
 
-# Portfolio (runs from nextjs-monorepo directory where devbox.json defines these scripts)
-alias pf-dev='(cd ~/Developer/nextjs-monorepo && devbox run pf:dev)'
-alias pf-build='(cd ~/Developer/nextjs-monorepo && devbox run pf:build)'
-alias pf-start='(cd ~/Developer/nextjs-monorepo && devbox run pf:start)'
-alias pf-lint='(cd ~/Developer/nextjs-monorepo && devbox run pf:lint)'
+# Portfolio
+alias pf-dev='(cd ~/Developer/nextjs-monorepo/apps/portfolio && bun run dev)'
+alias pf-build='(cd ~/Developer/nextjs-monorepo/apps/portfolio && bun run build)'
+alias pf-start='(cd ~/Developer/nextjs-monorepo/apps/portfolio && bun run start)'
+alias pf-lint='(cd ~/Developer/nextjs-monorepo/apps/portfolio && bun run lint)'
 
 # Cortana
 alias cortana-sync='bash /Users/hd/Developer/cortana/tools/repo/post-merge-sync.sh'

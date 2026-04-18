@@ -44,16 +44,8 @@ _cache_init() {
   source "$cache_file"
 }
 
-# Check if Nix/Devbox is installed (native zsh check - faster than command -v)
-if (( $+commands[nix] )); then
-    # With Devbox: Use Nix-managed binaries
-    _cache_init "zoxide" "/Users/hameldesai/.local/share/devbox/global/default/.devbox/nix/profile/default/bin/zoxide init --cmd cd zsh" || _cache_init "zoxide" "zoxide init --cmd cd zsh"
-    _cache_init "starship" "/Users/hameldesai/.local/share/devbox/global/default/.devbox/nix/profile/default/bin/starship init zsh" || _cache_init "starship" "starship init zsh"
-else
-    # Without Devbox: Use system binaries
-    _cache_init "zoxide" "zoxide init --cmd cd zsh"
-    _cache_init "starship" "starship init zsh"
-fi
+_cache_init "zoxide" "zoxide init --cmd cd zsh"
+_cache_init "starship" "starship init zsh"
 
 export STARSHIP_CONFIG=~/Developer/dotfiles-hd/config/starship/starship.toml
 
