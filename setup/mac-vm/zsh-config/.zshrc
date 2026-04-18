@@ -13,13 +13,6 @@ source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
 source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
 source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 
-# Remove inherited Nix/Devbox paths before the new toolchain activates.
-path=(${path:#$HOME/.local/share/devbox/global/default/.devbox/nix/profile/default/bin})
-path=(${path:#$HOME/.local/share/devbox/global/default/.devbox/virtenv/runx/bin})
-path=(${path:#$HOME/.nix-profile/bin})
-path=(${path:#/nix/var/nix/profiles/default/bin})
-export PATH="${(j/:/)path}"
-
 # -----------------------------------------------------------------------------
 # Plugins - Load immediately for better UX
 # Adds ~5-10ms to startup but plugins work right away
