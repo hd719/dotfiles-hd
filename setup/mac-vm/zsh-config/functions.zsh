@@ -245,3 +245,21 @@ goodMorning() {
 
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 }
+
+unalias opmission opmissiondev 2>/dev/null
+
+opmission() {
+  local pids
+  pids=$(lsof -tiTCP:3000 -sTCP:LISTEN -c ssh 2>/dev/null)
+  [[ -n "$pids" ]] && kill $pids
+  ssh -fN -o ExitOnForwardFailure=yes -L '[::1]:3000:127.0.0.1:3000' hd@100.120.198.12
+  open 'http://localhost:3000'
+}
+
+opmissiondev() {
+  local pids
+  pids=$(lsof -tiTCP:3001 -sTCP:LISTEN -c ssh 2>/dev/null)
+  [[ -n "$pids" ]] && kill $pids
+  ssh -fN -o ExitOnForwardFailure=yes -L '[::1]:3001:127.0.0.1:3001' hd@100.120.198.12
+  open 'http://localhost:3001'
+}

@@ -128,7 +128,7 @@ alias tailscale="cd ~/go/bin; ./tailscale up --advertise-exit-node --ssh; ./tail
 
 # OpenClaw
 alias opdash='lsof -ti:18789 | xargs kill -9 2>/dev/null; ssh -L 18789:127.0.0.1:18789 hd@100.120.198.12 -f -N && open "http://127.0.0.1:18789/#token=$(op read "op://Development/OpenClaw-Gateway-Token/password")"'
-alias opmission='ssh -L 3000:127.0.0.1:3000 hd@100.120.198.12 -f -N && open "http://127.0.0.1:3000"'
+
 
 # Monorepo Shell Scripts
 # --------------------------------------------------------------------------------------------------------
