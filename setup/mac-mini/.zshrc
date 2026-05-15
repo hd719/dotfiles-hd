@@ -50,7 +50,6 @@ fi
 # -----------------------------------------------------------------------------
 # Environment
 # -----------------------------------------------------------------------------
-_activate_mise
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 if [[ -f "$HOME/.local/bin/env" ]]; then
@@ -104,3 +103,5 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
+_activate_mise
