@@ -7,6 +7,11 @@ _load_homebrew_plugin() {
   source "$plugin_path"
 }
 
+_activate_mise() {
+  [[ -x /opt/homebrew/bin/mise ]] || return 1
+  eval "$(/opt/homebrew/bin/mise activate zsh)"
+}
+
 reload() {
   # Use zsh's EPOCHREALTIME for millisecond precision (macOS compatible)
   zmodload zsh/datetime 2>/dev/null

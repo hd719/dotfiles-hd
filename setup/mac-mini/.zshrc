@@ -50,6 +50,7 @@ fi
 # -----------------------------------------------------------------------------
 # Environment
 # -----------------------------------------------------------------------------
+_activate_mise
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 if [[ -f "$HOME/.local/bin/env" ]]; then
@@ -91,11 +92,13 @@ fi
 compdef _op op
 
 # Cache fnm environment
-_fnm_cache="$_ZSH_CACHE_DIR/fnm-env.zsh"
-if _cache_needs_refresh "$_fnm_cache"; then
-  fnm env --use-on-cd > "$_fnm_cache" 2>/dev/null
+if ! command -v mise >/dev/null 2>&1; then
+  _fnm_cache="$_ZSH_CACHE_DIR/fnm-env.zsh"
+  if _cache_needs_refresh "$_fnm_cache"; then
+    fnm env --use-on-cd > "$_fnm_cache" 2>/dev/null
+  fi
+  [[ -f "$_fnm_cache" ]] && source "$_fnm_cache"
 fi
-[[ -f "$_fnm_cache" ]] && source "$_fnm_cache"
 
 # Created by `pipx` on 2026-01-27 22:02:05
 export PATH="$PATH:/Users/hd/.local/bin"
