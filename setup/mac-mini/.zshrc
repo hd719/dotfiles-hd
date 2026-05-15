@@ -91,15 +91,6 @@ fi
 [[ -f "$_op_cache" ]] && source "$_op_cache"
 compdef _op op
 
-# Cache fnm environment
-if ! command -v mise >/dev/null 2>&1; then
-  _fnm_cache="$_ZSH_CACHE_DIR/fnm-env.zsh"
-  if _cache_needs_refresh "$_fnm_cache"; then
-    fnm env --use-on-cd > "$_fnm_cache" 2>/dev/null
-  fi
-  [[ -f "$_fnm_cache" ]] && source "$_fnm_cache"
-fi
-
 # Created by `pipx` on 2026-01-27 22:02:05
 export PATH="$PATH:/Users/hd/.local/bin"
 
