@@ -52,6 +52,7 @@ export STARSHIP_CONFIG=~/Developer/dotfiles-hd/config/starship/starship.toml
 # Defer you-should-use plugin load until after first prompt (saves ~10ms startup)
 _load_ysu() {
   unset -f _load_ysu
-  source ~/Developer/zsh-you-should-use/you-should-use.plugin.zsh
+  local ysu_plugin="$HOME/Developer/zsh-you-should-use/you-should-use.plugin.zsh"
+  [[ -r "$ysu_plugin" ]] && source "$ysu_plugin"
 }
 precmd_functions+=(_load_ysu)

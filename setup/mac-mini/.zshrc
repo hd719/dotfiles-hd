@@ -1,107 +1,104 @@
 # =============================================================================
-# ZSH Configuration (Work - Resilience)
+# ZSH Configuration (Mac mini - Hermes)
 # =============================================================================
 
-ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-vm/zsh-config
+ZSH_CONFIG_DIR="$HOME/Developer/dotfiles-hd/setup/mac-vm/zsh-config"
 
-# -----------------------------------------------------------------------------
-# Core Configuration (order matters)
-# -----------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/prompt.zsh      # Prompt, starship, zoxide
-source $ZSH_CONFIG_DIR/tooling.zsh     # Dev tools config
-source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
-source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
-source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
-
-# -----------------------------------------------------------------------------
-# Plugins (Homebrew) - Smart deferred loading (~32ms savings)
-# -----------------------------------------------------------------------------
-# Plugins load before first prompt via precmd hook (better UX than preexec)
-# This keeps fast startup but plugins are active before you start typing
-_deferred_plugins_loaded=0
-_load_deferred_plugins() {
-  (( _deferred_plugins_loaded )) && return
-  _deferred_plugins_loaded=1
-  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+_source_zsh_config() {
+  local file="$1"
+  [[ -r "$file" ]] && source "$file"
 }
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd _load_deferred_plugins
 
 # -----------------------------------------------------------------------------
-# Completions (cached compinit for speed)
+# Core Configuration
 # -----------------------------------------------------------------------------
-# Uses zsh native EPOCHSECONDS and zstat (loaded in prompt.zsh) instead of external commands
-fpath=(/Users/hameldesai/.docker/completions $fpath)
+_source_zsh_config "$ZSH_CONFIG_DIR/prompt.zsh"
+_source_zsh_config "$ZSH_CONFIG_DIR/tooling.zsh"
+_source_zsh_config "$ZSH_CONFIG_DIR/functions.zsh"
+_source_zsh_config "$ZSH_CONFIG_DIR/alias.zsh"
+_source_zsh_config "$ZSH_CONFIG_DIR/k8s.zsh"
+
+# -----------------------------------------------------------------------------
+# Plugins
+# -----------------------------------------------------------------------------
+if (( $+functions[_load_homebrew_plugin] )); then
+  _load_homebrew_plugin "/opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  _load_homebrew_plugin "/opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+
+# -----------------------------------------------------------------------------
+# Completions
+# -----------------------------------------------------------------------------
+[[ -d "$HOME/.docker/completions" ]] && fpath=("$HOME/.docker/completions" $fpath)
+
 autoload -Uz compinit
-if [[ -f ~/.zcompdump ]]; then
-  local _zcomp_mtime _today_start
-  zstat -A _zcomp_mtime +mtime ~/.zcompdump 2>/dev/null
+if [[ -f "$HOME/.zcompdump" ]]; then
+  typeset _zcomp_mtime _today_start
+  zstat -A _zcomp_mtime +mtime "$HOME/.zcompdump" 2>/dev/null
   _today_start=$(( EPOCHSECONDS - (EPOCHSECONDS % 86400) ))
   if (( _zcomp_mtime >= _today_start )); then
-    compinit -C  # Cached (fast)
+    compinit -C
   else
-    compinit     # Full rebuild (once per day)
+    compinit
   fi
 else
-  compinit       # First run
+  compinit
 fi
 
 # -----------------------------------------------------------------------------
 # Environment
 # -----------------------------------------------------------------------------
-export PATH="/opt/homebrew/opt/curl/bin:$PATH"
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+[[ -d /opt/homebrew/opt/curl/bin ]] && export PATH="/opt/homebrew/opt/curl/bin:$PATH"
+[[ -d /opt/homebrew/opt/postgresql@17/bin ]] && export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
 if [[ -f "$HOME/.local/bin/env" ]]; then
-  . "$HOME/.local/bin/env"
+  source "$HOME/.local/bin/env"
 fi
+
 if [[ -n "$SSH_CONNECTION" ]]; then
-  export GIT_EDITOR="vim"
-  export EDITOR="vim"
+  export GIT_EDITOR="code --wait"
+  export EDITOR="code --wait"
 fi
+
 export GOG_ACCOUNT="hameldesai3@gmail.com"
-[ -f "$HOME/.gog-env" ] && source "$HOME/.gog-env"
+[[ -f "$HOME/.gog-env" ]] && source "$HOME/.gog-env"
 
 # -----------------------------------------------------------------------------
-# Tool Init Scripts (cached for speed)
+# Tool Init Scripts
 # -----------------------------------------------------------------------------
-# Helper: Check if cache file needs refresh (older than 1 day)
-# Uses zsh native EPOCHSECONDS and zstat instead of external commands
 _cache_needs_refresh() {
   local cache_file="$1"
   [[ ! -f "$cache_file" ]] && return 0
+
   local file_mtime
   zstat -A file_mtime +mtime "$cache_file" 2>/dev/null || return 0
   (( EPOCHSECONDS - file_mtime > 86400 ))
 }
 
-# Cache uv completions
-_uv_cache="$_ZSH_CACHE_DIR/uv-completion.zsh"
-if _cache_needs_refresh "$_uv_cache"; then
-  uv generate-shell-completion zsh > "$_uv_cache" 2>/dev/null
+if (( $+commands[uv] )); then
+  _uv_cache="$_ZSH_CACHE_DIR/uv-completion.zsh"
+  if _cache_needs_refresh "$_uv_cache"; then
+    uv generate-shell-completion zsh > "$_uv_cache" 2>/dev/null
+  fi
+  [[ -f "$_uv_cache" ]] && source "$_uv_cache"
 fi
-[[ -f "$_uv_cache" ]] && source "$_uv_cache"
 
-# Cache 1Password completions
-_op_cache="$_ZSH_CACHE_DIR/op-completion.zsh"
-if _cache_needs_refresh "$_op_cache"; then
-  op completion zsh > "$_op_cache" 2>/dev/null
+if (( $+commands[op] )); then
+  _op_cache="$_ZSH_CACHE_DIR/op-completion.zsh"
+  if _cache_needs_refresh "$_op_cache"; then
+    op completion zsh > "$_op_cache" 2>/dev/null
+  fi
+  [[ -f "$_op_cache" ]] && source "$_op_cache"
+  compdef _op op 2>/dev/null
 fi
-[[ -f "$_op_cache" ]] && source "$_op_cache"
-compdef _op op
 
-# Created by `pipx` on 2026-01-27 22:02:05
-export PATH="$PATH:/Users/hd/.local/bin"
-
-# OpenClaw Completion
-source "/Users/hd/.openclaw/completions/openclaw.zsh"
-
-# pnpm
-export PNPM_HOME="/Users/hd/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
-# pnpm end
 
-_activate_mise
+if (( $+functions[_activate_mise] )); then
+  _activate_mise
+fi
