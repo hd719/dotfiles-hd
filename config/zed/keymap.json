@@ -1,0 +1,65 @@
+[
+  {
+    "context": "vim_mode == normal && !menu",
+    "bindings": {
+      "shift-h": "pane::ActivatePreviousItem",
+      "shift-l": "pane::ActivateNextItem",
+      "i": "vim::InsertAfter",
+      "a": "vim::InsertBefore",
+      "space v": "pane::SplitRight",
+      "space s": "pane::SplitDown",
+      "space h": "workspace::ActivatePaneLeft",
+      "space j": "workspace::ActivatePaneDown",
+      "space k": "workspace::ActivatePaneUp",
+      "space l": "workspace::ActivatePaneRight",
+      "space w": ["workspace::SendKeystrokes", ":w! enter"],
+      "space q": ["workspace::SendKeystrokes", ":q! enter"],
+      "space x": ["workspace::SendKeystrokes", ":x! enter"],
+      "[ d": ["editor::GoToPreviousDiagnostic", { "severity": { "min": "hint", "max": "error" } }],
+      "] d": ["editor::GoToDiagnostic", { "severity": { "min": "hint", "max": "error" } }],
+      "space c a": "editor::ToggleCodeActions",
+      "space f": "file_finder::Toggle",
+      "space p": "editor::Format",
+      "g h": "editor::Hover",
+      "ctrl-space": "vim::NormalBefore"
+    }
+  },
+  {
+    "context": "vim_mode == insert && !menu",
+    "bindings": {
+      "ctrl-space": "vim::NormalBefore"
+    }
+  },
+  {
+    "context": "vim_mode == visual && !menu",
+    "bindings": {
+      "<": "vim::Outdent",
+      ">": "vim::Indent",
+      "shift-j": "editor::MoveLineDown",
+      "shift-k": "editor::MoveLineUp",
+      "space c": "vim::ToggleComments"
+    }
+  },
+  {
+    "context": "ProjectPanel && not_editing",
+    "bindings": {
+      "j": ["workspace::SendKeystrokes", "down"],
+      "k": ["workspace::SendKeystrokes", "up"],
+      "h": ["workspace::SendKeystrokes", "left"],
+      "l": ["workspace::SendKeystrokes", "right"],
+      "o": "project_panel::Open",
+      "enter": "project_panel::OpenPermanent",
+      "space l": "workspace::ActivatePaneRight",
+      "ctrl-w l": "workspace::ActivatePaneRight"
+    }
+  },
+  {
+    "context": "Dock",
+    "bindings": {
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      "ctrl-w j": "workspace::ActivatePaneDown",
+      "ctrl-w k": "workspace::ActivatePaneUp",
+      "ctrl-w l": "workspace::ActivatePaneRight"
+    }
+  }
+]
