@@ -14,6 +14,22 @@
   "session": {
     "trust_all_worktrees": true,
   },
+  "auto_install_extensions": {
+    "toml": true,
+    "dockerfile": true,
+    "docker-compose": true,
+    "terraform": true,
+    "go": true,
+    "graphql": true,
+    "prisma": true,
+    "python": true,
+    "sql": true,
+    "latex": true,
+    "ssh-config": true,
+    "tmux": true,
+    "markdownlint": true,
+    "cspell": true,
+  },
   "vim_mode": true,
   "terminal": {
     "font_size": 15.0,
