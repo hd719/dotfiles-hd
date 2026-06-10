@@ -5,13 +5,13 @@
 alias reset-finder="defaults write com.apple.finder CreateDesktop -bool true; killall Finder; open /System/Library/CoreServices/Finder.app"
 alias reset-dock="defaults write com.apple.dock autohide -bool false; killall Dock"
 
-## Npm
-alias npb='npm run build'
-alias npp='npm run prettier'
-alias nps='npm run start'
-alias npserve='npm run serve'
-alias npserved='npm run serve:dev'
-alias npt='npm run test'
+## Pnpm
+alias npb='pnpm run build'
+alias npp='pnpm run prettier'
+alias nps='pnpm run start'
+alias npserve='pnpm run serve'
+alias npserved='pnpm run serve:dev'
+alias npt='pnpm run test'
 
 ## Node
 alias fucknode='rm -rf node_modules'

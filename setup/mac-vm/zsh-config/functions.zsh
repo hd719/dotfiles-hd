@@ -13,6 +13,18 @@ _activate_mise() {
   eval "$("$mise_bin" activate zsh)"
 }
 
+_remove_mise_npm() {
+  command -v mise &> /dev/null || return 0
+
+  local node_path node_bin node_root
+  node_path="$(mise which node 2>/dev/null)" || return 0
+  node_bin="$(dirname "$node_path")"
+  node_root="$(cd "$node_bin/.." && pwd)"
+
+  rm -f "$node_bin/npm" "$node_bin/npx"
+  rm -rf "$node_root/lib/node_modules/npm"
+}
+
 reload() {
   # Use zsh's EPOCHREALTIME for millisecond precision (macOS compatible)
   zmodload zsh/datetime 2>/dev/null
@@ -164,6 +176,7 @@ goodMorning() {
   echo "Checking mise toolchain..."
   if command -v mise &> /dev/null; then
     mise install
+    _remove_mise_npm
     echo ""
     echo "Active mise runtimes:"
     mise ls

@@ -12,9 +12,3 @@ export EDITOR="code --wait"
 #   *) export PATH="$PNPM_HOME:$PATH" ;;
 # esac
 # pnpm end
-
-# [FNM]
-# --------------------------------------------------------------------------------------------------------
-# fnm
-# eval "$(fnm env --use-on-cd)"
-# fnm end
