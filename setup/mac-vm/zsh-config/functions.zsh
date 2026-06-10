@@ -8,8 +8,9 @@ _load_homebrew_plugin() {
 }
 
 _activate_mise() {
-  [[ -x /opt/homebrew/bin/mise ]] || return 1
-  eval "$(/opt/homebrew/bin/mise activate zsh)"
+  local mise_bin
+  mise_bin="$(command -v mise 2>/dev/null)" || return 0
+  eval "$("$mise_bin" activate zsh)"
 }
 
 reload() {

@@ -1,77 +1,72 @@
-# [ZSH Config Directory]
-ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-vm/zsh-config
+# Ubuntu zsh configuration
 
-# [ZSH/System Aliases]
+# [Paths]
 # --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/alias.zsh
+typeset -U path PATH
 
-# [ZSH/System Functions]
+ZSH_CONFIG_DIR="$HOME/Developer/dotfiles-hd/setup/mac-vm/zsh-config"
+
+path=(
+  "$HOME/.local/bin"
+  "$HOME/Developer/tools/anycable"
+  $path
+)
+
+export TERM="xterm-256color"
+export STARSHIP_CONFIG="$HOME/Developer/dotfiles-hd/config/starship/starship.toml"
+
+# [Editor]
 # --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/functions.zsh
+export GIT_EDITOR="code --wait"
+export EDITOR="code --wait"
 
-# [Kubernetes Config]
+# [Shared zsh helpers]
 # --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/k8s.zsh
+source_if_exists() {
+  [[ -r "$1" ]] && source "$1"
+}
 
-# [Environment Variables]
+source_if_exists "$ZSH_CONFIG_DIR/functions.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/alias.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/k8s.zsh"
+
+# [Prompt]
 # --------------------------------------------------------------------------------------------------------
-export GIT_EDITOR="cursor --wait"
-export EDITOR="cursor --wait"
-export TERM=xterm-256color
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
-export STARSHIP_CONFIG=~/Developer/dotfiles-hd/config/starship/starship.toml
-export PATH="$PATH:/home/hamel/.local/bin"
-export PATH="$HOME/Developer/tools/anycable:$PATH"
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init --cmd cd zsh)"
+fi
 
-# [Prompt / Shell Plugins]
+# [Language managers]
 # --------------------------------------------------------------------------------------------------------
-eval "$(starship init zsh)"
-eval "$(zoxide init --cmd cd zsh)"
-
-# Initialize rbenv if it exists
-if [ -d "$HOME/.rbenv" ]; then
-  export PATH="$HOME/.rbenv/bin:$PATH"
+if [[ -d "$HOME/.rbenv" ]]; then
+  path=("$HOME/.rbenv/bin" $path)
   eval "$(rbenv init - zsh)"
 fi
 
-# Only initialize brew if it exists
-if [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
-# Load zsh plugins if they exist
-if [ -f "$HOME/Developer/zsh-plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
-  source "$HOME/Developer/zsh-plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+export PNPM_HOME="$HOME/.local/share/pnpm"
+if [[ -d "$PNPM_HOME" ]]; then
+  path=("$PNPM_HOME" $path)
 fi
 
-if [ -f "$HOME/Developer/zsh-plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
-  source "$HOME/Developer/zsh-plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+if [[ -f "$HOME/.local/bin/env" ]]; then
+  source "$HOME/.local/bin/env"
 fi
 
-if [ -f "$HOME/Developer/zsh-plugins/zsh-you-should-use/you-should-use.plugin.zsh" ]; then
-  source "$HOME/Developer/zsh-plugins/zsh-you-should-use/you-should-use.plugin.zsh"
+# Keep mise last so its configured runtimes win over rbenv, brew, and system tools.
+if typeset -f _activate_mise >/dev/null; then
+  _activate_mise
 fi
 
-# [Node.js]
+# [Plugins]
 # --------------------------------------------------------------------------------------------------------
-# fnm
-FNM_PATH="/home/hamel/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
-  export PATH="$FNM_PATH:$PATH"
-  eval "`fnm env`"
-fi
-
-# [pnpm]
-# --------------------------------------------------------------------------------------------------------
-export PNPM_HOME="/home/hamel/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-
-# [Aliases]
-# --------------------------------------------------------------------------------------------------------
-
-export GIT_EDITOR="code --wait"
-export EDITOR="code --wait"
+source_if_exists "$HOME/Developer/zsh-plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source_if_exists "$HOME/Developer/zsh-plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+source_if_exists "$HOME/Developer/zsh-plugins/zsh-you-should-use/you-should-use.plugin.zsh"

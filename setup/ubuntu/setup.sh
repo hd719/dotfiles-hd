@@ -79,7 +79,7 @@ install_base_tools() {
         git curl wget gcc make unzip tar zsh vim \
         build-essential libssl-dev libreadline-dev zlib1g-dev \
         jq zstd ffmpeg ghostscript imagemagick libvips-dev \
-        tmux redis-server nmap speedtest-cli python3-pip python3-venv pipx golang
+        tmux redis-server nmap speedtest-cli python3-pip python3-venv golang
 
     # Install bat (might be named batcat on Ubuntu)
     if ! command -v bat &>/dev/null; then
@@ -263,33 +263,33 @@ install_starship_zsh_config() {
 }
 
 install_node_and_pnpm() {
-    step "Installing Node.js (fnm) + pnpm"
+    step "Installing Node.js (mise) + pnpm"
 
-    # Install fnm if not already installed
-    if ! command -v fnm &>/dev/null; then
-        echo -e "${YELLOW}Installing fnm...${NC}"
-        curl -fsSL https://fnm.vercel.app/install | bash
+    if ! command -v mise &>/dev/null; then
+        echo -e "${YELLOW}Installing mise...${NC}"
+        curl -fsSL https://mise.run | sh
     fi
 
-    # Load fnm for this session
-    export PATH="$HOME/.local/share/fnm:$PATH"
-    eval "$(fnm env --use-on-cd)"
+    export PATH="$HOME/.local/bin:$PATH"
 
-    # Install LTS version of Node.js
-    fnm install --lts
-    fnm use lts-latest
+    mkdir -p "$HOME/.config/mise"
+    ln -sfn "$HOME/Developer/dotfiles-hd/config/mise/config.toml" "$HOME/.config/mise/config.toml"
 
-    # Add fnm initialization to .zshrc if not already present
-    if ! grep -q "fnm env" ~/.zshrc 2>/dev/null; then
-        echo 'eval "$(fnm env --use-on-cd)"' >> ~/.zshrc
-    fi
+    mise trust "$HOME/.config/mise/config.toml" || true
+    mise install node
+    eval "$(mise activate bash)"
 
-    # Install pnpm
+    NODE_PATH="$(mise which node)"
+    NODE_BIN="$(dirname "$NODE_PATH")"
+    NODE_ROOT="$(cd "$NODE_BIN/.." && pwd)"
+    rm -f "$NODE_BIN/npm" "$NODE_BIN/npx"
+    rm -rf "$NODE_ROOT/lib/node_modules/npm"
+
     if ! command -v pnpm &>/dev/null; then
         curl -fsSL https://get.pnpm.io/install.sh | sh -
     fi
 
-    echo -e "${GREEN}✓ Node.js (via fnm) and pnpm installed${NC}"
+    echo -e "${GREEN}✓ Node.js (via mise) and pnpm installed${NC}"
 }
 
 install_rbenv() {
@@ -382,11 +382,8 @@ install_ruby_lsp_and_ruby_build() {
 install_uv() {
     step "Installing uv for Python"
 
-    # Ensure pipx is available and in PATH
-    pipx ensurepath
-
-    # Install uv via pipx
-    pipx install uv
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
 
     echo -e "${GREEN}✓ uv installed${NC}"
 }

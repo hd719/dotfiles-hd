@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
 # System Update Script for Ubuntu
-# Updates all packages, snaps, and other package managers
 
-set -e
+set -euo pipefail
 
-# Colors
+export PATH="$HOME/.local/bin:$PATH"
+
+if [[ -d "$HOME/.local/share/pnpm" ]]; then
+    export PNPM_HOME="$HOME/.local/share/pnpm"
+    export PATH="$PNPM_HOME:$PATH"
+fi
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -13,112 +18,146 @@ BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
+section() {
+    echo -e "${BLUE}$1${NC}"
+}
 
-echo -e "${MAGENTA}🔄 Starting System Update...${NC}\n"
+success() {
+    echo -e "${GREEN}✓ $1${NC}\n"
+}
 
-# Update apt packages
-echo -e "${BLUE}📦 Updating APT packages...${NC}"
-sudo apt update
-sudo apt upgrade -y
-sudo apt autoremove -y
-sudo apt autoclean
-echo -e "${GREEN}✓ APT packages updated${NC}\n"
+warn() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
 
-# Update snap packages
-if command -v snap &>/dev/null; then
-    echo -e "${BLUE}📦 Updating Snap packages...${NC}"
+has() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+update_apt() {
+    section "📦 Updating APT packages..."
+    sudo apt update
+    sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
+    sudo DEBIAN_FRONTEND=noninteractive apt autoremove -y
+    sudo apt autoclean
+    success "APT packages updated"
+}
+
+update_snap() {
+    has snap || return 0
+
+    section "📦 Updating Snap packages..."
     sudo snap refresh
-    echo -e "${GREEN}✓ Snap packages updated${NC}\n"
-fi
 
-# Update flatpak packages (if installed)
-if command -v flatpak &>/dev/null; then
-    echo -e "${BLUE}📦 Updating Flatpak packages...${NC}"
+    LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' | while read -r snapname revision; do
+        sudo snap remove "$snapname" --revision="$revision" 2>/dev/null || true
+    done
+
+    success "Snap packages updated"
+}
+
+update_flatpak() {
+    has flatpak || return 0
+
+    section "📦 Updating Flatpak packages..."
     flatpak update -y
-    echo -e "${GREEN}✓ Flatpak packages updated${NC}\n"
-fi
+    success "Flatpak packages updated"
+}
 
-# Update npm global packages (if installed)
-if command -v npm &>/dev/null; then
-    echo -e "${BLUE}📦 Updating NPM global packages...${NC}"
-    npm update -g
-    echo -e "${GREEN}✓ NPM packages updated${NC}\n"
-fi
+update_node_packages() {
+    if has pnpm; then
+        section "📦 Updating pnpm global packages..."
+        pnpm self-update || pnpm add -g pnpm@latest || warn "pnpm self-update skipped or failed"
+        pnpm update -g || warn "pnpm global update skipped or failed"
+        success "pnpm checked"
+    fi
+}
 
-# Update pnpm (if installed)
-if command -v pnpm &>/dev/null; then
-    echo -e "${BLUE}📦 Updating pnpm...${NC}"
-    pnpm update -g
-    echo -e "${GREEN}✓ pnpm updated${NC}\n"
-fi
+update_uv() {
+    has uv || return 0
 
-# Update pipx packages (if installed)
-if command -v pipx &>/dev/null; then
-    echo -e "${BLUE}📦 Updating pipx packages...${NC}"
-    pipx upgrade-all
-    echo -e "${GREEN}✓ pipx packages updated${NC}\n"
-fi
+    section "📦 Updating uv..."
+    uv self update || curl -LsSf https://astral.sh/uv/install.sh | sh
+    success "uv updated"
+}
 
-# Update uv (if installed)
-if command -v uv &>/dev/null; then
-    echo -e "${BLUE}📦 Updating uv...${NC}"
-    pipx upgrade uv
-    echo -e "${GREEN}✓ uv updated${NC}\n"
-fi
+update_mise() {
+    has mise || return 0
 
-# Update Rust packages (if installed)
-if command -v rustup &>/dev/null; then
-    echo -e "${BLUE}📦 Updating Rust...${NC}"
+    section "📦 Updating mise toolchain..."
+    mise self-update -y
+    mise install
+    mise reshim
+    eval "$(mise activate bash)"
+    remove_mise_npm
+    mise outdated || true
+    success "mise toolchain updated"
+}
+
+remove_mise_npm() {
+    local node_path node_bin node_root
+
+    node_path="$(mise which node 2>/dev/null)" || return 0
+    node_bin="$(dirname "$node_path")"
+    node_root="$(cd "$node_bin/.." && pwd)"
+
+    rm -f "$node_bin/npm" "$node_bin/npx"
+    rm -rf "$node_root/lib/node_modules/npm"
+}
+
+update_rust() {
+    has rustup || return 0
+
+    section "📦 Updating Rust..."
     rustup update
-    echo -e "${GREEN}✓ Rust updated${NC}\n"
-fi
+    success "Rust updated"
+}
 
-# Update Go (if installed via modules)
-if command -v go &>/dev/null; then
-    echo -e "${BLUE}📦 Updating Go modules...${NC}"
-    go get -u all 2>/dev/null || echo -e "${YELLOW}⚠️  No Go modules to update${NC}"
-    echo -e "${GREEN}✓ Go modules updated${NC}\n"
-fi
+check_firmware() {
+    has fwupdmgr || return 0
 
-# Update Docker images (optional - commented out by default)
-# Uncomment if you want to update Docker images automatically
-# if command -v docker &>/dev/null; then
-#     echo -e "${BLUE}🐳 Updating Docker images...${NC}"
-#     docker images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>" | xargs -L1 docker pull
-#     echo -e "${GREEN}✓ Docker images updated${NC}\n"
-# fi
-
-# Update firmware (requires fwupd)
-if command -v fwupdmgr &>/dev/null; then
-    echo -e "${BLUE}🔧 Checking for firmware updates...${NC}"
+    section "🔧 Checking firmware updates..."
     fwupdmgr refresh --force 2>/dev/null || true
     fwupdmgr get-updates 2>/dev/null || echo -e "${GREEN}✓ No firmware updates available${NC}"
     echo ""
-fi
+}
 
-# Clean up package caches
-echo -e "${BLUE}🧹 Cleaning up...${NC}"
-sudo apt autoremove -y
-sudo apt autoclean
-if command -v snap &>/dev/null; then
-    # Remove old snap revisions
-    LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' | while read snapname revision; do
-        sudo snap remove "$snapname" --revision="$revision" 2>/dev/null || true
-    done
-fi
-echo -e "${GREEN}✓ Cleanup complete${NC}\n"
+pending_apt_count() {
+    apt list --upgradable 2>/dev/null | awk 'NR > 1 {count++} END {print count + 0}'
+}
 
-# Display system info
-echo -e "${MAGENTA}📊 System Information:${NC}"
-echo -e "Kernel: $(uname -r)"
-echo -e "Uptime: $(uptime -p)"
-if command -v apt &>/dev/null; then
-    UPDATES=$(apt list --upgradable 2>/dev/null | grep -c "upgradable" || echo "0")
-    echo -e "Pending APT updates: $UPDATES"
-fi
+print_summary() {
+    echo -e "${MAGENTA}📊 System Information:${NC}"
+    echo "Kernel: $(uname -r)"
+    echo "Uptime: $(uptime -p)"
+    echo "Pending APT updates: $(pending_apt_count)"
 
-echo -e "\n${GREEN}✅ System update complete!${NC}"
-echo -e "${YELLOW}💡 Tip: Reboot your system if kernel was updated${NC}"
+    if [[ -f /var/run/reboot-required ]]; then
+        warn "Reboot required"
+    else
+        echo "Reboot required: no"
+    fi
 
-echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
+    echo -e "\n${GREEN}✅ System update complete!${NC}"
+}
+
+main() {
+    echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
+    echo -e "${MAGENTA}🔄 Starting System Update...${NC}\n"
+
+    sudo -v
+
+    update_apt
+    update_snap
+    update_flatpak
+    update_mise
+    update_uv
+    update_node_packages
+    update_rust
+    check_firmware
+    print_summary
+
+    echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
+}
+
+main "$@"
