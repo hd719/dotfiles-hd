@@ -6,6 +6,7 @@
       "alt-shift-h": "multi_workspace::ToggleWorkspaceSidebar",
       "alt-shift-j": "multi_workspace::FocusWorkspaceSidebar",
       "alt-shift-l": "workspace::FocusCenterPane",
+      "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher",
       "alt-shift-n": "agent::NewThread",
       "alt-shift-]": "multi_workspace::NextThread",
       "alt-shift-[": "multi_workspace::PreviousThread",
@@ -16,6 +17,7 @@
     "context": "ThreadsSidebar",
     "use_key_equivalents": true,
     "bindings": {
+      "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher",
       "alt-shift-n": "agents_sidebar::NewThreadInGroup"
     }
   },
