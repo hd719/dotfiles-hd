@@ -1,5 +1,25 @@
 [
   {
+    "context": "Workspace",
+    "use_key_equivalents": true,
+    "bindings": {
+      "alt-shift-h": "multi_workspace::ToggleWorkspaceSidebar",
+      "alt-shift-j": "multi_workspace::FocusWorkspaceSidebar",
+      "alt-shift-l": "workspace::FocusCenterPane",
+      "alt-shift-n": "agent::NewThread",
+      "alt-shift-]": "multi_workspace::NextThread",
+      "alt-shift-[": "multi_workspace::PreviousThread",
+      "cmd-alt-j": null
+    }
+  },
+  {
+    "context": "ThreadsSidebar",
+    "use_key_equivalents": true,
+    "bindings": {
+      "alt-shift-n": "agents_sidebar::NewThreadInGroup"
+    }
+  },
+  {
     "context": "vim_mode == normal && !menu",
     "bindings": {
       "shift-h": "pane::ActivatePreviousItem",
