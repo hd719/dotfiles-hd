@@ -4,6 +4,7 @@
     "use_key_equivalents": true,
     "bindings": {
       "alt-shift-h": "multi_workspace::ToggleWorkspaceSidebar",
+      "alt-shift-i": "project_panel::ToggleFocus",
       "alt-shift-j": "multi_workspace::FocusWorkspaceSidebar",
       "alt-shift-l": "workspace::FocusCenterPane",
       "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher",
