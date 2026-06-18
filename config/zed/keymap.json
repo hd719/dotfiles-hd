@@ -1,29 +1,28 @@
 [
   {
-    "context": "Workspace",
+    "context": "Workspace && !AgentPanel && !(MessageEditor > Editor)",
+    "use_key_equivalents": true,
+    "bindings": {
+      "cmd-shift-g": "git_panel::ToggleFocus",
+      "alt-shift-h": "multi_workspace::ToggleWorkspaceSidebar",
+      "alt-shift-j": "multi_workspace::FocusWorkspaceSidebar",
+      "alt-shift-n": "agent::ToggleFocus",
+      "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher",
+      "space h": "project_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "AgentPanel || (MessageEditor > Editor)",
     "use_key_equivalents": true,
     "bindings": {
       "alt-shift-h": "multi_workspace::ToggleWorkspaceSidebar",
-      "alt-shift-i": "project_panel::ToggleFocus",
       "alt-shift-j": "multi_workspace::FocusWorkspaceSidebar",
-      "alt-shift-l": "workspace::FocusCenterPane",
-      "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher",
-      "alt-shift-n": "agent::NewThread",
-      "alt-shift-]": "multi_workspace::NextThread",
-      "alt-shift-[": "multi_workspace::PreviousThread",
-      "cmd-alt-j": null
+      "alt-shift-n": "agent::ToggleFocus",
+      "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher"
     }
   },
   {
-    "context": "ThreadsSidebar",
-    "use_key_equivalents": true,
-    "bindings": {
-      "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher",
-      "alt-shift-n": "agents_sidebar::NewThreadInGroup"
-    }
-  },
-  {
-    "context": "vim_mode == normal && !menu",
+    "context": "Editor && mode == full && !AgentPanel && vim_mode == normal && !menu",
     "bindings": {
       "shift-h": "pane::ActivatePreviousItem",
       "shift-l": "pane::ActivateNextItem",
@@ -31,7 +30,11 @@
       "a": "vim::InsertBefore",
       "space v": "pane::SplitRight",
       "space s": "pane::SplitDown",
-      "space h": "workspace::ActivatePaneLeft",
+      "space n": "workspace::NewFile",
+      "space t": "workspace::NewTerminal",
+      "space T": "workspace::NewCenterTerminal",
+      "space d": "pane::CloseActiveItem",
+      "space h": "project_panel::ToggleFocus",
       "space j": "workspace::ActivatePaneDown",
       "space k": "workspace::ActivatePaneUp",
       "space l": "workspace::ActivatePaneRight",
@@ -42,19 +45,20 @@
       "] d": ["editor::GoToDiagnostic", { "severity": { "min": "hint", "max": "error" } }],
       "space c a": "editor::ToggleCodeActions",
       "space f": "file_finder::Toggle",
+      "space S": "project_symbols::Toggle",
       "space p": "editor::Format",
       "g h": "editor::Hover",
       "ctrl-space": "vim::NormalBefore"
     }
   },
   {
-    "context": "vim_mode == insert && !menu",
+    "context": "Editor && mode == full && !AgentPanel && vim_mode == insert && !menu",
     "bindings": {
       "ctrl-space": "vim::NormalBefore"
     }
   },
   {
-    "context": "vim_mode == visual && !menu",
+    "context": "Editor && mode == full && !AgentPanel && vim_mode == visual && !menu",
     "bindings": {
       "<": "vim::Outdent",
       ">": "vim::Indent",
@@ -66,23 +70,7 @@
   {
     "context": "ProjectPanel && not_editing",
     "bindings": {
-      "j": ["workspace::SendKeystrokes", "down"],
-      "k": ["workspace::SendKeystrokes", "up"],
-      "h": ["workspace::SendKeystrokes", "left"],
-      "l": ["workspace::SendKeystrokes", "right"],
-      "o": "project_panel::Open",
-      "enter": "project_panel::OpenPermanent",
-      "space l": "workspace::ActivatePaneRight",
-      "ctrl-w l": "workspace::ActivatePaneRight"
-    }
-  },
-  {
-    "context": "Dock",
-    "bindings": {
-      "ctrl-w h": "workspace::ActivatePaneLeft",
-      "ctrl-w j": "workspace::ActivatePaneDown",
-      "ctrl-w k": "workspace::ActivatePaneUp",
-      "ctrl-w l": "workspace::ActivatePaneRight"
+      "space l": "workspace::ActivatePaneRight"
     }
   }
 ]
