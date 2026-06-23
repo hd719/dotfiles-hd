@@ -50,6 +50,7 @@ fi
 # -----------------------------------------------------------------------------
 [[ -d /opt/homebrew/opt/curl/bin ]] && export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 [[ -d /opt/homebrew/opt/postgresql@17/bin ]] && export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+# Mac mini local tools, including cua-driver-rs.
 export PATH="$HOME/.local/bin:$PATH"
 
 if [[ -f "$HOME/.local/bin/env" ]]; then
