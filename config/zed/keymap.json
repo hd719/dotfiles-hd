@@ -7,8 +7,7 @@
       "alt-shift-h": "multi_workspace::ToggleWorkspaceSidebar",
       "alt-shift-j": "multi_workspace::FocusWorkspaceSidebar",
       "alt-shift-n": "agent::ToggleFocus",
-      "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher",
-      "space h": "project_panel::ToggleFocus"
+      "alt-shift-y": "agents_sidebar::ToggleThreadSwitcher"
     }
   },
   {
