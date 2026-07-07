@@ -7,6 +7,11 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "languages": {
+    "Go": {
+      "show_edit_predictions": false
+    }
+  },
   "disable_ai": false,
   "debugger": {
     "dock": "right",
@@ -42,6 +47,7 @@
       "default": "allow",
     },
     "default_model": {
+      "speed": "standard",
       "provider": "openai-subscribed",
       "model": "gpt-5.5",
       "enable_thinking": true,
@@ -122,6 +128,7 @@
   "gutter": {
     "line_numbers": true,
   },
+  "relative_line_numbers": "enabled",
   "minimap": {
     "show": "never",
   },
@@ -149,8 +156,8 @@
     "dark": "Catppuccin Mocha",
   },
   "ui_font_family": "Maple Mono NF",
-  "ui_font_size": 15.0,
-  "buffer_font_size": 13.0,
+  "ui_font_size": 16.5,
+  "buffer_font_size": 14.0,
   "theme": {
     "mode": "system",
     "light": "Gruvbox Light",
