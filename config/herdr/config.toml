@@ -34,6 +34,7 @@ switch_tab = "prefix+1..9"
 close_tab = "prefix+shift+x"
 
 # Panes.
+edit_scrollback = "prefix+e"
 focus_pane_left = "prefix+h"
 focus_pane_down = "prefix+j"
 focus_pane_up = "prefix+k"
@@ -72,3 +73,6 @@ manage_ssh_config = true
 
 [experimental]
 pane_history = true
+
+[advanced]
+scrollback_limit_bytes = 100000000
