@@ -13,6 +13,7 @@ lsof -ti :9002 | xargs kill -9 2>/dev/null || true
 lsof -ti :3000 | xargs kill -9 2>/dev/null || true
 lsof -ti :3001 | xargs kill -9 2>/dev/null || true
 lsof -ti :8080 | xargs kill -9 2>/dev/null || true
+lsof -ti :9695 | xargs kill -9 2>/dev/null || true
 
 # Wait another moment after cleanup
 sleep 1
@@ -27,6 +28,10 @@ tmux send-keys -t platform:1 "res-plat-be" C-m
 # Create a window for the frontend with yarn dev
 tmux new-window -t platform:2 -n "frontend"
 tmux send-keys -t platform:2 "res-plat-fe" C-m
+
+# Create a window for the Hasura console
+tmux new-window -t platform:3 -n "hasura"
+tmux send-keys -t platform:3 "res-plat-hasura" C-m
 
 # Attach to the tmux session
 tmux attach -t platform
