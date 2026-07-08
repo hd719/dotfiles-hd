@@ -1,6 +1,8 @@
 # Herdr config
 # Source of truth: ~/Developer/dotfiles-hd/config/herdr/config.toml
 
+onboarding = false
+
 [theme]
 name = "terminal"
 
