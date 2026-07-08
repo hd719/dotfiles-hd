@@ -7,13 +7,17 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "diagnostics": {
+    "button": false
+  },
   "languages": {
     "Go": {
       "show_edit_predictions": false
     }
   },
-  "disable_ai": false,
+  "disable_ai": true,
   "debugger": {
+    "button": false,
     "dock": "right",
   },
   "collaboration_panel": {
@@ -99,6 +103,7 @@
   "vim_mode": true,
   "terminal": {
     "button": false,
+    "dock": "left",
     "font_size": 13.5,
     "font_family": "Maple Mono NF",
     "cursor_shape": "bar",

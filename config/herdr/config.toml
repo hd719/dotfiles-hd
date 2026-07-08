@@ -1,0 +1,72 @@
+# Herdr config
+# Source of truth: ~/Developer/dotfiles-hd/config/herdr/config.toml
+
+[theme]
+name = "terminal"
+
+[terminal]
+shell_mode = "auto"
+new_cwd = "follow"
+
+[keys]
+# Match Hamel's tmux prefix.
+prefix = "esc"
+
+# Tmux-like session/app controls.
+help = "prefix+?"
+detach = "prefix+d"
+reload_config = "prefix+r"
+
+# Workspaces.
+workspace_picker = "prefix+w"
+new_workspace = "prefix+shift+n"
+rename_workspace = "prefix+shift+w"
+close_workspace = "prefix+shift+d"
+
+# Tabs map to tmux windows.
+new_tab = "prefix+c"
+rename_tab = "prefix+shift+t"
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
+switch_tab = "prefix+1..9"
+close_tab = "prefix+shift+x"
+
+# Panes.
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+cycle_pane_next = "prefix+tab"
+cycle_pane_previous = "prefix+shift+tab"
+split_vertical = "prefix+v"
+split_horizontal = "prefix+s"
+close_pane = "prefix+x"
+zoom = "prefix+z"
+resize_mode = "prefix+shift+r"
+toggle_sidebar = "prefix+b"
+
+# Navigate-mode movement.
+navigate_pane_left = "h"
+navigate_pane_down = "j"
+navigate_pane_up = "k"
+navigate_pane_right = "l"
+
+[ui]
+sidebar_width = 26
+sidebar_min_width = 18
+sidebar_max_width = 36
+mouse_capture = true
+confirm_close = true
+prompt_new_tab_name = false
+pane_borders = true
+pane_gaps = true
+accent = "#88c0d0"
+
+[session]
+resume_agents_on_restore = true
+
+[remote]
+manage_ssh_config = true
+
+[experimental]
+pane_history = true
