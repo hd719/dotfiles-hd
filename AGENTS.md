@@ -29,10 +29,10 @@ Whole directory links:
 - `~/.config/btop` -> `config/btop`
 - `~/.config/fastfetch` -> `config/fastfetch`
 - `~/.config/karabiner` -> `config/karabiner`
+- `~/.config/mise` -> `config/mise`
 
 Single file or subdirectory links:
 
-- `~/.config/mise/config.toml` -> `config/mise/config.toml`
 - `~/.config/herdr/config.toml` -> `config/herdr/config.toml`
 - `~/.config/zed/settings.json` -> `config/zed/settings.json`
 - `~/.config/zed/keymap.json` -> `config/zed/keymap.json`
@@ -43,6 +43,7 @@ Single file or subdirectory links:
 - `~/.config/tmux` because live plugins live there. Review/link `tmux.conf` separately.
 - `~/.gitconfig` because live config can differ by machine.
 - `~/.config/raycast` because it contains extension/runtime state.
+- `~/.config/1Password`, `~/.config/op`, `~/.config/gh`, or `~/.config/cagent` without a specific request because they contain credential, auth, or app-managed state.
 - `~/.config/zed/prompts` because it is Zed runtime database state.
 - `~/Library/Application Support/Zed` because it is app runtime state.
 - Herdr logs, sockets, sessions, and release notes under `~/.config/herdr`.

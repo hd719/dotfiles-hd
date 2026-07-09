@@ -16,7 +16,7 @@ These are the active symlinks on this Mac.
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
 | Karabiner | `~/.config/karabiner` | `config/karabiner` | Linked dir | Personal Mac should be 1:1 with dotfiles. |
-| mise | `~/.config/mise/config.toml` | `config/mise/config.toml` | Linked file | Global toolchain config. |
+| mise | `~/.config/mise` | `config/mise` | Linked dir | Global toolchain config. |
 | Herdr | `~/.config/herdr/config.toml` | `config/herdr/config.toml` | Linked file | Only config is linked; runtime state stays local. |
 | Zed settings | `~/.config/zed/settings.json` | `config/zed/settings.json` | Linked file | User-owned Zed settings. |
 | Zed keymap | `~/.config/zed/keymap.json` | `config/zed/keymap.json` | Linked file | User-owned Zed keybindings. |
@@ -54,7 +54,7 @@ DOTFILES="$HOME/Developer/dotfiles-hd"
 backup_and_link "$DOTFILES/config/btop" "$HOME/.config/btop"
 backup_and_link "$DOTFILES/config/fastfetch" "$HOME/.config/fastfetch"
 backup_and_link "$DOTFILES/config/karabiner" "$HOME/.config/karabiner"
-backup_and_link "$DOTFILES/config/mise/config.toml" "$HOME/.config/mise/config.toml"
+backup_and_link "$DOTFILES/config/mise" "$HOME/.config/mise"
 backup_and_link "$DOTFILES/config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 backup_and_link "$DOTFILES/config/zed/settings.json" "$HOME/.config/zed/settings.json"
 backup_and_link "$DOTFILES/config/zed/keymap.json" "$HOME/.config/zed/keymap.json"
@@ -85,7 +85,10 @@ This links only `~/.config/herdr/config.toml`.
 | --- | --- |
 | `~/.config/tmux` | The live directory contains plugins. Link/review `tmux.conf`, not the whole folder. |
 | `~/.gitconfig` | Live config differs from repo. Review before linking. |
+| `~/.config/herdr` | Contains logs, sockets, release notes, and session state. Link only `config.toml`. |
 | `~/.config/raycast` | Raycast has extension/runtime state. Treat `config/raycast` as exports, not a live symlink target. |
+| `~/.config/zed` | Contains prompt database state. Link settings, keymap, and themes only. |
 | `~/.config/zed/prompts` | Zed runtime database state, not portable config. |
 | `~/Library/Application Support/Zed` | App runtime state, not portable config. |
+| `~/.config/1Password`, `~/.config/op`, `~/.config/gh`, `~/.config/cagent` | Credential, auth, or app-managed state. Do not link without a specific reason. |
 | Terminal configs | Link only for tools actively used on the current machine. |
