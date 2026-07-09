@@ -29,18 +29,22 @@ export FORCE_COLOR=1
 # Completions (cached compinit for speed)
 # Uses zsh native stat instead of external stat command
 # -----------------------------------------------------------------------------
-fpath=(/Users/hameldesai/.docker/completions $fpath)
+typeset -gaU fpath
+fpath=(
+  /Users/hameldesai/.docker/completions
+  /opt/homebrew/share/zsh/site-functions
+  /usr/local/share/zsh/site-functions
+  $fpath
+)
 autoload -Uz compinit
-# Check if zcompdump exists and is from today (using zsh native stat)
+# Check if zcompdump is fresh enough to reuse.
 if [[ -f ~/.zcompdump ]]; then
-  local _zcomp_mtime _today_start
+  local _zcomp_mtime
   zstat -A _zcomp_mtime +mtime ~/.zcompdump 2>/dev/null
-  # Calculate start of today (midnight)
-  _today_start=$(( EPOCHSECONDS - (EPOCHSECONDS % 86400) ))
-  if (( _zcomp_mtime >= _today_start )); then
+  if (( EPOCHSECONDS - _zcomp_mtime < 43200 )); then
     compinit -C  # Cached (fast)
   else
-    compinit     # Full rebuild (once per day)
+    compinit     # Full rebuild
   fi
 else
   compinit       # First run

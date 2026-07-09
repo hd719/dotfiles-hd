@@ -1,0 +1,86 @@
+# Hamel Nord theme for btop
+# Palette aligned with Codex/Zed Hamel Nord.
+
+# Main background, empty for terminal default, leave empty for transparency.
+theme[main_bg]="#3b4252"
+
+# Main text color
+theme[main_fg]="#d8dee9"
+
+# Title color for boxes
+theme[title]="#88c0d0"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#88c0d0"
+
+# Background color of selected item in processes box
+theme[selected_bg]="#434c5e"
+
+# Foreground color of selected item in processes box
+theme[selected_fg]="#d8dee9"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#a0aec8"
+
+# Color of text appearing on top of graphs
+theme[graph_text]="#d8dee9"
+
+# Background color of the percentage meters
+theme[meter_bg]="#4c566a"
+
+# Misc colors for processes box
+theme[proc_misc]="#d8dee9"
+
+# CPU, Memory, Network, Proc box outline colors
+theme[cpu_box]="#88c0d0"
+theme[mem_box]="#a3be8c"
+theme[net_box]="#ebcb8b"
+theme[proc_box]="#b48ead"
+
+# Box divider line and small boxes line color
+theme[div_line]="#4c566a"
+
+# Temperature graph color (Green -> Yellow -> Red)
+theme[temp_start]="#a3be8c"
+theme[temp_mid]="#ebcb8b"
+theme[temp_end]="#bf616a"
+
+# CPU graph colors (Blue -> Cyan -> Pale cyan)
+theme[cpu_start]="#81a1c1"
+theme[cpu_mid]="#88c0d0"
+theme[cpu_end]="#add3d2"
+
+# Mem/Disk free meter (Purple -> Cyan -> Blue)
+theme[free_start]="#b48ead"
+theme[free_mid]="#88c0d0"
+theme[free_end]="#81a1c1"
+
+# Mem/Disk cached meter (Teal -> Cyan -> Pale cyan)
+theme[cached_start]="#8fbcbb"
+theme[cached_mid]="#88c0d0"
+theme[cached_end]="#add3d2"
+
+# Mem/Disk available meter (Green -> Yellow -> Red)
+theme[available_start]="#a3be8c"
+theme[available_mid]="#ebcb8b"
+theme[available_end]="#bf616a"
+
+# Mem/Disk used meter (Blue -> Cyan -> Pale cyan)
+theme[used_start]="#81a1c1"
+theme[used_mid]="#88c0d0"
+theme[used_end]="#add3d2"
+
+# Download graph colors (Cyan -> Yellow -> Red)
+theme[download_start]="#88c0d0"
+theme[download_mid]="#ebcb8b"
+theme[download_end]="#bf616a"
+
+# Upload graph colors (Green -> Cyan -> Pale cyan)
+theme[upload_start]="#a3be8c"
+theme[upload_mid]="#88c0d0"
+theme[upload_end]="#add3d2"
+
+# Process box color gradient for threads, memory, and CPU usage
+theme[process_start]="#88c0d0"
+theme[process_mid]="#8fbcbb"
+theme[process_end]="#b48ead"

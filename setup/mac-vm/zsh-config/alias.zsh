@@ -90,7 +90,7 @@ alias l='lsd -l'
 alias la='lsd -a'
 
 ## Bat
-alias cat="bat --paging never --theme Dracula"
+alias cat="bat --paging never --theme Nord"
 
 ## Snitch - Network connection inspector (https://github.com/karol-broda/snitch)
 alias sn='snitch'                    # Interactive TUI (all connections)
