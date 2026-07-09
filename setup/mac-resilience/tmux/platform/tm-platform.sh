@@ -30,8 +30,9 @@ tmux new-window -t platform:2 -n "frontend"
 tmux send-keys -t platform:2 "res-plat-fe" C-m
 
 # Create a window for the Hasura console
+# Wait until Hasura answers on :8080 before launching (the stack can take a few minutes to come up)
 tmux new-window -t platform:3 -n "hasura"
-tmux send-keys -t platform:3 "res-plat-hasura" C-m
+tmux send-keys -t platform:3 'until curl -sf http://localhost:8080/v1/version >/dev/null 2>&1; do echo "waiting for hasura on :8080..."; sleep 5; done; res-plat-hasura' C-m
 
 # Attach to the tmux session
 tmux attach -t platform
