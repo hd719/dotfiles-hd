@@ -1,0 +1,94 @@
+return {
+  {
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
+    opts = {
+      input = { enabled = true },
+      notifier = { enabled = true, timeout = 3000 },
+      picker = { enabled = true },
+      lazygit = {},
+      terminal = {},
+    },
+    keys = {
+      {
+        "<leader>f",
+        function()
+          Snacks.picker.files()
+        end,
+        desc = "Find files",
+      },
+      {
+        "<leader>/",
+        function()
+          Snacks.picker.grep()
+        end,
+        desc = "Grep",
+      },
+      {
+        "<leader>b",
+        function()
+          Snacks.picker.buffers()
+        end,
+        desc = "Buffers",
+      },
+      {
+        "<leader>S",
+        function()
+          Snacks.picker.lsp_workspace_symbols()
+        end,
+        desc = "Project symbols",
+      },
+      {
+        "<leader>d",
+        function()
+          Snacks.bufdelete()
+        end,
+        desc = "Close buffer",
+      },
+      {
+        "<leader>g",
+        function()
+          Snacks.lazygit()
+        end,
+        desc = "LazyGit",
+      },
+      {
+        "gd",
+        function()
+          Snacks.picker.lsp_definitions()
+        end,
+        desc = "Definitions",
+      },
+      {
+        "<leader>t",
+        function()
+          Snacks.terminal.open()
+        end,
+        desc = "New terminal",
+      },
+      {
+        "<leader>T",
+        function()
+          Snacks.terminal.open(nil, { win = { position = "float" } })
+        end,
+        desc = "New floating terminal",
+      },
+    },
+  },
+  {
+    "stevearc/oil.nvim",
+    lazy = false,
+    dependencies = {
+      { "nvim-mini/mini.icons", opts = {} },
+    },
+    opts = {
+      view_options = {
+        show_hidden = true,
+      },
+    },
+    keys = {
+      { "<leader>h", "<cmd>Oil<cr>", desc = "File browser" },
+    },
+  },
+}

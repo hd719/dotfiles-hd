@@ -15,8 +15,10 @@ These are the active symlinks on this Mac.
 | --- | --- | --- | --- | --- |
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
+| Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Matches Zed's Maple Mono NF and Hamel Nord Blur appearance. |
 | Karabiner | `~/.config/karabiner` | `config/karabiner` | Linked dir | Personal Mac should be 1:1 with dotfiles. |
 | mise | `~/.config/mise` | `config/mise` | Linked dir | Global toolchain config. |
+| Neovim | `~/.config/nvim` | `config/nvim` | Linked dir | Lua config, plugins, keymaps, LSP, and Hamel Nord. |
 | Herdr | `~/.config/herdr/config.toml` | `config/herdr/config.toml` | Linked file | Only config is linked; runtime state stays local. |
 | Zed settings | `~/.config/zed/settings.json` | `config/zed/settings.json` | Linked file | User-owned Zed settings. |
 | Zed keymap | `~/.config/zed/keymap.json` | `config/zed/keymap.json` | Linked file | User-owned Zed keybindings. |
@@ -53,8 +55,10 @@ DOTFILES="$HOME/Developer/dotfiles-hd"
 
 backup_and_link "$DOTFILES/config/btop" "$HOME/.config/btop"
 backup_and_link "$DOTFILES/config/fastfetch" "$HOME/.config/fastfetch"
+backup_and_link "$DOTFILES/config/ghostty/config" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 backup_and_link "$DOTFILES/config/karabiner" "$HOME/.config/karabiner"
 backup_and_link "$DOTFILES/config/mise" "$HOME/.config/mise"
+backup_and_link "$DOTFILES/config/nvim" "$HOME/.config/nvim"
 backup_and_link "$DOTFILES/config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 backup_and_link "$DOTFILES/config/zed/settings.json" "$HOME/.config/zed/settings.json"
 backup_and_link "$DOTFILES/config/zed/keymap.json" "$HOME/.config/zed/keymap.json"

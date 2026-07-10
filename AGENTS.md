@@ -30,9 +30,11 @@ Whole directory links:
 - `~/.config/fastfetch` -> `config/fastfetch`
 - `~/.config/karabiner` -> `config/karabiner`
 - `~/.config/mise` -> `config/mise`
+- `~/.config/nvim` -> `config/nvim`
 
 Single file or subdirectory links:
 
+- `~/Library/Application Support/com.mitchellh.ghostty/config` -> `config/ghostty/config`
 - `~/.config/herdr/config.toml` -> `config/herdr/config.toml`
 - `~/.config/zed/settings.json` -> `config/zed/settings.json`
 - `~/.config/zed/keymap.json` -> `config/zed/keymap.json`
@@ -62,6 +64,41 @@ Prefer these scripts when they match the task.
 - Keep both profiles in `config/zed/settings.json` and preserve their matching sidebar and scrollbar settings.
 - Switch profiles in Zed with `settings profile selector: toggle` from the command palette.
 - Blur colors use `#RRGGBBAA`; `ed` is 92.9% opacity. For opacity changes, keep `background`, `status_bar.background`, `title_bar.background`, and `title_bar.inactive_background` identical in the blur theme file and its `theme_overrides` entry.
+
+## Neovim Teaching Continuity
+
+- The goal is to make Hamel a deadly Vim/Neovim warrior: fast, confident, and
+  able to reason about the editor instead of memorizing unexplained magic.
+- Before teaching Neovim, read `config/nvim/README.md`,
+  `config/nvim/CURRICULUM.md`, and `config/nvim/LEARNING_LOG.md` so lessons
+  resume from the last checkpoint.
+- `CURRICULUM.md` is the checkable skill-progress source of truth;
+  `LEARNING_LOG.md` is the append-only evidence of what happened in each
+  session. Keep both current.
+- Teach interactively in small steps. Give one concrete action, wait for Hamel
+  to try it, explain what happened, and then continue.
+- Check a curriculum sub-lesson only after Hamel practices it and confirms the
+  result. Add the supporting session number beside the completed checkbox.
+- Keep checkboxes atomic. Never group several keys or behaviors into one checked
+  item when Hamel practiced only part of the group.
+- A lesson is complete when every core sub-lesson is checked. Optional deep
+  dives never block progress and may remain unchecked permanently.
+- If Hamel wants to go deeper, add the new topic under that lesson's Optional
+  Deep Dives before teaching it. Do not silently expand the core track.
+- Default to the first unchecked core item in the earliest incomplete lesson,
+  unless Hamel explicitly chooses another topic.
+- Keep the curriculum's `Current Checkpoint` synchronized whenever progress
+  changes.
+- Every Neovim concept, key, workflow, conflict, or correction taught must be
+  documented in `config/nvim/LEARNING_LOG.md` during that session. Do not rely
+  on chat history as the record.
+- Keep the learning log append-only. Start each new teaching session with the
+  next numbered, dated entry and preserve older entries.
+- Each session entry must include what was practiced, the useful mental model,
+  any unresolved confusion or key conflict, and the best next lesson.
+- If a chat or agent handoff loses context, resume from the curriculum's first
+  unchecked core item, confirm it against the latest log entry, and begin with
+  one short recall checkpoint.
 
 ## Verification
 
