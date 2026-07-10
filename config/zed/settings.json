@@ -113,6 +113,7 @@
     "button": false,
     "dock": "left",
     "auto_fold_dirs": false,
+    "sticky_scroll": false,
   },
   "preview_tabs": {
     "enabled": false,
@@ -121,7 +122,7 @@
     "show_nav_history_buttons": false,
   },
   "toolbar": {
-    "breadcrumbs": false,
+    "breadcrumbs": true,
     "quick_actions": false,
     "selections_menu": false,
     "agent_review": false,
@@ -166,6 +167,30 @@
   "ui_font_family": "Maple Mono NF",
   "ui_font_size": 16.5,
   "buffer_font_size": 14.0,
+  "profiles": {
+    "Hamel Nord": {
+      "settings": {
+        "theme": "Hamel Nord",
+        "project_panel": {
+          "sticky_scroll": true,
+        },
+        "scrollbar": {
+          "show": "auto",
+        },
+      },
+    },
+    "Hamel Nord Blur": {
+      "settings": {
+        "theme": "Hamel Nord Blur",
+        "project_panel": {
+          "sticky_scroll": false,
+        },
+        "scrollbar": {
+          "show": "system",
+        },
+      },
+    },
+  },
   "theme": {
     "mode": "system",
     "light": "Gruvbox Light",

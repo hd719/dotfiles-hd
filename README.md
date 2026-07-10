@@ -71,6 +71,14 @@ Zed:
 
 This links Zed settings, keymap, themes, and exposes Codex skills to Zed through `~/.agents/skills`.
 
+### Switch Zed Themes
+
+1. Open the command palette with `Cmd+Shift+P`.
+2. Run `settings profile selector: toggle`.
+3. Select `Hamel Nord` for the opaque theme or `Hamel Nord Blur` for the blurred theme.
+
+The profiles also apply their matching sidebar and scrollbar settings.
+
 Herdr:
 
 ```bash

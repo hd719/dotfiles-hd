@@ -55,6 +55,13 @@ Single file or subdirectory links:
 
 Prefer these scripts when they match the task.
 
+## Zed Theme Profiles
+
+- `Hamel Nord` pairs with `config/zed/themes/hamel-nord.json`.
+- `Hamel Nord Blur` pairs with `config/zed/themes/hamel-nord-blur.json`.
+- Keep both profiles in `config/zed/settings.json` and preserve their matching sidebar and scrollbar settings.
+- Switch profiles in Zed with `settings profile selector: toggle` from the command palette.
+
 ## Verification
 
 After symlink or config changes:
