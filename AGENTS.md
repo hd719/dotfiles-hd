@@ -61,6 +61,7 @@ Prefer these scripts when they match the task.
 - `Hamel Nord Blur` pairs with `config/zed/themes/hamel-nord-blur.json`.
 - Keep both profiles in `config/zed/settings.json` and preserve their matching sidebar and scrollbar settings.
 - Switch profiles in Zed with `settings profile selector: toggle` from the command palette.
+- Blur colors use `#RRGGBBAA`; `ed` is 92.9% opacity. For opacity changes, keep `background`, `status_bar.background`, `title_bar.background`, and `title_bar.inactive_background` identical in the blur theme file and its `theme_overrides` entry.
 
 ## Verification
 

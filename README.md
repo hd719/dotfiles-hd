@@ -79,6 +79,15 @@ This links Zed settings, keymap, themes, and exposes Codex skills to Zed through
 
 The profiles also apply their matching sidebar and scrollbar settings.
 
+### Change Zed Blur Opacity
+
+Zed colors use `#RRGGBBAA`; the final two digits control opacity. The current value is `#3b4252ed`, where `ed` is 237/255, or 92.9%.
+
+To choose another opacity, calculate `round((percentage / 100) × 255)` and convert the result to two-digit hexadecimal. Update `background`, `status_bar.background`, `title_bar.background`, and `title_bar.inactive_background` in both:
+
+- `config/zed/themes/hamel-nord-blur.json`
+- The `Hamel Nord Blur` theme override in `config/zed/settings.json`
+
 Herdr:
 
 ```bash
