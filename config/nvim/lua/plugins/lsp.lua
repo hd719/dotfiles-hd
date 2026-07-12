@@ -89,7 +89,13 @@ return {
     opts = {
       formatters_by_ft = {
         go = { "gofmt" },
+        javascript = { "prettier" },
+        javascriptreact = { "prettier" },
         lua = { "stylua" },
+        markdown = { "mdformat" },
+        python = { "ruff_format" },
+        typescript = { "prettier" },
+        typescriptreact = { "prettier" },
       },
       default_format_opts = {
         lsp_format = "fallback",

@@ -174,14 +174,23 @@ unexplained magic.
 - [ ] **6.4** Inspect and choose LSP actions with `Space c a`.
 - [ ] **6.5** Format Go and Lua manually with `Space p` and review the diff.
 - [ ] **6.6** Diagnose formatter availability with `:ConformInfo`.
-- [ ] **6.7** Explain that the first phase has LSP and formatting for Go and Lua,
-  while JavaScript, TypeScript, and Python only have syntax parsing so far.
+- [ ] **6.7** Explain the current coverage: Go and Lua have LSP support; Go,
+  Lua, JavaScript, TypeScript, Markdown, and Python have manual formatting;
+  format-on-save remains disabled.
 
 ### Optional Deep Dives
 
 - [ ] **6.D1** Send diagnostics to a location or quickfix list.
 - [ ] **6.D2** Filter diagnostics by severity and source.
 - [ ] **6.D3** Add a new formatter without introducing hidden auto-formatting.
+- [x] **6.D4** Recover broken TypeScript/TSX highlighting by reinstalling the
+  Tree-sitter parsers in dependency order. — Session 003
+- [x] **6.D5** Format a TSX buffer manually with `Space p` using project-local
+  Prettier and verify the indentation change. — Session 004
+- [x] **6.D6** Format Markdown manually with `Space p` using dedicated
+  `mdformat` instead of Prettier. — Session 004
+- [ ] **6.D7** Format Python manually with `Space p` using Ruff installed
+  through `uv`.
 
 ## Lesson 7 — Multi-File Project Workflow
 

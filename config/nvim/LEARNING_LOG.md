@@ -557,3 +557,135 @@ historical planning snapshot that led to the detailed curriculum.
   checkpoint.
 - Curriculum 3.5 remains open. Next, press `u` twice to remove `[TWO]` and then
   `[ONE]`, followed by `Ctrl-r` practice and the `.` repeat command.
+
+## 2026-07-11 — Session 003: TypeScript/TSX Highlighting Recovery
+
+### Goal
+
+Restore full Nord syntax highlighting in a `.tsx` file without changing the
+Neovim theme or configuration.
+
+### Root Cause and Fix
+
+- Nord was loaded and the filetype was correctly detected as
+  `typescriptreact`; the colorscheme was not the problem.
+- The installed Tree-sitter TypeScript/TSX parser state was stale or
+  mismatched, so most TSX nodes fell back to the plain foreground color.
+- Hamel ran `:TSInstall! typescript` first. This refreshed TypeScript parsing,
+  but JSX tags still needed the separate TSX parser.
+- Hamel then ran `:TSInstall! tsx` and confirmed that the complete TSX syntax
+  coloring returned.
+- Mental model: Nord chooses the colors, while Tree-sitter identifies which
+  pieces of code receive those colors. A `.tsx` file needs both its TypeScript
+  and JSX-aware TSX parsing layers.
+
+### Command-Mode Correction
+
+- `:TSInstall!` is an Ex command: leave Insert mode, press `:`, type the command
+  in the command line, and press `Enter`.
+- During the repair, command text was accidentally inserted into the source
+  buffer instead. Normal-mode `u` is the first recovery tool before saving.
+- A disk check found the accidental suffix `:TSInstall! tsxuu` on the final
+  export line of `apps/mission-control/components/ui/progress.tsx`. That project
+  cleanup remains pending and must be reviewed before any write.
+
+### Curriculum and Next Step
+
+- **Optional Curriculum 6.D4 complete:** Hamel recovered TypeScript/TSX
+  highlighting by reinstalling the parsers in dependency order.
+- The main curriculum checkpoint remains **3.5**: undo, redo, and repeat.
+- Immediate safety step: remove only the accidental TSX command suffix and
+  verify the project diff before moving to completion or formatting setup.
+
+### Accidental Source Edit Cleaned
+
+- Removed only the accidental `:TSInstall! tsxuu` suffix from
+  `apps/mission-control/components/ui/progress.tsx`.
+- Verified that `progress.tsx` now matches its Git version with no remaining
+  diff.
+- No unrelated `cortana-services` changes were modified.
+
+## 2026-07-12 — Session 004: Manual Multi-Language Formatting
+
+### TSX Formatting Confirmed
+
+- Added JavaScript, JSX, TypeScript, and TSX mappings from Conform to
+  project-local Prettier.
+- Added a root `prettier.config.mjs` bridge in `cortana-services` so editor
+  discovery reaches the shared 120-column configuration.
+- Hamel reloaded Conform, pressed `Space p` on an intentionally misindented TSX
+  prop, and confirmed that Prettier corrected the indentation.
+- Mental model: `Space p` asks Conform to select a formatter from the current
+  buffer's filetype. It changes the in-memory buffer; `Space w` writes that
+  result to disk.
+- **Optional Curriculum 6.D5 complete:** manual TSX formatting was practiced
+  and confirmed.
+
+### Command-Entry Safety Reinforced
+
+- `:Lazy reload conform.nvim` was briefly typed into the TSX buffer as well as
+  run from the command line.
+- A disk check confirmed the command text was not saved. Normal-mode `u`
+  removed the accidental buffer insertion before formatting continued.
+
+### Dedicated Markdown and Python Formatters Staged
+
+- Hamel chose not to make Markdown depend on Prettier.
+- Markdown now maps to dedicated `mdformat`; Python maps to Ruff's formatter.
+- Both tools are installed with `uv`. The Markdown tool includes GFM,
+  frontmatter, footnote, alert, and wikilink plugins.
+- Safety finding: plain `mdformat` escapes Obsidian `[[wikilinks]]`. Adding
+  `mdformat-wikilink` preserved normal links, aliases, headings, block links,
+  and embeds in an isolated test.
+- Headless Conform checks found both formatters and formatted isolated buffers
+  successfully. Curricula 6.D6 and 6.D7 remain open until Hamel practices each
+  mapping in Neovim.
+
+### Next Checkpoint
+
+- Reload Conform, then test `Space p` on one harmless Markdown formatting
+  change. Test Python separately afterward.
+- Format-on-save and ESLint remain intentionally unchanged.
+
+### Project Formatting Rules vs Neovim Wiring
+
+- The project owns formatting style such as `printWidth`, wrapping, and
+  trailing commas in `packages/tooling/prettier/config.mjs`.
+- The root `prettier.config.mjs` only exposes that shared configuration to
+  editor discovery and normally should not need editing.
+- Neovim owns formatter selection and editor behavior in
+  `config/nvim/lua/plugins/lsp.lua`, including filetype mappings, `Space p`,
+  and any future format-on-save setting.
+- Rule of thumb: change style in the project; change formatter wiring in the
+  Neovim configuration. Project rule changes apply on the next `Space p`;
+  Neovim wiring changes require a plugin reload or restart.
+
+### Markdown Formatting Confirmed
+
+- `:ConformInfo` confirmed `mdformat` was ready for the Markdown buffer at
+  `~/.local/bin/mdformat`.
+- A failed Lazy reload used the accidental plugin name `conform.nvim.` with a
+  trailing period. The exact plugin name is `conform.nvim`.
+- Indenting `- Links:` can turn it into a nested list item, so `mdformat`
+  preserves that semantic structure instead of guessing that the indentation
+  was accidental.
+- The reliable formatting sequence is: make the test edit in Insert mode,
+  press `Ctrl-c` to return to Normal mode, then press `Space p`.
+- Hamel tested the unambiguous heading `##   Open`; `Space p` normalized it to
+  `## Open` and confirmed that dedicated Markdown formatting works.
+- **Optional Curriculum 6.D6 complete:** manual Markdown formatting was
+  practiced and confirmed.
+
+### Normal-Mode Corrections
+
+- Pressing `q` in a normal file buffer starts macro recording; the
+  `recording @u` indicator was stopped safely with another `q`.
+- `Space p` formats; it is not an end-of-line or file-navigation command, and
+  the cursor can move when formatting rewrites nearby text.
+- `G` jumps to the end of the file. `Ctrl-p` does not.
+
+### Next Checkpoint
+
+- Practice `Space p` once on an isolated Python buffer so Curriculum 6.D7 can
+  be confirmed.
+- Format-on-save and ESLint remain intentionally unchanged.
