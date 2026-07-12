@@ -11,8 +11,8 @@ shell_mode = "auto"
 new_cwd = "follow"
 
 [keys]
-# Match Hamel's tmux prefix.
-prefix = "esc"
+# Match Kuncheng's Herdr prefix and keep Escape free for Neovim.
+prefix = "ctrl+b"
 
 # Tmux-like session/app controls.
 help = "prefix+?"

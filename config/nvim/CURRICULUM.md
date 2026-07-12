@@ -20,14 +20,15 @@ unexplained magic.
 
 ## Current Checkpoint
 
-- **Lesson:** 1 — Editor Foundations
-- **Next core sub-lesson:** 1.12a — navigate a horizontal split
-- **Why Lesson 1 remains open:** retrospective evidence only checks actions
-  Hamel explicitly practiced or confirmed.
+- **Lesson:** 3 — Safe Editing and Recovery
+- **Next core sub-lesson:** 3.5 — undo with `u`, redo with `Ctrl-r`, and repeat
+  with `.`
+- **Why Lesson 3 remains open:** undo, redo, repeat, clipboard, modified-buffer
+  prompts, and intentional change abandonment remain.
 
 ## Lesson 1 — Editor Foundations
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 001
 
 ### Core Sub-Lessons
 
@@ -49,14 +50,16 @@ unexplained magic.
 - [x] **1.11** Create a vertical split with `Space v` and move with `Ctrl-h` and
   `Ctrl-l` in a normal file buffer. — Session 001
 - [x] **1.12** Create a horizontal split with `Space s`. — Session 001
-- [ ] **1.12a** Move between horizontal panes with `Ctrl-j` and `Ctrl-k`.
+- [x] **1.12a** Move between horizontal panes with `Ctrl-j` and `Ctrl-k`. —
+  Session 001
 - [x] **1.13** Distinguish `Space q` window-close from `Space d` buffer-close. —
   Session 001
-- [ ] **1.14** Explain that `Space q` exits Neovim when only one window remains.
+- [x] **1.14** Explain that `Space q` exits Neovim when only one window remains.
+  — Session 001
 - [x] **1.15** Identify that Shortcat captures `Ctrl-Space` before Neovim. —
   Session 001
-- [ ] **1.16** Use `Escape` to cancel a picker and return from Insert mode to
-  Normal mode.
+- [x] **1.16** Use `Escape` to cancel a picker and return from Insert mode to
+  Normal mode. — Session 001
 
 ### Optional Deep Dives
 
@@ -67,16 +70,20 @@ unexplained magic.
 
 ## Lesson 2 — Project Search and Results
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 001
 
 ### Core Sub-Lessons
 
-- [ ] **2.1** Open project grep with `Space /` and identify its search root.
-- [ ] **2.2** Search for a real symbol or phrase in a repository.
-- [ ] **2.3** Move through results and read the live preview.
-- [ ] **2.4** Open the selected match with `Enter` at the exact line.
-- [ ] **2.5** Return through jump history with `Ctrl-o` and `Ctrl-i`.
-- [ ] **2.6** Explain when to use `Space f`, `Space /`, and `Space b`.
+- [x] **2.1** Open project grep with `Space /` and identify its search root. —
+  Session 001
+- [x] **2.2** Search for a real symbol or phrase in a repository. — Session 001
+- [x] **2.3** Move through results and read the live preview. — Session 001
+- [x] **2.4** Open the selected match with `Enter` at the exact line. — Session
+  001
+- [x] **2.5** Return through jump history with `Ctrl-o` and `Ctrl-i`. — Session
+  001
+- [x] **2.6** Explain when to use `Space f`, `Space /`, and `Space b`. — Session
+  001
 
 ### Optional Deep Dives
 
@@ -91,12 +98,14 @@ unexplained magic.
 
 ### Core Sub-Lessons
 
-- [ ] **3.1** Create a harmless scratch buffer with `Space n`.
-- [ ] **3.2** Enter and leave Insert mode with the intentional reversed `i` and
-  `a` behavior.
-- [ ] **3.3** Demonstrate exact `Escape` behavior: the first press leaves Insert
+- [x] **3.1** Create a harmless scratch buffer with `Space n`. — Session 001
+- [x] **3.2** Enter and leave Insert mode with the intentional reversed `i` and
+  `a` behavior. — Session 001
+- [x] **3.3** Demonstrate exact `Escape` behavior: the first press leaves Insert
   mode; a later press in Normal mode saves only a named, modified normal file.
-- [ ] **3.4** Save with `Space w` and save-and-quit with `Space x`.
+  — Session 001
+- [x] **3.4** Save with `Space w` and save-and-quit with `Space x`. — Session
+  001
 - [ ] **3.5** Undo with `u`, redo with `Ctrl-r`, and repeat with `.`.
 - [ ] **3.6** Yank, paste, and use the system clipboard safely.
 - [ ] **3.7** Recognize modified buffers and unsaved-change prompts.
@@ -107,6 +116,8 @@ unexplained magic.
 - [ ] **3.D1** Inspect persistent undo across Neovim restarts.
 - [ ] **3.D2** Explore completion, snippets, and documentation popups.
 - [ ] **3.D3** Recover from swap, backup, or interrupted-write scenarios.
+- [x] **3.D4** Diagnose and recover an accidental Oil listing edit without
+  changing the file on disk. — Session 001
 
 ## Lesson 4 — Motions, Operators, and Text Objects
 
@@ -213,6 +224,8 @@ unexplained magic.
 - [ ] **8.D1** Manage multiple named or task-specific terminals.
 - [ ] **8.D2** Stage and commit a safe practice change from LazyGit.
 - [ ] **8.D3** Build a test-and-return loop around a real project command.
+- [ ] **8.D4** Run Neovim inside Herdr with its `Ctrl-b` prefix, verify that one
+  `Escape` changes Neovim modes, and verify Herdr navigation independently.
 
 ## Lesson 9 — Safe File Operations with Oil
 

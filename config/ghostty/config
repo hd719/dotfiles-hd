@@ -21,11 +21,12 @@ cursor-color = #88c0d0
 selection-background = #4c566a
 selection-foreground = #d8dee9
 
-# Use an 88% Hamel Nord Blur background. Applying opacity to
-# explicit cells keeps Neovim and other full-screen terminal apps blurred.
+# Use an 88% Hamel Nord Blur background with a slightly stronger blur.
+# Applying opacity to explicit cells keeps Neovim and other full-screen
+# terminal apps blurred.
 background-opacity = 0.88
 background-opacity-cells = true
-background-blur = true
+background-blur = 30
 
 font-family = Maple Mono NF
 font-size = 13.5

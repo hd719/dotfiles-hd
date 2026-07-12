@@ -188,3 +188,372 @@ historical planning snapshot that led to the detailed curriculum.
   does not duplicate the file.
 - **Next:** Curriculum 1.12a — move between the lower and upper panes with
   `Ctrl-j/k`.
+
+### Horizontal Split Navigation
+
+- **Curriculum 1.12a complete:** Hamel used `Ctrl-j` and `Ctrl-k` and confirmed
+  that focus moved between the lower and upper panes.
+- Mental model: `Ctrl-h/j/k/l` changes the active window in the direction of the
+  matching Vim movement key; it does not change or close a buffer.
+- **Next:** Curriculum 1.14 — recall what `Space q` does on the final window.
+
+### Retrieval Correction: Final-Window Quit
+
+- Hamel initially described `Space d` behavior when asked about `Space q`.
+- Correct model: `Space q` runs `:quit`; with one window remaining it exits
+  Neovim.
+- `Space d` closes the current buffer, keeps the window, and shows another
+  buffer. It does not delete the file from disk.
+- Curriculum 1.14 remains open pending a correct recall.
+- On the second recall, Hamel chose `Space q` for keeping Neovim open. Reinforce
+  the mnemonic: `q` quits the window; `d` dismisses the buffer while preserving
+  the window.
+
+### Final-Window Quit Confirmed
+
+- **Curriculum 1.14 complete:** after correction, Hamel confirmed and noted that
+  `Space q` quits Neovim when only one window remains.
+- **Next:** Curriculum 1.16 — use `Escape` to cancel a picker and return to
+  Normal mode.
+
+### Escape Practice: Picker Cancel
+
+- Hamel opened the file picker with `Space f`, filtered for `README`, pressed
+  `Escape`, and confirmed that the picker closed.
+- Curriculum 1.16 remains open until Hamel also practices leaving Insert mode
+  with `Escape`.
+
+### Escape Practice: Return to Normal Mode
+
+- **Curriculum 1.16 complete:** Hamel entered Insert mode, pressed `Escape`, and
+  confirmed the transition back to Normal mode.
+- **Lesson 1 complete:** every core Editor Foundations sub-lesson has been
+  practiced and confirmed.
+- **Next:** Curriculum 2.1 — open project grep with `Space /` and identify its
+  search root.
+
+### Project Grep Opened
+
+- Hamel pressed `Space /` and confirmed that the Snacks project-grep picker
+  opened.
+- By default, this picker searches from Neovim's current working directory.
+- Curriculum 2.1 remains open until Hamel identifies that directory with
+  `:pwd`.
+- Screenshot confirmation showed the `Grep` overlay with an active blank input
+  and `-- INSERT --`; this is the picker's search-input mode, not the normal
+  file-editing view.
+- Hamel pressed `Escape` once and confirmed that the Grep picker closed.
+
+### Project Grep Detour: `pwd` as Search Text
+
+- Hamel entered `pwd` in the Grep input and received four project matches with
+  a live code preview.
+- This was a valid preview of Curricula 2.2 and 2.3, but it was not the `:pwd`
+  Ex command and did not reveal the search root.
+- Keep 2.2 and 2.3 open until Hamel repeats those actions deliberately and
+  confirms the result-navigation behavior.
+- The screenshot also showed `README.md [+]`, meaning that buffer has an
+  unsaved change. The saved working tree was still clean for that file, so
+  leave the buffer open until the change can be inspected safely.
+
+### Correction: Snacks Picker Requires Two Escapes
+
+- Repeated screenshots confirmed that one `Escape` from the Snacks search input
+  leaves Insert mode but keeps the picker open.
+- A second `Escape`, now in the picker's Normal mode, closes the picker.
+- The earlier single-`Escape` description was incomplete. The durable sequence
+  is: first `Escape` changes mode, second `Escape` cancels the picker.
+
+### Project Grep Search Root Confirmed
+
+- **Curriculum 2.1 complete:** Hamel closed the picker, ran `:pwd`, and read
+  `/Users/hameldesai/Developer/dotfiles-hd` at the bottom of Neovim.
+- Mental model: `Space /` searches file contents beneath that current working
+  directory unless a narrower directory is configured.
+- The earlier `README.md [+]` marker cleared. A working-tree check found no
+  accidental README edit; only the intentional picker-Escape documentation was
+  present.
+- **Next:** Curriculum 2.2 — deliberately search for a real project symbol.
+
+### Deliberate Project Text Search
+
+- **Curriculum 2.2 complete:** Hamel opened `Space /`, searched for
+  `node_root`, and received eight content matches across the dotfiles repo.
+- `Space f` filters file names and paths when the desired file is known.
+- `Space /` searches text inside project files when the desired code or phrase
+  is known but its location is not.
+- Curriculum 2.6 remains open until `Space b` is included in the comparison.
+- **Next:** Curriculum 2.3 — move through the eight results and watch the live
+  preview follow the selection.
+
+### Finder Terminology Clarified
+
+- Both `Space f` and `Space /` use the same Snacks picker interface.
+- `Space f` is the fuzzy file-name finder.
+- `Space /` is live grep: it sends the search text to ripgrep to match file
+  contents, with regular-expression and smart-case behavior by default.
+- Hamel confirmed the distinction and continued to result navigation.
+
+### Grep Result Navigation
+
+- **Curriculum 2.3 complete:** Hamel used `Ctrl-j` and `Ctrl-k` to move through
+  `node_root` matches and confirmed that the preview followed the selection.
+- Precision: these keys move between matches, not necessarily different files;
+  one file can contain several matching lines.
+- **Next:** Curriculum 2.4 — press `Enter` to open the highlighted match at its
+  exact file and line.
+
+### Open a Grep Match
+
+- **Curriculum 2.4 complete:** Hamel highlighted a `node_root` match, pressed
+  `Enter`, and confirmed that Grep closed and the selected file opened at the
+  matching line.
+- **Next:** Curriculum 2.5 — use `Ctrl-o` to return to the older location, then
+  `Ctrl-i` to move forward to the grep match again.
+
+### Jump-History Mental Model
+
+- `Ctrl-o` moves to an older meaningful cursor location, like a browser Back
+  button for code navigation.
+- `Ctrl-i` moves forward to a newer jump location.
+- The jump list records larger moves such as opening a grep result; it does not
+  record every ordinary `h/j/k/l` cursor movement.
+- Curriculum 2.5 remains open until both directions are practiced.
+
+### Jump History Practiced
+
+- **Curriculum 2.5 complete:** Hamel used `Ctrl-o` and `Ctrl-i` and confirmed
+  that backward and forward jump navigation both worked.
+- **Next core lesson:** Curriculum 2.6 — compare `Space f`, `Space /`, and
+  `Space b`.
+
+### Oil Icon Safety Diagnosis
+
+- Hamel reported that the icon beside `CONTEXT.md` disappeared in Oil.
+- The file is safe: it remains a regular 29,984-byte file and has no Git change.
+- MiniIcons still returns the Markdown icon for `CONTEXT.md`, and a fresh Oil
+  render includes it. The missing decoration is therefore a transient edit to
+  the live Oil listing, not deleted file data.
+- Added optional Curriculum 3.D4 for safe Oil-listing recovery. First recovery
+  step: press `u` once to undo the most recent Oil-buffer edit.
+
+### Ghostty Blur Tuning
+
+- Paused the Neovim lesson to reduce background distraction in Ghostty.
+- Ghostty 1.3.1 documents `background-blur = true` as intensity `20`; changed it
+  to numeric intensity `30`.
+- Kept `background-opacity = 0.88` and `background-opacity-cells = true` so the
+  existing Hamel Nord transparency remains consistent inside Neovim.
+- The Ghostty file was later reverted to `background-blur = true`; reapplied
+  intensity `30` and revalidated the actively linked configuration.
+
+### Neovim Contrast Tuning
+
+- Screenshots showed Nord's default `#616e88` comments and `#4c566a` inactive
+  line numbers blending into the transparent Ghostty background.
+- Changed comments to Zed's readable `#b5b5b5` while preserving italics.
+- Changed inactive and relative line numbers to Nord frost `#81a1c1`; the
+  current line number remains bright `#d8dee9` and bold.
+
+### Picker Border Contrast
+
+- A follow-up screenshot confirmed that comments and relative line numbers were
+  readable, but the `Space f` and `Space /` picker outline still blended into
+  the background.
+- Snacks picker borders inherit Neovim's `FloatBorder`, which Nord colored
+  `#4c566a`.
+- Changed `FloatBorder` to Nord cyan `#88c0d0` while keeping its background
+  transparent, improving the input, results, and preview outlines together.
+
+### Oil Listing Recovered
+
+- **Optional Curriculum 3.D4 complete:** Hamel pressed Normal-mode `u`, restored
+  the missing Oil icon, and confirmed that `u` means undo.
+- This restored only the editable Oil buffer display; `CONTEXT.md` remained
+  unchanged on disk throughout.
+
+### Oil Recovery Reinforced: Mode Matters
+
+- In `config/herdr`, Hamel accidentally typed a folder-looking entry while Oil
+  showed `-- INSERT --` and `[+]`.
+- Pressing `u` initially inserted another literal `u` because `u` only means
+  undo in Normal mode.
+- Hamel pressed `Escape`, then Normal-mode `u`, and confirmed that the listing
+  was restored.
+- Filesystem and Git checks confirmed that no accidental directory was created
+  and `config/herdr` remained unchanged.
+
+### Herdr and Neovim Integration Decision
+
+- Desired stack: Ghostty renders the terminal, Herdr optionally manages
+  persistent workspaces and panes, and Neovim edits inside a pane.
+- Herdr 0.7.3 is running, and the active dotfiles config sets its prefix to bare
+  `Escape`.
+- [Herdr's keyboard documentation](https://herdr.dev/docs/keyboard/) says the
+  prefix is reserved and the following key goes to Herdr instead of the pane.
+  Bare `Escape` therefore conflicts with Neovim's primary mode-exit key.
+- This likely explains the inconsistent behavior between the direct `nvim .`
+  Ghostty tab and the Herdr tab: in Herdr, `Escape` can be consumed before
+  Neovim sees it.
+- Recommendation: use direct Ghostty for Neovim now. Before daily Neovim use
+  inside Herdr, move Herdr to its documented default `Ctrl-b` prefix and verify
+  both layers. No Herdr config change was made without Hamel's approval.
+- Added optional Curriculum 8.D4 for that integration test.
+
+### Correction: Herdr Can Forward Its Escape Prefix
+
+- Hamel's screenshot showed Herdr PREFIX mode explicitly listing
+  `esc send prefix`.
+- There is no Neovim configuration-file conflict. The conflict is input
+  routing: one physical `Escape` enters Herdr PREFIX mode; `Escape Escape`
+  forwards one logical `Escape` to Neovim.
+- Inside Herdr, leaving Neovim Insert mode requires two physical `Escape`
+  presses. Triggering the custom Normal-mode `Escape` save afterward requires
+  two more. A Snacks picker that needs two logical escapes can likewise require
+  four physical presses.
+- The earlier recommendation not to use Neovim inside Herdr until changing the
+  prefix was too strong. It works with `Escape Escape`; changing the prefix is
+  an optional ergonomics decision to restore native one-press Vim behavior.
+- Revised optional Curriculum 8.D4 to compare both workflows before deciding.
+
+### Herdr Prefix Changed to `Ctrl-b`
+
+- Hamel chose to make Neovim easier inside Herdr by freeing bare `Escape`.
+- Kuncheng's current Herdr config uses `prefix = "ctrl+b"`; Hamel chose to
+  match it.
+- Changed the linked Herdr source config from `Escape` to `Ctrl-b`. Herdr
+  commands now start with `Ctrl-b`, while a single `Escape` should reach
+  Neovim directly.
+- Revised optional Curriculum 8.D4 for a live single-`Escape` and Herdr-prefix
+  verification after reload.
+- Kuncheng's Neovim config uses native `Escape` to leave Insert mode and maps
+  Normal-mode `Escape` to save, matching the same two-step mental model.
+- Reloaded the running Herdr 0.7.3 server successfully: status `applied`, zero
+  diagnostics, linked config confirmed, and the client/server remained healthy.
+- Daily launch workflow: enter or attach to Herdr, move the pane to the project
+  directory, and run `nvim .`. Herdr keeps the pane/session alive; Neovim owns
+  editing and now receives bare `Escape` directly.
+- Optional Curriculum 8.D4 remains open until Hamel verifies one-press
+  `Escape` and a `Ctrl-b` Herdr command in the live pane.
+
+### Picker Comparison Retrieval
+
+- Curriculum 2.6 remains open because the three-way comparison was presented
+  but not yet recalled from memory.
+- Split the retrieval into one prompt at a time before advancing to Lesson 3.
+- Recall 1 of 3 correct: Hamel answered `Space f` when the filename is known.
+- Recall 2 of 3 correct: Hamel answered `Space /` when text inside project files
+  is known.
+- On recall 3, Hamel answered `H`/`L`. Those cycle to the previous or next
+  buffer; `Space b` opens the searchable list of all open buffers.
+- Curriculum 2.6 remains open pending a correct recall of `Space b`.
+
+### Picker Comparison Confirmed
+
+- **Curriculum 2.6 complete:** on retry, Hamel correctly recalled `Space b` for
+  the searchable list of open buffers.
+- Full model: `Space f` finds a file by name, `Space /` finds text inside project
+  files, and `Space b` selects a file that is already open as a buffer.
+- **Lesson 2 complete:** every core Project Search and Results sub-lesson has
+  been practiced and confirmed.
+- **Next:** Curriculum 3.1 — create a harmless unnamed buffer with `Space n`.
+
+### Harmless Scratch Buffer
+
+- **Curriculum 3.1 complete:** Hamel pressed `Space n` and confirmed that a
+  blank screen opened.
+- `Space n` runs `:enew`: it switches the current window to a new empty,
+  unnamed buffer without creating a file on disk.
+- Existing buffers remain available through `H`, `L`, or `Space b`.
+- **Next:** Curriculum 3.2 — practice the intentional reversed `i` and `a`
+  behavior inside this safe buffer.
+
+### Scratch Insert-Mode Practice
+
+- Hamel pressed `i`, typed `hello`, pressed `Escape`, and confirmed the return
+  to Normal mode.
+- Curriculum 3.2 remains open until the before-cursor and after-cursor behavior
+  of the intentionally reversed `a` and `i` mappings is demonstrated.
+- With the cursor on `h`, Hamel pressed `a`, inserted `X`, and produced
+  `Xhello`, confirming that this custom `a` inserts before the cursor.
+- After undoing, Hamel pressed `i` on `h`, inserted `X`, and produced `hXello`,
+  confirming that this custom `i` inserts after the cursor.
+- **Curriculum 3.2 complete:** both reversed insert mappings and the return to
+  Normal mode with `Escape` were practiced.
+- **Next:** Curriculum 3.3 — test Normal-mode `Escape` first on this unnamed
+  modified buffer, where it must not create or save a file.
+
+### Escape Safety: Unnamed Buffer
+
+- Hamel pressed `Escape` while already in Normal mode on the modified unnamed
+  scratch buffer and confirmed that nothing happened.
+- This is intentional: the custom Normal-mode `Escape` save only runs for a
+  named, modified, ordinary file buffer.
+- Curriculum 3.3 remains open until the named-file auto-save case is practiced.
+- Hamel ran `:saveas /tmp/nvim-warrior-practice-20260710.txt` and confirmed that
+  the scratch buffer was named and saved outside the project repository.
+- Hamel then inserted `!`, pressed `Escape` once to leave Insert mode, and
+  confirmed that `[+]` appeared beside the filename. This marker means the
+  in-memory buffer differs from the saved file on disk.
+- Hamel pressed `Escape` again in Normal mode and confirmed that `[+]`
+  disappeared. A filesystem check verified the `/tmp` file was updated.
+- **Curriculum 3.3 complete:** unnamed buffers are ignored; the first `Escape`
+  leaves Insert mode; a later Normal-mode `Escape` saves a named, modified,
+  ordinary file buffer.
+- **Next:** Curriculum 3.4 — practice explicit save with `Space w`, then
+  save-and-quit with `Space x`.
+
+### Herdr Prefix Ergonomics Decision
+
+- Hamel considered a Karabiner hold-`3` shortcut for Herdr's `Ctrl-b` prefix,
+  then explicitly declined it before testing.
+- No `3` remapping was retained. Herdr continues to use physical `Ctrl-b`.
+
+### Explicit Save with Native `:w`
+
+- Hamel created an unsaved change in the `/tmp` practice file, confirmed the
+  `[+]` modified marker, then ran `:w` to save it.
+- A filesystem check confirmed that `save-test` was written to disk.
+- `:w` is Vim's native write command. The personal `Space w` mapping runs the
+  same `:write` command.
+- Curriculum 3.4 remains open until Hamel practices both `Space w` and
+  `Space x`.
+
+### Leader Save with `Space w`
+
+- Hamel made another practice-file change, pressed `Space w`, and confirmed
+  that the `[+]` modified marker disappeared.
+- A filesystem check confirmed the new `another-test` line was written to the
+  `/tmp` practice file.
+- Curriculum 3.4 remains open only for save-and-quit with `Space x`.
+
+### Leader Save-and-Quit with `Space x`
+
+- Hamel pressed `Space x` in the practice-file workflow and confirmed that
+  Neovim closed and returned to the Herdr shell.
+- `Space x` runs `:x`: it writes when needed, then quits the current Neovim
+  window.
+- **Curriculum 3.4 complete:** both explicit save with `Space w` and
+  save-and-quit with `Space x` were practiced.
+- **Next:** Curriculum 3.5 — undo with `u`, redo with `Ctrl-r`, and repeat the
+  last change with `.`.
+
+### First Undo with `u`
+
+- Hamel inserted `UNDO`, pressed `u` in Normal mode, and confirmed that the
+  inserted text disappeared.
+- Repeated `u` presses can walk backward through multiple change blocks; one
+  continuous Insert-mode visit normally forms one change block.
+- Curriculum 3.5 remains open for multi-step undo, redo with `Ctrl-r`, and
+  repeat with `.`.
+
+## 2026-07-11 — Session 002: Multi-Step Undo Setup
+
+### Two Separate Change Blocks
+
+- Hamel inserted `[ONE]` and `[TWO]` during two separate Insert-mode visits and
+  confirmed that both markers appeared.
+- The two Insert-mode visits create separate change blocks for the next undo
+  checkpoint.
+- Curriculum 3.5 remains open. Next, press `u` twice to remove `[TWO]` and then
+  `[ONE]`, followed by `Ctrl-r` practice and the `.` repeat command.

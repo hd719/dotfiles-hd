@@ -34,6 +34,10 @@ Every agent teaching Neovim must read and update both files.
 - `i` inserts after the cursor and `a` inserts before it, matching Zed.
 - `Escape` is the primary mode-exit key. Shortcat currently captures
   `Ctrl-Space` before it reaches Neovim.
+- Herdr uses `Ctrl-b` as its prefix, matching Kuncheng's config, so one
+  `Escape` reaches Neovim both directly in Ghostty and inside Herdr.
+- In a Snacks picker, the first `Escape` leaves its search-input Insert mode;
+  the second `Escape` closes the picker.
 - Normal-mode `Escape` saves an existing modified file.
 - `Ctrl-a` selects the whole file.
 
@@ -46,6 +50,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space h` | Open Oil file browser |
 | `Space b` | Pick a buffer |
 | `Space d` | Close the current buffer |
+| `Space w` / `Space x` | Save / save and quit |
 | `Space v` / `Space s` | Split right / down |
 | `Space q` | Close the current window |
 | `Space t` / `Space T` | Bottom / floating terminal |
