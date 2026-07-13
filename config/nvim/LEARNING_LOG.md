@@ -689,3 +689,118 @@ Neovim theme or configuration.
 - Practice `Space p` once on an isolated Python buffer so Curriculum 6.D7 can
   be confirmed.
 - Format-on-save and ESLint remain intentionally unchanged.
+
+## 2026-07-12 — Session 005: TypeScript Language Intelligence
+
+### LSP Mental Model Corrected
+
+- `nvim-lspconfig` provides the framework for connecting language servers; it
+  is not one universal server for every language.
+- The initial configuration enabled only `gopls` for Go and `lua_ls` for Lua.
+  Tree-sitter highlighting, Blink buffer suggestions, and Prettier formatting
+  made TypeScript feel partially intelligent without a TypeScript LSP client.
+- Chose `vtsls` over `typescript-tools.nvim` because it integrates directly
+  with the existing native LSP configuration and keeps the plugin set small.
+- Installed Homebrew's `vtsls` 0.3.0 and configured it to use each workspace's
+  project-local TypeScript version.
+
+### Live Diagnostic Confirmed
+
+- A headless check attached `vtsls` at the `cortana-services` monorepo root and
+  reported `Cannot find name 'someVariable'` on line 98.
+- Hamel restarted Neovim and confirmed a red `E` beside line 98. The `E` is an
+  error-severity diagnostic sign; `E:1` in the status line means the current
+  buffer contains one error.
+- The test line is an undeclared assignment, so TypeScript reports it. A
+  declared-but-unused variable would instead be reported by the configured
+  ESLint rule when ESLint runs.
+- **Optional Curriculum 5.D4 complete:** TypeScript LSP attachment and live
+  diagnostics were practiced and confirmed.
+
+### Safety and Next Checkpoint
+
+- ESLint LSP remains separate and disabled; `vtsls` supplies TypeScript and
+  JavaScript diagnostics, completion, hover, and code navigation.
+- The temporary `someVariable = 10;` test line was saved during the check. A
+  final disk check confirmed that Hamel removed it and the project file once
+  again matches Git.
+- On the next live diagnostic, place the cursor on its line and open the detail
+  with `Ctrl-w d`.
+
+## 2026-07-12 — Session 006: ESLint and Git Signs
+
+### Shared Monorepo ESLint Configuration
+
+- Installed `vscode-eslint-language-server` through Homebrew and enabled the
+  native `eslint` client alongside `vtsls`.
+- Cortana Services has no root ESLint config by design. Each of its eleven
+  JavaScript/TypeScript workspaces has an `eslint.config.mjs` that re-exports a
+  profile from `@cortana/tooling`.
+- Kept nvim-lspconfig's monorepo defaults: one client roots at the repository's
+  `pnpm-lock.yaml`, while `workingDirectory = auto` resolves the nearest
+  workspace config and project-local ESLint library for each file.
+- Automatic ESLint fixes on save remain disabled. Prettier through Conform
+  continues to own JavaScript and TypeScript formatting.
+
+### Cross-Workspace Verification
+
+- Audited all eleven workspace configs and confirmed that the shared
+  `@typescript-eslint/no-unused-vars` rule is enabled as an error.
+- Headless Neovim probes produced the same live unused-variable diagnostic in
+  Mission Control, Service API, and the shared library, covering the Next app,
+  Node app, and Node library profiles.
+- Root-level `scripts/*.ts` files remain outside ESLint because the repository
+  does not include them in a root config or root lint target.
+
+### Live Signs Confirmed
+
+- Hamel restarted Neovim with a temporary unused `const someVar = 10;` line and
+  confirmed a red `E` diagnostic sign.
+- The status line showed `E:1 H:1`: `E:1` means one diagnostic error, while
+  `H:1` means Gitsigns sees one changed Git hunk.
+- `H` tracks the working-tree difference and does not describe code validity;
+  `E` comes from an attached language or lint server.
+- **Optional Curriculum 6.D8 complete:** live ESLint diagnostics and the
+  difference between lint and Git signs were practiced and confirmed.
+
+### Safety and Next Checkpoint
+
+- Remove the temporary `someVar` declaration and save the file. Its `E` and
+  this file's `H` should disappear once the buffer is clean and matches Git.
+- The main curriculum still resumes at 3.5: finish redo with `Ctrl-r` and
+  repeat with `.`.
+
+## 2026-07-13 — Session 007: LazyGit Repository Root
+
+### Root Cause
+
+- `Space g` called `Snacks.lazygit()` without a working directory, so LazyGit
+  started from Neovim's `:pwd` instead of the repository containing the current
+  file.
+- When `:pwd` was `/Users/hameldesai`, LazyGit correctly reported that it was
+  outside a Git repository. Pressing `N` declined repository creation and
+  opened LazyGit's recent-repositories flow; it did not fix the launch root.
+- Oil needed separate handling because its buffer name is an `oil://` URI, not
+  a normal filesystem path.
+
+### Configuration Fix
+
+- `Space g` now resolves the Git root from the current normal file or from the
+  directory currently displayed by Oil, with Neovim's working directory only
+  as a fallback.
+- Headless checks resolved a Cortana Services TypeScript buffer to
+  `/Users/hameldesai/Developer/cortana-services` and the dotfiles Oil view to
+  `/Users/hameldesai/Developer/dotfiles-hd`.
+- Curriculum 8.6 remains open until Hamel restarts Neovim, presses `Space g`,
+  and confirms that the LazyGit dashboard opens without the repository-creation
+  prompt.
+
+### Live Confirmation
+
+- **Curriculum 8.6 complete:** after restarting Neovim, Hamel pressed
+  `Space g` and confirmed that LazyGit opened the correct repository dashboard
+  without the repository-creation prompt.
+- The dashboard's Files panel shows repository changes and the Diff panel
+  previews the selected change.
+- The main curriculum still resumes at 3.5: finish redo with `Ctrl-r` and
+  repeat with `.`.

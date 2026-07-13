@@ -62,7 +62,15 @@ return {
         },
       })
 
-      vim.lsp.enable({ "gopls", "lua_ls" })
+      vim.lsp.config("vtsls", {
+        settings = {
+          vtsls = {
+            autoUseWorkspaceTsdk = true,
+          },
+        },
+      })
+
+      vim.lsp.enable({ "eslint", "gopls", "lua_ls", "vtsls" })
 
       vim.diagnostic.config({
         severity_sort = true,

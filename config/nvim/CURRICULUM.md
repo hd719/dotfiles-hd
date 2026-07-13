@@ -160,6 +160,8 @@ unexplained magic.
 - [ ] **5.D1** Rename symbols with `grn` and review every affected file.
 - [ ] **5.D2** Explore implementations, declarations, and document symbols.
 - [ ] **5.D3** Compare Tree-sitter structure with LSP semantic knowledge.
+- [x] **5.D4** Verify `vtsls` attachment in a TypeScript/TSX buffer and confirm
+  that it uses the project's TypeScript version. — Session 005
 
 ## Lesson 6 — Diagnostics, Code Actions, and Formatting
 
@@ -174,9 +176,10 @@ unexplained magic.
 - [ ] **6.4** Inspect and choose LSP actions with `Space c a`.
 - [ ] **6.5** Format Go and Lua manually with `Space p` and review the diff.
 - [ ] **6.6** Diagnose formatter availability with `:ConformInfo`.
-- [ ] **6.7** Explain the current coverage: Go and Lua have LSP support; Go,
-  Lua, JavaScript, TypeScript, Markdown, and Python have manual formatting;
-  format-on-save remains disabled.
+- [ ] **6.7** Explain the current coverage: Go, Lua, JavaScript, and TypeScript
+  have LSP support; Go, Lua, JavaScript, TypeScript, Markdown, and Python have
+  manual formatting; ESLint provides project lint diagnostics while automatic
+  formatting and lint fixes on save remain disabled.
 
 ### Optional Deep Dives
 
@@ -191,6 +194,8 @@ unexplained magic.
   `mdformat` instead of Prettier. — Session 004
 - [ ] **6.D7** Format Python manually with `Space p` using Ruff installed
   through `uv`.
+- [x] **6.D8** Verify a live ESLint unused-variable diagnostic and distinguish
+  its `E` sign from Gitsigns' `H` changed-hunk sign. — Session 006
 
 ## Lesson 7 — Multi-File Project Workflow
 
@@ -225,7 +230,8 @@ unexplained magic.
   the native `Ctrl-\`, `Ctrl-n` fallback while Shortcat owns `Ctrl-Space`.
 - [ ] **8.4** Navigate between terminal and editor windows without losing work.
 - [ ] **8.5** Read Gitsigns gutter changes and current-line blame.
-- [ ] **8.6** Open LazyGit with `Space g` and inspect status and diffs.
+- [x] **8.6** Open LazyGit with `Space g` and inspect status and diffs. —
+  Session 007
 - [ ] **8.7** Exit terminal and Git views while preserving editor buffers.
 
 ### Optional Deep Dives

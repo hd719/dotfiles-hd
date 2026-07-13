@@ -25,6 +25,8 @@ brew "tailscale"
 brew "tesseract"
 brew "tmux"
 brew "uv"
+brew "vscode-langservers-extracted"
+brew "vtsls"
 brew "websocat"
 brew "xcodegen"
 brew "zoxide"
@@ -39,5 +41,3 @@ cask "obsidian"
 cask "visual-studio-code"
 
 vscode "openai.chatgpt"
-
-

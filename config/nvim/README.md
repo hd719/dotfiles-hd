@@ -8,7 +8,9 @@ Hamel's existing Zed muscle memory.
 - Neovim 0.12+, ripgrep, fd, fzf, LazyGit, and the Tree-sitter CLI.
 - Go: `gopls` and `gofmt`.
 - Lua: `lua-language-server` and `stylua`.
-- JavaScript and TypeScript: project-local `prettier`.
+- JavaScript and TypeScript: `vtsls` for language intelligence,
+  `vscode-eslint-language-server` for project lint rules, and project-local
+  `prettier` for formatting.
 - Markdown: `mdformat`, installed through `uv` with GFM, frontmatter, footnote,
   alert, and Obsidian-wikilink plugins.
 - Python: `ruff`, installed through `uv tool install ruff@latest`.
@@ -75,9 +77,17 @@ Every agent teaching Neovim must read and update both files.
 | `gd` / `gh` | Definition / hover |
 | `H` / `L` | Previous / next buffer |
 
+`Space g` resolves the repository from the current file. In Oil, it resolves
+from the directory being viewed, so it does not depend on Neovim's `:pwd`.
+
 Completion appears automatically. Press `Enter` to accept the selected item.
 
 `Space p` selects a formatter from the current buffer's filetype: `gofmt` for
 Go, `stylua` for Lua, project-local Prettier for JavaScript and TypeScript,
 `mdformat` for Markdown, and Ruff for Python. Formatting changes the buffer;
 use `Space w` to write it to disk. Format-on-save is not enabled yet.
+
+`vtsls` provides JavaScript and TypeScript diagnostics, completion, hover, and
+code navigation. The ESLint language server discovers the nearest workspace
+`eslint.config.mjs`, so each Cortana Services app or package uses its shared
+`@cortana/tooling` profile. ESLint fixes on save remain disabled.

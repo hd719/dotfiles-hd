@@ -49,7 +49,8 @@ return {
       {
         "<leader>g",
         function()
-          Snacks.lazygit()
+          local source = vim.bo.filetype == "oil" and require("oil").get_current_dir() or 0
+          Snacks.lazygit({ cwd = Snacks.git.get_root(source) or vim.fn.getcwd(0) })
         end,
         desc = "LazyGit",
       },
