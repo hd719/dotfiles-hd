@@ -1,12 +1,14 @@
 # AGENTS.md
 
-Be concise. This repo is Hamel's source of truth for rebuilding personal machines.
+Be concise. This repo is Hamel's source of truth for rebuilding personal and
+work machines.
 
 ## Mental Model
 
 - `config/` contains portable app and tool configuration.
 - `setup/` contains machine bootstrap scripts and machine-specific setup files.
 - The current personal Mac symlink inventory lives in `README.md`.
+- The Resilience work Mac instructions live in `setup/mac-resilience/README.md`.
 
 ## Before Editing
 
@@ -20,9 +22,10 @@ Be concise. This repo is Hamel's source of truth for rebuilding personal machine
 - Always back up an existing live file or directory before replacing it.
 - Use timestamped backups beside the live path, like `path.backup-YYYYMMDD-HHMMSS`.
 - Verify the link after creating it with `readlink` and basic `test -f` or `test -d` checks.
-- Update the README inventory in the same change whenever symlink state changes.
+- Update the matching machine inventory whenever symlink state changes. Do not
+  overwrite the personal Mac inventory with work Mac state.
 
-## Current Intended Links
+## Current Personal Mac Links
 
 Whole directory links:
 
@@ -50,10 +53,31 @@ Single file or subdirectory links:
 - `~/Library/Application Support/Zed` because it is app runtime state.
 - Herdr logs, sockets, sessions, and release notes under `~/.config/herdr`.
 
+## Resilience Work Mac
+
+When Hamel asks to set up the work laptop:
+
+1. Read `setup/mac-resilience/README.md` and follow it as the runbook.
+2. Default to only Ghostty, Herdr, and Neovim. Do not apply the full personal
+   Mac symlink list.
+3. Use `setup/mac-resilience/Brewfile` for the terminal/editor dependencies and
+   `setup/mac-resilience/link-terminal-editor-config.sh` for the three links.
+   Never run `setup/mac-mini/Brewfile` or `setup/mac-vm/setup-vm.sh` on the
+   work laptop.
+4. Inspect and timestamp-backup every existing destination before replacing it.
+5. Do not link `config/mise`, replace `setup/mac-resilience/.zshrc`, or change
+   work-repo runtimes unless Hamel explicitly asks. Resilience repos own their
+   Node and package-manager versions.
+6. Never copy or replace Git/SSH/GitHub auth, AWS/Doppler/1Password state,
+   company certificates, Docker state, or other work credentials.
+7. Report every backup and any company-policy blocker. Never bypass device
+   management or security policy.
+
 ## Existing Helpers
 
 - `config/zed/link-zed-config.sh`
 - `config/herdr/link-herdr-config.sh`
+- `setup/mac-resilience/link-terminal-editor-config.sh`
 
 Prefer these scripts when they match the task.
 

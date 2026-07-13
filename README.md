@@ -1,11 +1,18 @@
 # Dotfiles
 
-This repo is the source of truth for rebuilding my personal machines.
+This repo is the source of truth for rebuilding my personal and work machines.
 
 ## Repo Map
 
 - `config/` - portable app and tool config. This is where personal settings, themes, keymaps, terminal config, and app exports live.
 - `setup/` - machine setup scripts and machine-specific bootstrap files for macOS, Linux, VMs, and servers.
+
+## Resilience Work Mac
+
+Use [`setup/mac-resilience/README.md`](setup/mac-resilience/README.md) to install
+and link the Ghostty, Herdr, and Neovim setup on the work laptop. That runbook is
+intentionally narrower than the personal Mac inventory below so it does not
+replace work-specific shell, runtime, credential, or certificate state.
 
 ## Current Personal Mac Symlinks
 

@@ -1,0 +1,19 @@
+# Ghostty, Herdr, and Neovim dependencies for the Resilience work Mac.
+# Work-repo runtimes and company-managed applications intentionally stay out.
+
+brew "fd"
+brew "fzf"
+brew "gopls"
+brew "herdr"
+brew "lazygit"
+brew "lua-language-server"
+brew "neovim"
+brew "ripgrep"
+brew "stylua"
+brew "tree-sitter"
+brew "uv"
+brew "vscode-langservers-extracted"
+brew "vtsls"
+
+cask "font-maple-mono-nf"
+cask "ghostty"
