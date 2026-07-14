@@ -22,6 +22,19 @@ return {
             bg = colors.none,
           })
         end
+
+        -- Make Gitsigns gutter bars stand out against the transparent
+        -- background: green add, cyan change, red delete.
+        for group, color in pairs({
+          GitSignsAdd = "#a3be8c",
+          GitSignsChange = "#88c0d0",
+          GitSignsDelete = "#bf616a",
+        }) do
+          highlights[group] = vim.tbl_extend("force", highlights[group] or {}, {
+            fg = color,
+            bg = colors.none,
+          })
+        end
       end,
     },
     config = function(_, opts)
