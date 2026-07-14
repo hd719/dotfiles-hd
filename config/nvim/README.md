@@ -145,3 +145,6 @@ files for performance.
 
 Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
 open all / close all) or the native `za` / `zR` / `zM`.
+
+The cursor line stays vertically centered as you move up and down
+(`scrolloff = 999`).

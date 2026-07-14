@@ -1083,3 +1083,10 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Added discoverable Space z fold maps in `keymaps.lua`: `Space z a` toggle fold,
   `Space z o` open all, `Space z c` close all. Native `za` / `zR` / `zM` still
   work.
+
+### Centered Cursor (scrolloff = 999)
+
+- Set `scrolloff = 999` in `config/nvim/lua/config/options.lua` so the cursor
+  line stays vertically centered while moving up/down (the "always-centered"
+  look from the video). Left `sidescrolloff = 8`. It is a reversible one-liner;
+  a toggle between `999` and `8` is the fallback if it feels like too much.

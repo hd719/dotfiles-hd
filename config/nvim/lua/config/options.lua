@@ -16,7 +16,9 @@ opt.fixendofline = true
 
 opt.ignorecase = true
 opt.smartcase = true
-opt.scrolloff = 8
+-- Keep the cursor line vertically centered: 999 forces the view to always
+-- center as you move up and down.
+opt.scrolloff = 999
 opt.sidescrolloff = 8
 
 opt.clipboard = "unnamedplus"
