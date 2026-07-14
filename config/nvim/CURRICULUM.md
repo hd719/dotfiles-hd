@@ -219,6 +219,9 @@ unexplained magic.
 - [ ] **7.D4** Save and restore a multi-window session.
 - [x] **7.D5** Add a bufferline (`bufferline.nvim`) that shows open buffers as a
   Zed-style tab strip, and move along it with `H` and `L`. — Session 008
+- [ ] **7.D6** Auto-reload buffers changed on disk by an external tool (e.g. the
+  Cursor agent) with `autoread` and a `checktime` autocmd, plus `Space r` to
+  reload on demand.
 
 ## Lesson 8 — Terminal and Git Workflow
 

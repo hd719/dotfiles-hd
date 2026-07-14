@@ -853,3 +853,37 @@ requested (Curriculum 5.3), ahead of the main 3.5 checkpoint.
 - **Optional Curriculum 7.D5 complete:** Hamel restarted Neovim, saw the tab
   strip of open buffers appear across the top, and confirmed it looks good with
   the transparent Nord theme. `H`/`L` move along the strip.
+
+### Auto-Reload of External Edits (agent workflow)
+
+- Hamel's work layout: Cursor agents (right), Neovim in Herdr (middle), browser
+  (left). Both the agent and Neovim edit the same files, so the filesystem is
+  the shared source of truth.
+- Mental model: Neovim edits a buffer (in-memory copy). When the agent writes
+  the file on disk, the buffer goes stale. `autoread` reloads unmodified
+  buffers, but only when Neovim actually checks; Neovim does not poll.
+- Added `autoread` plus an autocmd that runs `:checktime` on `FocusGained`,
+  `BufEnter`, `CursorHold`, and `TermLeave` (real file buffers only), and a
+  `FileChangedShellPost` notification, in `config/nvim/lua/config/options.lua`.
+  Added `Space r` (`:checktime`) in `keymaps.lua` for on-demand reload.
+- Safety: only unmodified buffers auto-reload; a buffer with unsaved edits still
+  raises Neovim's `W12` warning instead of losing work.
+- Headless verification on `README.md`: appended a marker to the file on disk,
+  ran `:checktime`, and confirmed the buffer reloaded (151 -> 152 lines, last
+  line = the marker, still unmodified). Restored the file afterward.
+- Added optional Curriculum 7.D6; it stays open until Hamel sees a live external
+  edit reload in his running Neovim.
+
+### Real-World Recovery: Accidental README Save
+
+- `README.md` on disk had been corrupted by an accidental edit saved from the
+  live Neovim: a duplicated "Current Personal Mac Symlinks" section, an
+  "iintentionally" typo, and a merged line. It was already 151 lines before the
+  auto-reload test, so the test did not cause it.
+- Recovered with `git restore README.md`, returning it to the committed
+  124-line version (commit 0d4fe7e). The git safety net made the clean copy one
+  command away.
+- Live-buffer caution: after restoring the file on disk, reload it in the
+  running Neovim with `:e!` before saving, or the stale buffer would re-save the
+  corruption. The Escape-to-save mapping makes accidental saves easy, so
+  `:e!` / `Space r` and gitsigns review are the guardrails.
