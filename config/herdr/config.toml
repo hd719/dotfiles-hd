@@ -28,8 +28,10 @@ close_workspace = "prefix+shift+d"
 # Tabs map to tmux windows.
 new_tab = "prefix+c"
 rename_tab = "prefix+shift+t"
-previous_tab = "prefix+p"
-next_tab = "prefix+n"
+# Direct (no-prefix) chords so tabs can be cycled continuously: hold Ctrl+Alt
+# and tap h/l to move prev/next without re-pressing the prefix each time.
+previous_tab = "ctrl+alt+h"
+next_tab = "ctrl+alt+l"
 switch_tab = "prefix+1..9"
 close_tab = "prefix+shift+x"
 
