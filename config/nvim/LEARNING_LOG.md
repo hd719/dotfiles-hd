@@ -909,3 +909,15 @@ requested (Curriculum 5.3), ahead of the main 3.5 checkpoint.
   see the gitsigns change bar in the gutter (on an uncommitted line in README)
   alongside the "Not Committed Yet" current-line blame. The contrast tweak made
   the bar visible; green = add, cyan = change, red = delete.
+
+### Clipboard Path Keymaps
+
+- The verbose `:let @+ = expand('%:p')` commands were hard to remember, so we
+  turned them into discoverable keymaps in `config/nvim/lua/config/keymaps.lua`,
+  listed by WhichKey under `Space y`:
+  - `Space y p` -> yank the current file's full path (`expand('%:p')`)
+  - `Space y d` -> yank the working directory / pwd (`getcwd()`)
+  - `Space y f` -> yank the current file's folder (`expand('%:p:h')`)
+- Each writes to the `+` (system clipboard) register and shows a "Copied ..."
+  toast for feedback. Nothing to memorize: press `Space y` and WhichKey shows
+  the choices. All three maps verified registered with their descriptions.
