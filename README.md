@@ -20,6 +20,7 @@ These are the active symlinks on this Mac.
 
 | Tool | Live path | Dotfiles source | Status | Notes |
 | --- | --- | --- | --- | --- |
+| AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Linked file | Only `aerospace.toml` is linked; monitor IDs and app-to-workspace rules are machine-specific. Includes Ghostty tiling workaround. |
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Matches Zed's Maple Mono NF and Hamel Nord Blur appearance. |
@@ -60,6 +61,7 @@ backup_and_link() {
 
 DOTFILES="$HOME/Developer/dotfiles-hd"
 
+backup_and_link "$DOTFILES/config/aerospace/aerospace.toml" "$HOME/.config/aerospace/aerospace.toml"
 backup_and_link "$DOTFILES/config/btop" "$HOME/.config/btop"
 backup_and_link "$DOTFILES/config/fastfetch" "$HOME/.config/fastfetch"
 backup_and_link "$DOTFILES/config/ghostty/config" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
