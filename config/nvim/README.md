@@ -21,6 +21,8 @@ Hamel's existing Zed muscle memory.
   `vscode-langservers-extracted` (already installed for ESLint); JSON schemas
   come from `SchemaStore.nvim`.
 - Shell: `bash-language-server` for shell-script diagnostics and completion.
+- Images and PDFs: ImageMagick (`magick`) converts supported files and
+  Ghostscript (`gs`) renders PDF pages through Snacks inside Ghostty.
 - Editing: `mini.pairs` auto-closes brackets and quotes; `mini.surround` adds,
   changes, and deletes surrounding pairs with a `gs` prefix.
 
@@ -47,6 +49,7 @@ npm install -g --prefix "$HOME/.local/graphql-lsp" graphql-language-service-cli
 - `nvim --clean` starts Neovim without this config.
 - `:Lazy` shows installed plugins and their status.
 - `:checkhealth` runs Neovim's diagnostics.
+- `:checkhealth snacks` verifies image tools and terminal graphics support.
 - `:LspInfo` shows language-server status.
 - `:ConformInfo` shows formatter status.
 - `:TSStatus` shows Tree-sitter parsers.
@@ -144,6 +147,10 @@ tables, and quotes in the editor; `Space m` toggles between raw and rendered.
 Snacks also provides indent guides with scope highlighting, highlights other
 uses of the symbol under the cursor, and disables heavy features on very large
 files for performance.
+
+Opening an image or PDF renders it in Neovim through Snacks when the terminal
+supports the Kitty graphics protocol. Ghostty is supported; ImageMagick and
+Ghostscript provide the conversion tools. The original file remains read-only.
 
 Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
 open all / close all) or the native `za` / `zR` / `zM`.

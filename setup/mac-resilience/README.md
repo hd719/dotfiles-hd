@@ -137,8 +137,8 @@ brew bundle check --verbose \
   --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
 
 for cmd in \
-  bash-language-server fd fzf gopls herdr lazygit lua-language-server nvim rg \
-  stylua tree-sitter uv vscode-eslint-language-server \
+  bash-language-server fd fzf gopls gs herdr lazygit lua-language-server \
+  magick nvim rg stylua tree-sitter uv vscode-eslint-language-server \
   vscode-json-language-server vtsls mdformat ruff
 do
   command -v "$cmd"
@@ -166,9 +166,10 @@ herdr server reload-config
 herdr status
 ```
 
-Inside Neovim, check `:checkhealth`, `:LspInfo`, `:ConformInfo`, and `:TSStatus`.
-Open a work TypeScript file and confirm highlighting, completion, ESLint
-diagnostics, `Space p` formatting, and `Space g` LazyGit.
+Inside Neovim, check `:checkhealth`, `:checkhealth snacks`, `:LspInfo`,
+`:ConformInfo`, and `:TSStatus`. Open a PDF in Ghostty and confirm that it
+renders. Open a work TypeScript file and confirm highlighting, completion,
+ESLint diagnostics, `Space p` formatting, and `Space g` LazyGit.
 
 Report every backup and validation result. Do not commit or push from the work
 laptop unless Hamel asks.

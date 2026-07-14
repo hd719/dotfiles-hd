@@ -1122,3 +1122,17 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   because it reads from the repo, not `~/.config/fastfetch` (which the work Mac
   does not symlink). Falls back to `"NVIM"` if the file is missing. The dashboard
   renders it in one highlight color (fastfetch's per-line gradient is dropped).
+
+### PDF and Image Viewing (Snacks)
+
+- Neovim does not render PDFs by itself. The already-installed Snacks plugin
+  can convert and display images and PDF pages inside terminals that support
+  the Kitty graphics protocol; Ghostty is supported.
+- Enabled the Snacks `image` module in
+  `config/nvim/lua/plugins/navigation.lua`. Opened images and PDFs are rendered
+  as read-only views, so this does not turn the binary file into editable text.
+- Added ImageMagick (`magick`) and Ghostscript (`gs`) to the Resilience
+  Brewfile and verification loop. ImageMagick performs conversion; Ghostscript
+  is specifically required for PDF rendering.
+- Added optional Curriculum 10.D6. It remains unchecked until Hamel opens a
+  real PDF in Ghostty and confirms the rendered view.

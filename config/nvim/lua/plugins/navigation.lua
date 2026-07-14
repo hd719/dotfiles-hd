@@ -36,6 +36,8 @@ return {
       bigfile = { enabled = true },
       words = { enabled = true },
       indent = { enabled = true },
+      -- Render images and PDFs directly in supported terminals such as Ghostty.
+      image = { enabled = true },
       -- On-demand sidebar tree (Space e). Keep replace_netrw false so Oil stays
       -- the directory editor and the explorer never hijacks directory buffers.
       explorer = { replace_netrw = false },
