@@ -14,6 +14,9 @@ Hamel's existing Zed muscle memory.
 - Markdown: `mdformat`, installed through `uv` with GFM, frontmatter, footnote,
   alert, and Obsidian-wikilink plugins.
 - Python: `ruff`, installed through `uv tool install ruff@latest`.
+- GraphQL: `graphql-lsp` (from `graphql-language-service-cli`), installed to a
+  fixed prefix and referenced by absolute path. Schema-aware features need a
+  `graphql-config` (e.g. `graphql.config.ts`) in the project.
 
 Install the Markdown formatter with:
 
@@ -24,6 +27,13 @@ uv tool install 'mdformat==1.0.0' \
   --with mdformat-footnote \
   --with mdformat-gfm-alerts \
   --with 'mdformat-wikilink==0.3.0'
+```
+
+Install the GraphQL language server (no Homebrew formula) to a fixed,
+node-version-independent prefix that this config references by absolute path:
+
+```bash
+npm install -g --prefix "$HOME/.local/graphql-lsp" graphql-language-service-cli
 ```
 
 ## Safety Net

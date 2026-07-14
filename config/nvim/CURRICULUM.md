@@ -162,6 +162,9 @@ unexplained magic.
 - [ ] **5.D3** Compare Tree-sitter structure with LSP semantic knowledge.
 - [x] **5.D4** Verify `vtsls` attachment in a TypeScript/TSX buffer and confirm
   that it uses the project's TypeScript version. — Session 005
+- [ ] **5.D5** Add and use the GraphQL language server (`graphql-lsp`) for
+  `.graphql` files, with schema-aware features from the project's
+  `graphql-config`.
 
 ## Lesson 6 — Diagnostics, Code Actions, and Formatting
 

@@ -940,3 +940,42 @@ requested (Curriculum 5.3), ahead of the main 3.5 checkpoint.
   and `Ctrl-h` moves focus back to the tree. There is no `Space h` for
   window-left because `Space h` opens Oil, so the return key is `Ctrl-h`.
   `Space e` again closes the sidebar.
+
+### GraphQL Language Server (research + setup + bugs)
+
+Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
+
+- Research decision: use the official `graphql-language-service-cli` (binary
+  `graphql-lsp`), the same engine VSCode's official GraphQL extension uses.
+  Rejected alternatives: `@0no-co/graphqlsp` (a TypeScript plugin for embedded
+  ``gql`` in `.ts/.tsx`, configured via `tsconfig` - complements, does not cover
+  standalone `.graphql` files) and Apollo's LSP (needs `apollo.config.json`,
+  which the repo does not use). The `resilience-pargasite` repo already has a
+  root `graphql.config.ts` and `@apollo/client`, so the official server gets
+  full schema-aware features via that config.
+- BUG #1 (install location): `npm i -g` invoked through the Homebrew Node keg
+  execpath installed `graphql-lsp` into `/opt/homebrew/Cellar/node/<version>/bin`
+  - not on `PATH`, and it would vanish on the next `node` upgrade. Root cause:
+  fnm shadows the `PATH` `node`, and npm's global prefix follows the invoking
+  node's execpath, so global installs are node-version-specific.
+- FIX: install to a fixed, node-version-independent prefix and reference it by
+  absolute path (no `PATH` edits, no Homebrew pollution, survives Node upgrades):
+  `npm install -g --prefix "$HOME/.local/graphql-lsp" graphql-language-service-cli`.
+  Binary lands at `~/.local/graphql-lsp/bin/graphql-lsp`.
+- Config: `config/nvim/lua/plugins/lsp.lua` defines `graphql` with an absolute
+  `cmd` (`~/.local/graphql-lsp/bin/graphql-lsp server -m stream`) and
+  `filetypes = { "graphql" }` (scoped to `.graphql`; keeps it off the tsx/jsx
+  buffers that already run vtsls + ESLint). Added `graphql` to the Tree-sitter
+  parser and filetype lists in `config/nvim/lua/plugins/editor.lua` and compiled
+  the parser.
+- Verification: opening the real `RiskIntelligence.graphql` attaches the
+  `graphql` client rooted at the repo (where `graphql.config.ts` lives), with no
+  errors in the LSP log; filetype is `graphql` and Tree-sitter highlighting is
+  active. The `.ts` config-loading concern did not materialize.
+- Reproducibility: install command documented in
+  `setup/mac-resilience/README.md` (dependency + verify steps) and in
+  `config/nvim/README.md` requirements. Schema-aware completion/validation
+  depends on the project's `graphql-config`; that is a work-repo concern and was
+  not modified.
+- Added optional Curriculum 5.D5; it stays open until Hamel confirms live
+  schema-aware behavior (hover/completion) in a `.graphql` buffer.

@@ -72,7 +72,20 @@ uv tool install 'mdformat==1.0.0' \
 uv tool install ruff@latest
 uv tool update-shell
 export PATH="$(uv tool dir --bin):$PATH"
+
+# GraphQL language server: an npm tool with no Homebrew formula. Install it to a
+# fixed, node-version-independent prefix that the Neovim config references by
+# absolute path (~/.local/graphql-lsp/bin/graphql-lsp), so it survives Node
+# upgrades and does not depend on the work fnm Node. npm comes from the Homebrew
+# Node that vtsls/ESLint pulled in above.
+npm install -g --prefix "$HOME/.local/graphql-lsp" graphql-language-service-cli
 ```
+
+`graphql-lsp` gives syntax and single-file features immediately; schema-aware
+completion, validation, and go-to-definition require a `graphql-config` file
+(for example `graphql.config.ts`) in the work repo, which the language server
+auto-detects as its root marker. Do not add that config to a work repo without
+Hamel's request.
 
 The Brewfile does not deliberately manage work-repo runtime versions. The
 `vtsls` and ESLint formulae may install and link Homebrew Node as a dependency,
@@ -129,6 +142,9 @@ for cmd in \
 do
   command -v "$cmd"
 done
+
+# graphql-lsp is installed at a fixed prefix (not on PATH); check it directly.
+test -x "$HOME/.local/graphql-lsp/bin/graphql-lsp" && echo "graphql-lsp ok"
 
 test "$(readlink "$HOME/.config/nvim")" = \
   "$HOME/Developer/dotfiles-hd/config/nvim"
