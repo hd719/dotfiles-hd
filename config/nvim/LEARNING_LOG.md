@@ -1033,3 +1033,17 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   and a colored mode indicator. Per Hamel, format-on-save stays off.
 - Verified lualine loads with no theme errors and owns the statusline
   (`laststatus = 3`); pinned in `lazy-lock.json`.
+
+### Markdown Rendering (render-markdown.nvim, Tier 3)
+
+- Added `MeanderingProgrammer/render-markdown.nvim` for in-editor Markdown
+  rendering: headings, `- [ ]`/`- [x]` as ☐/✓, code blocks, tables, and quotes.
+  Loads on the `markdown` filetype; `Space m` toggles raw vs rendered. Reuses the
+  already-installed markdown Tree-sitter parsers and `mini.icons` (no
+  nvim-treesitter dependency added, since the config uses a forked
+  `neovim-treesitter/nvim-treesitter`).
+- Hamel tested it on `CURRICULUM.md` / `AGENTS.md` and chose to keep it.
+- Aside during testing: a stale Neovim swap for `AGENTS.md` (from a killed
+  session) plus an accidental `config/fastfetch` -> `config/` edit were cleaned
+  up with `git restore` and by removing the swap; `:e!` reloads the clean buffer.
+  Reminder: cleanly `:qa` sessions to avoid leftover swap prompts.

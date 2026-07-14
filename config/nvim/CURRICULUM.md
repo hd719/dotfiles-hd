@@ -291,8 +291,8 @@ unexplained magic.
 - [ ] **10.4** Perform confirmed project search-and-replace.
 - [ ] **10.5** Explain the Lua config structure and the roles of Lazy, Nord,
   Snacks, Oil, Tree-sitter, Blink, friendly-snippets, mini.icons, mini.pairs,
-  mini.surround, bufferline, lualine, SchemaStore, LSPConfig, Conform, and
-  Gitsigns.
+  mini.surround, bufferline, lualine, render-markdown, SchemaStore, LSPConfig,
+  Conform, and Gitsigns.
 - [ ] **10.6** Make and verify one intentional keymap or option change.
 - [ ] **10.7** Use `:Lazy`, `:checkhealth`, `:LspInfo`, `:ConformInfo`, and
   `:TSStatus` to troubleshoot independently.

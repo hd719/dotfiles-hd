@@ -96,6 +96,7 @@ Every agent teaching Neovim must read and update both files.
 | `]d` / `[d` | Next / previous diagnostic |
 | `Space y p/d/f` | Copy file path / working dir / file folder |
 | `Space r` | Reload files changed on disk |
+| `Space m` | Toggle Markdown rendering (in Markdown files) |
 | `gd` / `gh` | Definition / hover |
 | `gsa` / `gsd` / `gsr` | Surround add / delete / replace |
 | `H` / `L` | Previous / next buffer |
@@ -133,3 +134,6 @@ project's diagnostics.
 The statusline (lualine) shows the current mode, git branch and diff,
 diagnostics, the attached LSP client(s), filetype, encoding, and cursor
 location.
+
+In Markdown files, render-markdown decorates headings, checkboxes, code blocks,
+tables, and quotes in the editor; `Space m` toggles between raw and rendered.
