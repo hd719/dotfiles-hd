@@ -4,13 +4,40 @@ local map = vim.keymap.set
 map("n", "i", "a", { desc = "Insert after cursor" })
 map("n", "a", "i", { desc = "Insert before cursor" })
 
--- Kuncheng's Escape-to-save idea, made safe for unnamed and unmodified buffers.
+-- Kuncheng's Escape-to-save idea, guarded so it only writes changes actually
+-- made in Insert mode. This prevents an accidental Normal-mode edit (a stray
+-- `dw`, `x`, paste, etc.) from being silently saved to disk on the next Escape.
+-- InsertLeave "arms" the save when the buffer was really edited; any write
+-- "disarms" it.
+vim.api.nvim_create_autocmd("InsertLeave", {
+  desc = "Arm Escape-to-save after a real Insert-mode edit",
+  callback = function(args)
+    if vim.bo[args.buf].modified then
+      vim.b[args.buf].save_on_esc = true
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+  desc = "Disarm Escape-to-save once the buffer is written",
+  callback = function(args)
+    vim.b[args.buf].save_on_esc = false
+  end,
+})
+
 map("n", "<Esc>", function()
-  local name = vim.api.nvim_buf_get_name(0)
-  if vim.bo.buftype == "" and vim.bo.modifiable and vim.bo.modified and name ~= "" then
+  local buf = vim.api.nvim_get_current_buf()
+  local name = vim.api.nvim_buf_get_name(buf)
+  if
+    vim.b[buf].save_on_esc
+    and vim.bo.buftype == ""
+    and vim.bo.modifiable
+    and vim.bo.modified
+    and name ~= ""
+  then
     vim.cmd.update()
   end
-end, { desc = "Save modified file" })
+end, { desc = "Save a file edited in Insert mode" })
 
 map("n", "<C-a>", "ggVG", { desc = "Select all" })
 map("n", "H", "<cmd>bprevious<cr>", { desc = "Previous buffer" })

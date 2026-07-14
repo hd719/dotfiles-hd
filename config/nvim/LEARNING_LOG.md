@@ -1047,3 +1047,17 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   session) plus an accidental `config/fastfetch` -> `config/` edit were cleaned
   up with `git restore` and by removing the swap; `:e!` reloads the clean buffer.
   Reminder: cleanly `:qa` sessions to avoid leftover swap prompts.
+
+### Guarded Escape-to-Save (accidental-edit fix)
+
+- After the README and AGENTS.md accidental-save incidents, guarded the
+  Normal-mode Escape-to-save so it only writes changes actually made in Insert
+  mode (`config/nvim/lua/config/keymaps.lua`). An `InsertLeave` autocmd sets a
+  per-buffer `save_on_esc` flag when the buffer was really edited, `BufWritePost`
+  clears it, and the `<Esc>` mapping saves only when the flag is set.
+- Effect: a stray Normal-mode edit (fat-finger `dw`, `x`, paste, etc.) is no
+  longer silently written on the next Escape. Deliberate Insert-mode edits still
+  auto-save on the second Escape as before, so the muscle memory is unchanged.
+- Trade-off: an intentional Normal-mode edit (e.g. `dd`) now needs a manual
+  `Space w`. Verified on a scratch file: an `x` edit leaves `save_on_esc` unset
+  (guard skips), while `iHELLO<Esc>` sets it (guard saves).
