@@ -804,3 +804,34 @@ Neovim theme or configuration.
   previews the selected change.
 - The main curriculum still resumes at 3.5: finish redo with `Ctrl-r` and
   repeat with `.`.
+
+## 2026-07-14 — Session 008: Go to Definition (LSP)
+
+### Goal
+
+Learn to jump to a symbol's definition with `gd` and return, as Hamel
+requested (Curriculum 5.3), ahead of the main 3.5 checkpoint.
+
+### Mental Model
+
+- `gd` in Normal mode jumps to the definition of the symbol under the cursor.
+- In this config `gd` runs `Snacks.picker.lsp_definitions()`: with a single
+  definition it jumps straight there; with several it opens a Snacks picker to
+  choose one.
+- `gd` relies on an attached language server, not Tree-sitter. Go uses `gopls`,
+  Lua uses `lua_ls`, and JavaScript/TypeScript use `vtsls`. In a plain-text or
+  Markdown buffer there is no definition to resolve, so `gd` does nothing.
+- Return the way you came with `Ctrl-o` (older jump) and go forward again with
+  `Ctrl-i` — the same jump list practiced in Curriculum 2.5.
+- Related keys for later in Lesson 5: `gh` hover (5.2), native `grr` references
+  (5.4), and `Space S` workspace symbols (5.5).
+
+### Confirmed
+
+- **Curriculum 5.3 complete:** Hamel opened a real code file, pressed `gd` on a
+  symbol, confirmed the jump to its definition, and returned with `Ctrl-o`.
+- Mental model reinforced: `gd` relies on the attached language server
+  (`gopls`, `lua_ls`, or `vtsls`), and `Ctrl-o` returns via the jump list.
+- Main checkpoint unchanged at 3.5 (undo, redo, repeat); 5.3 was an explicit
+  detour Hamel chose. Lesson 5 otherwise remains open (next: `gh` hover in
+  5.2, `grr` references in 5.4).

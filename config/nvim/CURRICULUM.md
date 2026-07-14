@@ -150,7 +150,7 @@ unexplained magic.
 - [ ] **5.1** Open real Go and Lua projects and verify attachment with
   `:LspInfo`.
 - [ ] **5.2** Read symbol information with `gh` hover.
-- [ ] **5.3** Jump to definitions with `gd` and return with `Ctrl-o`.
+- [x] **5.3** Jump to definitions with `gd` and return with `Ctrl-o`. — Session 008
 - [ ] **5.4** Find references with Neovim's native `grr` mapping.
 - [ ] **5.5** Search workspace symbols with `Space S`.
 - [ ] **5.6** Use completion deliberately and accept the intended item.
