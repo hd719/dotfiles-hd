@@ -7,6 +7,11 @@ return {
       input = { enabled = true },
       notifier = { enabled = true, timeout = 3000 },
       picker = { enabled = true },
+      -- Free Snacks modules: big-file performance safety, reference highlighting
+      -- for the symbol under the cursor, and indent guides + scope.
+      bigfile = { enabled = true },
+      words = { enabled = true },
+      indent = { enabled = true },
       -- On-demand sidebar tree (Space e). Keep replace_netrw false so Oil stays
       -- the directory editor and the explorer never hijacks directory buffers.
       explorer = { replace_netrw = false },

@@ -137,3 +137,7 @@ location.
 
 In Markdown files, render-markdown decorates headings, checkboxes, code blocks,
 tables, and quotes in the editor; `Space m` toggles between raw and rendered.
+
+Snacks also provides indent guides with scope highlighting, highlights other
+uses of the symbol under the cursor, and disables heavy features on very large
+files for performance.

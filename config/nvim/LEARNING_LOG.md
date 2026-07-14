@@ -1063,3 +1063,13 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   (guard skips), while `iHELLO<Esc>` sets it (guard saves).
 - Added a "Saved <file>" toast (via the Snacks notifier) when the Escape
   auto-save fires, so the automatic write is visible instead of silent.
+
+### Free Snacks Modules (bigfile, words, indent)
+
+- Enabled three already-bundled Snacks modules in
+  `config/nvim/lua/plugins/navigation.lua` (no new plugins):
+  - `bigfile` - disables heavy features (LSP, Tree-sitter, etc.) on very large
+    files so they stay responsive.
+  - `words` - highlights the other occurrences of the symbol under the cursor.
+  - `indent` - indent guides plus current-scope highlighting.
+- Verified all three report `enabled = true` and the config loads clean.
