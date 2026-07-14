@@ -17,6 +17,39 @@ return {
       explorer = { replace_netrw = false },
       lazygit = {},
       terminal = {},
+      -- Start screen shown when Neovim opens with no file.
+      dashboard = {
+        enabled = true,
+        preset = {
+          header = table.concat({
+            "",
+            "███╗   ██╗██╗   ██╗██╗███╗   ███╗",
+            "████╗  ██║██║   ██║██║████╗ ████║",
+            "██╔██╗ ██║██║   ██║██║██╔████╔██║",
+            "██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║",
+            "██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║",
+            "╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝",
+            "",
+          }, "\n"),
+          keys = {
+            { icon = " ", key = "f", desc = "Find File", action = function() Snacks.dashboard.pick("files") end },
+            { icon = " ", key = "/", desc = "Find Text", action = function() Snacks.dashboard.pick("live_grep") end },
+            { icon = " ", key = "r", desc = "Recent Files", action = function() Snacks.dashboard.pick("oldfiles") end },
+            { icon = " ", key = "e", desc = "File Explorer", action = function() Snacks.explorer() end },
+            { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+            { icon = " ", key = "g", desc = "LazyGit", action = function() Snacks.lazygit() end },
+            { icon = " ", key = "c", desc = "Config", action = function() Snacks.dashboard.pick("files", { cwd = vim.fn.stdpath("config") }) end },
+            { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
+            { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+          },
+        },
+        sections = {
+          { section = "header" },
+          { section = "keys", gap = 1, padding = 1 },
+          { section = "recent_files", icon = " ", title = "Recent Files", indent = 2, padding = 1 },
+          { section = "startup" },
+        },
+      },
     },
     keys = {
       {

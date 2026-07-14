@@ -148,3 +148,7 @@ open all / close all) or the native `za` / `zR` / `zM`.
 
 The cursor line stays vertically centered as you move up and down
 (`scrolloff = 999`).
+
+Opening Neovim with no file shows a start dashboard (Snacks) with shortcuts
+(find, grep, recent, explorer, new, LazyGit, config, Lazy, quit), a recent-files
+list, and startup stats. Open a file and it disappears.

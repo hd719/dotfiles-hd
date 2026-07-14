@@ -1090,3 +1090,14 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   line stays vertically centered while moving up/down (the "always-centered"
   look from the video). Left `sidescrolloff = 8`. It is a reversible one-liner;
   a toggle between `999` and `8` is the fallback if it feels like too much.
+
+### Start Dashboard (Snacks)
+
+- Enabled the Snacks `dashboard` (start screen shown when Neovim opens with no
+  file) in `config/nvim/lua/plugins/navigation.lua`: a custom NVIM header, a
+  shortcut menu wired to the existing tools (`f` files, `/` grep, `r` recent,
+  `e` explorer, `n` new, `g` LazyGit, `c` config, `l` Lazy, `q` quit), a
+  recent-files section, and startup stats. No new plugin (Snacks module).
+  Verified it reports enabled and `Snacks.dashboard.open()` runs without error.
+- This is separate from the lazy.nvim install UI, which only appears on a fresh
+  machine when plugins need installing.
