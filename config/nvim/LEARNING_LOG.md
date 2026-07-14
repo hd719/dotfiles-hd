@@ -1021,3 +1021,15 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   need no new install.
 - Added optional Curriculum 4.D4 (surround); it stays open until Hamel practices
   `gsa`/`gsd`/`gsr` and confirms.
+
+### Statusline (lualine, Tier 3)
+
+- Replaced Neovim's built-in statusline with `nvim-lualine/lualine.nvim`. Nord
+  theme, `globalstatus = true` (one bar at the bottom, `laststatus = 3`).
+  Sections: mode | git branch + diff (from Gitsigns' buffer data) | filename
+  (relative) | diagnostics + attached LSP client(s) + filetype | encoding |
+  line:col + progress. Reuses `mini.icons` for filetype icons.
+- Biggest gains over the default bar: git branch/diff, the attached LSP names,
+  and a colored mode indicator. Per Hamel, format-on-save stays off.
+- Verified lualine loads with no theme errors and owns the statusline
+  (`laststatus = 3`); pinned in `lazy-lock.json`.

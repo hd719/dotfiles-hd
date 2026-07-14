@@ -129,3 +129,7 @@ Diagnostics from any server show inline at the end of the line (virtual text).
 Use `]d` / `[d` to jump between them, `Ctrl-w d` for the detail float, and
 `Space c d` / `Space c D` for a searchable list of the current buffer's or the
 project's diagnostics.
+
+The statusline (lualine) shows the current mode, git branch and diff,
+diagnostics, the attached LSP client(s), filetype, encoding, and cursor
+location.
