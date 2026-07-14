@@ -40,6 +40,7 @@ return {
     lazy = false,
     dependencies = {
       "saghen/blink.cmp",
+      "b0o/schemastore.nvim",
     },
     config = function()
       vim.lsp.config("*", {
@@ -85,7 +86,29 @@ return {
         filetypes = { "graphql" },
       })
 
-      vim.lsp.enable({ "eslint", "gopls", "graphql", "lua_ls", "vtsls" })
+      -- JSON with SchemaStore catalogs (package.json, tsconfig.json, etc.).
+      -- The jsonls/cssls/html servers ship with vscode-langservers-extracted,
+      -- which is already installed for ESLint.
+      vim.lsp.config("jsonls", {
+        settings = {
+          json = {
+            schemas = require("schemastore").json.schemas(),
+            validate = { enable = true },
+          },
+        },
+      })
+
+      vim.lsp.enable({
+        "bashls",
+        "cssls",
+        "eslint",
+        "gopls",
+        "graphql",
+        "html",
+        "jsonls",
+        "lua_ls",
+        "vtsls",
+      })
 
       vim.diagnostic.config({
         severity_sort = true,
