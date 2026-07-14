@@ -109,7 +109,9 @@ The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves
 focus back to the tree. There is no `Space h` for window-left because `Space h`
 opens Oil, so the key to return to the tree is `Ctrl-h`. Press `Space e` again
-to close the sidebar.
+to close the sidebar. The sidebar shows dotfiles by default (matching Oil) but
+hides `.gitignore`d files; inside the tree press `H` to toggle dotfiles and `I`
+to toggle gitignored files.
 
 Completion appears automatically. Press `Enter` to accept the selected item.
 
@@ -151,4 +153,6 @@ The cursor line stays vertically centered as you move up and down
 
 Opening Neovim with no file shows a start dashboard (Snacks) with shortcuts
 (find, grep, recent, explorer, new, LazyGit, config, Lazy, quit), a recent-files
-list, and startup stats. Open a file and it disappears.
+list, and startup stats. Open a file and it disappears. The header is the anon
+mask read from `config/fastfetch/logo-anon.txt` (shared with fastfetch), so
+editing that logo updates both.

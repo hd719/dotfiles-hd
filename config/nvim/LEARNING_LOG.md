@@ -940,6 +940,16 @@ requested (Curriculum 5.3), ahead of the main 3.5 checkpoint.
   and `Ctrl-h` moves focus back to the tree. There is no `Space h` for
   window-left because `Space h` opens Oil, so the return key is `Ctrl-h`.
   `Space e` again closes the sidebar.
+- **Hidden files gotcha (dotfiles):** the sidebar and Oil are two different
+  explorers with different defaults. Oil shows dotfiles because we set
+  `view_options.show_hidden = true`; the Snacks explorer defaults to
+  `hidden = false` and `ignored = false`, so `.zshrc`, `.config/`, and anything
+  in `.gitignore` are filtered out of the tree (the file itself is untouched —
+  only the sidebar hides it). Toggle live in the tree with `H` (dotfiles) and
+  `I` (gitignored). Made dotfiles show by default via
+  `picker.sources.explorer = { hidden = true, ignored = false }` in
+  `navigation.lua`, so the sidebar now matches Oil while still hiding gitignored
+  noise. Verified `Snacks.config.picker.sources.explorer.hidden == true`.
 
 ### GraphQL Language Server (research + setup + bugs)
 
@@ -1101,3 +1111,14 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   Verified it reports enabled and `Snacks.dashboard.open()` runs without error.
 - This is separate from the lazy.nvim install UI, which only appears on a fresh
   machine when plugins need installing.
+- **Header = fastfetch anon mask.** Replaced the block "NVIM" banner with the
+  Guy Fawkes / anon mask from `config/fastfetch/logo-anon.txt` (the same logo
+  fastfetch renders). Instead of copy-pasting the Braille art, the header is read
+  at startup by `anon_header()` in `navigation.lua`: it resolves the real path of
+  `~/.config/nvim` (a symlink into the dotfiles repo) with `vim.fn.resolve`, walks
+  up to `config/fastfetch/logo-anon.txt`, reads it, and strips fastfetch's `$N`
+  color codes with `gsub("%$%d+", "")`. This keeps a single source of truth (edit
+  the logo once, both fastfetch and the dashboard update) and stays reproducible
+  because it reads from the repo, not `~/.config/fastfetch` (which the work Mac
+  does not symlink). Falls back to `"NVIM"` if the file is missing. The dashboard
+  renders it in one highlight color (fastfetch's per-line gradient is dropped).

@@ -1,3 +1,19 @@
+-- Reuse the fastfetch anon logo as the dashboard header. It is resolved from the
+-- dotfiles repo via the ~/.config/nvim symlink and has fastfetch's $N color
+-- codes stripped. Falls back to a simple title if the file is not found.
+local function anon_header()
+  local nvim_dir = vim.fn.resolve(vim.fn.stdpath("config"))
+  local logo = vim.fs.dirname(nvim_dir) .. "/fastfetch/logo-anon.txt"
+  if vim.fn.filereadable(logo) == 1 then
+    local lines = vim.fn.readfile(logo)
+    for i, line in ipairs(lines) do
+      lines[i] = (line:gsub("%$%d+", ""))
+    end
+    return "\n" .. table.concat(lines, "\n") .. "\n"
+  end
+  return "NVIM"
+end
+
 return {
   {
     "folke/snacks.nvim",
@@ -6,7 +22,15 @@ return {
     opts = {
       input = { enabled = true },
       notifier = { enabled = true, timeout = 3000 },
-      picker = { enabled = true },
+      picker = {
+        enabled = true,
+        sources = {
+          -- Show dotfiles (e.g. .zshrc, .config) in the explorer sidebar so it
+          -- matches Oil. Gitignored files stay hidden; press I in the tree to
+          -- reveal them, or H to toggle dotfiles back off.
+          explorer = { hidden = true, ignored = false },
+        },
+      },
       -- Free Snacks modules: big-file performance safety, reference highlighting
       -- for the symbol under the cursor, and indent guides + scope.
       bigfile = { enabled = true },
@@ -21,16 +45,7 @@ return {
       dashboard = {
         enabled = true,
         preset = {
-          header = table.concat({
-            "",
-            "███╗   ██╗██╗   ██╗██╗███╗   ███╗",
-            "████╗  ██║██║   ██║██║████╗ ████║",
-            "██╔██╗ ██║██║   ██║██║██╔████╔██║",
-            "██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║",
-            "██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║",
-            "╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝",
-            "",
-          }, "\n"),
+          header = anon_header(),
           keys = {
             { icon = " ", key = "f", desc = "Find File", action = function() Snacks.dashboard.pick("files") end },
             { icon = " ", key = "/", desc = "Find Text", action = function() Snacks.dashboard.pick("live_grep") end },
