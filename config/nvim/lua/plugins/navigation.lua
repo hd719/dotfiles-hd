@@ -7,6 +7,9 @@ return {
       input = { enabled = true },
       notifier = { enabled = true, timeout = 3000 },
       picker = { enabled = true },
+      -- On-demand sidebar tree (Space e). Keep replace_netrw false so Oil stays
+      -- the directory editor and the explorer never hijacks directory buffers.
+      explorer = { replace_netrw = false },
       lazygit = {},
       terminal = {},
     },
@@ -17,6 +20,13 @@ return {
           Snacks.picker.files()
         end,
         desc = "Find files",
+      },
+      {
+        "<leader>e",
+        function()
+          Snacks.explorer()
+        end,
+        desc = "File explorer",
       },
       {
         "<leader>/",
