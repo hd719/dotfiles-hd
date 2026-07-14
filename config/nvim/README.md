@@ -17,6 +17,12 @@ Hamel's existing Zed muscle memory.
 - GraphQL: `graphql-lsp` (from `graphql-language-service-cli`), installed to a
   fixed prefix and referenced by absolute path. Schema-aware features need a
   `graphql-config` (e.g. `graphql.config.ts`) in the project.
+- JSON, CSS, and HTML: `jsonls`, `cssls`, and `html` from
+  `vscode-langservers-extracted` (already installed for ESLint); JSON schemas
+  come from `SchemaStore.nvim`.
+- Shell: `bash-language-server` for shell-script diagnostics and completion.
+- Editing: `mini.pairs` auto-closes brackets and quotes; `mini.surround` adds,
+  changes, and deletes surrounding pairs with a `gs` prefix.
 
 Install the Markdown formatter with:
 
@@ -91,6 +97,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space y p/d/f` | Copy file path / working dir / file folder |
 | `Space r` | Reload files changed on disk |
 | `gd` / `gh` | Definition / hover |
+| `gsa` / `gsd` / `gsr` | Surround add / delete / replace |
 | `H` / `L` | Previous / next buffer |
 
 `Space g` resolves the repository from the current file. In Oil, it resolves

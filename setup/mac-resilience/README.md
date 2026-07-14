@@ -137,8 +137,9 @@ brew bundle check --verbose \
   --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
 
 for cmd in \
-  fd fzf gopls herdr lazygit lua-language-server nvim rg stylua tree-sitter \
-  uv vscode-eslint-language-server vtsls mdformat ruff
+  bash-language-server fd fzf gopls herdr lazygit lua-language-server nvim rg \
+  stylua tree-sitter uv vscode-eslint-language-server \
+  vscode-json-language-server vtsls mdformat ruff
 do
   command -v "$cmd"
 done

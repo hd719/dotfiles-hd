@@ -998,3 +998,26 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
     the other Snacks pickers.
 - Other built-in ways recorded in the README: `]d` / `[d` jump to the next /
   previous diagnostic; `Ctrl-w d` still opens the detail float.
+
+### Tier 1 + 2 Additions: More LSPs, SchemaStore, Auto-Pairs, Surround
+
+- Tier 1 (free - the servers already shipped with `vscode-langservers-extracted`,
+  installed for ESLint): enabled `jsonls`, `cssls`, and `html` in `lsp.lua`.
+  Added `b0o/schemastore.nvim` and wired `jsonls` to
+  `require('schemastore').json.schemas()` for schema-aware `package.json` /
+  `tsconfig.json` completion and validation. Verified `jsonls` attaches to a
+  `.json` buffer.
+- Tier 2:
+  - Installed `bash-language-server` via Homebrew (added to the Brewfile) and
+    enabled `bashls`; verified it attaches to a `.sh` buffer. High value given
+    how much shell the dotfiles and `hd-*.sh` launchers involve.
+  - Added `mini.pairs` (auto-close brackets/quotes on `InsertEnter`) and
+    `mini.surround` for add/change/delete of surrounding pairs, under a `gs`
+    prefix so the native `s` (substitute) is preserved: `gsa` add, `gsd` delete,
+    `gsr` replace, `gsf`/`gsF` find, `gsh` highlight.
+- Reproducibility: `bash-language-server` in the Brewfile and the verify step;
+  `schemastore.nvim` / `mini.pairs` / `mini.surround` pinned in
+  `lazy-lock.json`; all documented in the Neovim README. `jsonls`/`cssls`/`html`
+  need no new install.
+- Added optional Curriculum 4.D4 (surround); it stays open until Hamel practices
+  `gsa`/`gsd`/`gsr` and confirms.

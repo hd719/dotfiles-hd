@@ -140,6 +140,8 @@ unexplained magic.
 - [ ] **4.D1** Master `f`, `F`, `t`, and `T` character motions.
 - [ ] **4.D2** Practice sentence, paragraph, and block text objects.
 - [ ] **4.D3** Build repeatable editing chains around the `.` command.
+- [ ] **4.D4** Use `mini.surround` (`gsa` / `gsd` / `gsr`) to add, delete, and
+  change surrounding quotes, brackets, and tags.
 
 ## Lesson 5 — Code Navigation with LSP
 
