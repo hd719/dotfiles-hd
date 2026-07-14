@@ -204,6 +204,12 @@ alias tm-plat-proxy="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/
 alias tm-plat-be="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-be.sh"
 alias tm-plat="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/platform/tm-platform.sh"
 
+# [Herdr Platform Session Aliases]
+alias hd-plat-fe="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/platform/hd-fe.sh"
+alias hd-plat-proxy="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/platform/hd-ed.sh"
+alias hd-plat-be="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/platform/hd-be.sh"
+alias hd-plat="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/platform/hd-platform.sh"
+
 # Build all workspace packages (run after install or pulling changes to internal packages)
 alias res-plat-build="cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token yarn build"
 # Install dependencies with proper authentication
@@ -249,6 +255,12 @@ alias tm-parg-client="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasit
 alias tm-parg-arc="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-arc.sh"
 alias tm-parg-calc="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-calc.sh"
 alias tm-parg="~/Developer/dotfiles-hd/setup/mac-resilience/tmux/pargasite/tm-pargasite.sh"
+
+# [Herdr Pargasite Session Aliases]
+alias hd-parg-client="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/pargasite/hd-client.sh"
+alias hd-parg-arc="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/pargasite/hd-arc.sh"
+alias hd-parg-calc="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/pargasite/hd-calc.sh"
+alias hd-parg="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/pargasite/hd-pargasite.sh"
 
 # [Pull all repos on dev branch]
 gda() {
