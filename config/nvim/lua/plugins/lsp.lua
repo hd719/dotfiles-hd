@@ -89,6 +89,9 @@ return {
 
       vim.diagnostic.config({
         severity_sort = true,
+        -- Show the message inline at the end of the line (VSCode/Zed-style), and
+        -- name the source when more than one server reports on a line.
+        virtual_text = { spacing = 2, source = "if_many" },
         float = {
           border = "rounded",
         },

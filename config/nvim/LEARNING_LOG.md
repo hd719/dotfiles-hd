@@ -979,3 +979,18 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   not modified.
 - Added optional Curriculum 5.D5; it stays open until Hamel confirms live
   schema-aware behavior (hover/completion) in a `.graphql` buffer.
+
+### Diagnostics: Inline Messages + Picker
+
+- Reading diagnostics only through the `Ctrl-w d` float was tedious. Two
+  additions (work for any source: eslint, vtsls, graphql):
+  - Enabled inline `virtual_text` in `vim.diagnostic.config`
+    (`config/nvim/lua/plugins/lsp.lua`): `{ spacing = 2, source = "if_many" }`,
+    so the message shows at the end of the offending line (VSCode/Zed-style),
+    naming the source when more than one server reports on a line.
+  - Added Snacks diagnostics-picker keymaps in
+    `config/nvim/lua/plugins/navigation.lua`: `Space c d` (current buffer) and
+    `Space c D` (project) - a searchable problems list with preview, matching
+    the other Snacks pickers.
+- Other built-in ways recorded in the README: `]d` / `[d` jump to the next /
+  previous diagnostic; `Ctrl-w d` still opens the detail float.

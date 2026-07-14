@@ -50,6 +50,20 @@ return {
         desc = "Project symbols",
       },
       {
+        "<leader>cd",
+        function()
+          Snacks.picker.diagnostics_buffer()
+        end,
+        desc = "Diagnostics (buffer)",
+      },
+      {
+        "<leader>cD",
+        function()
+          Snacks.picker.diagnostics()
+        end,
+        desc = "Diagnostics (project)",
+      },
+      {
         "<leader>d",
         function()
           Snacks.bufdelete()

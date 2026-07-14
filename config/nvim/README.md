@@ -86,6 +86,8 @@ Every agent teaching Neovim must read and update both files.
 | `Space g` | Open LazyGit |
 | `Space p` | Format |
 | `Space c a` | LSP code action |
+| `Space c d` / `Space c D` | Diagnostics list (buffer / project) |
+| `]d` / `[d` | Next / previous diagnostic |
 | `Space y p/d/f` | Copy file path / working dir / file folder |
 | `Space r` | Reload files changed on disk |
 | `gd` / `gh` | Definition / hover |
