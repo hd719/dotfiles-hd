@@ -24,6 +24,10 @@ workspace_picker = "prefix+w"
 new_workspace = "prefix+shift+n"
 rename_workspace = "prefix+shift+w"
 close_workspace = "prefix+shift+d"
+# Direct (no-prefix) chords to cycle the vertical workspace list continuously:
+# hold Ctrl+Alt and tap j/k.
+next_workspace = "ctrl+alt+k"
+previous_workspace = "ctrl+alt+j"
 
 # Tabs map to tmux windows.
 new_tab = "prefix+c"
