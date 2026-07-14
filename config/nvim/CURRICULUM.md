@@ -234,7 +234,7 @@ unexplained magic.
 - [ ] **8.3** Exit terminal-input mode with Snacks' double-`Escape` behavior and
   the native `Ctrl-\`, `Ctrl-n` fallback while Shortcat owns `Ctrl-Space`.
 - [ ] **8.4** Navigate between terminal and editor windows without losing work.
-- [ ] **8.5** Read Gitsigns gutter changes and current-line blame.
+- [x] **8.5** Read Gitsigns gutter changes and current-line blame. — Session 008
 - [x] **8.6** Open LazyGit with `Space g` and inspect status and diffs. —
   Session 007
 - [ ] **8.7** Exit terminal and Git views while preserving editor buffers.

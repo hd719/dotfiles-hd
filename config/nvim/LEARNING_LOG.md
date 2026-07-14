@@ -887,3 +887,25 @@ requested (Curriculum 5.3), ahead of the main 3.5 checkpoint.
   running Neovim with `:e!` before saving, or the stale buffer would re-save the
   corruption. The Escape-to-save mapping makes accidental saves easy, so
   `:e!` / `Space r` and gitsigns review are the guardrails.
+
+### Gitsigns: Signs vs Diagnostics, and Contrast Tuning
+
+- Clarified two overlapping gutter systems on a changed line in a work TSX file:
+  - `E` (and status `E:1`) is an LSP diagnostic from vtsls/ESLint about code
+    validity (e.g. an unused `const thisIsATest = 10`), not gitsigns.
+  - Gitsigns shows `H:1` in the status line (changed hunks) and the
+    "Not Committed Yet" current-line blame; its change marker is the gutter `▎`.
+- Sign priority: with a single `signcolumn`, the diagnostic sign outranks the
+  gitsigns bar, so a line with an error shows `E`, not the bar. This reinforces
+  the Session 006 `E` (code validity) vs `H` (git change) distinction.
+- Contrast tuning: the gitsigns bars were hard to see on the transparent Nord
+  background. Added explicit high-contrast highlights in
+  `config/nvim/lua/plugins/colorscheme.lua` `on_highlights`: `GitSignsAdd`
+  `#a3be8c` (green), `GitSignsChange` `#88c0d0` (cyan), `GitSignsDelete`
+  `#bf616a` (red), with transparent bg. Verified they survive gitsigns' default
+  links (gitsigns sets highlights with `default = true`, so explicit
+  definitions win).
+- **Curriculum 8.5 complete:** after restarting Neovim, Hamel confirmed he can
+  see the gitsigns change bar in the gutter (on an uncommitted line in README)
+  alongside the "Not Committed Yet" current-line blame. The contrast tweak made
+  the bar visible; green = add, cyan = change, red = delete.
