@@ -113,3 +113,12 @@ use `Space w` to write it to disk. Format-on-save is not enabled yet.
 code navigation. The ESLint language server discovers the nearest workspace
 `eslint.config.mjs`, so each Cortana Services app or package uses its shared
 `@cortana/tooling` profile. ESLint fixes on save remain disabled.
+
+`graphql-lsp` provides schema-aware validation, completion, hover, and
+go-to-definition for `.graphql` files, resolving the schema from the project's
+`graphql-config` (for example `graphql.config.ts`).
+
+Diagnostics from any server show inline at the end of the line (virtual text).
+Use `]d` / `[d` to jump between them, `Ctrl-w d` for the detail float, and
+`Space c d` / `Space c D` for a searchable list of the current buffer's or the
+project's diagnostics.

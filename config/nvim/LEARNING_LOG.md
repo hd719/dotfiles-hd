@@ -977,8 +977,12 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   `config/nvim/README.md` requirements. Schema-aware completion/validation
   depends on the project's `graphql-config`; that is a work-repo concern and was
   not modified.
-- Added optional Curriculum 5.D5; it stays open until Hamel confirms live
-  schema-aware behavior (hover/completion) in a `.graphql` buffer.
+- **Curriculum 5.D5 complete:** confirmed live schema-aware validation. Opening
+  a query with unused variables surfaced real diagnostics - `Variable "$limit"
+  is never used in operation "GetClientQuestionnaire"` (same for `$offset` and
+  `$order_by`) - proving `graphql-lsp` parses operations against the schema
+  resolved from the repo's `graphql.config.ts`. The messages now show inline via
+  virtual text.
 
 ### Diagnostics: Inline Messages + Picker
 
