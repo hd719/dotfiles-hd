@@ -19,6 +19,7 @@ map("n", "L", "<cmd>bnext<cr>", { desc = "Next buffer" })
 map("n", "<leader>v", "<cmd>rightbelow vsplit<cr>", { desc = "Split right" })
 map("n", "<leader>s", "<cmd>rightbelow split<cr>", { desc = "Split down" })
 map("n", "<leader>n", "<cmd>enew<cr>", { desc = "New file" })
+map("n", "<leader>r", "<cmd>checktime<cr>", { desc = "Reload files changed on disk" })
 
 map("n", "<C-h>", "<C-w>h", { desc = "Window left" })
 map("n", "<C-j>", "<C-w>j", { desc = "Window down" })
