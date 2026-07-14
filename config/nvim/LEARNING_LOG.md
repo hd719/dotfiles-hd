@@ -1073,3 +1073,13 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   - `words` - highlights the other occurrences of the symbol under the cursor.
   - `indent` - indent guides plus current-scope highlighting.
 - Verified all three report `enabled = true` and the config loads clean.
+
+### Tree-sitter Folding + Space z Keys
+
+- Enabled structure-aware folding in `config/nvim/lua/config/options.lua`:
+  `foldmethod = expr`, `foldexpr = v:lua.vim.treesitter.foldexpr()`, and
+  `foldlevel`/`foldlevelstart = 99` so files open fully unfolded (fold on
+  demand). Verified a real Lua file computes fold levels (max depth 8).
+- Added discoverable Space z fold maps in `keymaps.lua`: `Space z a` toggle fold,
+  `Space z o` open all, `Space z c` close all. Native `za` / `zR` / `zM` still
+  work.

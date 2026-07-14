@@ -97,6 +97,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space y p/d/f` | Copy file path / working dir / file folder |
 | `Space r` | Reload files changed on disk |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
+| `Space z a/o/c` | Fold: toggle / open all / close all |
 | `gd` / `gh` | Definition / hover |
 | `gsa` / `gsd` / `gsr` | Surround add / delete / replace |
 | `H` / `L` | Previous / next buffer |
@@ -141,3 +142,6 @@ tables, and quotes in the editor; `Space m` toggles between raw and rendered.
 Snacks also provides indent guides with scope highlighting, highlights other
 uses of the symbol under the cursor, and disables heavy features on very large
 files for performance.
+
+Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
+open all / close all) or the native `za` / `zR` / `zM`.

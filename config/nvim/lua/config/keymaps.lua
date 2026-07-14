@@ -67,6 +67,12 @@ map("n", "<leader>yf", function()
   vim.notify("Copied folder: " .. folder)
 end, { desc = "Yank file folder" })
 
+-- Folding (Tree-sitter). WhichKey lists these under Space z; native za/zM/zR
+-- still work too.
+map("n", "<leader>za", "za", { desc = "Toggle fold" })
+map("n", "<leader>zo", "zR", { desc = "Open all folds" })
+map("n", "<leader>zc", "zM", { desc = "Close all folds" })
+
 map("n", "<C-h>", "<C-w>h", { desc = "Window left" })
 map("n", "<C-j>", "<C-w>j", { desc = "Window down" })
 map("n", "<C-k>", "<C-w>k", { desc = "Window up" })

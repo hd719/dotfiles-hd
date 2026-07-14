@@ -32,6 +32,14 @@ opt.updatetime = 250
 opt.timeoutlen = 400
 opt.completeopt = { "menu", "menuone", "noselect" }
 
+-- Structure-aware folding via Tree-sitter. Files open fully unfolded
+-- (foldlevel 99); fold on demand with the Space z maps or the native z commands.
+opt.foldmethod = "expr"
+opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+opt.foldlevel = 99
+opt.foldlevelstart = 99
+opt.foldenable = true
+
 vim.filetype.add({
   extension = {
     js = "javascriptreact",
