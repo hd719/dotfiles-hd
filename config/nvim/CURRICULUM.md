@@ -271,6 +271,8 @@ unexplained magic.
 - [ ] **9.D2** Explore hidden files, sorting, permissions, and detail columns.
 - [ ] **9.D3** Decide whether to configure a trash-based workflow instead of
   permanent deletion.
+- [x] **9.D4** Toggle a Snacks explorer sidebar with `Space e` for a
+  Zed/VSCode-style file tree, kept separate from Oil (`replace_netrw = false`). — Session 008
 
 ## Lesson 10 — Warrior Techniques and Config Ownership
 

@@ -65,20 +65,30 @@ Every agent teaching Neovim must read and update both files.
 | `Space f` | Find files |
 | `Space /` | Search text |
 | `Space h` | Open Oil file browser |
+| `Space e` | Open the file-explorer sidebar (Snacks) |
 | `Space b` | Pick a buffer |
 | `Space d` | Close the current buffer |
 | `Space w` / `Space x` | Save / save and quit |
 | `Space v` / `Space s` | Split right / down |
+| `Ctrl-h/j/k/l` | Focus window left / down / up / right |
 | `Space q` | Close the current window |
 | `Space t` / `Space T` | Bottom / floating terminal |
 | `Space g` | Open LazyGit |
 | `Space p` | Format |
 | `Space c a` | LSP code action |
+| `Space y p/d/f` | Copy file path / working dir / file folder |
+| `Space r` | Reload files changed on disk |
 | `gd` / `gh` | Definition / hover |
 | `H` / `L` | Previous / next buffer |
 
 `Space g` resolves the repository from the current file. In Oil, it resolves
 from the directory being viewed, so it does not depend on Neovim's `:pwd`.
+
+The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
+tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves
+focus back to the tree. There is no `Space h` for window-left because `Space h`
+opens Oil, so the key to return to the tree is `Ctrl-h`. Press `Space e` again
+to close the sidebar.
 
 Completion appears automatically. Press `Enter` to accept the selected item.
 

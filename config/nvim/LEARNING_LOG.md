@@ -921,3 +921,22 @@ requested (Curriculum 5.3), ahead of the main 3.5 checkpoint.
 - Each writes to the `+` (system clipboard) register and shows a "Copied ..."
   toast for feedback. Nothing to memorize: press `Space y` and WhichKey shows
   the choices. All three maps verified registered with their descriptions.
+
+### Snacks Explorer Sidebar (Zed/VSCode-style)
+
+- Clarified that Oil is a buffer-as-directory editor (`Space h`), not a
+  persistent sidebar. For a Zed/VSCode-style file tree, added the Snacks
+  explorer, which already ships with snacks.nvim (no new plugin).
+- Enabled with `explorer = { replace_netrw = false }` in
+  `config/nvim/lua/plugins/navigation.lua` so Oil stays the directory handler
+  and the explorer never hijacks directory buffers. Bound `Space e` to
+  `Snacks.explorer()`.
+- Oil (`Space h`) and the explorer (`Space e`) now coexist: Oil for fast
+  buffer-based edits, the explorer for a persistent browsing sidebar.
+- **Optional Curriculum 9.D4 complete:** Hamel opened the sidebar with `Space e`
+  and used it alongside Oil.
+- Focus-navigation gotcha (also documented in `config/nvim/README.md` so it is
+  easy to find): from the tree, `Space l` / `Ctrl-l` moves focus to the editor,
+  and `Ctrl-h` moves focus back to the tree. There is no `Space h` for
+  window-left because `Space h` opens Oil, so the return key is `Ctrl-h`.
+  `Space e` again closes the sidebar.
