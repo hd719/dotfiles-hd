@@ -835,3 +835,21 @@ requested (Curriculum 5.3), ahead of the main 3.5 checkpoint.
 - Main checkpoint unchanged at 3.5 (undo, redo, repeat); 5.3 was an explicit
   detour Hamel chose. Lesson 5 otherwise remains open (next: `gh` hover in
   5.2, `grr` references in 5.4).
+
+### Bufferline Added (Zed-style tab strip)
+
+- Hamel asked how to get the VSCode/Zed tab strip. Mental model taught:
+  Zed/VSCode file tabs map to Neovim **buffers** (already navigable with `H`,
+  `L`, and `Space b`). Neovim's own `:tab` pages are whole window layouts, not
+  per-file tabs, so they are the wrong tool for this.
+- The config had no tab bar (no bufferline/tabline; `showtabline` was default).
+- Added `akinsho/bufferline.nvim` in
+  `config/nvim/lua/plugins/bufferline.lua`. It renders open buffers as a visual
+  tab strip, reuses the existing `mini.icons` through
+  `mock_nvim_web_devicons()` (no second icon plugin), shows `nvim_lsp`
+  diagnostics per tab, and sets `showtabline = 2` so the bar is always visible.
+- `H` and `L` (`bnext`/`bprevious`) already move along the strip in buffer
+  order, so no remap was needed. `Space d` closes a buffer and removes its tab.
+- **Optional Curriculum 7.D5 complete:** Hamel restarted Neovim, saw the tab
+  strip of open buffers appear across the top, and confirmed it looks good with
+  the transparent Nord theme. `H`/`L` move along the strip.

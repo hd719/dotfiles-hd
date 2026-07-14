@@ -217,6 +217,8 @@ unexplained magic.
 - [ ] **7.D2** Learn marks for durable local and cross-file positions.
 - [ ] **7.D3** Compare Neovim tab pages with Zed-style file tabs.
 - [ ] **7.D4** Save and restore a multi-window session.
+- [x] **7.D5** Add a bufferline (`bufferline.nvim`) that shows open buffers as a
+  Zed-style tab strip, and move along it with `H` and `L`. — Session 008
 
 ## Lesson 8 — Terminal and Git Workflow
 
