@@ -1061,3 +1061,5 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Trade-off: an intentional Normal-mode edit (e.g. `dd`) now needs a manual
   `Space w`. Verified on a scratch file: an `x` edit leaves `save_on_esc` unset
   (guard skips), while `iHELLO<Esc>` sets it (guard saves).
+- Added a "Saved <file>" toast (via the Snacks notifier) when the Escape
+  auto-save fires, so the automatic write is visible instead of silent.

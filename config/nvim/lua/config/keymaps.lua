@@ -36,6 +36,7 @@ map("n", "<Esc>", function()
     and name ~= ""
   then
     vim.cmd.update()
+    vim.notify("Saved " .. vim.fn.fnamemodify(name, ":t"), vim.log.levels.INFO)
   end
 end, { desc = "Save a file edited in Insert mode" })
 
