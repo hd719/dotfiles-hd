@@ -29,6 +29,7 @@ background-opacity-cells = true
 background-blur = 30
 
 font-family = Maple Mono NF
+font-style = SemiBold
 font-size = 13.5
 
 window-decoration = true
