@@ -130,3 +130,37 @@ hd_focus_attach() {
 
   exec herdr
 }
+
+# Free a TCP port by killing its LISTEN process, unless that process is
+# Docker-owned (so containers and their published ports are never touched).
+# Honors HD_DRY_RUN=1 (report only, no kill).
+# Usage: hd_free_port <port>
+hd_free_port() {
+  local port="$1"
+
+  local pids
+  pids="$(lsof -ti tcp:"$port" -sTCP:LISTEN 2>/dev/null || true)"
+  if [ -z "$pids" ]; then
+    echo "  :$port already free"
+    return 0
+  fi
+
+  local pid cmd
+  for pid in $pids; do
+    cmd="$(ps -p "$pid" -o comm= 2>/dev/null | xargs || true)"
+    case "$cmd" in
+      *docker*|*Docker*|*com.docker*|*vpnkit*|*colima*)
+        echo "  :$port skipped (docker-owned: ${cmd:-pid $pid})"
+        ;;
+      *)
+        if [ -n "${HD_DRY_RUN:-}" ]; then
+          echo "  :$port would kill ${cmd:-pid} (pid $pid)"
+        elif kill -9 "$pid" 2>/dev/null; then
+          echo "  :$port freed (killed ${cmd:-pid}, pid $pid)"
+        else
+          echo "  :$port kill failed (pid $pid)"
+        fi
+        ;;
+    esac
+  done
+}

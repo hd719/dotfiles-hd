@@ -262,6 +262,10 @@ alias hd-parg-arc="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/pargasite/
 alias hd-parg-calc="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/pargasite/hd-calc.sh"
 alias hd-parg="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/pargasite/hd-pargasite.sh"
 
+# [Herdr Control Aliases]
+# Stop Herdr + free dev-server ports, but leave Docker containers running.
+alias hd-stop="~/Developer/dotfiles-hd/setup/mac-resilience/herdr/hd-stop.sh"
+
 # [Pull all repos on dev branch]
 gda() {
   startdir=$(pwd)
