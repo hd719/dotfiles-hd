@@ -67,6 +67,18 @@ have() {
   command -v "$1" >/dev/null 2>&1
 }
 
+# The private global-directory layout used for pinned language servers is
+# supported by pnpm 11. Execute the command so a stale or broken shim does not
+# pass a presence-only check.
+pnpm_is_supported() {
+  local version major
+
+  have pnpm || return 1
+  version="$(pnpm --version 2>/dev/null || true)"
+  major="${version%%.*}"
+  [[ "$major" =~ ^[0-9]+$ ]] && ((10#$major >= 11))
+}
+
 # Record the active Node. If it is Homebrew's public link, inspect its Cellar
 # target to remember which formula owns it, such as `node` or `node@22`.
 capture_host_node() {
@@ -208,6 +220,33 @@ ensure_brew_command() {
   fi
 }
 
+# Personal machines receive pnpm from mise; the Resilience Mac receives it from
+# its scoped Brewfile. Homebrew is only a fallback for another Mac host.
+ensure_pnpm() {
+  if pnpm_is_supported; then
+    echo "already available: pnpm $(pnpm --version) ($(command -v pnpm))"
+    return
+  fi
+
+  if have pnpm; then
+    echo "pnpm exists but is broken or older than version 11: $(command -v pnpm)" >&2
+    return 1
+  fi
+
+  if ! have brew; then
+    echo "host-managed prerequisite missing: pnpm 11+" >&2
+    return 1
+  fi
+
+  echo "installing pnpm"
+  brew install pnpm
+  hash -r
+  pnpm_is_supported || {
+    echo "Homebrew installed pnpm, but version 11+ is not usable" >&2
+    return 1
+  }
+}
+
 # Presence alone is insufficient for Go 1.26 development. Keep a current gopls
 # from any package manager, upgrade an active Homebrew copy, and refuse to
 # replace a stale externally managed command behind its owner's back.
@@ -293,37 +332,92 @@ ensure_vscode_language_servers() {
   fi
 }
 
+# A marker and launcher can outlive a deleted pnpm package. Verify pnpm's exact
+# package graph and payload path before treating the private install as a no-op.
+graphql_lsp_payload_is_healthy() {
+  local prefix="$1"
+  local package_name="$2"
+  local wanted_version="$3"
+  local global_dir="$prefix/global"
+  local bin_dir="$prefix/bin"
+  local listing
+
+  [[ -x "$bin_dir/graphql-lsp" ]] || return 1
+  pnpm_is_supported || return 1
+  have node || return 1
+
+  listing="$(
+    PNPM_HOME="$prefix" PATH="$bin_dir:$PATH" \
+      pnpm list --global --depth=0 \
+        --global-dir "$global_dir" \
+        --json 2>/dev/null
+  )" || return 1
+
+  GRAPHQL_LSP_PACKAGE="$package_name" \
+    GRAPHQL_LSP_VERSION="$wanted_version" \
+    node -e '
+      const fs = require("fs");
+      const roots = JSON.parse(fs.readFileSync(0, "utf8"));
+      const dependencies = roots[0]?.dependencies ?? {};
+      const names = Object.keys(dependencies);
+      const dependency = dependencies[process.env.GRAPHQL_LSP_PACKAGE];
+
+      if (
+        names.length !== 1
+        || !dependency
+        || dependency.version !== process.env.GRAPHQL_LSP_VERSION
+        || !fs.existsSync(dependency.path)
+      ) {
+        process.exit(1);
+      }
+    ' <<<"$listing"
+}
+
 # Prefer any existing command. Otherwise install or reuse the exact version in
-# a private prefix instead of changing the caller's global npm packages.
+# a private pnpm prefix instead of changing the caller's normal global packages.
 ensure_graphql_lsp() {
   local prefix="$HOME/.local/graphql-lsp"
-  local package_json="$prefix/lib/node_modules/graphql-language-service-cli/package.json"
+  local global_dir="$prefix/global"
+  local bin_dir="$prefix/bin"
+  local store_dir="$prefix/store"
+  local manifest="$prefix/.dotfiles-pnpm-package"
+  local package_name="graphql-language-service-cli"
   local wanted_version="3.5.0"
-  local installed_version=""
+  local wanted_spec="$package_name@$wanted_version"
 
   if have graphql-lsp; then
     echo "already available: graphql-lsp ($(command -v graphql-lsp))"
     return
   fi
 
-  if have node && [[ -f "$package_json" ]]; then
-    installed_version="$(node -p "require('$package_json').version" 2>/dev/null || true)"
-  fi
-
-  if [[ "$installed_version" == "$wanted_version" && -x "$prefix/bin/graphql-lsp" ]]; then
-    echo "already available: graphql-lsp $wanted_version ($prefix/bin/graphql-lsp)"
+  if [[ -f "$manifest" && "$(<"$manifest")" == "$wanted_spec" ]] \
+    && graphql_lsp_payload_is_healthy "$prefix" "$package_name" "$wanted_version"; then
+    echo "already available: graphql-lsp $wanted_version ($bin_dir/graphql-lsp)"
     return
   fi
 
-  if ! have npm; then
-    echo "cannot install graphql-lsp: npm is not available" >&2
+  if ! pnpm_is_supported; then
+    echo "cannot install graphql-lsp: pnpm 11+ is not available" >&2
     return
   fi
 
-  echo "installing graphql-language-service-cli@$wanted_version"
-  npm install -g \
-    --prefix "$prefix" \
-    "graphql-language-service-cli@$wanted_version"
+  echo "installing $wanted_spec with pnpm"
+  mkdir -p "$global_dir" "$bin_dir" "$store_dir"
+  rm -f "$manifest"
+  PNPM_HOME="$prefix" PATH="$bin_dir:$PATH" \
+    pnpm add --global \
+      --global-dir "$global_dir" \
+      --global-bin-dir "$bin_dir" \
+      --store-dir "$store_dir" \
+      --save-exact \
+      "$wanted_spec"
+
+  if ! graphql_lsp_payload_is_healthy "$prefix" "$package_name" "$wanted_version"; then
+    echo "pnpm did not provide the complete pinned graphql-lsp package" >&2
+    return 1
+  fi
+
+  printf '%s\n' "$wanted_spec" >"$manifest"
 }
 
 # Compare uv's recorded packages and extensions before reinstalling them. Ruff
@@ -394,6 +488,7 @@ ensure_brew_command curl curl
 # Full includes core and adds the configured language servers and formatters.
 if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
   ensure_brew_command uv uv
+  ensure_pnpm
   # Prepare Brew's private Node only if at least one Node-backed Brew formula
   # is actually missing.
   if have brew \
@@ -422,7 +517,7 @@ if [[ "$PROFILE" == "desktop" ]]; then
 fi
 
 # Finish the Homebrew phase by restoring Node, then disarm its emergency EXIT
-# cleanup before npm- and uv-managed tools run in the restored environment.
+# cleanup before pnpm- and uv-managed tools run in the restored environment.
 restore_host_node
 NODE_RESTORE_PENDING=0
 trap - EXIT

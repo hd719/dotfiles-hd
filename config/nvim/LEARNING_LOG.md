@@ -1228,3 +1228,25 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   real machine. The Escape-save suite now covers eight safety scenarios; the
   earlier Session 009 entry described the five cases present at that time.
 - No curriculum checkbox changed. The next teaching checkpoint remains 3.5.
+
+## 2026-07-15 — Session 012: pnpm-Only Neovim Tooling Correction
+
+- Hamel caught an incorrect setup comment claiming Neovim needed npm. The
+  implementation also used npm for pinned Node-based language servers, so this
+  was a real configuration mismatch rather than only stale wording.
+- Personal macOS and Ubuntu now share a pinned pnpm through mise. The Ubuntu
+  adapter and shared `graphql-lsp` fallback install their exact packages through
+  private pnpm directories; the dependency doctor checks pnpm instead of npm.
+- Removed the old Ubuntu npm-repair path. Node may contain its bundled npm and
+  npx files, but the portable Neovim setup neither invokes nor deletes them.
+  pnpm is its only JavaScript package manager.
+- Added absolute wrappers for pnpm-installed language servers, verified the
+  pinned package versions and payload paths, and covered damaged installs with
+  repair and no-op tests.
+- Ubuntu now runs from the active checkout, mise installs from its controlled
+  config directory, and the pinned mise `uv` is no longer overwritten by a
+  floating installer.
+- The workstation setup no longer appends through its linked `~/.zshrc`; the
+  tracked file owns rbenv and Zsh plugin initialization without checkout edits.
+- Updated `AGENTS.md` so future agents preserve this ownership rule across
+  machines. No curriculum checkbox changed; the next checkpoint remains 3.5.

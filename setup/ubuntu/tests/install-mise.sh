@@ -109,12 +109,13 @@ expect_no_event() {
 
 expect_mise_lifecycle() {
   local label="$1"
+  local target="$FAKE_HOME/.config/mise"
   local bootstrap_line go_line install_line reshim_line
 
   bootstrap_line="$(grep -nEm1 '^bootstrap personal$' "$EVENT_LOG" | cut -d: -f1 || true)"
-  go_line="$(grep -nEm1 '^mise install --yes go$' "$EVENT_LOG" | cut -d: -f1 || true)"
-  install_line="$(grep -nEm1 '^mise install --yes$' "$EVENT_LOG" | cut -d: -f1 || true)"
-  reshim_line="$(grep -nEm1 '^mise reshim$' "$EVENT_LOG" | cut -d: -f1 || true)"
+  go_line="$(grep -nF -m1 -x -- "mise -C $target install --yes go" "$EVENT_LOG" | cut -d: -f1 || true)"
+  install_line="$(grep -nF -m1 -x -- "mise -C $target install --yes" "$EVENT_LOG" | cut -d: -f1 || true)"
+  reshim_line="$(grep -nF -m1 -x -- "mise -C $target reshim" "$EVENT_LOG" | cut -d: -f1 || true)"
 
   if [[ -z "$bootstrap_line" || -z "$go_line" || -z "$install_line" || -z "$reshim_line" ]] \
     || ! ((bootstrap_line < go_line && go_line < install_line && install_line < reshim_line)); then

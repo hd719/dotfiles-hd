@@ -6,11 +6,6 @@ set -euo pipefail
 
 export PATH="$HOME/.local/bin:$PATH"
 
-if [[ -d "$HOME/.local/share/pnpm" ]]; then
-    export PNPM_HOME="$HOME/.local/share/pnpm"
-    export PATH="$PNPM_HOME:$PATH"
-fi
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -64,34 +59,19 @@ update_flatpak() {
     success "Flatpak packages updated"
 }
 
-update_node_packages() {
-    if has pnpm; then
-        section "📦 Updating pnpm global packages..."
-        pnpm self-update || pnpm add -g pnpm@latest || warn "pnpm self-update skipped or failed"
-        pnpm update -g || warn "pnpm global update skipped or failed"
-        success "pnpm checked"
-    fi
-}
-
-update_uv() {
-    has uv || return 0
-
-    section "📦 Updating uv..."
-    uv self update || curl -LsSf https://astral.sh/uv/install.sh | sh
-    success "uv updated"
-}
-
 update_mise() {
+    local config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+
     has mise || return 0
 
     section "📦 Updating mise toolchain..."
     # CLI upgrades belong to the Ubuntu bootstrap/package owner. This update
     # path converges only the shared runtime and language-server pins.
-    mise install --yes
-    mise reshim
-    eval "$(mise activate bash)"
-    # Keep npm and npx. Neovim uses npm to install some language servers.
-    mise outdated || true
+    mise -C "$config_dir" install --yes
+    mise -C "$config_dir" reshim
+    # Node may ship npm and npx, but this Ubuntu setup path uses pinned pnpm.
+    # Leave Node's bundled files untouched instead of damaging its installation.
+    mise -C "$config_dir" outdated || true
     success "mise toolchain updated"
 }
 
@@ -141,8 +121,6 @@ main() {
     update_snap
     update_flatpak
     update_mise
-    update_uv
-    update_node_packages
     update_rust
     check_firmware
     print_summary

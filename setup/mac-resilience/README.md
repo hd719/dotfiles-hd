@@ -64,10 +64,10 @@ brew bundle install --no-upgrade \
   --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
 ```
 
-The shared Neovim bootstrap in step 4 owns the pinned `uv` and npm tools plus
-the Node-backed language servers. This keeps the directly managed versions and
-install locations consistent across machines without letting the Brewfile
-bypass the host-Node safety check.
+The shared Neovim bootstrap in step 4 owns the pinned tools installed through
+`uv` and pnpm plus the Node-backed language servers. This keeps the directly
+managed versions and install locations consistent across machines without
+letting the Brewfile bypass the host-Node safety check.
 
 `graphql-lsp` gives syntax and single-file features immediately; schema-aware
 completion, validation, and go-to-definition require a `graphql-config` file

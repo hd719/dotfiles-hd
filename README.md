@@ -16,7 +16,7 @@ replace work-specific shell, runtime, credential, or certificate state.
 
 ## Shared Personal Toolchain
 
-Personal macOS and Ubuntu share the exact Bun, Go, Node, Python, and `gopls`
+Personal macOS and Ubuntu share the exact Bun, Go, Node, pnpm, Python, and `gopls`
 pins in `config/mise/config.toml`. Each OS owns the mise CLI, while mise owns
 those development tools:
 
@@ -30,7 +30,8 @@ brew install mise
 ```
 
 Both paths create the same whole-directory link at `~/.config/mise`, back up
-conflicts, install every configured runtime, and keep npm/npx intact. See
+conflicts, and install the same pinned runtimes and pnpm. Node's bundled npm/npx
+files are left untouched but are not used by these setup paths. See
 [`setup/mise/README.md`](setup/mise/README.md). Do not apply this personal
 toolchain to the Resilience work Mac.
 
@@ -57,15 +58,19 @@ the focused Ubuntu adapter before running the shared bootstrap:
 ```bash
 PROFILE=full
 export PATH="$HOME/.local/bin:$PATH"
-./setup/ubuntu/install-mise.sh
-mise exec -- ./setup/ubuntu/install-neovim-dependencies.sh "$PROFILE"
-./setup/nvim/link-config.sh
-mise exec -- ./setup/nvim/bootstrap.sh "$PROFILE"
+DOTFILES_DIR="$(git rev-parse --show-toplevel)"
+MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+"$DOTFILES_DIR/setup/ubuntu/install-mise.sh"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/ubuntu/install-neovim-dependencies.sh" "$PROFILE"
+"$DOTFILES_DIR/setup/nvim/link-config.sh"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/nvim/bootstrap.sh" "$PROFILE"
 ```
 
 The mise step gives a personal development machine the same runtimes as macOS.
-`mise exec --` exposes those runtimes immediately without asking a child script
-to change its parent shell. Skip the mise step on a generic `core` server that
+Controlled `mise exec` exposes those runtimes immediately without inheriting a
+project-local config. Skip the mise step on a generic `core` server that
 intentionally uses system-managed runtimes. The export keeps newly installed
 user-local commands visible to the current shell.
 

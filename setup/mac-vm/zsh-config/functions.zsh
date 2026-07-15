@@ -13,15 +13,22 @@ _activate_mise() {
   eval "$("$mise_bin" activate zsh)"
 }
 
+_mise_personal_config_dir() {
+  print -r -- "${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+}
+
 refresh-global() {
   # Resolve mise from PATH so this shared function works on Homebrew macOS and
-  # APT-backed Ubuntu. npm and npx remain part of mise's Node installation.
+  # APT-backed Ubuntu. The shared config pins pnpm for package-manager work.
   if ! command -v mise >/dev/null 2>&1; then
     echo "mise not found. Install it before refreshing the shared toolchain."
     return 1
   fi
 
-  mise install --yes && mise reshim && hash -r
+  local config_dir="$(_mise_personal_config_dir)"
+  mise -C "$config_dir" install --yes \
+    && mise -C "$config_dir" reshim \
+    && hash -r
 }
 
 reload() {
@@ -174,11 +181,12 @@ goodMorning() {
 
   echo "Checking mise toolchain..."
   if command -v mise &> /dev/null; then
-    mise install --yes
-    mise reshim
+    local mise_config_dir="$(_mise_personal_config_dir)"
+    mise -C "$mise_config_dir" install --yes
+    mise -C "$mise_config_dir" reshim
     echo ""
     echo "Active mise runtimes:"
-    mise ls --current
+    mise -C "$mise_config_dir" ls --current
   else
     echo "mise not found, skipping."
   fi

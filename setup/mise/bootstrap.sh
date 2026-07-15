@@ -74,8 +74,10 @@ fi
 # Global mise config is implicitly trusted. gopls uses mise's Go backend, so
 # install the pinned Go runtime first on a completely fresh machine. The second
 # command converges every configured tool; reshim refreshes their commands.
-mise install --yes go
-mise install --yes
-mise reshim
+# `-C` prevents a project-local mise.toml in the caller's current directory from
+# overriding this personal machine config during setup.
+mise -C "$TARGET" install --yes go
+mise -C "$TARGET" install --yes
+mise -C "$TARGET" reshim
 
 echo "mise personal toolchain is ready."

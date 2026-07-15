@@ -169,6 +169,23 @@ check_node() {
   fi
 }
 
+check_pnpm() {
+  local version major
+
+  if ! command -v pnpm >/dev/null 2>&1; then
+    fail "pnpm 11+"
+    return
+  fi
+
+  version="$(pnpm --version 2>/dev/null || true)"
+  major="${version%%.*}"
+  if [[ "$major" =~ ^[0-9]+$ ]] && ((10#$major >= 11)); then
+    ok "pnpm $version ($(command -v pnpm))"
+  else
+    fail "pnpm 11+ (found: ${version:-broken command})"
+  fi
+}
+
 # Go 1.26 development uses the current gopls line. An older distro binary can
 # exist on PATH yet still be too stale for the configured language features.
 check_gopls() {
@@ -197,14 +214,29 @@ check_gopls() {
 # even when `graphql-lsp` is not globally available on PATH.
 check_graphql_lsp() {
   local fixed="$HOME/.local/graphql-lsp/bin/graphql-lsp"
+  local resolved version
 
   if command -v graphql-lsp >/dev/null 2>&1; then
-    ok "GraphQL language server ($(command -v graphql-lsp))"
+    resolved="$(command -v graphql-lsp)"
   elif [[ -x "$fixed" ]]; then
-    ok "GraphQL language server ($fixed)"
+    resolved="$fixed"
   else
     fail "GraphQL language server (graphql-lsp)"
+    return
   fi
+
+  if ! version="$("$resolved" --version 2>/dev/null)" || [[ -z "$version" ]]; then
+    fail "GraphQL language server (broken command: $resolved)"
+    return
+  fi
+
+  version="${version%%$'\n'*}"
+  if [[ "$resolved" == "$fixed" && "$version" != "3.5.0" ]]; then
+    fail "GraphQL language server 3.5.0 (found: $version)"
+    return
+  fi
+
+  ok "GraphQL language server $version ($resolved)"
 }
 
 # Explain when a pinned uv tool exists but PATH misses or shadows it. Never
@@ -303,7 +335,7 @@ check_command "gzip" gzip
 # Full includes core and adds language-server and formatter checks.
 if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
   check_node
-  check_command "npm" npm
+  check_pnpm
   check_command "Bash language server" bash-language-server
   check_gopls
   check_command "Go formatter" gofmt

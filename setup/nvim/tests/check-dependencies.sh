@@ -66,14 +66,16 @@ make_full_path() {
   make_core_path "$dir" "0.26.10" curl
 
   for command_name in \
-    npm bash-language-server gofmt lua-language-server stylua vtsls \
+    bash-language-server gofmt lua-language-server stylua vtsls \
     vscode-eslint-language-server vscode-json-language-server \
-    vscode-css-language-server vscode-html-language-server graphql-lsp
+    vscode-css-language-server vscode-html-language-server
   do
     write_stub "$dir" "$command_name" 'exit 0'
   done
+  write_stub "$dir" graphql-lsp 'echo "3.5.0"'
 
   write_stub "$dir" node 'echo "v22.22.0"'
+  write_stub "$dir" pnpm 'echo "11.2.2"'
   write_stub "$dir" gopls 'echo "golang.org/x/tools/gopls v0.23.0"'
 
   write_stub "$dir" uv \
@@ -223,7 +225,34 @@ expect_failure_containing \
   "Node below 18 is rejected" \
   "Node.js 18+"
 
-# Scenario 8: older binaries earlier on PATH must fail with actionable ordering
+# Scenario 8: command presence is insufficient for pnpm. Reject both an older
+# major and a shim that cannot execute.
+old_pnpm_path="$TMP_ROOT/old-pnpm"
+make_full_path "$old_pnpm_path"
+write_stub "$old_pnpm_path" pnpm 'echo "10.18.3"'
+run_doctor "$old_pnpm_path:$UV_BIN" full
+expect_failure_containing "pnpm below 11 is rejected" "pnpm 11+"
+
+broken_pnpm_path="$TMP_ROOT/broken-pnpm"
+make_full_path "$broken_pnpm_path"
+write_stub "$broken_pnpm_path" pnpm 'exit 42'
+run_doctor "$broken_pnpm_path:$UV_BIN" full
+expect_failure_containing "a broken pnpm shim is rejected" "broken command"
+
+# Scenario 9: an executable GraphQL launcher is not healthy when its private
+# pnpm payload is gone and the command can no longer report its version.
+broken_graphql_path="$TMP_ROOT/broken-graphql"
+make_full_path "$broken_graphql_path"
+rm -f "$broken_graphql_path/graphql-lsp"
+mkdir -p "$FAKE_HOME/.local/graphql-lsp/bin"
+write_stub "$FAKE_HOME/.local/graphql-lsp/bin" graphql-lsp 'exit 42'
+run_doctor "$broken_graphql_path:$UV_BIN" full
+expect_failure_containing \
+  "a broken private GraphQL launcher is rejected" \
+  "GraphQL language server (broken command"
+rm -rf "$FAKE_HOME/.local/graphql-lsp"
+
+# Scenario 10: older binaries earlier on PATH must fail with actionable ordering
 # guidance instead of being mistaken for the pinned uv tools.
 stale_shadow_path="$TMP_ROOT/stale-shadow"
 make_full_path "$stale_shadow_path"

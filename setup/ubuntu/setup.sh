@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
 
 # Manual Steps:
-# 1. Symlink .zshrc from dotfiles (Ubuntu)
-# 2. Copy over gitignore and gitconfig from dotfiles
-# 3. Setup tmux config
-# 4. Install Cursor AppImage
-# 5. Install a browser (Brave/Firefox)
+# 1. Copy over gitignore and gitconfig from dotfiles
+# 2. Setup tmux config
+# 3. Install Cursor AppImage
+# 4. Install a browser (Brave/Firefox)
 
 # execute chmod +x ~/setup-ubuntu.sh
 # ./setup-ubuntu.sh
 
 set -e
+
+# Resolve every subordinate script from this checkout. This matters when a QA
+# branch is run beside an older canonical clone in ~/Developer/dotfiles-hd.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
+MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
 
 # Disable interactive aliases that might prompt for confirmation
 unalias rm 2>/dev/null || true
@@ -25,7 +30,7 @@ YELLOW='\033[1;33m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-TOTAL_STEPS=14
+TOTAL_STEPS=13
 CURRENT_STEP=0
 step() {
     CURRENT_STEP=$((CURRENT_STEP + 1))
@@ -255,18 +260,9 @@ install_docker() {
 install_starship_zsh_config() {
     step "Configuring Zsh + Starship"
 
-    # Create .zshrc if it doesn't exist
-    touch ~/.zshrc
-
-    # Add starship initialization
-    if ! grep -q "starship init zsh" ~/.zshrc 2>/dev/null; then
-        echo 'eval "$(starship init zsh)"' >> ~/.zshrc
-    fi
-
-    # Add zoxide initialization
-    if ! grep -q "zoxide init" ~/.zshrc 2>/dev/null; then
-        echo 'eval "$(zoxide init zsh)"' >> ~/.zshrc
-    fi
+    # The linker backs up an existing ~/.zshrc and links this checkout's Ubuntu
+    # config. That file initializes Starship, zoxide, and mise on future shells.
+    DOTFILES_DIR="$DOTFILES_DIR" "$DOTFILES_DIR/setup/ubuntu/link-configs.sh"
 
     echo -e "${GREEN}✓ Zsh + Starship configured${NC}"
 }
@@ -275,13 +271,12 @@ install_mise_toolchain_and_pnpm() {
     step "Installing the shared mise toolchain + pnpm"
 
     # Fresh Ubuntu hosts get the mise CLI through APT. The shared bootstrap owns
-    # the config link plus the Bun, Go, Node, Python, and gopls pins inside it.
-    "$HOME/Developer/dotfiles-hd/setup/ubuntu/install-mise.sh"
-    eval "$(mise activate bash)"
+    # the config link plus the Bun, Go, Node, pnpm, Python, and gopls pins.
+    DOTFILES_DIR="$DOTFILES_DIR" "$DOTFILES_DIR/setup/ubuntu/install-mise.sh"
 
-    if ! command -v pnpm &>/dev/null; then
-        curl -fsSL https://get.pnpm.io/install.sh | sh -
-    fi
+    # Do not run pnpm's floating installer here. The shared mise config keeps
+    # the same exact pnpm version on personal macOS and Ubuntu machines.
+    mise -C "$MISE_CONFIG_DIR" exec -- pnpm --version >/dev/null
 
     echo -e "${GREEN}✓ Shared mise toolchain and pnpm installed${NC}"
 }
@@ -289,14 +284,15 @@ install_mise_toolchain_and_pnpm() {
 install_neovim_configuration() {
     step "Installing the shared Neovim desktop profile"
 
-    local dotfiles_dir="$HOME/Developer/dotfiles-hd"
     export PATH="$HOME/.local/bin:$PATH"
 
-    # `mise exec --` exposes the freshly installed Node, Go, and gopls pins to
-    # child setup commands without pretending this script can alter a parent shell.
-    mise exec -- "$dotfiles_dir/setup/ubuntu/install-neovim-dependencies.sh" desktop
-    "$dotfiles_dir/setup/nvim/link-config.sh"
-    mise exec -- "$dotfiles_dir/setup/nvim/bootstrap.sh" desktop
+    # Controlled `mise exec` exposes the freshly installed pins without reading
+    # a project-local mise.toml from the directory that launched this script.
+    mise -C "$MISE_CONFIG_DIR" exec -- \
+        "$DOTFILES_DIR/setup/ubuntu/install-neovim-dependencies.sh" desktop
+    "$DOTFILES_DIR/setup/nvim/link-config.sh"
+    mise -C "$MISE_CONFIG_DIR" exec -- \
+        "$DOTFILES_DIR/setup/nvim/bootstrap.sh" desktop
 
     echo -e "${GREEN}✓ Shared Neovim desktop profile installed${NC}"
 }
@@ -311,17 +307,8 @@ install_rbenv() {
         # Clone rbenv
         git clone https://github.com/rbenv/rbenv.git ~/.rbenv
 
-        # Add rbenv to PATH and initialize in .zshrc if not already present
-        if ! grep -q 'rbenv init' ~/.zshrc; then
-            echo '' >> ~/.zshrc
-            echo '# Initialize rbenv if it exists' >> ~/.zshrc
-            echo 'if [ -d "$HOME/.rbenv" ]; then' >> ~/.zshrc
-            echo '  export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.zshrc
-            echo '  eval "$(rbenv init - zsh)"' >> ~/.zshrc
-            echo 'fi' >> ~/.zshrc
-        fi
-
-        # Make rbenv available in current session
+        # The tracked Ubuntu .zshrc owns future-shell initialization. Activate
+        # the new clone only in this setup process; never write through its link.
         export PATH="$HOME/.rbenv/bin:$PATH"
         eval "$(~/.rbenv/bin/rbenv init - zsh)"
 
@@ -388,15 +375,6 @@ install_ruby_lsp_and_ruby_build() {
     fi
 }
 
-install_uv() {
-    step "Installing uv for Python"
-
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    export PATH="$HOME/.local/bin:$PATH"
-
-    echo -e "${GREEN}✓ uv installed${NC}"
-}
-
 install_and_configure_redis() {
     step "Installing and configuring Redis"
 
@@ -425,40 +403,35 @@ install_zsh_plugins() {
     # Install zsh-autosuggestions (gray suggestions as you type)
     if [ ! -d "$PLUGIN_DIR/zsh-autosuggestions" ]; then
         git clone https://github.com/zsh-users/zsh-autosuggestions "$PLUGIN_DIR/zsh-autosuggestions"
-        echo "source $PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ~/.zshrc
     fi
 
     # Install zsh-syntax-highlighting (green/red command highlighting)
     if [ ! -d "$PLUGIN_DIR/zsh-syntax-highlighting" ]; then
         git clone https://github.com/zsh-users/zsh-syntax-highlighting "$PLUGIN_DIR/zsh-syntax-highlighting"
-        echo "source $PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ~/.zshrc
     fi
 
     # Install zsh-you-should-use (suggests aliases)
     if [ ! -d "$PLUGIN_DIR/zsh-you-should-use" ]; then
         git clone https://github.com/MichaelAquilina/zsh-you-should-use "$PLUGIN_DIR/zsh-you-should-use"
-        echo "source $PLUGIN_DIR/zsh-you-should-use/you-should-use.plugin.zsh" >> ~/.zshrc
     fi
 
     echo -e "${GREEN}✓ Zsh plugins installed${NC}"
 }
 
 clone_dotfiles() {
-    step "Cloning dotfiles"
+    step "Verifying dotfiles checkout"
 
-    mkdir -p ~/Developer
-
-    if [ ! -d ~/Developer/dotfiles-hd ]; then
-        git clone https://github.com/hd719/dotfiles-hd.git ~/Developer/dotfiles-hd
-        echo -e "${GREEN}✓ Dotfiles cloned${NC}"
-    else
-        echo -e "${YELLOW}⚠️ dotfiles-hd already exists${NC}"
+    if ! git -C "$DOTFILES_DIR" rev-parse --show-toplevel >/dev/null 2>&1; then
+        echo -e "${RED}❌ This setup must run from a dotfiles-hd checkout: $DOTFILES_DIR${NC}"
+        exit 1
     fi
+
+    echo -e "${GREEN}✓ Using dotfiles checkout: $DOTFILES_DIR${NC}"
 }
 
 link_dotfiles_configs() {
     step "Linking config files from dotfiles"
-    "$HOME/Developer/dotfiles-hd/setup/ubuntu/link-configs.sh"
+    DOTFILES_DIR="$DOTFILES_DIR" "$DOTFILES_DIR/setup/ubuntu/link-configs.sh"
 }
 
 install_vscode() {
@@ -532,7 +505,6 @@ install_mise_toolchain_and_pnpm
 install_neovim_configuration
 install_rbenv
 install_ruby_lsp_and_ruby_build
-install_uv
 install_and_configure_redis
 install_zsh_plugins
 link_dotfiles_configs

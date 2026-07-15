@@ -1,5 +1,9 @@
 #!/usr/bin/env zsh
 
+# LEGACY: this pre-mise VM bootstrap is kept for reference only. New personal
+# Macs use Homebrew mise plus setup/mise/bootstrap.sh personal; do not run this
+# script to create a current machine.
+
 # Exit on error
 set -e
 

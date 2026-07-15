@@ -20,9 +20,14 @@ for app in btop fastfetch bat wtf ghostty; do
   mkdir -p "$TEST_REPO/config/$app"
   printf '%s\n' "$app-shared" >"$TEST_REPO/config/$app/config"
 done
-mkdir -p "$TEST_REPO/config/tmux/scripts" "$CONFIG_HOME/tmux/plugins/tpm"
+mkdir -p \
+  "$TEST_REPO/config/tmux/scripts" \
+  "$TEST_REPO/setup/ubuntu" \
+  "$CONFIG_HOME/tmux/plugins/tpm"
 printf '%s\n' 'shared-tmux' >"$TEST_REPO/config/tmux/tmux.conf"
 printf '%s\n' 'shared-script' >"$TEST_REPO/config/tmux/scripts/status.sh"
+printf '%s\n' 'shared-zshrc' >"$TEST_REPO/setup/ubuntu/.zshrc"
+printf '%s\n' 'local-zshrc' >"$FAKE_HOME/.zshrc"
 printf '%s\n' 'plugin-state' >"$CONFIG_HOME/tmux/plugins/tpm/sentinel"
 printf '%s\n' 'new-local-tmux' >"$CONFIG_HOME/tmux/tmux.conf"
 mkdir -p "$CONFIG_HOME/tmux/tmux.conf.backup-20260715-151500"
@@ -78,11 +83,17 @@ expect "older same-second tmux backup remains intact" \
   test "$(<"$CONFIG_HOME/tmux/tmux.conf.backup-20260715-151500/value")" = "older-tmux-backup"
 expect "new tmux conflict receives a numeric sibling" \
   test "$(<"$CONFIG_HOME/tmux/tmux.conf.backup-20260715-151500-1")" = "new-local-tmux"
+expect "Ubuntu zshrc is linked from this checkout" \
+  test "$(readlink "$FAKE_HOME/.zshrc")" = "$TEST_REPO/setup/ubuntu/.zshrc"
+expect "existing zshrc is preserved in a sibling backup" \
+  test "$(<"$FAKE_HOME/.zshrc.backup-20260715-151500")" = "local-zshrc"
 
 # Matching links are no-ops and do not produce a second backup on rerun.
 run_linker
 expect "rerun creates no second tmux backup" \
   test ! -e "$CONFIG_HOME/tmux/tmux.conf.backup-20260715-151500-2"
+expect "rerun creates no second zshrc backup" \
+  test ! -e "$FAKE_HOME/.zshrc.backup-20260715-151500-1"
 
 # Migrate the unsafe whole-directory tmux link created by older setup versions.
 # Any plugins stored through that link are copied into the new local directory.

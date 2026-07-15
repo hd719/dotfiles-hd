@@ -32,6 +32,7 @@ mkdir -p "$TEST_REPO/config/mise" "$FAKE_BIN" "$STATE_DIR"
 printf '%s\n' \
   '[tools]' \
   'node = "26.1.0"' \
+  'pnpm = "11.2.2"' \
   'go = "1.26.3"' \
   >"$TEST_REPO/config/mise/config.toml"
 
@@ -121,7 +122,8 @@ reset_machine() {
   mkdir -p "$FAKE_HOME" "$NODE_BIN"
   : >"$TRACE_LOG"
 
-  # These sentinels make the historical npm/npx deletion bug observable.
+  # Node bundles these files. pnpm is the configured package manager, but the
+  # bootstrap must still leave the host-managed Node installation byte-identical.
   printf '%s\n' 'npm-sentinel-26.1.0' >"$NODE_BIN/npm"
   printf '%s\n' 'npx-sentinel-26.1.0' >"$NODE_BIN/npx"
   chmod +x "$NODE_BIN/npm" "$NODE_BIN/npx"
@@ -178,6 +180,7 @@ expect "canonical config pins gopls" \
   grep -Fxq '"go:golang.org/x/tools/gopls" = "0.23.0"' "$CANONICAL_CONFIG"
 expect "canonical config pins Go" grep -Fxq 'go = "1.26.3"' "$CANONICAL_CONFIG"
 expect "canonical config pins Node" grep -Fxq 'node = "26.1.0"' "$CANONICAL_CONFIG"
+expect "canonical config pins pnpm" grep -Fxq 'pnpm = "11.2.2"' "$CANONICAL_CONFIG"
 expect "canonical config pins Python" grep -Fxq 'python = "3.14.5"' "$CANONICAL_CONFIG"
 
 gopls_line="$(grep -nFm1 '"go:golang.org/x/tools/gopls"' "$CANONICAL_CONFIG" | cut -d: -f1)"
@@ -222,9 +225,9 @@ expect "fresh link points at this checkout" \
 expect "config.toml is visible through the directory link" \
   cmp -s "$TARGET/config.toml" "$TEST_REPO/config/mise/config.toml"
 expect_trace "fresh setup installs Go before its gopls tool, then completes the lifecycle" \
-  "install --yes go" \
-  "install --yes" \
-  "reshim"
+  "-C $TARGET install --yes go" \
+  "-C $TARGET install --yes" \
+  "-C $TARGET reshim"
 expect_node_commands_preserved "fresh setup" "fresh"
 
 # Scenario 4: an existing directory is never deleted. It moves to one exact
@@ -255,9 +258,9 @@ expect "rerun keeps the original backup" test -d "$BACKUP"
 expect "rerun does not create a nested backup" \
   test ! -e "$BACKUP.backup-20260715-143015"
 expect_trace "rerun repeats only the safe mise lifecycle" \
-  "install --yes go" \
-  "install --yes" \
-  "reshim"
+  "-C $TARGET install --yes go" \
+  "-C $TARGET install --yes" \
+  "-C $TARGET reshim"
 expect_node_commands_preserved "idempotent rerun" "conflict"
 
 # Scenario 6: a backup from the same second must never become a directory that
@@ -292,9 +295,9 @@ expect "XDG link points at this checkout" \
 expect "XDG setup leaves the default destination untouched" \
   test "$(<"$FAKE_HOME/.config/mise/config.toml")" = "default-config-must-stay"
 expect_trace "XDG setup runs the same lifecycle" \
-  "install --yes go" \
-  "install --yes" \
-  "reshim"
+  "-C $TARGET install --yes go" \
+  "-C $TARGET install --yes" \
+  "-C $TARGET reshim"
 expect_node_commands_preserved "XDG setup" "xdg"
 
 if ((failures > 0)); then

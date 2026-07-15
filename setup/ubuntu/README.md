@@ -6,7 +6,9 @@ running the larger Ubuntu workstation setup.
 The larger `setup/ubuntu/setup.sh` uses this same sequence with the `desktop`
 profile after it installs the shared mise toolchain. Its final config step uses
 `setup/ubuntu/link-configs.sh`, which creates timestamped backups and keeps tmux
-plugins local while linking `tmux.conf` and shared status scripts separately.
+plugins local while linking `tmux.conf`, shared status scripts, and the Ubuntu
+login-shell config. Every subordinate command runs from the checkout that
+launched `setup.sh`, so a QA clone cannot silently delegate to an older clone.
 
 It supports Ubuntu 26.04 or newer. Ubuntu dependencies come from APT, not
 Homebrew or Snap. When Ubuntu's package is missing or too old, the installer
@@ -24,12 +26,13 @@ Profiles are cumulative. Choose one and use the same value for every command.
 
 `desktop` does not install Ghostty or Herdr.
 
-`full` and `desktop` require host-managed Node 18+ and gopls 0.23.0+. The
-Ubuntu adapter preserves Node and installs its pinned gopls when gopls is
-missing or stale.
+`full` and `desktop` require host-managed Node 18+, pnpm 11+, and gopls 0.23.0+.
+The Ubuntu adapter preserves Node and pnpm, and installs its pinned gopls when
+gopls is missing or stale.
 
 On Hamel's personal Ubuntu development machines, mise is that host manager.
-It uses the same Bun, Go, Node, Python, and `gopls` pins as the personal Mac.
+It uses the same Bun, Go, Node, pnpm, Python, and `gopls` pins as the personal
+Mac.
 Generic `core` servers may skip mise and keep their existing system tools.
 
 ## Protect Existing Work
@@ -58,11 +61,15 @@ configuration, and the bootstrap verifies the tools and restores locked plugins.
 cd /path/to/dotfiles-hd
 PROFILE=full
 export PATH="$HOME/.local/bin:$PATH"
+DOTFILES_DIR="$PWD"
+MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
 
-./setup/ubuntu/install-mise.sh
-mise exec -- ./setup/ubuntu/install-neovim-dependencies.sh "$PROFILE"
-./setup/nvim/link-config.sh
-mise exec -- ./setup/nvim/bootstrap.sh "$PROFILE"
+"$DOTFILES_DIR/setup/ubuntu/install-mise.sh"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/ubuntu/install-neovim-dependencies.sh" "$PROFILE"
+"$DOTFILES_DIR/setup/nvim/link-config.sh"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/nvim/bootstrap.sh" "$PROFILE"
 ```
 
 Keep that export in the current shell. A child installer cannot change its
@@ -71,10 +78,17 @@ user-local directory is still visible when you run the bootstrap.
 
 `install-mise.sh` uses Ubuntu's official APT repository when mise is missing,
 preserves an existing working command, then safely links the whole shared
-`config/mise` directory. The adapter preserves that working Node, npm, and Go
-toolchain. It does not delete npm or npx. Prettier remains project-local.
-`mise exec --` makes the installed runtimes available to the next command
-immediately; a child installer cannot modify its parent shell.
+`config/mise` directory. The adapter preserves that working Node, pnpm, and Go
+toolchain. Node may still include its bundled npm and npx files, but these
+portable Neovim setup paths neither invoke nor remove them. Prettier remains
+project-local.
+Controlled `mise exec` makes the installed runtimes available immediately
+without inheriting a project-local config; a child installer cannot modify its
+parent shell.
+
+The dependency adapter is also the sole owner of its pinned `uv` installation.
+The larger workstation setup and daily updater do not run `uv self update` or a
+floating installer over that version.
 
 ## Prove It Is Safe to Rerun
 
@@ -83,11 +97,16 @@ pinned tools should become no-ops.
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
-./setup/ubuntu/install-mise.sh
-mise exec -- ./setup/ubuntu/install-neovim-dependencies.sh "$PROFILE"
-mise exec -- ./setup/nvim/bootstrap.sh "$PROFILE"
-mise exec -- ./setup/nvim/check-dependencies.sh "$PROFILE"
-mise exec -- nvim --headless '+qa'
+DOTFILES_DIR="$(git rev-parse --show-toplevel)"
+MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+"$DOTFILES_DIR/setup/ubuntu/install-mise.sh"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/ubuntu/install-neovim-dependencies.sh" "$PROFILE"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/nvim/bootstrap.sh" "$PROFILE"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/nvim/check-dependencies.sh" "$PROFILE"
+mise -C "$MISE_CONFIG_DIR" exec -- nvim --headless '+qa'
 ```
 
 The second mise run should report the existing link and installed pins. If the
@@ -100,4 +119,5 @@ Offline Ubuntu regression checks:
 ./setup/ubuntu/tests/install-mise.sh
 ./setup/ubuntu/tests/install-neovim-dependencies.sh
 ./setup/ubuntu/tests/link-configs.sh
+./setup/ubuntu/tests/workstation-wiring.sh
 ```

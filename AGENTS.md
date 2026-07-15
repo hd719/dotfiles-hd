@@ -90,7 +90,7 @@ Prefer these scripts when they match the task.
 ## Personal Runtime Ownership
 
 - Personal macOS and Ubuntu share `config/mise/config.toml` and the same
-  Bun, Go, Node, Python, and `gopls` pins.
+  Bun, Go, Node, pnpm, Python, and `gopls` pins.
 - Link the whole `config/mise` directory with
   `setup/mise/bootstrap.sh personal`; never maintain an Ubuntu-only file link.
 - Homebrew owns the mise CLI on macOS. Fresh Ubuntu hosts install it from the
@@ -98,9 +98,13 @@ Prefer these scripts when they match the task.
   explicitly approves a migration. mise owns the configured development tools
   on both systems.
 - The shared bootstrap must run `mise install --yes` and `mise reshim`, remain
-  safe to rerun, and preserve npm and npx.
+  safe to rerun, and use the configured pnpm pin for JavaScript package work.
+  Do not invoke npm/npx or delete the copies bundled inside Node.
 - Do not make generic servers or the Resilience work Mac depend on this personal
   toolchain. Their existing runtime ownership rules still apply.
+- `setup/mac-vm/setup-vm.sh` predates this shared toolchain and is retained only
+  as legacy reference. Do not use it for a new personal Mac; use Homebrew mise
+  plus `setup/mise/bootstrap.sh personal`.
 
 ## Portable Neovim Dependencies
 
@@ -114,9 +118,10 @@ Prefer these scripts when they match the task.
 - On a personal Ubuntu `full` or `desktop` machine, run
   `setup/ubuntu/install-mise.sh` before that dependency adapter. A minimal
   generic `core` server may keep its system-managed runtimes instead.
-- In a same-shell scripted sequence, invoke the Ubuntu adapter and shared
-  Neovim bootstrap through `mise exec --`; a completed child script cannot
-  activate runtimes in its parent shell.
+- In a same-shell scripted sequence, set `MISE_CONFIG_DIR` to
+  `${XDG_CONFIG_HOME:-$HOME/.config}/mise`, then invoke the Ubuntu adapter and
+  shared Neovim bootstrap through `mise -C "$MISE_CONFIG_DIR" exec --`. This
+  avoids project-local overrides; a child script cannot activate its parent.
 - Before that Ubuntu sequence, export `PATH="$HOME/.local/bin:$PATH"` in the
   caller's shell. The adapter cannot update its parent shell, and the shared
   bootstrap must see the user-local commands it just installed.
@@ -132,9 +137,12 @@ Prefer these scripts when they match the task.
 - Keep Node host-managed. Homebrew-backed language servers may use an unlinked
   Homebrew Node dependency, but setup must preserve the Node command and version
   that the caller had before bootstrap.
-- Ubuntu setup must preserve working Node, npm, and Go commands. Never remove
-  npm or npx to make pnpm the only package manager; Neovim's full profile needs
-  npm for pinned language-server installation.
+- Require a working pnpm 11+ for `full` and `desktop`; validate its version
+  before using its isolated Neovim package directories.
+- Ubuntu setup must preserve working Node, pnpm, and Go commands. pnpm is the
+  only JavaScript package manager the portable Neovim setup invokes, including
+  for pinned language servers. Never delete npm or npx from Node's installation;
+  leaving bundled files intact is different from using them.
 - Keep `core`, `full`, and `desktop` profiles distinct. Never install
   ImageMagick, Ghostscript, Ghostty, or Herdr on a headless host just to satisfy
   the core editor.

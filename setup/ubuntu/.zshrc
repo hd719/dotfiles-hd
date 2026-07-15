@@ -4,7 +4,10 @@
 # --------------------------------------------------------------------------------------------------------
 typeset -U path PATH
 
-ZSH_CONFIG_DIR="$HOME/Developer/dotfiles-hd/setup/mac-vm/zsh-config"
+# `:A` resolves ~/.zshrc when this file is linked from a QA checkout, then three
+# `:h` modifiers walk from setup/ubuntu/.zshrc back to the repository root.
+DOTFILES_DIR="${DOTFILES_DIR:-${${(%):-%N}:A:h:h:h}}"
+ZSH_CONFIG_DIR="$DOTFILES_DIR/setup/mac-vm/zsh-config"
 
 path=(
   "$HOME/.local/bin"
@@ -13,7 +16,7 @@ path=(
 )
 
 export TERM="xterm-256color"
-export STARSHIP_CONFIG="$HOME/Developer/dotfiles-hd/config/starship/starship.toml"
+export STARSHIP_CONFIG="$DOTFILES_DIR/config/starship/starship.toml"
 
 # [Editor]
 # --------------------------------------------------------------------------------------------------------
@@ -45,11 +48,6 @@ fi
 if [[ -d "$HOME/.rbenv" ]]; then
   path=("$HOME/.rbenv/bin" $path)
   eval "$(rbenv init - zsh)"
-fi
-
-export PNPM_HOME="$HOME/.local/share/pnpm"
-if [[ -d "$PNPM_HOME" ]]; then
-  path=("$PNPM_HOME" $path)
 fi
 
 if [[ -f "$HOME/.local/bin/env" ]]; then

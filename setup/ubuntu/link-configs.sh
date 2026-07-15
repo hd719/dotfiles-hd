@@ -99,6 +99,10 @@ main() {
   link_path "$SOURCE_ROOT/tmux/tmux.conf" "$CONFIG_HOME/tmux/tmux.conf"
   link_path "$SOURCE_ROOT/tmux/scripts" "$CONFIG_HOME/tmux/scripts"
 
+  # A real login shell must activate the same mise-managed runtimes that setup
+  # just installed. Back up any existing user file before linking this checkout.
+  link_path "$DOTFILES_DIR/setup/ubuntu/.zshrc" "$HOME/.zshrc"
+
   echo "Ubuntu dotfiles config links are ready."
 }
 

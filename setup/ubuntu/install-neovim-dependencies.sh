@@ -87,7 +87,11 @@ esac
 
 LOCAL_BIN="$HOME/.local/bin"
 LOCAL_OPT="$HOME/.local/opt"
-NODE_TOOLS_PREFIX="$HOME/.local/nvim-node-tools"
+NODE_TOOLS_PREFIX="$HOME/.local/nvim-pnpm-tools"
+NODE_TOOLS_GLOBAL_DIR="$NODE_TOOLS_PREFIX/global"
+NODE_TOOLS_BIN_DIR="$NODE_TOOLS_PREFIX/bin"
+NODE_TOOLS_STORE_DIR="$NODE_TOOLS_PREFIX/store"
+NODE_TOOLS_MANIFEST="$NODE_TOOLS_PREFIX/.dotfiles-package-pins"
 export PATH="$LOCAL_BIN:$PATH"
 
 have() {
@@ -106,6 +110,18 @@ node_is_supported() {
   [[ "$major" =~ ^[0-9]+$ ]] && ((10#$major >= 18))
 }
 
+# Run the command instead of trusting a possibly broken shim. The private
+# global-directory layout below is defined for pnpm 11, which personal machines
+# receive from the shared mise config.
+pnpm_is_supported() {
+  local version major
+
+  have pnpm || return 1
+  version="$(pnpm --version 2>/dev/null || true)"
+  major="${version%%.*}"
+  [[ "$major" =~ ^[0-9]+$ ]] && ((10#$major >= 11))
+}
+
 # Remember a working Node before any package operation. Full setup must not
 # silently replace a mise-managed (or otherwise host-managed) runtime.
 HOST_NODE_PATH=""
@@ -115,79 +131,9 @@ if have node; then
   HOST_NODE_VERSION="$(node --version 2>/dev/null || true)"
 fi
 
-# Older revisions of these dotfiles removed npm from mise's Node installation.
-# Reinstalling the exact same mise version repairs npm without selecting a new
-# Node release. Any unexpected path or version change aborts setup.
-repair_mise_npm() {
-  local managed_node wanted_version current_path current_version
-  local node_bin node_root global_modules entry entry_name
-
-  [[ -n "$HOST_NODE_PATH" ]] || return 0
-  have npm && return 0
-  have mise || return 0
-
-  managed_node="$(mise which node 2>/dev/null || true)"
-  [[ "$managed_node" == "$HOST_NODE_PATH" ]] || return 0
-
-  wanted_version="${HOST_NODE_VERSION#v}"
-  [[ -n "$wanted_version" ]] || return 0
-
-  node_bin="$(dirname "$HOST_NODE_PATH")"
-  node_root="$(cd "$node_bin/.." && pwd -P)"
-  global_modules="$node_root/lib/node_modules"
-
-  # A forced mise reinstall replaces the complete Node version directory. It is
-  # safe for the historical npm-only damage, but not when the user installed
-  # unrelated global packages or commands into that same directory.
-  if [[ -d "$global_modules" ]]; then
-    for entry in "$global_modules"/*; do
-      [[ -e "$entry" || -L "$entry" ]] || continue
-      entry_name="${entry##*/}"
-      case "$entry_name" in
-        npm | corepack) ;;
-        *)
-          echo "automatic npm repair refused: existing global Node package $entry_name" >&2
-          echo "repair npm manually, then rerun setup" >&2
-          exit 1
-          ;;
-      esac
-    done
-  fi
-
-  for entry in "$node_bin"/*; do
-    [[ -e "$entry" || -L "$entry" ]] || continue
-    entry_name="${entry##*/}"
-    case "$entry_name" in
-      node | npm | npx | corepack) ;;
-      *)
-        echo "automatic npm repair refused: existing global Node command $entry_name" >&2
-        echo "repair npm manually, then rerun setup" >&2
-        exit 1
-        ;;
-    esac
-  done
-
-  echo "repairing npm in the existing mise Node $wanted_version"
-  if ! mise install --force "node@$wanted_version"; then
-    echo "mise could not repair npm; APT will fill the missing npm capability" >&2
-    return 0
-  fi
-  mise reshim
-  hash -r
-
-  current_path="$(command -v node 2>/dev/null || true)"
-  current_version="$(node --version 2>/dev/null || true)"
-  if [[ "$current_path" != "$HOST_NODE_PATH" || "$current_version" != "$HOST_NODE_VERSION" ]]; then
-    echo "Node changed while repairing npm; stopping for safety" >&2
-    echo "before: $HOST_NODE_PATH ($HOST_NODE_VERSION)" >&2
-    echo "after: ${current_path:-missing} (${current_version:-missing})" >&2
-    exit 1
-  fi
-}
-
 if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
   # A half-visible Go toolchain is usually a PATH or host-manager problem. Stop
-  # before npm repair or APT can mutate anything unrelated to that problem.
+  # before APT can mutate anything unrelated to that problem.
   if have go && ! have gofmt; then
     echo "the active Go toolchain provides go but not gofmt" >&2
     echo "repair that host-managed Go installation, then rerun setup" >&2
@@ -203,7 +149,14 @@ if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
     echo "activate a supported host-managed Node, then rerun setup" >&2
     exit 1
   fi
-  repair_mise_npm
+
+  # Personal machines receive this exact command from the shared mise config.
+  # Other full-profile hosts must provide an approved pnpm before system changes.
+  pnpm_is_supported || {
+    echo "pnpm 11 or newer is required for the full Neovim profile" >&2
+    echo "on a personal Ubuntu machine, run setup/ubuntu/install-mise.sh first" >&2
+    exit 1
+  }
 fi
 
 # Build one APT transaction from missing commands. This keeps the second run a
@@ -233,7 +186,6 @@ need_package gzip gzip
 
 if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
   need_package node nodejs
-  need_package npm npm
   if ! have go; then
     APT_PACKAGES+=(golang-go)
   fi
@@ -274,13 +226,32 @@ fi
 
 mkdir -p "$LOCAL_BIN" "$LOCAL_OPT"
 
+# Never delete an unexpected file or directory in a managed location. A
+# timestamped sibling preserves it for inspection, and a numeric suffix handles
+# two repairs that begin during the same second.
+backup_conflicting_path() {
+  local path="$1"
+  local base backup suffix=1
+
+  [[ -e "$path" || -L "$path" ]] || return 0
+  base="$path.backup-$(date +%Y%m%d-%H%M%S)"
+  backup="$base"
+  while [[ -e "$backup" || -L "$backup" ]]; do
+    backup="$base-$suffix"
+    suffix=$((suffix + 1))
+  done
+
+  echo "backing up conflicting path: $path -> $backup"
+  mv "$path" "$backup"
+}
+
 # Back up a conflicting user-local command rather than deleting it. Managed
 # version directories are immutable, so later runs resolve to the same target.
 link_local_command() {
   local source_path="$1"
   local command_name="$2"
   local destination="$LOCAL_BIN/$command_name"
-  local current_target backup
+  local current_target
 
   if [[ -L "$destination" ]]; then
     current_target="$(readlink "$destination")"
@@ -288,13 +259,67 @@ link_local_command() {
   fi
 
   if [[ -e "$destination" || -L "$destination" ]]; then
-    backup="$destination.backup-$(date +%Y%m%d-%H%M%S)"
-    echo "backing up conflicting command: $destination -> $backup"
-    mv "$destination" "$backup"
+    backup_conflicting_path "$destination"
   fi
 
   ln -s "$source_path" "$destination"
   hash -r
+}
+
+# pnpm's generated command shims locate their packages relative to `$0`. A
+# symlink from ~/.local/bin changes `$0` and makes those shims search in the
+# wrong directory, so expose them through a tiny wrapper that executes the real
+# shim by its absolute path. Existing machine-local commands are backed up by
+# the same rule as every other managed command.
+install_local_exec_wrapper() {
+  local source_path="$1"
+  local command_name="$2"
+  local destination="$LOCAL_BIN/$command_name"
+  local temporary
+
+  if pnpm_wrapper_is_current "$source_path" "$destination"; then
+    return 0
+  fi
+
+  if [[ -e "$destination" || -L "$destination" ]]; then
+    backup_conflicting_path "$destination"
+  fi
+
+  temporary="$(mktemp "$LOCAL_BIN/.${command_name}.XXXXXX")"
+  pnpm_wrapper_contents "$source_path" >"$temporary"
+  chmod +x "$temporary"
+  mv "$temporary" "$destination"
+  hash -r
+}
+
+# Keep wrapper generation and validation byte-for-byte identical. The executable
+# bit is part of the contract; a launcher that cannot run is not a healthy no-op.
+pnpm_wrapper_contents() {
+  local source_path="$1"
+
+  printf '#!/usr/bin/env bash\n'
+  printf '# dotfiles-managed pnpm wrapper: %s\n' "$source_path"
+  printf 'exec %q "$@"\n' "$source_path"
+}
+
+pnpm_wrapper_is_current() {
+  local source_path="$1"
+  local destination="$2"
+  local actual expected
+
+  [[ -f "$destination" && ! -L "$destination" && -x "$destination" ]] \
+    || return 1
+  actual="$(<"$destination")"
+  expected="$(pnpm_wrapper_contents "$source_path")"
+  [[ "$actual" == "$expected" ]]
+}
+
+is_managed_pnpm_wrapper() {
+  local source_path="$1"
+  local destination="$2"
+
+  [[ -f "$destination" && ! -L "$destination" ]] \
+    && grep -Fqx "# dotfiles-managed pnpm wrapper: $source_path" "$destination"
 }
 
 # Ubuntu names fd's binary `fdfind`. Expose the conventional command name that
@@ -374,7 +399,7 @@ ensure_neovim() {
       echo "downloaded Neovim archive has an unexpected layout" >&2
       exit 1
     }
-    rm -rf "$target"
+    backup_conflicting_path "$target"
     mv "$source_dir" "$target"
   fi
 
@@ -384,7 +409,7 @@ ensure_neovim() {
 ensure_tree_sitter() {
   local version="0.26.11"
   local asset="tree-sitter-linux-$TREE_SITTER_ARCH.gz"
-  local sha256 target archive
+  local sha256 target archive staging
 
   tree_sitter_is_usable && return 0
 
@@ -400,8 +425,11 @@ ensure_tree_sitter() {
     download_verified \
       "https://github.com/tree-sitter/tree-sitter/releases/download/v$version/$asset" \
       "$sha256" "$archive"
-    gzip -dc "$archive" >"$target"
-    chmod +x "$target"
+    staging="$TMP_ROOT/tree-sitter"
+    gzip -dc "$archive" >"$staging"
+    chmod +x "$staging"
+    backup_conflicting_path "$target"
+    mv "$staging" "$target"
   fi
 
   link_local_command "$target" tree-sitter
@@ -432,7 +460,7 @@ ensure_lua_language_server() {
       echo "downloaded Lua language server has an unexpected layout" >&2
       exit 1
     }
-    rm -rf "$target"
+    backup_conflicting_path "$target"
     mv "$staging" "$target"
   fi
 
@@ -466,6 +494,7 @@ ensure_stylua() {
       echo "downloaded StyLua archive has an unexpected layout" >&2
       exit 1
     }
+    backup_conflicting_path "$target"
     mv "$source_path" "$target"
   fi
 
@@ -498,7 +527,7 @@ ensure_uv() {
       echo "downloaded uv archive has an unexpected layout" >&2
       exit 1
     }
-    rm -rf "$target"
+    backup_conflicting_path "$target"
     mv "$source_dir" "$target"
   fi
 
@@ -506,48 +535,143 @@ ensure_uv() {
   link_local_command "$target/uvx" uvx
 }
 
-ensure_node_servers() {
-  local command_name source_path
-  local -a missing_commands=()
+# Ask pnpm for the installed package graph and let Node validate the exact pins
+# plus each package directory. Executable shims alone are not proof of a healthy
+# install: a deleted global payload leaves those small launcher files behind.
+pnpm_node_tools_match_install() {
+  local expected_manifest="$1"
+  local listing command_name
+  shift
 
-  for command_name in \
-    bash-language-server \
-    vtsls \
-    vscode-eslint-language-server \
-    vscode-json-language-server \
-    vscode-css-language-server \
-    vscode-html-language-server \
-    graphql-lsp
-  do
-    have "$command_name" || missing_commands+=("$command_name")
+  for command_name in "$@"; do
+    [[ -x "$NODE_TOOLS_BIN_DIR/$command_name" ]] || return 1
   done
 
-  ((${#missing_commands[@]} > 0)) || return 0
+  listing="$(
+    PNPM_HOME="$NODE_TOOLS_PREFIX" PATH="$NODE_TOOLS_BIN_DIR:$PATH" \
+      pnpm list --global --depth=0 \
+        --global-dir "$NODE_TOOLS_GLOBAL_DIR" \
+        --json 2>/dev/null
+  )" || return 1
+
+  NODE_TOOL_SPECS="$expected_manifest" node -e '
+    const fs = require("fs");
+    const roots = JSON.parse(fs.readFileSync(0, "utf8"));
+    const dependencies = roots[0]?.dependencies ?? {};
+
+    for (const spec of process.env.NODE_TOOL_SPECS.split("\n")) {
+      const separator = spec.lastIndexOf("@");
+      const name = spec.slice(0, separator);
+      const version = spec.slice(separator + 1);
+      const dependency = dependencies[name];
+
+      if (!dependency || dependency.version !== version || !fs.existsSync(dependency.path)) {
+        process.exit(1);
+      }
+    }
+  ' <<<"$listing"
+}
+
+ensure_node_servers() {
+  local command_name current_path current_target expected_manifest source_path
+  local managed_commands=0
+  local needs_install=0
+  local -a missing_commands=()
+  local -a package_specs=(
+    'bash-language-server@5.6.0'
+    '@vtsls/language-server@0.3.0'
+    'vscode-langservers-extracted@4.10.0'
+    'graphql-language-service-cli@3.5.0'
+  )
+  local -a command_names=(
+    bash-language-server
+    vtsls
+    vscode-eslint-language-server
+    vscode-json-language-server
+    vscode-css-language-server
+    vscode-html-language-server
+    graphql-lsp
+  )
+
+  expected_manifest="$(printf '%s\n' "${package_specs[@]}")"
+
+  for command_name in "${command_names[@]}"; do
+    if ! have "$command_name"; then
+      missing_commands+=("$command_name")
+      continue
+    fi
+
+    current_path="$(command -v "$command_name")"
+    if [[ "$current_path" == "$LOCAL_BIN/$command_name" ]]; then
+      if [[ -L "$current_path" ]]; then
+        current_target="$(readlink "$current_path")"
+        if [[ "$current_target" == "$NODE_TOOLS_BIN_DIR/$command_name" \
+          || "$current_target" == "$HOME/.local/nvim-node-tools/bin/$command_name" ]]; then
+          # Migrate both the broken pnpm symlink shape and links produced by the
+          # earlier npm-backed implementation to absolute exec wrappers.
+          managed_commands=1
+          missing_commands+=("$command_name")
+        fi
+      elif is_managed_pnpm_wrapper "$NODE_TOOLS_BIN_DIR/$command_name" "$current_path"; then
+        managed_commands=1
+        pnpm_wrapper_is_current "$NODE_TOOLS_BIN_DIR/$command_name" "$current_path" \
+          && [[ -x "$NODE_TOOLS_BIN_DIR/$command_name" ]] \
+          || missing_commands+=("$command_name")
+      fi
+    fi
+  done
+
+  # A manifest means this adapter owns a private package set even if every host
+  # command currently resolves somewhere else. Validate that owned state instead
+  # of letting a corrupt payload remain hidden behind executable launcher files.
+  if ((managed_commands == 1)) || [[ -f "$NODE_TOOLS_MANIFEST" ]]; then
+    if [[ ! -f "$NODE_TOOLS_MANIFEST" ]] \
+      || [[ "$(<"$NODE_TOOLS_MANIFEST")" != "$expected_manifest" ]] \
+      || ! pnpm_node_tools_match_install "$expected_manifest" "${command_names[@]}"; then
+      needs_install=1
+    fi
+  fi
+
+  if ((${#missing_commands[@]} == 0 && needs_install == 0)); then
+    return 0
+  fi
+
   have node || {
     echo "Node is required for the full Neovim profile" >&2
     exit 1
   }
-  have npm || {
-    echo "npm is required for the full Neovim profile" >&2
+  pnpm_is_supported || {
+    echo "pnpm 11 or newer is required for the full Neovim profile" >&2
     exit 1
   }
 
-  # A private prefix avoids changing the user's global npm package set.
-  npm install -g --prefix "$NODE_TOOLS_PREFIX" \
-    'bash-language-server@5.6.0' \
-    '@vtsls/language-server@0.3.0' \
-    'vscode-langservers-extracted@4.10.0' \
-    'graphql-language-service-cli@3.5.0'
+  # Keep Neovim's pinned packages in a private pnpm store and bin directory.
+  # PNPM_HOME plus PATH satisfies pnpm's global-bin safety check without
+  # changing the caller's normal global packages or shell configuration.
+  mkdir -p "$NODE_TOOLS_GLOBAL_DIR" "$NODE_TOOLS_BIN_DIR" "$NODE_TOOLS_STORE_DIR"
+  PNPM_HOME="$NODE_TOOLS_PREFIX" PATH="$NODE_TOOLS_BIN_DIR:$PATH" \
+    pnpm add --global \
+      --global-dir "$NODE_TOOLS_GLOBAL_DIR" \
+      --global-bin-dir "$NODE_TOOLS_BIN_DIR" \
+      --store-dir "$NODE_TOOLS_STORE_DIR" \
+      --save-exact \
+      "${package_specs[@]}"
 
-  # Link only capabilities that were missing before installation. A working
+  pnpm_node_tools_match_install "$expected_manifest" "${command_names[@]}" || {
+    echo "pnpm did not provide the complete pinned language-server set" >&2
+    exit 1
+  }
+  printf '%s\n' "${package_specs[@]}" >"$NODE_TOOLS_MANIFEST"
+
+  # Wrap only capabilities that were missing before installation. A working
   # server supplied by the host stays selected instead of being shadowed.
   for command_name in "${missing_commands[@]}"; do
-    source_path="$NODE_TOOLS_PREFIX/bin/$command_name"
+    source_path="$NODE_TOOLS_BIN_DIR/$command_name"
     [[ -x "$source_path" ]] || {
-      echo "npm did not provide the expected command: $command_name" >&2
+      echo "pnpm did not provide the expected command: $command_name" >&2
       exit 1
     }
-    link_local_command "$source_path" "$command_name"
+    install_local_exec_wrapper "$source_path" "$command_name"
   done
 }
 
@@ -565,7 +689,6 @@ gopls_is_usable() {
 
 ensure_gopls() {
   local local_gopls="$LOCAL_BIN/gopls"
-  local backup
 
   gopls_is_usable && return 0
   have go || {
@@ -580,9 +703,7 @@ ensure_gopls() {
   # `go install` writes directly to GOBIN. Preserve a stale user-local binary
   # before replacing it, just as we do for managed symlinks.
   if [[ -e "$local_gopls" || -L "$local_gopls" ]]; then
-    backup="$local_gopls.backup-$(date +%Y%m%d-%H%M%S)"
-    echo "backing up stale gopls: $local_gopls -> $backup"
-    mv "$local_gopls" "$backup"
+    backup_conflicting_path "$local_gopls"
   fi
 
   GOBIN="$LOCAL_BIN" go install 'golang.org/x/tools/gopls@v0.23.0'

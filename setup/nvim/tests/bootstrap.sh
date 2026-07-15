@@ -15,6 +15,7 @@ BREW_ROOT="$TMP_ROOT/homebrew"
 STATE_DIR="$TMP_ROOT/state"
 FAKE_HOME="$TMP_ROOT/home"
 REAL_BASH="$(command -v bash)"
+REAL_NODE="$(command -v node)"
 failures=0
 
 # Remove the entire fake machine even when an assertion or command fails.
@@ -57,7 +58,7 @@ link_real_commands() {
 
   # The fake PATH contains only the commands we choose. Link harmless shell
   # utilities from the real machine so the script under test can still run.
-  for command_name in bash chmod cmp cp dirname grep ln mktemp readlink rm sed; do
+  for command_name in bash chmod cmp cp dirname grep ln mkdir mktemp readlink rm sed; do
     real_command="$(command -v "$command_name")"
     ln -s "$real_command" "$dir/$command_name"
   done
@@ -105,10 +106,13 @@ make_full_path() {
   for command_name in \
     gofmt lua-language-server stylua vtsls \
     vscode-eslint-language-server vscode-json-language-server \
-    vscode-css-language-server vscode-html-language-server graphql-lsp
+    vscode-css-language-server vscode-html-language-server
   do
     write_stub "$dir" "$command_name" 'exit 0'
   done
+  write_stub "$dir" graphql-lsp 'echo "3.5.0"'
+
+  write_stub "$dir" pnpm 'echo "11.2.2"'
 
   # The shared doctor enforces the minimum supported gopls line, not only the
   # existence of a command with that name.
@@ -214,6 +218,9 @@ write_stub "$BREW_ROOT/bin" brew \
   '    printf "%s\n" "$*" >>"$TEST_STATE_DIR/brew-installs"' \
   '    if [[ "$formula" == "node" ]]; then' \
   '      printf "installed\n" >"$TEST_STATE_DIR/brew-node-installed"' \
+  '    elif [[ "$formula" == "pnpm" ]]; then' \
+  '      printf "#!%s\necho 11.2.2\n" "$TEST_REAL_BASH" >"$TEST_BREW_ROOT/bin/pnpm"' \
+  '      chmod +x "$TEST_BREW_ROOT/bin/pnpm"' \
   '    elif [[ "$formula" == "bash-language-server" ]]; then' \
   '      if [[ ! -f "$TEST_STATE_DIR/brew-node-installed" || "${TEST_BREW_FORCE_RELINK:-0}" == "1" ]]; then' \
   '        printf "installed\n" >"$TEST_STATE_DIR/brew-node-installed"' \
@@ -364,6 +371,148 @@ expect_output_containing \
 expect_output_not_containing \
   "stale external gopls fails before the dependency doctor" \
   "Neovim dependency check"
+
+# Scenario 8: when GraphQL is the only missing server, install its exact package
+# through a private pnpm prefix. A matching second run must be a true no-op, and
+# a failed pnpm command must never leave the success marker behind.
+graphql_path="$TMP_ROOT/graphql-pnpm"
+graphql_log="$STATE_DIR/graphql-pnpm.log"
+make_full_path "$graphql_path"
+write_stub "$graphql_path" bash-language-server 'exit 0'
+write_stub "$graphql_path" node \
+  'if [[ "${1:-}" == "-e" ]]; then exec "$TEST_REAL_NODE" "$@"; fi' \
+  'echo "v22.22.0"'
+rm -f "$graphql_path/graphql-lsp"
+write_stub "$graphql_path" pnpm \
+  'if [[ "${1:-}" == "--version" ]]; then echo "11.2.2"; exit 0; fi' \
+  'bin_dir=""; global_dir=""; args=("$@")' \
+  'for ((i = 0; i < ${#args[@]}; i++)); do' \
+  '  [[ "${args[$i]}" == "--global-bin-dir" ]] && { i=$((i + 1)); bin_dir="${args[$i]}"; }' \
+  '  [[ "${args[$i]}" == "--global-dir" ]] && { i=$((i + 1)); global_dir="${args[$i]}"; }' \
+  'done' \
+  'if [[ "${1:-}" == "list" ]]; then' \
+  '  printf '\''[{"dependencies":{"graphql-language-service-cli":{"version":"3.5.0","path":"%s/graphql-language-service-cli"}}}]\n'\'' "$global_dir"' \
+  '  exit 0' \
+  'fi' \
+  'printf "%s\n" "$*" >>"$TEST_PNPM_LOG"' \
+  '[[ "${TEST_PNPM_FAIL:-0}" == "1" ]] && exit 42' \
+  '[[ -n "$bin_dir" ]] || exit 90' \
+  '[[ -n "$global_dir" ]] || exit 91' \
+  'mkdir -p "$bin_dir" "$global_dir/graphql-language-service-cli"' \
+  'printf "#!%s\necho 3.5.0\n" "$TEST_REAL_BASH" >"$bin_dir/graphql-lsp"' \
+  'chmod +x "$bin_dir/graphql-lsp"'
+
+: >"$graphql_log"
+run_bootstrap \
+  "$graphql_path:$UV_BIN" \
+  full \
+  TEST_PNPM_LOG="$graphql_log" \
+  TEST_REAL_BASH="$REAL_BASH" \
+  TEST_REAL_NODE="$REAL_NODE"
+expect "missing GraphQL installs successfully through pnpm" test "$BOOTSTRAP_STATUS" -eq 0
+expect "GraphQL uses exact isolated pnpm arguments" grep -Fqx \
+  "add --global --global-dir $FAKE_HOME/.local/graphql-lsp/global --global-bin-dir $FAKE_HOME/.local/graphql-lsp/bin --store-dir $FAKE_HOME/.local/graphql-lsp/store --save-exact graphql-language-service-cli@3.5.0" \
+  "$graphql_log"
+expect "GraphQL success writes the exact package marker" \
+  grep -Fxq 'graphql-language-service-cli@3.5.0' \
+  "$FAKE_HOME/.local/graphql-lsp/.dotfiles-pnpm-package"
+
+graphql_install_count="$(wc -l <"$graphql_log")"
+run_bootstrap \
+  "$graphql_path:$UV_BIN" \
+  full \
+  TEST_PNPM_LOG="$graphql_log" \
+  TEST_REAL_BASH="$REAL_BASH" \
+  TEST_REAL_NODE="$REAL_NODE"
+expect "matching GraphQL pnpm install is a second-run no-op" \
+  test "$(wc -l <"$graphql_log")" -eq "$graphql_install_count"
+
+# A launcher and marker can survive deletion of the package itself. The next
+# run must restore the payload once, then return to a true no-op.
+rm -rf "$FAKE_HOME/.local/graphql-lsp/global/graphql-language-service-cli"
+run_bootstrap \
+  "$graphql_path:$UV_BIN" \
+  full \
+  TEST_PNPM_LOG="$graphql_log" \
+  TEST_REAL_BASH="$REAL_BASH" \
+  TEST_REAL_NODE="$REAL_NODE"
+expect "missing GraphQL pnpm payload is repaired" test "$BOOTSTRAP_STATUS" -eq 0
+expect "GraphQL payload repair runs one exact reinstall" \
+  test "$(wc -l <"$graphql_log")" -eq "$((graphql_install_count + 1))"
+graphql_repair_count="$(wc -l <"$graphql_log")"
+run_bootstrap \
+  "$graphql_path:$UV_BIN" \
+  full \
+  TEST_PNPM_LOG="$graphql_log" \
+  TEST_REAL_BASH="$REAL_BASH" \
+  TEST_REAL_NODE="$REAL_NODE"
+expect "repaired GraphQL pnpm payload is a no-op" \
+  test "$(wc -l <"$graphql_log")" -eq "$graphql_repair_count"
+
+rm -rf "$FAKE_HOME/.local/graphql-lsp"
+run_bootstrap \
+  "$graphql_path:$UV_BIN" \
+  full \
+  TEST_PNPM_LOG="$graphql_log" \
+  TEST_REAL_BASH="$REAL_BASH" \
+  TEST_REAL_NODE="$REAL_NODE" \
+  TEST_PNPM_FAIL=1
+expect "failed GraphQL pnpm install keeps a failing status" test "$BOOTSTRAP_STATUS" -ne 0
+expect "failed GraphQL pnpm install leaves no success marker" \
+  test ! -e "$FAKE_HOME/.local/graphql-lsp/.dotfiles-pnpm-package"
+
+# Scenarios 9-12 exercise pnpm itself. A missing command fails on a non-Homebrew
+# host, an old or broken command is never replaced behind its owner's back, and
+# a Mac with no pnpm receives the Homebrew fallback once.
+missing_pnpm_path="$TMP_ROOT/missing-pnpm"
+make_full_path "$missing_pnpm_path"
+rm -f "$missing_pnpm_path/pnpm"
+write_stub "$missing_pnpm_path" node 'echo "v22.22.0"'
+run_bootstrap "$missing_pnpm_path:$UV_BIN" full
+expect "missing pnpm fails without Homebrew" test "$BOOTSTRAP_STATUS" -ne 0
+expect_output_containing "missing pnpm names the required minimum" "pnpm 11+"
+
+old_pnpm_path="$TMP_ROOT/old-pnpm-bootstrap"
+make_full_path "$old_pnpm_path"
+write_stub "$old_pnpm_path" node 'echo "v22.22.0"'
+write_stub "$old_pnpm_path" pnpm 'echo "10.9.0"'
+rm -f "$BREW_ROOT/bin/pnpm"
+pnpm_install_count_before="$(grep -c '^install pnpm$' "$STATE_DIR/brew-installs" 2>/dev/null || true)"
+run_bootstrap \
+  "$old_pnpm_path:$BREW_ROOT/bin:$UV_BIN" \
+  full \
+  TEST_BREW_ROOT="$BREW_ROOT" \
+  TEST_REAL_BASH="$REAL_BASH"
+expect "pnpm 10 fails instead of being silently replaced" test "$BOOTSTRAP_STATUS" -ne 0
+expect_output_containing "old pnpm explains why it was rejected" "broken or older than version 11"
+expect "old pnpm causes no Homebrew pnpm install" \
+  test "$(grep -c '^install pnpm$' "$STATE_DIR/brew-installs" 2>/dev/null || true)" -eq "$pnpm_install_count_before"
+
+broken_pnpm_path="$TMP_ROOT/broken-pnpm-bootstrap"
+make_full_path "$broken_pnpm_path"
+write_stub "$broken_pnpm_path" node 'echo "v22.22.0"'
+write_stub "$broken_pnpm_path" pnpm 'exit 42'
+run_bootstrap \
+  "$broken_pnpm_path:$BREW_ROOT/bin:$UV_BIN" \
+  full \
+  TEST_BREW_ROOT="$BREW_ROOT" \
+  TEST_REAL_BASH="$REAL_BASH"
+expect "a broken pnpm shim fails instead of being silently replaced" \
+  test "$BOOTSTRAP_STATUS" -ne 0
+expect_output_containing "broken pnpm explains why it was rejected" "broken or older than version 11"
+expect "broken pnpm causes no Homebrew pnpm install" \
+  test "$(grep -c '^install pnpm$' "$STATE_DIR/brew-installs" 2>/dev/null || true)" -eq "$pnpm_install_count_before"
+
+run_bootstrap \
+  "$BREW_ROOT/bin:$missing_pnpm_path:$UV_BIN" \
+  full \
+  TEST_BREW_ROOT="$BREW_ROOT" \
+  TEST_REAL_BASH="$REAL_BASH"
+expect "Homebrew fills a truly missing pnpm command" test "$BOOTSTRAP_STATUS" -eq 0
+expect "Homebrew installs pnpm exactly once" \
+  test "$(grep -c '^install pnpm$' "$STATE_DIR/brew-installs")" -eq "$((pnpm_install_count_before + 1))"
+expect "the Homebrew fallback supplies pnpm 11" \
+  test "$(PATH="$BREW_ROOT/bin:$missing_pnpm_path" pnpm --version)" = "11.2.2"
 
 # Convert the accumulated assertion count into the test process's exit status.
 if ((failures > 0)); then

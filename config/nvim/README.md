@@ -9,7 +9,7 @@ Hamel's existing Zed muscle memory.
   fzf, LazyGit, and Tree-sitter CLI 0.26.1+.
 - Go: `gopls` and `gofmt`.
 - Lua: `lua-language-server` and `stylua`.
-- JavaScript and TypeScript: `vtsls` for language intelligence,
+- JavaScript and TypeScript: pnpm 11+ for setup, `vtsls` for language intelligence,
   `vscode-eslint-language-server` for project lint rules, and project-local
   `prettier` for formatting.
 - Markdown: `mdformat`, installed through `uv` with GFM, frontmatter, footnote,
@@ -41,19 +41,23 @@ Ubuntu 26.04 or newer needs its APT dependency adapter first:
 ```bash
 PROFILE=full
 export PATH="$HOME/.local/bin:$PATH"
-./setup/ubuntu/install-mise.sh
-mise exec -- ./setup/ubuntu/install-neovim-dependencies.sh "$PROFILE"
-./setup/nvim/link-config.sh
-mise exec -- ./setup/nvim/bootstrap.sh "$PROFILE"
+DOTFILES_DIR="$(git rev-parse --show-toplevel)"
+MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+"$DOTFILES_DIR/setup/ubuntu/install-mise.sh"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/ubuntu/install-neovim-dependencies.sh" "$PROFILE"
+"$DOTFILES_DIR/setup/nvim/link-config.sh"
+mise -C "$MISE_CONFIG_DIR" exec -- \
+  "$DOTFILES_DIR/setup/nvim/bootstrap.sh" "$PROFILE"
 ```
 
 The mise step is for Hamel's personal `full` and `desktop` machines; a generic
-`core` server may keep its approved system runtimes. `mise exec --` exposes the
-new pins immediately, while the export keeps user-local adapter commands visible
-to the shared bootstrap.
+`core` server may keep its approved system runtimes. Controlled `mise exec`
+exposes the new pins without inheriting a project-local config, while the export
+keeps user-local adapter commands visible to the shared bootstrap.
 
 The Ubuntu path does not install Homebrew or Snap and preserves working Node,
-npm, and Go commands. Run the adapter and bootstrap twice to verify
+pnpm, and Go commands. Run the adapter and bootstrap twice to verify
 idempotence. If the current clone has changes, use a separate clone or worktree
 instead of pulling or switching it. See
 [`setup/ubuntu/README.md`](../../setup/ubuntu/README.md).
@@ -70,14 +74,17 @@ Profiles are cumulative, so choose only the highest level the machine needs:
 Choose one profile per machine. It is normal to use `desktop` on a laptop and
 `core` or `full` on a server, but never combine profiles on one machine. Rerun a
 higher profile later if the machine's role grows. The Go toolchain stays
-host-managed, Prettier stays project-local, and Ghostty/Herdr remain outside
+host-managed, pnpm is the only JavaScript package manager invoked, Prettier
+stays project-local, and Ghostty/Herdr remain outside
 these profiles.
 
 The bootstrap accepts tools already supplied by mise or the operating system,
 uses Homebrew only when it is already available, installs `mdformat`/Ruff with
-`uv`, and installs a pinned `graphql-lsp` under `~/.local/graphql-lsp` only when
+`uv`, and installs a pinned `graphql-lsp` with pnpm under
+`~/.local/graphql-lsp` only when
 one is not already on `PATH`. It never invokes `sudo`, installs a package
-manager, changes the host-managed Node command, or changes shell startup files.
+manager outside the host's existing Homebrew/mise ownership, changes the
+host-managed Node command, or changes shell startup files.
 Homebrew-backed language servers use an unlinked Homebrew Node dependency when
 the machine already has Node. The bootstrap also waits for the committed
 Tree-sitter parsers and preserves `lazy-lock.json` byte-for-byte. See
