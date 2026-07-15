@@ -1196,3 +1196,15 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Future agents must update the bootstrap, doctor, README, and affected machine
   runbook together whenever Neovim gains a new external executable dependency.
 - The next teaching checkpoint remains Curriculum 3.5.
+
+## 2026-07-15 — Session 010: Bootstrap Profile Mental Model
+
+- `core`, `full`, and `desktop` are cumulative levels, not separate components
+  that need to be combined: `full` contains `core`, and `desktop` contains both.
+- Use `core` for lightweight headless/SSH editing, `full` for a normal developer
+  machine or cloud development host, and `desktop` for Ghostty or another local
+  Kitty-graphics-compatible terminal where image/PDF previews are useful.
+- Choose one profile per machine. Using `desktop` on a laptop and `core` or
+  `full` on a server is normal. If a machine's role grows, rerun a higher profile;
+  the idempotent bootstrap keeps existing capabilities and fills only new gaps.
+- No curriculum checkbox changed. The next teaching checkpoint remains 3.5.

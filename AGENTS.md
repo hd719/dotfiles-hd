@@ -92,11 +92,15 @@ Prefer these scripts when they match the task.
 - Setup is capability-based. Accept a working command from Homebrew, mise, a
   system package manager, or a work-managed runtime instead of installing a
   duplicate.
+- Dependency checks must inspect the caller's real `PATH`; never prepend a tool
+  directory inside the doctor in a way that can hide a missing persistent path.
 - Keep the Go toolchain host-managed. Never replace a work or cloud machine's
   approved Go runtime merely to supply `gofmt`; report the missing prerequisite.
 - Keep `core`, `full`, and `desktop` profiles distinct. Never install
   ImageMagick, Ghostscript, Ghostty, or Herdr on a headless host just to satisfy
   the core editor.
+- Profiles are cumulative (`core` → `full` → `desktop`). Choose one profile per
+  setup; a later rerun with a higher profile safely fills only the new gaps.
 - When Neovim starts depending on a new executable, update the shared bootstrap,
   dependency checker, `config/nvim/README.md`, and any affected machine runbook
   in the same change.

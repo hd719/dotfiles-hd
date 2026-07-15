@@ -62,6 +62,34 @@ with_file(function(buf, path)
 end)
 
 with_file(function(buf, path)
+  insert_session(buf, "first insert edit")
+  insert_session(buf, "second insert edit")
+  escape_callback()
+  assert(
+    read_file(path) == "second insert edit\n",
+    "Consecutive Insert-mode edits were not written"
+  )
+  assert(not vim.bo[buf].modified, "Saved consecutive Insert-mode edits should be clean")
+end)
+
+with_file(function(buf, path)
+  insert_session(buf, "insert edit")
+  insert_session(buf)
+  escape_callback()
+  assert(read_file(path) == "base\n", "Empty Insert session preserved earlier authorization")
+  assert(vim.bo[buf].modified, "Insert edit should remain unsaved after an empty session")
+end)
+
+with_file(function(buf, path)
+  insert_session(buf, "first insert edit")
+  set_text(buf, "normal edit")
+  insert_session(buf, "second insert edit")
+  escape_callback()
+  assert(read_file(path) == "base\n", "Normal edit between Insert sessions was written")
+  assert(vim.bo[buf].modified, "Mixed edits should remain unsaved")
+end)
+
+with_file(function(buf, path)
   set_text(buf, "normal edit")
   insert_session(buf)
   escape_callback()

@@ -24,9 +24,12 @@ cd /path/to/dotfiles-hd
 ./setup/nvim/bootstrap.sh full
 ```
 
-Use `core` for a minimal server and `desktop` for Ghostty image/PDF previews.
-The scripts preserve tools already supplied by mise or the operating system and
-only fill missing capabilities. See [`setup/nvim/README.md`](setup/nvim/README.md).
+Profiles are cumulative: use `core` for a minimal headless/SSH server, `full`
+for a development machine without desktop previews, or `desktop` for a Ghostty
+machine with image/PDF previews. Choose one per machine—`desktop` already
+includes `full` and `core`. The scripts preserve tools already supplied by mise
+or the operating system and only fill missing capabilities. See
+[`setup/nvim/README.md`](setup/nvim/README.md).
 
 ## Current Personal Mac Symlinks
 

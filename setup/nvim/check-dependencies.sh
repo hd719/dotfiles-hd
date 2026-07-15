@@ -1,21 +1,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+print_usage() {
+  cat <<'EOF'
+Usage: check-dependencies.sh [core|full|desktop]
+
+Profiles are cumulative; choose the same one used for bootstrap:
+  core     Verify the editor, search, Tree-sitter, LazyGit, and plugin base.
+  full     Verify core plus language servers and formatters. (default)
+  desktop  Verify full plus image/PDF previews and a system file opener.
+
+Running the desktop check already includes the full and core checks.
+EOF
+}
+
 PROFILE="${1:-full}"
+
+if (($# > 1)); then
+  print_usage >&2
+  exit 2
+fi
 
 case "$PROFILE" in
   core | full | desktop) ;;
+  -h | --help)
+    print_usage
+    exit 0
+    ;;
   *)
-    echo "Usage: $0 [core|full|desktop]" >&2
+    print_usage >&2
     exit 2
     ;;
 esac
 
+UV_BIN=""
 if command -v uv >/dev/null 2>&1; then
   UV_BIN="$(uv tool dir --bin 2>/dev/null || true)"
-  if [[ -n "$UV_BIN" ]]; then
-    export PATH="$UV_BIN:$PATH"
-  fi
 fi
 
 missing=0
@@ -78,6 +98,32 @@ check_neovim() {
   fi
 }
 
+check_tree_sitter() {
+  local version_line version major minor patch
+
+  if ! command -v tree-sitter >/dev/null 2>&1; then
+    fail "Tree-sitter CLI 0.26.1+ (tree-sitter)"
+    return
+  fi
+
+  version_line="$(tree-sitter --version 2>/dev/null || true)"
+  version="${version_line#tree-sitter }"
+  version="${version%% *}"
+
+  if [[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+    major="${BASH_REMATCH[1]}"
+    minor="${BASH_REMATCH[2]}"
+    patch="${BASH_REMATCH[3]}"
+
+    if ((major > 0 || minor > 26 || (minor == 26 && patch >= 1))); then
+      ok "$version_line"
+      return
+    fi
+  fi
+
+  fail "Tree-sitter CLI 0.26.1+ (found: ${version_line:-unknown})"
+}
+
 check_graphql_lsp() {
   local fixed="$HOME/.local/graphql-lsp/bin/graphql-lsp"
 
@@ -90,24 +136,74 @@ check_graphql_lsp() {
   fi
 }
 
-check_mdformat_extensions() {
-  local listing
+print_uv_path_guidance() {
+  local command_name="$1"
+  local resolved="$2"
+  local pinned
 
-  if ! command -v uv >/dev/null 2>&1 || ! command -v mdformat >/dev/null 2>&1; then
-    fail "mdformat 1.0.0 with Obsidian-safe extensions"
+  if [[ -z "$UV_BIN" ]]; then
     return
   fi
 
-  listing="$(uv tool list --show-with --show-version-specifiers 2>/dev/null || true)"
-  if printf '%s\n' "$listing" | grep -q '^mdformat v1\.0\.0 ' \
-    && printf '%s\n' "$listing" | grep -q 'mdformat-gfm==1\.0\.0' \
-    && printf '%s\n' "$listing" | grep -q 'mdformat-frontmatter==2\.1\.2' \
-    && printf '%s\n' "$listing" | grep -q 'mdformat-footnote==0\.1\.3' \
-    && printf '%s\n' "$listing" | grep -q 'mdformat-gfm-alerts==2\.0\.0' \
-    && printf '%s\n' "$listing" | grep -q 'mdformat-wikilink==0\.3\.0'; then
-    ok "mdformat 1.0.0 with Obsidian-safe extensions"
+  pinned="$UV_BIN/$command_name"
+  if [[ ! -x "$pinned" ]]; then
+    return
+  fi
+
+  if [[ -z "$resolved" ]]; then
+    printf 'path: %s exists but is not reachable through the caller PATH.\n' "$pinned" >&2
+  elif [[ "$resolved" != "$pinned" ]]; then
+    printf 'path: %s shadows the pinned UV tool at %s.\n' "$resolved" "$pinned" >&2
   else
+    return
+  fi
+
+  printf 'path: Put %s first: export PATH="%s:$PATH"\n' "$UV_BIN" "$UV_BIN" >&2
+  echo "path: Persist that ordering through the machine-approved shell setup." >&2
+}
+
+check_mdformat_extensions() {
+  local command_path version version_line
+
+  command_path="$(command -v mdformat 2>/dev/null || true)"
+  if [[ -z "$command_path" ]]; then
     fail "mdformat 1.0.0 with Obsidian-safe extensions"
+    print_uv_path_guidance mdformat ""
+    return
+  fi
+
+  version_line="$("$command_path" --version 2>/dev/null || true)"
+  version="${version_line#mdformat }"
+  version="${version%% *}"
+  if [[ "$version" == "1.0.0" \
+    && "$version_line" == *"mdformat-gfm 1.0.0"* \
+    && "$version_line" == *"mdformat_frontmatter 2.1.2"* \
+    && "$version_line" == *"mdformat_footnote 0.1.3"* \
+    && "$version_line" == *"mdformat_gfm_alerts 2.0.0"* \
+    && "$version_line" == *"mdformat_wikilink 0.3.0"* ]]; then
+    ok "mdformat 1.0.0 with Obsidian-safe extensions ($command_path)"
+  else
+    fail "mdformat 1.0.0 with Obsidian-safe extensions (found: ${version_line:-unknown}; path: $command_path)"
+    print_uv_path_guidance mdformat "$command_path"
+  fi
+}
+
+check_ruff() {
+  local command_path version_line
+
+  command_path="$(command -v ruff 2>/dev/null || true)"
+  if [[ -z "$command_path" ]]; then
+    fail "Ruff 0.15.21 (ruff)"
+    print_uv_path_guidance ruff ""
+    return
+  fi
+
+  version_line="$("$command_path" --version 2>/dev/null || true)"
+  if [[ "$version_line" == "ruff 0.15.21" ]]; then
+    ok "Ruff 0.15.21 ($command_path)"
+  else
+    fail "Ruff 0.15.21 (found: ${version_line:-unknown}; path: $command_path)"
+    print_uv_path_guidance ruff "$command_path"
   fi
 }
 
@@ -118,10 +214,10 @@ check_command "Git" git
 check_command "ripgrep" rg
 check_command "fd" fd
 check_command "fzf" fzf
-check_command "Tree-sitter CLI" tree-sitter
+check_tree_sitter
 check_command "LazyGit" lazygit
 check_command "C compiler" cc
-check_any_command "download client" curl wget
+check_command "curl" curl
 check_command "unzip" unzip
 check_any_command "tar" tar gtar
 check_command "gzip" gzip
@@ -142,7 +238,7 @@ if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
   check_graphql_lsp
   check_command "uv" uv
   check_mdformat_extensions
-  check_command "Python formatter" ruff
+  check_ruff
   echo "project: Prettier stays project-local and is not installed globally"
 fi
 

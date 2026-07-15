@@ -1,20 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+print_usage() {
+  cat <<'EOF'
+Usage: bootstrap.sh [core|full|desktop]
+
+Profiles are cumulative; choose one:
+  core     Editor, search, Tree-sitter, LazyGit, and locked plugins.
+           Use on a minimal headless or SSH server.
+  full     Core plus configured language servers and formatters. (default)
+           Use on a developer machine or cloud development host.
+  desktop  Full plus image/PDF preview tools and a system file opener.
+           Use with Ghostty or another Kitty-graphics-compatible terminal.
+
+Choose one per machine; using desktop on a laptop and core on a server is normal.
+Running desktop already includes full and core. You can safely rerun later with
+a higher profile; the bootstrap only fills missing capabilities.
+EOF
+}
+
 PROFILE="${1:-full}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 
+if (($# > 1)); then
+  print_usage >&2
+  exit 2
+fi
+
 case "$PROFILE" in
   core | full | desktop) ;;
+  -h | --help)
+    print_usage
+    exit 0
+    ;;
   *)
-    echo "Usage: $0 [core|full|desktop]" >&2
+    print_usage >&2
     exit 2
     ;;
 esac
 
 export HOMEBREW_NO_AUTO_UPDATE=1
-export PATH="$HOME/.local/bin:$PATH"
 
 have() {
   command -v "$1" >/dev/null 2>&1
@@ -95,13 +121,15 @@ ensure_graphql_lsp() {
 
 ensure_uv_tools() {
   local listing=""
+  local ruff_command=""
+  local uv_bin=""
 
   if ! have uv; then
     echo "cannot install mdformat or ruff: uv is not available" >&2
     return
   fi
 
-  export PATH="$(uv tool dir --bin):$PATH"
+  uv_bin="$(uv tool dir --bin)"
   listing="$(uv tool list --show-with --show-version-specifiers 2>/dev/null || true)"
 
   if printf '%s\n' "$listing" | grep -q '^mdformat v1\.0\.0 ' \
@@ -120,7 +148,13 @@ ensure_uv_tools() {
       --with 'mdformat-wikilink==0.3.0'
   fi
 
-  if have ruff && [[ "$(ruff --version 2>/dev/null || true)" == "ruff 0.15.21" ]]; then
+  if [[ -x "$uv_bin/ruff" ]]; then
+    ruff_command="$uv_bin/ruff"
+  elif have ruff; then
+    ruff_command="$(command -v ruff)"
+  fi
+
+  if [[ -n "$ruff_command" && "$("$ruff_command" --version 2>/dev/null || true)" == "ruff 0.15.21" ]]; then
     echo "already available: ruff 0.15.21"
   else
     uv tool install --force 'ruff==0.15.21'
@@ -136,6 +170,7 @@ ensure_brew_command fd fd
 ensure_brew_command fzf fzf
 ensure_brew_command tree-sitter tree-sitter-cli
 ensure_brew_command lazygit lazygit
+ensure_brew_command curl curl
 
 if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
   ensure_brew_command uv uv

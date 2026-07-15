@@ -5,8 +5,8 @@ Hamel's existing Zed muscle memory.
 
 ## Requirements
 
-- Core: Neovim 0.12+, Git, a C compiler, curl/wget, unzip, tar, gzip, ripgrep,
-  fd, fzf, LazyGit, and the Tree-sitter CLI.
+- Core: Neovim 0.12+, Git, a C compiler, `curl`, unzip, tar, gzip, ripgrep, fd,
+  fzf, LazyGit, and Tree-sitter CLI 0.26.1+.
 - Go: `gopls` and `gofmt`.
 - Lua: `lua-language-server` and `stylua`.
 - JavaScript and TypeScript: `vtsls` for language intelligence,
@@ -36,12 +36,20 @@ cd /path/to/dotfiles-hd
 ./setup/nvim/bootstrap.sh full
 ```
 
-Profiles keep server and desktop installs separate:
+Profiles are cumulative, so choose only the highest level the machine needs:
 
-- `core` installs the editor/search/plugin foundation.
-- `full` checks configured global language servers and formatters. The Go
-  toolchain stays host-managed, and Prettier stays project-local.
-- `desktop` adds ImageMagick and Ghostscript for image/PDF previews.
+- `core` is for minimal headless/SSH editing, search, and Git.
+- `full` includes `core` plus language servers and formatters. Use it for normal
+  development laptops, workstations, or cloud development hosts. It is the
+  default.
+- `desktop` includes `full` plus image/PDF preview tools. Use it in Ghostty or
+  another Kitty-graphics-compatible terminal when those previews are useful.
+
+Choose one profile per machine. It is normal to use `desktop` on a laptop and
+`core` or `full` on a server, but never combine profiles on one machine. Rerun a
+higher profile later if the machine's role grows. The Go toolchain stays
+host-managed, Prettier stays project-local, and Ghostty/Herdr remain outside
+these profiles.
 
 The bootstrap accepts tools already supplied by mise or the operating system,
 uses Homebrew only when it is already available, installs `mdformat`/Ruff with
@@ -49,6 +57,10 @@ uses Homebrew only when it is already available, installs `mdformat`/Ruff with
 one is not already on `PATH`. It never invokes `sudo`, installs a package
 manager, or changes shell startup files. See
 [`setup/nvim/README.md`](../../setup/nvim/README.md).
+
+The shell that launches Neovim must put `uv tool dir --bin` before any stale
+`mdformat` or Ruff copies on its persistent `PATH`; the dependency doctor checks
+the caller's resolved commands instead of changing their order for the check.
 
 ## Safety Net
 
@@ -60,6 +72,8 @@ manager, or changes shell startup files. See
 - `:ConformInfo` shows formatter status.
 - `:TSStatus` shows Tree-sitter parsers.
 - `setup/nvim/check-dependencies.sh full` checks external tools on any machine.
+- `setup/nvim/tests/check-dependencies.sh` tests version, download, and caller
+  `PATH` handling in the dependency doctor.
 - `nvim --headless -u NONE -l config/nvim/tests/escape-save.lua` runs the
   guarded Escape-save regression test from the dotfiles repo root.
 

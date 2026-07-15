@@ -39,8 +39,9 @@ fi
 
 git pull --ff-only
 
+NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 for path in \
-  "$HOME/.config/nvim" \
+  "$NVIM_CONFIG_DIR" \
   "$HOME/.config/herdr/config.toml" \
   "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 do
@@ -103,7 +104,7 @@ replacing a non-matching destination. It links only these paths:
 | --- | --- | --- |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` |
 | Herdr | `~/.config/herdr/config.toml` | `config/herdr/config.toml` |
-| Neovim | `~/.config/nvim` | `config/nvim` |
+| Neovim | `${XDG_CONFIG_HOME:-$HOME/.config}/nvim` | `config/nvim` |
 
 ### 4. Install plugins and project tools
 
@@ -111,11 +112,20 @@ replacing a non-matching destination. It links only these paths:
 ~/Developer/dotfiles-hd/setup/nvim/bootstrap.sh desktop
 ```
 
+`desktop` already includes the `full` language tooling and the `core` editor
+foundation, so do not run the other profiles separately on this laptop.
+
 The shared bootstrap installs only missing capabilities, restores the locked
 plugins, and verifies the full desktop profile. Open Neovim once and let
 Tree-sitter finish installing its committed parser list. In each work repo, use
 that repo's documented package manager to install dependencies. Prettier stays
 project-local, and the ESLint server discovers the project's own configuration.
+
+If bootstrap reports that `mdformat` or Ruff is missing or stale, put
+`uv tool dir --bin` before the reported shadowing directory through the
+company-approved shell setup, start a fresh shell, and rerun bootstrap. The
+scripts deliberately do not edit `.zshrc` or hide this gap with a temporary
+internal `PATH`.
 
 ### 5. Verify
 
@@ -125,7 +135,8 @@ brew bundle check --verbose \
 
 ~/Developer/dotfiles-hd/setup/nvim/check-dependencies.sh desktop
 
-test "$(readlink "$HOME/.config/nvim")" = \
+NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
+test "$(readlink "$NVIM_CONFIG_DIR")" = \
   "$HOME/Developer/dotfiles-hd/config/nvim"
 test "$(readlink "$HOME/.config/herdr/config.toml")" = \
   "$HOME/Developer/dotfiles-hd/config/herdr/config.toml"

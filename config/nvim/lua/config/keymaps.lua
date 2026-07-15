@@ -4,14 +4,14 @@ local map = vim.keymap.set
 map("n", "i", "a", { desc = "Insert after cursor" })
 map("n", "a", "i", { desc = "Insert before cursor" })
 
--- Kuncheng's Escape-to-save idea, guarded so it only writes a clean buffer that
--- was changed during one Insert-mode session. Normal-mode edits, stale undo
--- state, and entering/leaving Insert mode without typing never arm a write.
+-- Kuncheng's Escape-to-save idea, guarded so it only writes changes authorized
+-- by Insert-mode sessions. Normal-mode edits and stale undo state disarm it.
 local escape_save_group = vim.api.nvim_create_augroup("GuardedEscapeSave", { clear = true })
 
 local function clear_escape_save_state(buf)
   vim.b[buf].insert_enter_changedtick = nil
   vim.b[buf].insert_enter_was_modified = nil
+  vim.b[buf].insert_enter_was_authorized = nil
   vim.b[buf].save_on_esc_changedtick = nil
 end
 
@@ -19,8 +19,12 @@ vim.api.nvim_create_autocmd("InsertEnter", {
   group = escape_save_group,
   desc = "Record the buffer state before an Insert-mode edit",
   callback = function(args)
-    vim.b[args.buf].insert_enter_changedtick = vim.api.nvim_buf_get_changedtick(args.buf)
+    local changedtick = vim.api.nvim_buf_get_changedtick(args.buf)
+
+    vim.b[args.buf].insert_enter_changedtick = changedtick
     vim.b[args.buf].insert_enter_was_modified = vim.bo[args.buf].modified
+    vim.b[args.buf].insert_enter_was_authorized = vim.b[args.buf].save_on_esc_changedtick
+      == changedtick
     vim.b[args.buf].save_on_esc_changedtick = nil
   end,
 })
@@ -32,9 +36,10 @@ vim.api.nvim_create_autocmd("InsertLeave", {
     local changedtick = vim.api.nvim_buf_get_changedtick(args.buf)
     local insert_enter_changedtick = vim.b[args.buf].insert_enter_changedtick
     local was_modified = vim.b[args.buf].insert_enter_was_modified
+    local was_authorized = vim.b[args.buf].insert_enter_was_authorized
 
     if
-      not was_modified
+      (not was_modified or was_authorized)
       and vim.bo[args.buf].modified
       and insert_enter_changedtick
       and changedtick ~= insert_enter_changedtick
@@ -46,6 +51,7 @@ vim.api.nvim_create_autocmd("InsertLeave", {
 
     vim.b[args.buf].insert_enter_changedtick = nil
     vim.b[args.buf].insert_enter_was_modified = nil
+    vim.b[args.buf].insert_enter_was_authorized = nil
   end,
 })
 
