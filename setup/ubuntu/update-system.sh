@@ -1,163 +1,78 @@
 #!/usr/bin/env bash
-
-# System Update Script for Ubuntu
-
 set -euo pipefail
 
-export PATH="$HOME/.local/bin:$PATH"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
+MISE_BIN="${DOTFILES_MISE_BIN:-$HOME/.local/bin/mise}"
+NEOVIM_SETUP_SCRIPT="${DOTFILES_NEOVIM_SETUP_SCRIPT:-$SCRIPT_DIR/setup-neovim.sh}"
 
-if [[ -d "$HOME/.local/share/pnpm" ]]; then
-    export PNPM_HOME="$HOME/.local/share/pnpm"
-    export PATH="$PNPM_HOME:$PATH"
-fi
+print_usage() {
+  cat <<'EOF'
+Usage: update-system.sh
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-NC='\033[0m'
-
-section() {
-    echo -e "${BLUE}$1${NC}"
+Update the lean Ubuntu workstation through APT and refresh the pinned mise and
+Neovim daily-driver setup.
+EOF
 }
 
-success() {
-    echo -e "${GREEN}✓ $1${NC}\n"
+log() {
+  printf '\n==> %s\n' "$1"
 }
 
-warn() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
+require_ubuntu() {
+  [[ -r "$OS_RELEASE_FILE" ]] || {
+    printf 'Cannot read %s.\n' "$OS_RELEASE_FILE" >&2
+    exit 1
+  }
 
-has() {
-    command -v "$1" >/dev/null 2>&1
-}
-
-update_apt() {
-    section "📦 Updating APT packages..."
-    sudo apt update
-    sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
-    sudo DEBIAN_FRONTEND=noninteractive apt autoremove -y
-    sudo apt autoclean
-    success "APT packages updated"
-}
-
-update_snap() {
-    has snap || return 0
-
-    section "📦 Updating Snap packages..."
-    sudo snap refresh
-
-    LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' | while read -r snapname revision; do
-        sudo snap remove "$snapname" --revision="$revision" 2>/dev/null || true
-    done
-
-    success "Snap packages updated"
-}
-
-update_flatpak() {
-    has flatpak || return 0
-
-    section "📦 Updating Flatpak packages..."
-    flatpak update -y
-    success "Flatpak packages updated"
-}
-
-update_node_packages() {
-    if has pnpm; then
-        section "📦 Updating pnpm global packages..."
-        pnpm self-update || pnpm add -g pnpm@latest || warn "pnpm self-update skipped or failed"
-        pnpm update -g || warn "pnpm global update skipped or failed"
-        success "pnpm checked"
-    fi
-}
-
-update_uv() {
-    has uv || return 0
-
-    section "📦 Updating uv..."
-    uv self update || curl -LsSf https://astral.sh/uv/install.sh | sh
-    success "uv updated"
-}
-
-update_mise() {
-    has mise || return 0
-
-    section "📦 Updating mise toolchain..."
-    mise self-update -y
-    mise install
-    mise reshim
-    eval "$(mise activate bash)"
-    remove_mise_npm
-    mise outdated || true
-    success "mise toolchain updated"
-}
-
-remove_mise_npm() {
-    local node_path node_bin node_root
-
-    node_path="$(mise which node 2>/dev/null)" || return 0
-    node_bin="$(dirname "$node_path")"
-    node_root="$(cd "$node_bin/.." && pwd)"
-
-    rm -f "$node_bin/npm" "$node_bin/npx"
-    rm -rf "$node_root/lib/node_modules/npm"
-}
-
-update_rust() {
-    has rustup || return 0
-
-    section "📦 Updating Rust..."
-    rustup update
-    success "Rust updated"
-}
-
-check_firmware() {
-    has fwupdmgr || return 0
-
-    section "🔧 Checking firmware updates..."
-    fwupdmgr refresh --force 2>/dev/null || true
-    fwupdmgr get-updates 2>/dev/null || echo -e "${GREEN}✓ No firmware updates available${NC}"
-    echo ""
-}
-
-pending_apt_count() {
-    apt list --upgradable 2>/dev/null | awk 'NR > 1 {count++} END {print count + 0}'
-}
-
-print_summary() {
-    echo -e "${MAGENTA}📊 System Information:${NC}"
-    echo "Kernel: $(uname -r)"
-    echo "Uptime: $(uptime -p)"
-    echo "Pending APT updates: $(pending_apt_count)"
-
-    if [[ -f /var/run/reboot-required ]]; then
-        warn "Reboot required"
-    else
-        echo "Reboot required: no"
-    fi
-
-    echo -e "\n${GREEN}✅ System update complete!${NC}"
+  # shellcheck disable=SC1090
+  source "$OS_RELEASE_FILE"
+  if [[ "${ID:-}" != "ubuntu" ]]; then
+    printf 'This updater supports Ubuntu only (detected: %s).\n' "${ID:-unknown}" >&2
+    exit 1
+  fi
 }
 
 main() {
-    echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
-    echo -e "${MAGENTA}🔄 Starting System Update...${NC}\n"
+  if (($# > 1)); then
+    print_usage >&2
+    exit 2
+  fi
 
-    sudo -v
+  if (($# > 0)); then
+    case "$1" in
+      -h | --help)
+        print_usage
+        exit 0
+        ;;
+      *)
+        print_usage >&2
+        exit 2
+        ;;
+    esac
+  fi
 
-    update_apt
-    update_snap
-    update_flatpak
-    update_mise
-    update_uv
-    update_node_packages
-    update_rust
-    check_firmware
-    print_summary
+  require_ubuntu
+  sudo -v
 
-    echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
+  log "Updating Ubuntu packages"
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get update
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
+  sudo apt-get autoclean
+
+  if [[ -x "$MISE_BIN" ]]; then
+    log "Updating mise"
+    "$MISE_BIN" self-update -y
+  fi
+
+  log "Refreshing the pinned Neovim setup"
+  bash "$NEOVIM_SETUP_SCRIPT"
+
+  printf '\nUbuntu update complete.\n'
+  if [[ -f /var/run/reboot-required ]]; then
+    printf 'A reboot is required.\n'
+  fi
 }
 
 main "$@"
