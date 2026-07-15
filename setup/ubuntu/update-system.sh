@@ -85,24 +85,14 @@ update_mise() {
     has mise || return 0
 
     section "📦 Updating mise toolchain..."
-    mise self-update -y
-    mise install
+    # CLI upgrades belong to the Ubuntu bootstrap/package owner. This update
+    # path converges only the shared runtime and language-server pins.
+    mise install --yes
     mise reshim
     eval "$(mise activate bash)"
-    remove_mise_npm
+    # Keep npm and npx. Neovim uses npm to install some language servers.
     mise outdated || true
     success "mise toolchain updated"
-}
-
-remove_mise_npm() {
-    local node_path node_bin node_root
-
-    node_path="$(mise which node 2>/dev/null)" || return 0
-    node_bin="$(dirname "$node_path")"
-    node_root="$(cd "$node_bin/.." && pwd)"
-
-    rm -f "$node_bin/npm" "$node_bin/npx"
-    rm -rf "$node_root/lib/node_modules/npm"
 }
 
 update_rust() {

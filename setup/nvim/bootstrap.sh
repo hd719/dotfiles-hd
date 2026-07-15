@@ -208,6 +208,59 @@ ensure_brew_command() {
   fi
 }
 
+# Presence alone is insufficient for Go 1.26 development. Keep a current gopls
+# from any package manager, upgrade an active Homebrew copy, and refuse to
+# replace a stale externally managed command behind its owner's back.
+gopls_is_usable() {
+  local output major minor patch
+
+  have gopls || return 1
+  output="$(gopls version 2>/dev/null || true)"
+  [[ "$output" =~ gopls[[:space:]]+v?([0-9]+)\.([0-9]+)\.([0-9]+) ]] || return 1
+  major="${BASH_REMATCH[1]}"
+  minor="${BASH_REMATCH[2]}"
+  patch="${BASH_REMATCH[3]}"
+  ((10#$major > 0 || 10#$minor > 23 || (10#$minor == 23 && 10#$patch >= 0)))
+}
+
+ensure_gopls() {
+  local active_path brew_prefix
+
+  if gopls_is_usable; then
+    echo "already available: gopls ($(command -v gopls))"
+    return
+  fi
+
+  if have gopls; then
+    active_path="$(command -v gopls)"
+    if ! have brew; then
+      echo "gopls 0.23.0+ is required; upgrade $active_path with its package manager" >&2
+      return 1
+    fi
+
+    brew_prefix="$(brew --prefix)"
+    if [[ "$active_path" != "$brew_prefix/bin/gopls" ]]; then
+      echo "gopls 0.23.0+ is required; upgrade $active_path with its package manager" >&2
+      return 1
+    fi
+
+    echo "upgrading Homebrew gopls to 0.23.0+"
+    brew upgrade gopls
+  elif have brew; then
+    echo "installing gopls"
+    brew install gopls
+  else
+    echo "cannot install gopls automatically: Homebrew is not available" >&2
+    return
+  fi
+
+  hash -r
+  if ! gopls_is_usable; then
+    echo "gopls 0.23.0+ is still unavailable after Homebrew setup" >&2
+    return 1
+  fi
+}
+
 # One Homebrew formula supplies all four commands, so the bundle is available
 # only when every server can be found on PATH.
 vscode_language_servers_available() {
@@ -350,7 +403,7 @@ if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
     prepare_homebrew_node_dependency
   fi
   ensure_brew_command bash-language-server bash-language-server
-  ensure_brew_command gopls gopls
+  ensure_gopls
   if have gofmt; then
     echo "already available: gofmt ($(command -v gofmt))"
   else

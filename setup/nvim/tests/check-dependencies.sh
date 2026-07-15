@@ -66,12 +66,15 @@ make_full_path() {
   make_core_path "$dir" "0.26.10" curl
 
   for command_name in \
-    node npm bash-language-server gopls gofmt lua-language-server stylua vtsls \
+    npm bash-language-server gofmt lua-language-server stylua vtsls \
     vscode-eslint-language-server vscode-json-language-server \
     vscode-css-language-server vscode-html-language-server graphql-lsp
   do
     write_stub "$dir" "$command_name" 'exit 0'
   done
+
+  write_stub "$dir" node 'echo "v22.22.0"'
+  write_stub "$dir" gopls 'echo "golang.org/x/tools/gopls v0.23.0"'
 
   write_stub "$dir" uv \
     'if [[ "$1 $2 $3" == "tool dir --bin" ]]; then' \
@@ -202,7 +205,25 @@ make_full_path "$uv_persistent_path"
 run_doctor "$uv_persistent_path:$UV_BIN" full
 expect_success "uv tools on the caller PATH are accepted"
 
-# Scenario 6: older binaries earlier on PATH must fail with actionable ordering
+# Scenario 6: reject an old gopls with the supported minimum in the guidance.
+old_gopls_path="$TMP_ROOT/old-gopls"
+make_full_path "$old_gopls_path"
+write_stub "$old_gopls_path" gopls 'echo "golang.org/x/tools/gopls v0.16.1"'
+run_doctor "$old_gopls_path:$UV_BIN" full
+expect_failure_containing \
+  "gopls below 0.23.0 is rejected" \
+  "gopls 0.23.0+"
+
+# Scenario 7: Node 16 is too old for the configured Neovim language servers.
+old_node_path="$TMP_ROOT/old-node"
+make_full_path "$old_node_path"
+write_stub "$old_node_path" node 'echo "v16.20.2"'
+run_doctor "$old_node_path:$UV_BIN" full
+expect_failure_containing \
+  "Node below 18 is rejected" \
+  "Node.js 18+"
+
+# Scenario 8: older binaries earlier on PATH must fail with actionable ordering
 # guidance instead of being mistaken for the pinned uv tools.
 stale_shadow_path="$TMP_ROOT/stale-shadow"
 make_full_path "$stale_shadow_path"

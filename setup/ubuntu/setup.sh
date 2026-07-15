@@ -25,7 +25,7 @@ YELLOW='\033[1;33m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-TOTAL_STEPS=13
+TOTAL_STEPS=14
 CURRENT_STEP=0
 step() {
     CURRENT_STEP=$((CURRENT_STEP + 1))
@@ -57,11 +57,11 @@ check_ubuntu_version() {
         exit 1
     fi
 
-    # Extract major version number
-    VERSION_NUM=$(echo "$VERSION_ID" | cut -d'.' -f1)
-
-    if [[ "$VERSION_NUM" -lt 20 ]]; then
-        echo -e "${RED}❌ Ubuntu version too old ($VERSION_ID). Requires 20.04 or newer.${NC}"
+    IFS=. read -r VERSION_MAJOR VERSION_MINOR _ <<<"${VERSION_ID:-}"
+    if [[ ! "$VERSION_MAJOR" =~ ^[0-9]+$ || ! "$VERSION_MINOR" =~ ^[0-9]+$ ]] \
+      || ((10#$VERSION_MAJOR < 26)) \
+      || ((10#$VERSION_MAJOR == 26 && 10#$VERSION_MINOR < 4)); then
+        echo -e "${RED}❌ Ubuntu version too old ($VERSION_ID). Requires 26.04 or newer.${NC}"
         exit 1
     fi
 
@@ -79,7 +79,7 @@ install_base_tools() {
         git curl wget gcc make unzip tar zsh vim \
         build-essential libssl-dev libreadline-dev zlib1g-dev \
         jq zstd ffmpeg ghostscript imagemagick libvips-dev \
-        tmux redis-server nmap speedtest-cli python3-pip python3-venv golang
+        tmux redis-server nmap speedtest-cli python3-pip python3-venv
 
     # Install bat (might be named batcat on Ubuntu)
     if ! command -v bat &>/dev/null; then
@@ -153,7 +153,16 @@ install_base_tools() {
     # Install kubectl
     if ! command -v kubectl &>/dev/null; then
         echo -e "${YELLOW}Installing kubectl...${NC}"
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        case "$(uname -m)" in
+            x86_64 | amd64) KUBECTL_ARCH="amd64" ;;
+            aarch64 | arm64) KUBECTL_ARCH="arm64" ;;
+            *)
+                echo -e "${RED}❌ Unsupported architecture for kubectl: $(uname -m)${NC}"
+                exit 1
+                ;;
+        esac
+
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${KUBECTL_ARCH}/kubectl"
         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
         rm kubectl
     fi
@@ -262,34 +271,34 @@ install_starship_zsh_config() {
     echo -e "${GREEN}✓ Zsh + Starship configured${NC}"
 }
 
-install_node_and_pnpm() {
-    step "Installing Node.js (mise) + pnpm"
+install_mise_toolchain_and_pnpm() {
+    step "Installing the shared mise toolchain + pnpm"
 
-    if ! command -v mise &>/dev/null; then
-        echo -e "${YELLOW}Installing mise...${NC}"
-        curl -fsSL https://mise.run | sh
-    fi
-
-    export PATH="$HOME/.local/bin:$PATH"
-
-    mkdir -p "$HOME/.config/mise"
-    ln -sfn "$HOME/Developer/dotfiles-hd/config/mise/config.toml" "$HOME/.config/mise/config.toml"
-
-    mise trust "$HOME/.config/mise/config.toml" || true
-    mise install node
+    # Fresh Ubuntu hosts get the mise CLI through APT. The shared bootstrap owns
+    # the config link plus the Bun, Go, Node, Python, and gopls pins inside it.
+    "$HOME/Developer/dotfiles-hd/setup/ubuntu/install-mise.sh"
     eval "$(mise activate bash)"
-
-    NODE_PATH="$(mise which node)"
-    NODE_BIN="$(dirname "$NODE_PATH")"
-    NODE_ROOT="$(cd "$NODE_BIN/.." && pwd)"
-    rm -f "$NODE_BIN/npm" "$NODE_BIN/npx"
-    rm -rf "$NODE_ROOT/lib/node_modules/npm"
 
     if ! command -v pnpm &>/dev/null; then
         curl -fsSL https://get.pnpm.io/install.sh | sh -
     fi
 
-    echo -e "${GREEN}✓ Node.js (via mise) and pnpm installed${NC}"
+    echo -e "${GREEN}✓ Shared mise toolchain and pnpm installed${NC}"
+}
+
+install_neovim_configuration() {
+    step "Installing the shared Neovim desktop profile"
+
+    local dotfiles_dir="$HOME/Developer/dotfiles-hd"
+    export PATH="$HOME/.local/bin:$PATH"
+
+    # `mise exec --` exposes the freshly installed Node, Go, and gopls pins to
+    # child setup commands without pretending this script can alter a parent shell.
+    mise exec -- "$dotfiles_dir/setup/ubuntu/install-neovim-dependencies.sh" desktop
+    "$dotfiles_dir/setup/nvim/link-config.sh"
+    mise exec -- "$dotfiles_dir/setup/nvim/bootstrap.sh" desktop
+
+    echo -e "${GREEN}✓ Shared Neovim desktop profile installed${NC}"
 }
 
 install_rbenv() {
@@ -440,7 +449,7 @@ clone_dotfiles() {
     mkdir -p ~/Developer
 
     if [ ! -d ~/Developer/dotfiles-hd ]; then
-        git clone https://github.com/hameldesai/dotfiles-hd.git ~/Developer/dotfiles-hd
+        git clone https://github.com/hd719/dotfiles-hd.git ~/Developer/dotfiles-hd
         echo -e "${GREEN}✓ Dotfiles cloned${NC}"
     else
         echo -e "${YELLOW}⚠️ dotfiles-hd already exists${NC}"
@@ -449,44 +458,7 @@ clone_dotfiles() {
 
 link_dotfiles_configs() {
     step "Linking config files from dotfiles"
-
-    DOTFILES_DIR="$HOME/Developer/dotfiles-hd/config"
-    CONFIG_DIR="$HOME/.config"
-
-    # Create .config directory if it doesn't exist
-    mkdir -p "$CONFIG_DIR"
-
-    # List of applications to symlink
-    APPS=("btop" "fastfetch" "bat" "tmux" "wtf" "ghostty")
-
-    for app in "${APPS[@]}"; do
-        SRC="$DOTFILES_DIR/$app"
-        DEST="$CONFIG_DIR/$app"
-
-        # Check if source exists
-        if [ ! -e "$SRC" ]; then
-            echo -e "${YELLOW}⚠️  $SRC doesn't exist, skipping...${NC}"
-            continue
-        fi
-
-        # Remove existing destination (backup already exists or first run)
-        if [[ -e "$DEST" || -L "$DEST" ]]; then
-            # Only backup if no backup exists yet
-            if [[ ! -e "$DEST.bak" ]]; then
-                echo -e "${YELLOW}⚠️  Backing up existing $DEST → $DEST.bak${NC}"
-                /bin/mv -f "$DEST" "$DEST.bak"
-            else
-                echo -e "${YELLOW}⚠️  Removing existing $DEST (backup already exists)${NC}"
-                /bin/rm -rf "$DEST"
-            fi
-        fi
-
-        # Create symlink
-        echo -e "${YELLOW}🔗 Linking $SRC → $DEST${NC}"
-        /bin/ln -s "$SRC" "$DEST"
-    done
-
-    echo -e "${GREEN}✓ Dotfiles config symlinks complete${NC}"
+    "$HOME/Developer/dotfiles-hd/setup/ubuntu/link-configs.sh"
 }
 
 install_vscode() {
@@ -541,6 +513,10 @@ install_ghostty() {
 echo -e "${MAGENTA}🙏 Om Shree Ganeshaya Namaha 🙏${NC}"
 echo -e "${GREEN}🚀 Starting Ubuntu Dev Setup...${NC}"
 
+# Reject unsupported hosts before network checks, package changes, or cleanup.
+check_ubuntu_version
+check_network
+
 # Fix any existing apt configuration conflicts before starting
 echo -e "${YELLOW}🔧 Checking for apt configuration conflicts...${NC}"
 if [ -f /etc/apt/sources.list.d/vscode.list ] && [ -f /usr/share/keyrings/microsoft.gpg ]; then
@@ -548,12 +524,12 @@ if [ -f /etc/apt/sources.list.d/vscode.list ] && [ -f /usr/share/keyrings/micros
     sudo rm -f /usr/share/keyrings/microsoft.gpg
 fi
 
-check_network
-check_ubuntu_version
 install_base_tools
+clone_dotfiles
 install_docker
 install_starship_zsh_config
-install_node_and_pnpm
+install_mise_toolchain_and_pnpm
+install_neovim_configuration
 install_rbenv
 install_ruby_lsp_and_ruby_build
 install_uv

@@ -13,16 +13,15 @@ _activate_mise() {
   eval "$("$mise_bin" activate zsh)"
 }
 
-_remove_mise_npm() {
-  command -v mise &> /dev/null || return 0
+refresh-global() {
+  # Resolve mise from PATH so this shared function works on Homebrew macOS and
+  # APT-backed Ubuntu. npm and npx remain part of mise's Node installation.
+  if ! command -v mise >/dev/null 2>&1; then
+    echo "mise not found. Install it before refreshing the shared toolchain."
+    return 1
+  fi
 
-  local node_path node_bin node_root
-  node_path="$(mise which node 2>/dev/null)" || return 0
-  node_bin="$(dirname "$node_path")"
-  node_root="$(cd "$node_bin/.." && pwd)"
-
-  rm -f "$node_bin/npm" "$node_bin/npx"
-  rm -rf "$node_root/lib/node_modules/npm"
+  mise install --yes && mise reshim && hash -r
 }
 
 reload() {
@@ -175,11 +174,11 @@ goodMorning() {
 
   echo "Checking mise toolchain..."
   if command -v mise &> /dev/null; then
-    mise install
-    _remove_mise_npm
+    mise install --yes
+    mise reshim
     echo ""
     echo "Active mise runtimes:"
-    mise ls
+    mise ls --current
   else
     echo "mise not found, skipping."
   fi

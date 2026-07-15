@@ -75,6 +75,9 @@ When Hamel asks to set up the work laptop:
 
 ## Existing Helpers
 
+- `setup/mise/bootstrap.sh personal`
+- `setup/ubuntu/install-mise.sh`
+- `setup/ubuntu/link-configs.sh`
 - `setup/nvim/link-config.sh`
 - `setup/nvim/bootstrap.sh`
 - `setup/nvim/check-dependencies.sh`
@@ -84,11 +87,41 @@ When Hamel asks to set up the work laptop:
 
 Prefer these scripts when they match the task.
 
+## Personal Runtime Ownership
+
+- Personal macOS and Ubuntu share `config/mise/config.toml` and the same
+  Bun, Go, Node, Python, and `gopls` pins.
+- Link the whole `config/mise` directory with
+  `setup/mise/bootstrap.sh personal`; never maintain an Ubuntu-only file link.
+- Homebrew owns the mise CLI on macOS. Fresh Ubuntu hosts install it from the
+  official mise APT repository; preserve an existing working CLI unless Hamel
+  explicitly approves a migration. mise owns the configured development tools
+  on both systems.
+- The shared bootstrap must run `mise install --yes` and `mise reshim`, remain
+  safe to rerun, and preserve npm and npx.
+- Do not make generic servers or the Resilience work Mac depend on this personal
+  toolchain. Their existing runtime ownership rules still apply.
+
 ## Portable Neovim Dependencies
 
 - Route every personal, work, Linux, and cloud host through
   `setup/nvim/bootstrap.sh` and `setup/nvim/check-dependencies.sh`; do not assume
   that Lazy installs external language servers or formatters.
+- On Ubuntu 26.04 or newer, run
+  `setup/ubuntu/install-neovim-dependencies.sh PROFILE` before the shared
+  bootstrap. Use APT, not Homebrew or Snap, and use the same profile for both
+  commands.
+- On a personal Ubuntu `full` or `desktop` machine, run
+  `setup/ubuntu/install-mise.sh` before that dependency adapter. A minimal
+  generic `core` server may keep its system-managed runtimes instead.
+- In a same-shell scripted sequence, invoke the Ubuntu adapter and shared
+  Neovim bootstrap through `mise exec --`; a completed child script cannot
+  activate runtimes in its parent shell.
+- Before that Ubuntu sequence, export `PATH="$HOME/.local/bin:$PATH"` in the
+  caller's shell. The adapter cannot update its parent shell, and the shared
+  bootstrap must see the user-local commands it just installed.
+- Before pulling or switching a setup checkout, run `git status`. If it has
+  changes, leave it untouched and use a separate clone or worktree.
 - Setup is capability-based. Accept a working command from Homebrew, mise, a
   system package manager, or a work-managed runtime instead of installing a
   duplicate.
@@ -99,6 +132,9 @@ Prefer these scripts when they match the task.
 - Keep Node host-managed. Homebrew-backed language servers may use an unlinked
   Homebrew Node dependency, but setup must preserve the Node command and version
   that the caller had before bootstrap.
+- Ubuntu setup must preserve working Node, npm, and Go commands. Never remove
+  npm or npx to make pnpm the only package manager; Neovim's full profile needs
+  npm for pinned language-server installation.
 - Keep `core`, `full`, and `desktop` profiles distinct. Never install
   ImageMagick, Ghostscript, Ghostty, or Herdr on a headless host just to satisfy
   the core editor.
@@ -109,6 +145,11 @@ Prefer these scripts when they match the task.
   in the same change.
 - Verify setup idempotence by running the chosen bootstrap twice, then run the
   matching dependency check and Neovim's headless startup.
+- On Ubuntu, run both the APT dependency adapter and shared bootstrap twice for
+  that idempotence check.
+- Ubuntu config linking must preserve the real `~/.config/tmux` directory and
+  its plugins. Link `tmux.conf` and repo scripts separately; never replace a
+  later local change with `rm -rf`.
 
 ## Zed Theme Profiles
 

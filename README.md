@@ -14,6 +14,26 @@ and link the Ghostty, Herdr, and Neovim setup on the work laptop. That runbook i
 intentionally narrower than the personal Mac inventory below so it does not
 replace work-specific shell, runtime, credential, or certificate state.
 
+## Shared Personal Toolchain
+
+Personal macOS and Ubuntu share the exact Bun, Go, Node, Python, and `gopls`
+pins in `config/mise/config.toml`. Each OS owns the mise CLI, while mise owns
+those development tools:
+
+```bash
+# Personal macOS
+brew install mise
+./setup/mise/bootstrap.sh personal
+
+# Personal Ubuntu
+./setup/ubuntu/install-mise.sh
+```
+
+Both paths create the same whole-directory link at `~/.config/mise`, back up
+conflicts, install every configured runtime, and keep npm/npx intact. See
+[`setup/mise/README.md`](setup/mise/README.md). Do not apply this personal
+toolchain to the Resilience work Mac.
+
 ## Portable Neovim Setup
 
 Every personal, work, Linux, or cloud host uses the same capability-based setup:
@@ -30,6 +50,27 @@ machine with image/PDF previews. Choose one per machine—`desktop` already
 includes `full` and `core`. The scripts preserve tools already supplied by mise
 or the operating system and only fill missing capabilities. See
 [`setup/nvim/README.md`](setup/nvim/README.md).
+
+On Ubuntu 26.04 or newer, install the external dependencies with APT through
+the focused Ubuntu adapter before running the shared bootstrap:
+
+```bash
+PROFILE=full
+export PATH="$HOME/.local/bin:$PATH"
+./setup/ubuntu/install-mise.sh
+mise exec -- ./setup/ubuntu/install-neovim-dependencies.sh "$PROFILE"
+./setup/nvim/link-config.sh
+mise exec -- ./setup/nvim/bootstrap.sh "$PROFILE"
+```
+
+The mise step gives a personal development machine the same runtimes as macOS.
+`mise exec --` exposes those runtimes immediately without asking a child script
+to change its parent shell. Skip the mise step on a generic `core` server that
+intentionally uses system-managed runtimes. The export keeps newly installed
+user-local commands visible to the current shell.
+
+See [`setup/ubuntu/README.md`](setup/ubuntu/README.md) for profile selection,
+idempotence checks, and the safe path when an existing clone has changes.
 
 ## Current Personal Mac Symlinks
 
@@ -92,6 +133,15 @@ backup_and_link "$DOTFILES/config/zed/themes" "$HOME/.config/zed/themes"
 ```
 
 ## Existing Bootstrap Scripts
+
+Personal mise toolchain:
+
+```bash
+~/Developer/dotfiles-hd/setup/mise/bootstrap.sh personal
+```
+
+On Ubuntu, use `setup/ubuntu/install-mise.sh`; it installs a missing mise command
+with APT before calling the shared command.
 
 Zed:
 

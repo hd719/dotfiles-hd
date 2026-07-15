@@ -103,12 +103,16 @@ make_full_path() {
   make_core_path "$dir"
 
   for command_name in \
-    gopls gofmt lua-language-server stylua vtsls \
+    gofmt lua-language-server stylua vtsls \
     vscode-eslint-language-server vscode-json-language-server \
     vscode-css-language-server vscode-html-language-server graphql-lsp
   do
     write_stub "$dir" "$command_name" 'exit 0'
   done
+
+  # The shared doctor enforces the minimum supported gopls line, not only the
+  # existence of a command with that name.
+  write_stub "$dir" gopls 'echo "golang.org/x/tools/gopls v0.23.0"'
 
   write_stub "$dir" uv \
     'if [[ "$1 $2 $3" == "tool dir --bin" ]]; then' \
@@ -156,6 +160,26 @@ expect() {
   # test run reports all broken guarantees instead of stopping at the first.
   if ! "$@"; then
     echo "FAIL: $label" >&2
+    failures=$((failures + 1))
+  fi
+}
+
+expect_output_containing() {
+  local label="$1"
+  local expected="$2"
+
+  if [[ "$BOOTSTRAP_OUTPUT" != *"$expected"* ]]; then
+    echo "FAIL: $label (missing output: $expected)" >&2
+    failures=$((failures + 1))
+  fi
+}
+
+expect_output_not_containing() {
+  local label="$1"
+  local unexpected="$2"
+
+  if [[ "$BOOTSTRAP_OUTPUT" == *"$unexpected"* ]]; then
+    echo "FAIL: $label (unexpected output: $unexpected)" >&2
     failures=$((failures + 1))
   fi
 }
@@ -320,6 +344,26 @@ expect "the outdated active Node is not changed" \
   test "$(PATH="$BREW_ROOT/bin:$FULL_BIN" node --version)" = "v26.5.0"
 expect "no language-server install runs with an outdated active Node" \
   test "$(wc -l <"$STATE_DIR/brew-installs")" -eq "$install_count"
+
+# Scenario 7: an old external gopls cannot be upgraded safely by the shared
+# bootstrap. Stop before the doctor and explain the exact host-managed upgrade.
+stale_gopls_path="$TMP_ROOT/stale-external-gopls"
+make_full_path "$stale_gopls_path"
+write_stub "$stale_gopls_path" node 'echo "v22.22.0"'
+write_stub "$stale_gopls_path" npm 'echo "10.9.4"'
+write_stub "$stale_gopls_path" gopls 'echo "golang.org/x/tools/gopls v0.16.1"'
+run_bootstrap "$stale_gopls_path:$UV_BIN" full
+expect "stale external gopls stops bootstrap" \
+  test "$BOOTSTRAP_STATUS" -ne 0
+expect_output_containing \
+  "stale external gopls reports the supported minimum" \
+  "gopls 0.23.0+"
+expect_output_containing \
+  "stale external gopls explains the required action" \
+  "with its package manager"
+expect_output_not_containing \
+  "stale external gopls fails before the dependency doctor" \
+  "Neovim dependency check"
 
 # Convert the accumulated assertion count into the test process's exit status.
 if ((failures > 0)); then

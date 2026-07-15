@@ -43,7 +43,8 @@ fi
 
 This ensures **all** reloads after `goodMorning` are consistently fast (~40ms) instead of having one slow reload (~275ms).
 
-**Note:** `goodMorning()` also runs `refresh-global` directly (not the alias) since aliases don't expand inside functions.
+**Note:** `refresh-global` is a function that resolves mise from `PATH`, so the
+same helper works with Homebrew on macOS and APT on Ubuntu.
 
 **Savings:** ~30ms
 
@@ -347,8 +348,8 @@ Deferred (loads after first prompt):
 | `.zprofile` | Brew shellenv (cached) |
 | `.zshrc` | Main config, immediate plugin loading, devbox cache, compinit |
 | `prompt.zsh` | Starship, zoxide, zsh modules, cached init scripts, deferred `you-should-use` |
-| `functions.zsh` | Cache functions, `reload()`, `refresh_zsh_cache()` (eager rebuild), `goodMorning()` |
-| `alias.zsh` | Aliases including `refresh-global` |
+| `functions.zsh` | Cache functions, `reload()`, `refresh-global()`, `refresh_zsh_cache()` (eager rebuild), `goodMorning()` |
+| `alias.zsh` | Command aliases |
 | `tooling.zsh` | Dev tool configs |
 | `k8s.zsh` | Kubernetes config |
 

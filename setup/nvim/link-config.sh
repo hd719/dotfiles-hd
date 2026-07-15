@@ -19,6 +19,21 @@ fi
 
 mkdir -p "$(dirname "$TARGET")"
 
+next_backup_path() {
+  local path="$1"
+  local base="$path.backup-$(date +%Y%m%d-%H%M%S)"
+  local candidate="$base"
+  local suffix=1
+
+  # Avoid nesting a new config inside an existing same-second backup directory.
+  while [[ -e "$candidate" || -L "$candidate" ]]; do
+    candidate="$base-$suffix"
+    suffix=$((suffix + 1))
+  done
+
+  printf '%s\n' "$candidate"
+}
+
 # This early success makes reruns idempotent: an already-correct link is untouched.
 if [[ -L "$TARGET" && "$(readlink "$TARGET")" == "$SOURCE" ]]; then
   echo "Already linked: $TARGET -> $SOURCE"
@@ -28,7 +43,7 @@ fi
 # `-e` catches files and directories; `-L` also catches dangling symlinks.
 # Back either one up so an existing local config is never destroyed.
 if [[ -e "$TARGET" || -L "$TARGET" ]]; then
-  BACKUP="$TARGET.backup-$(date +%Y%m%d-%H%M%S)"
+  BACKUP="$(next_backup_path "$TARGET")"
   mv "$TARGET" "$BACKUP"
   echo "Backed up: $TARGET -> $BACKUP"
 fi
@@ -36,7 +51,7 @@ fi
 ln -s "$SOURCE" "$TARGET"
 
 # Verify the exact target so the script cannot report success for a wrong link.
-if [[ ! -L "$TARGET" || "$(readlink "$TARGET")" != "$SOURCE" ]]; then
+if [[ ! -L "$TARGET" || "$(readlink "$TARGET")" != "$SOURCE" || ! -d "$TARGET" ]]; then
   echo "Failed to link: $TARGET" >&2
   exit 1
 fi

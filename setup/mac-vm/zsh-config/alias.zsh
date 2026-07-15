@@ -121,8 +121,6 @@ alias tmns='tmux new -s'                    # Start a new tmux session with name
 alias tms='tmux new-session -s'             # Start a new tmux session
 alias tmk='tmux kill-server'                # Kill all tmux sessions
 
-alias refresh-global='/opt/homebrew/bin/mise install && /opt/homebrew/bin/mise reshim && hash -r'
-
 # OpenClaw
 alias opdash='lsof -ti:18789 | xargs kill -9 2>/dev/null; ssh -L 18789:127.0.0.1:18789 hd@100.120.198.12 -f -N && open "http://127.0.0.1:18789/#token=$(op read "op://Development/OpenClaw-Gateway-Token/password")"'
 

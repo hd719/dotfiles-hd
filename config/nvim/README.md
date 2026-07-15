@@ -36,6 +36,28 @@ cd /path/to/dotfiles-hd
 ./setup/nvim/bootstrap.sh full
 ```
 
+Ubuntu 26.04 or newer needs its APT dependency adapter first:
+
+```bash
+PROFILE=full
+export PATH="$HOME/.local/bin:$PATH"
+./setup/ubuntu/install-mise.sh
+mise exec -- ./setup/ubuntu/install-neovim-dependencies.sh "$PROFILE"
+./setup/nvim/link-config.sh
+mise exec -- ./setup/nvim/bootstrap.sh "$PROFILE"
+```
+
+The mise step is for Hamel's personal `full` and `desktop` machines; a generic
+`core` server may keep its approved system runtimes. `mise exec --` exposes the
+new pins immediately, while the export keeps user-local adapter commands visible
+to the shared bootstrap.
+
+The Ubuntu path does not install Homebrew or Snap and preserves working Node,
+npm, and Go commands. Run the adapter and bootstrap twice to verify
+idempotence. If the current clone has changes, use a separate clone or worktree
+instead of pulling or switching it. See
+[`setup/ubuntu/README.md`](../../setup/ubuntu/README.md).
+
 Profiles are cumulative, so choose only the highest level the machine needs:
 
 - `core` is for minimal headless/SSH editing, search, and Git.
@@ -77,6 +99,7 @@ the caller's resolved commands instead of changing their order for the check.
 - `setup/nvim/check-dependencies.sh full` checks external tools on any machine.
 - `setup/nvim/tests/check-dependencies.sh` tests version, download, and caller
   `PATH` handling in the dependency doctor.
+- `setup/nvim/tests/link-config.sh` tests safe backups and idempotent linking.
 - `setup/nvim/tests/bootstrap.sh` tests lockfile and host-Node preservation.
 - `nvim --headless -u NONE -l config/nvim/tests/escape-save.lua` runs the
   guarded Escape-save regression test from the dotfiles repo root.

@@ -149,6 +149,50 @@ check_tree_sitter() {
   fail "Tree-sitter CLI 0.26.1+ (found: ${version_line:-unknown})"
 }
 
+# Configured JavaScript language servers require Node 18 or newer. Report an
+# old host runtime instead of accepting commands that will fail when started.
+check_node() {
+  local version_line version major
+
+  if ! command -v node >/dev/null 2>&1; then
+    fail "Node.js 18+ (node)"
+    return
+  fi
+
+  version_line="$(node --version 2>/dev/null || true)"
+  version="${version_line#v}"
+  major="${version%%.*}"
+  if [[ "$major" =~ ^[0-9]+$ ]] && ((10#$major >= 18)); then
+    ok "Node.js $version_line ($(command -v node))"
+  else
+    fail "Node.js 18+ (found: ${version_line:-unknown})"
+  fi
+}
+
+# Go 1.26 development uses the current gopls line. An older distro binary can
+# exist on PATH yet still be too stale for the configured language features.
+check_gopls() {
+  local version_line major minor patch
+
+  if ! command -v gopls >/dev/null 2>&1; then
+    fail "gopls 0.23.0+ (gopls)"
+    return
+  fi
+
+  version_line="$(gopls version 2>/dev/null || true)"
+  if [[ "$version_line" =~ gopls[[:space:]]+v?([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+    major="${BASH_REMATCH[1]}"
+    minor="${BASH_REMATCH[2]}"
+    patch="${BASH_REMATCH[3]}"
+    if ((10#$major > 0 || 10#$minor > 23 || (10#$minor == 23 && 10#$patch >= 0))); then
+      ok "gopls v$major.$minor.$patch ($(command -v gopls))"
+      return
+    fi
+  fi
+
+  fail "gopls 0.23.0+ (found: ${version_line:-unknown})"
+}
+
 # The Lua config explicitly knows this private fallback path, so it is valid
 # even when `graphql-lsp` is not globally available on PATH.
 check_graphql_lsp() {
@@ -258,10 +302,10 @@ check_command "gzip" gzip
 
 # Full includes core and adds language-server and formatter checks.
 if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
-  check_command "Node.js" node
+  check_node
   check_command "npm" npm
   check_command "Bash language server" bash-language-server
-  check_command "Go language server" gopls
+  check_gopls
   check_command "Go formatter" gofmt
   check_command "Lua language server" lua-language-server
   check_command "Lua formatter" stylua

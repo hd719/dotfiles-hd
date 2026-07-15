@@ -47,10 +47,6 @@ if [[ -d "$HOME/.rbenv" ]]; then
   eval "$(rbenv init - zsh)"
 fi
 
-if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
-
 export PNPM_HOME="$HOME/.local/share/pnpm"
 if [[ -d "$PNPM_HOME" ]]; then
   path=("$PNPM_HOME" $path)
@@ -60,7 +56,7 @@ if [[ -f "$HOME/.local/bin/env" ]]; then
   source "$HOME/.local/bin/env"
 fi
 
-# Keep mise last so its configured runtimes win over rbenv, brew, and system tools.
+# Keep mise last so its configured runtimes win over rbenv and system tools.
 if typeset -f _activate_mise >/dev/null; then
   _activate_mise
 fi
