@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
+# Stop on command errors (-e), unset variables (-u), and failures hidden
+# inside pipelines (pipefail).
 set -euo pipefail
 
+# Run the real doctor against disposable PATHs filled with controlled fake
+# commands. This checks decisions without depending on the laptop's live tools.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 BOOTSTRAP="$SCRIPT_DIR/../bootstrap.sh"
 DOCTOR="$SCRIPT_DIR/../check-dependencies.sh"
@@ -13,6 +17,7 @@ REAL_DIRNAME="$(command -v dirname)"
 REAL_SED="$(command -v sed)"
 failures=0
 
+# Always remove the fake HOME and commands, including after an expected failure.
 trap 'rm -rf "$TMP_ROOT"' EXIT
 mkdir -p "$FAKE_HOME" "$UV_BIN"
 
@@ -21,6 +26,7 @@ write_stub() {
   local name="$2"
   shift 2
 
+  # Turn the remaining string arguments into lines of a small executable.
   {
     printf '#!%s\n' "$REAL_BASH"
     printf '%s\n' "$@"
@@ -34,6 +40,8 @@ make_core_path() {
   local download_client="$3"
   local command_name
 
+  # Each scenario receives a private PATH. Only the named commands exist, so a
+  # missing dependency cannot accidentally fall through to the real machine.
   mkdir -p "$dir"
   ln -s "$REAL_BASH" "$dir/bash"
   ln -s "$REAL_DIRNAME" "$dir/dirname"
@@ -54,6 +62,7 @@ make_full_path() {
   local dir="$1"
   local command_name
 
+  # Full is cumulative: begin with a valid core PATH, then add its extra tools.
   make_core_path "$dir" "0.26.10" curl
 
   for command_name in \
@@ -82,6 +91,8 @@ run_doctor() {
   local path="$1"
   local profile="$2"
 
+  # Expected-failure tests need the status and message, so pause `set -e` while
+  # the doctor runs and restore strict mode immediately afterward.
   set +e
   DOCTOR_OUTPUT="$(
     PATH="$path" \
@@ -97,6 +108,8 @@ run_bootstrap() {
   local path="$1"
   local profile="$2"
 
+  # Bootstrap eventually calls the same doctor. Capture its failure to verify
+  # bootstrap does not secretly repair PATH only for its own child process.
   set +e
   DOCTOR_OUTPUT="$(
     PATH="$path" \
@@ -143,10 +156,13 @@ expect_output_containing() {
   fi
 }
 
+# These pinned uv stubs are valid; individual PATH scenarios decide whether the
+# doctor can actually reach them or whether an older command shadows them.
 write_stub "$UV_BIN" mdformat \
   'echo "mdformat 1.0.0 (mdformat_gfm_alerts 2.0.0, mdformat-gfm 1.0.0, mdformat_footnote 0.1.3, mdformat_wikilink 0.3.0, mdformat_frontmatter 2.1.2)"'
 write_stub "$UV_BIN" ruff 'echo "ruff 0.15.21"'
 
+# Scenario 1: reject the version just below the supported Tree-sitter minimum.
 old_tree_sitter_path="$TMP_ROOT/old-tree-sitter"
 make_core_path "$old_tree_sitter_path" "0.26.0" curl
 run_doctor "$old_tree_sitter_path" core
@@ -154,16 +170,20 @@ expect_failure_containing \
   "Tree-sitter below 0.26.1 is rejected" \
   "Tree-sitter CLI 0.26.1+"
 
+# Scenario 2: accept the exact minimum version.
 minimum_tree_sitter_path="$TMP_ROOT/minimum-tree-sitter"
 make_core_path "$minimum_tree_sitter_path" "0.26.1" curl
 run_doctor "$minimum_tree_sitter_path" core
 expect_success "Tree-sitter 0.26.1 is accepted"
 
+# Scenario 3: wget is not a substitute because the locked installer calls curl.
 wget_only_path="$TMP_ROOT/wget-only"
 make_core_path "$wget_only_path" "0.26.10" wget
 run_doctor "$wget_only_path" core
 expect_failure_containing "wget cannot replace curl" "curl (curl)"
 
+# Scenario 4: uv knows where its tools live, but that directory is absent from
+# the caller PATH. Both the doctor and bootstrap must report the real gap.
 uv_not_persistent_path="$TMP_ROOT/uv-not-persistent"
 make_full_path "$uv_not_persistent_path"
 run_doctor "$uv_not_persistent_path" full
@@ -176,11 +196,14 @@ expect_failure_containing \
   "bootstrap preserves the caller PATH for its doctor" \
   "Put $UV_BIN first"
 
+# Scenario 5: the same pinned tools pass once their directory is truly on PATH.
 uv_persistent_path="$TMP_ROOT/uv-persistent"
 make_full_path "$uv_persistent_path"
 run_doctor "$uv_persistent_path:$UV_BIN" full
 expect_success "uv tools on the caller PATH are accepted"
 
+# Scenario 6: older binaries earlier on PATH must fail with actionable ordering
+# guidance instead of being mistaken for the pinned uv tools.
 stale_shadow_path="$TMP_ROOT/stale-shadow"
 make_full_path "$stale_shadow_path"
 write_stub "$stale_shadow_path" mdformat 'echo "mdformat 0.7.17"'
@@ -196,6 +219,7 @@ expect_output_containing \
   "PATH ordering guidance puts the uv tool directory first" \
   "Put $UV_BIN first"
 
+# Convert the accumulated assertion count into the test process's exit status.
 if ((failures > 0)); then
   echo "$failures dependency-doctor regression test(s) failed." >&2
   exit 1

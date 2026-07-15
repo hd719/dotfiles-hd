@@ -1208,3 +1208,23 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   `full` on a server is normal. If a machine's role grows, rerun a higher profile;
   the idempotent bootstrap keeps existing capabilities and fills only new gaps.
 - No curriculum checkbox changed. The next teaching checkpoint remains 3.5.
+
+## 2026-07-15 — Session 011: Reading the Lua and Bash Setup
+
+- Added beginner-focused comments to the portable Neovim Lua, Bash, and their
+  regression tests. The comments explain intent and safety invariants rather
+  than repeating obvious commands.
+- Lua mental model: `local` keeps state scoped to one file or function, tables
+  hold plugin specifications and buffer-local values, callbacks run on Neovim
+  events, and `pcall` lets cleanup happen before an error is raised again.
+- The Escape-save guard uses `changedtick` as a buffer edit-version. Only the
+  exact version authorized by a real Insert session may be written; a later
+  Normal-mode edit, undo, or empty Insert session invalidates that permission.
+- Bash mental model: `set -euo pipefail` makes failures visible, functions read
+  arguments through `$1`/`$2`, `command -v` checks capabilities on the real
+  `PATH`, and `trap` provides cleanup when a command or signal stops the script.
+- The test scripts construct disposable fake commands and PATHs, so they can
+  simulate lockfile corruption and Homebrew Node relinking without changing the
+  real machine. The Escape-save suite now covers eight safety scenarios; the
+  earlier Session 009 entry described the five cases present at that time.
+- No curriculum checkbox changed. The next teaching checkpoint remains 3.5.

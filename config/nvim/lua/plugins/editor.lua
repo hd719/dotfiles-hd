@@ -60,10 +60,15 @@ return {
       "neovim-treesitter/treesitter-parser-registry",
     },
     lazy = false,
+    -- Lazy calls `build` after installing or updating the plugin. Tree-sitter
+    -- returns an asynchronous task, so wait before reporting a successful build.
     build = function()
       assert(require("nvim-treesitter").update():wait(300000))
     end,
     config = function()
+      -- Interactive startup installs parsers in the background. The bootstrap
+      -- sets this flag and waits up to five minutes so headless setup cannot
+      -- finish before the required parsers are ready.
       local install_task = require("nvim-treesitter").install(parsers)
       if vim.env.DOTFILES_NVIM_BOOTSTRAP == "1" then
         assert(install_task:wait(300000))
@@ -73,6 +78,8 @@ return {
         desc = "Enable Tree-sitter highlighting when a parser is installed",
         pattern = filetypes,
         callback = function()
+          -- A missing parser should not stop the file from opening. `pcall`
+          -- contains that expected error; highlighting starts when possible.
           pcall(vim.treesitter.start)
         end,
       })

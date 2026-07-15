@@ -6,8 +6,12 @@ map("n", "a", "i", { desc = "Insert before cursor" })
 
 -- Kuncheng's Escape-to-save idea, guarded so it only writes changes authorized
 -- by Insert-mode sessions. Normal-mode edits and stale undo state disarm it.
+-- `changedtick` increases whenever buffer text changes, so a matching value
+-- proves that Escape is still looking at the exact edit state Insert authorized.
 local escape_save_group = vim.api.nvim_create_augroup("GuardedEscapeSave", { clear = true })
 
+-- `vim.b[buf]` is storage local to one buffer. Assigning nil removes these
+-- temporary values so authorization cannot leak into a later edit.
 local function clear_escape_save_state(buf)
   vim.b[buf].insert_enter_changedtick = nil
   vim.b[buf].insert_enter_was_modified = nil
@@ -15,6 +19,8 @@ local function clear_escape_save_state(buf)
   vim.b[buf].save_on_esc_changedtick = nil
 end
 
+-- Snapshot the state at the start of one Insert session. An existing save token
+-- carries forward only when it still matches this exact buffer version.
 vim.api.nvim_create_autocmd("InsertEnter", {
   group = escape_save_group,
   desc = "Record the buffer state before an Insert-mode edit",
@@ -38,6 +44,9 @@ vim.api.nvim_create_autocmd("InsertLeave", {
     local was_modified = vim.b[args.buf].insert_enter_was_modified
     local was_authorized = vim.b[args.buf].insert_enter_was_authorized
 
+    -- Arm Escape only when this Insert session changed text and either started
+    -- clean or continued edits that were already authorized. Unrelated unsaved
+    -- work must still be written manually.
     if
       (not was_modified or was_authorized)
       and vim.bo[args.buf].modified
@@ -49,6 +58,7 @@ vim.api.nvim_create_autocmd("InsertLeave", {
       vim.b[args.buf].save_on_esc_changedtick = nil
     end
 
+    -- These snapshots belong to this Insert session. Keep only the final token.
     vim.b[args.buf].insert_enter_changedtick = nil
     vim.b[args.buf].insert_enter_was_modified = nil
     vim.b[args.buf].insert_enter_was_authorized = nil
@@ -69,11 +79,15 @@ map("n", "<Esc>", function()
   local changedtick = vim.api.nvim_buf_get_changedtick(buf)
   local armed_changedtick = vim.b[buf].save_on_esc_changedtick
 
+  -- Any later edit changes `changedtick`. Disarm and leave the buffer unsaved
+  -- instead of writing mixed or stale changes.
   if armed_changedtick and armed_changedtick ~= changedtick then
     vim.b[buf].save_on_esc_changedtick = nil
     return
   end
 
+  -- Write only a normal, named, modifiable file buffer at the exact authorized
+  -- version. Help, terminal, scratch, and unnamed buffers are skipped.
   if
     armed_changedtick == changedtick
     and vim.bo.buftype == ""

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
+# Stop on command errors (-e), unset variables (-u), and failures hidden
+# inside pipelines (pipefail).
 set -euo pipefail
 
+# This test never installs real packages. It builds a disposable repo, HOME,
+# PATH, and Homebrew tree, then fills them with tiny fake commands (stubs).
 SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
 TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/nvim-bootstrap.XXXXXX")"
 TEST_REPO="$TMP_ROOT/repo"
@@ -13,6 +17,7 @@ FAKE_HOME="$TMP_ROOT/home"
 REAL_BASH="$(command -v bash)"
 failures=0
 
+# Remove the entire fake machine even when an assertion or command fails.
 trap 'rm -rf "$TMP_ROOT"' EXIT
 
 mkdir -p \
@@ -37,6 +42,8 @@ write_stub() {
   local name="$2"
   shift 2
 
+  # Each remaining argument is one line of the fake executable. Writing stubs
+  # this way lets a test control exactly what a dependency reports or changes.
   {
     printf '#!%s\n' "$REAL_BASH"
     printf '%s\n' "$@"
@@ -48,6 +55,8 @@ link_real_commands() {
   local dir="$1"
   local command_name real_command
 
+  # The fake PATH contains only the commands we choose. Link harmless shell
+  # utilities from the real machine so the script under test can still run.
   for command_name in bash chmod cmp cp dirname grep ln mktemp readlink rm sed; do
     real_command="$(command -v "$command_name")"
     ln -s "$real_command" "$dir/$command_name"
@@ -61,6 +70,8 @@ make_core_path() {
   mkdir -p "$dir"
   link_real_commands "$dir"
 
+  # This Neovim stub counts headless restores. On request, its first call
+  # corrupts the lock and its second call proves bootstrap restored the pins.
   write_stub "$dir" nvim \
     'if [[ "${1:-}" == "--version" ]]; then' \
     '  echo "NVIM v0.12.4"' \
@@ -88,6 +99,7 @@ make_full_path() {
   local dir="$1"
   local command_name
 
+  # Start with core, then add the commands required by the full profile.
   make_core_path "$dir"
 
   for command_name in \
@@ -118,6 +130,8 @@ run_bootstrap() {
   shift 2
 
   rm -f "$STATE_DIR/nvim-calls"
+  # Some scenarios intentionally fail. Temporarily disable `set -e` so the
+  # harness can capture both output and status, then turn strict mode back on.
   set +e
   BOOTSTRAP_OUTPUT="$(
     env \
@@ -138,12 +152,16 @@ expect() {
   local label="$1"
   shift
 
+  # Run the assertion command supplied in "$@". Record every failure so one
+  # test run reports all broken guarantees instead of stopping at the first.
   if ! "$@"; then
     echo "FAIL: $label" >&2
     failures=$((failures + 1))
   fi
 }
 
+# Scenario 1: a fresh core restore may mutate the lock once, but bootstrap must
+# replace it and run a second convergence pass.
 make_core_path "$CORE_BIN"
 run_bootstrap "$CORE_BIN" core TEST_MUTATE_LOCK=1
 expect "fresh bootstrap succeeds after restoring the committed lock" \
@@ -153,6 +171,8 @@ expect "fresh bootstrap leaves lazy-lock.json byte-identical" \
 expect "fresh bootstrap runs a second restore after replacing the lock" \
   test "$(<"$STATE_DIR/nvim-calls")" -eq 2
 
+# Build a fake Homebrew with Node 22 linked for the user and Node 26 available
+# for language servers. The Brew stub records installs and can simulate relinks.
 write_stub "$BREW_ROOT/Cellar/node@22/22.23.1/bin" node 'echo "v22.23.1"'
 write_stub "$BREW_ROOT/Cellar/node@22/22.23.1/bin" npm 'echo "10.9.4"'
 write_stub "$BREW_ROOT/Cellar/node/26.5.0/bin" node 'echo "v26.5.0"'
@@ -213,6 +233,8 @@ write_stub "$UV_BIN" ruff 'echo "ruff 0.15.21"'
 cp "$TMP_ROOT/expected-lock.json" "$TEST_REPO/config/nvim/lazy-lock.json"
 rm -f "$STATE_DIR/brew-node-installed" "$STATE_DIR/brew-installs"
 
+# Scenario 2: installing a language server must use private Node 26 while
+# restoring the public `node` command to the original Node 22.
 run_bootstrap \
   "$BREW_ROOT/bin:$FULL_BIN:$UV_BIN" \
   full \
@@ -230,6 +252,7 @@ expect "the installed language server remains available" \
 expect "Homebrew Node was installed as an unlinked dependency" \
   grep -q '^install --skip-link --as-dependency node$' "$STATE_DIR/brew-installs"
 
+# Scenario 3: a second full run is idempotent and installs nothing else.
 install_count="$(wc -l <"$STATE_DIR/brew-installs")"
 run_bootstrap \
   "$BREW_ROOT/bin:$FULL_BIN:$UV_BIN" \
@@ -241,6 +264,8 @@ expect "a second full bootstrap performs no Homebrew installs" \
 expect "a second full bootstrap still keeps Node 22" \
   test "$(PATH="$BREW_ROOT/bin:$FULL_BIN" node --version)" = "v22.23.1"
 
+# Scenario 4: a machine that starts without Node may receive Homebrew Node as
+# its new active runtime because there is no existing host choice to preserve.
 rm -f \
   "$BREW_ROOT/bin/node" \
   "$BREW_ROOT/bin/npm" \
@@ -257,6 +282,8 @@ expect "a machine without Node receives Homebrew Node" \
 expect "a newly supplied Node is available to Neovim" \
   test "$(PATH="$BREW_ROOT/bin:$FULL_BIN" node --version)" = "v26.5.0"
 
+# Scenario 5: even when Brew relinks Node and then fails, the EXIT cleanup trap
+# must put the original Node 22 link back before the script returns.
 ln -sf ../Cellar/node@22/22.23.1/bin/node "$BREW_ROOT/bin/node"
 ln -sf ../Cellar/node@22/22.23.1/bin/npm "$BREW_ROOT/bin/npm"
 rm -f "$BREW_ROOT/bin/bash-language-server"
@@ -275,6 +302,8 @@ expect "failure cleanup restores the original Node link" \
 expect "failure cleanup restores the original Node version" \
   test "$(PATH="$BREW_ROOT/bin:$FULL_BIN" node --version)" = "v22.23.1"
 
+# Scenario 6: refuse to install against an outdated active unversioned Node;
+# otherwise Brew could upgrade it before the old version can be restored.
 ln -sf ../Cellar/node/26.5.0/bin/node "$BREW_ROOT/bin/node"
 ln -sf ../Cellar/node/26.5.0/bin/npm "$BREW_ROOT/bin/npm"
 rm -f "$BREW_ROOT/bin/bash-language-server"
@@ -292,6 +321,7 @@ expect "the outdated active Node is not changed" \
 expect "no language-server install runs with an outdated active Node" \
   test "$(wc -l <"$STATE_DIR/brew-installs")" -eq "$install_count"
 
+# Convert the accumulated assertion count into the test process's exit status.
 if ((failures > 0)); then
   printf '%s\n' "$BOOTSTRAP_OUTPUT" >&2
   echo "$failures bootstrap regression test(s) failed." >&2

@@ -145,6 +145,9 @@ Prefer these scripts when they match the task.
 - Every Neovim concept, key, workflow, conflict, or correction taught must be
   documented in `config/nvim/LEARNING_LOG.md` during that session. Do not rely
   on chat history as the record.
+- Treat non-obvious Neovim Lua and setup Bash as teaching material. Comment the
+  purpose and safety rule behind state machines, callbacks, traps, and test
+  mocks; do not narrate obvious one-line commands.
 - Keep the learning log append-only. Start each new teaching session with the
   next numbered, dated entry and preserve older entries.
 - Each session entry must include what was practiced, the useful mental model,

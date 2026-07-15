@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
+# Stop on command errors (-e), unset variables (-u), and failures hidden inside
+# pipelines (pipefail).
 set -euo pipefail
 
+# This is a read-only doctor: inspect the caller's real environment, report
+# every gap, then fail once at the end if anything is missing.
+
+# Print the command reference literally; quoting `EOF` prevents Bash from
+# expanding examples or variables inside this help text.
 print_usage() {
   cat <<'EOF'
 Usage: check-dependencies.sh [core|full|desktop]
@@ -14,8 +21,10 @@ Running the desktop check already includes the full and core checks.
 EOF
 }
 
+# `${1:-full}` uses the first argument, or `full` when none is supplied.
 PROFILE="${1:-full}"
 
+# Exit status 2 means the command was invoked incorrectly.
 if (($# > 1)); then
   print_usage >&2
   exit 2
@@ -33,13 +42,18 @@ case "$PROFILE" in
     ;;
 esac
 
+# Locate uv's managed bin directory for diagnostics only. Do not add it to PATH:
+# this check must see the same commands that a normal Neovim process inherits.
 UV_BIN=""
 if command -v uv >/dev/null 2>&1; then
   UV_BIN="$(uv tool dir --bin 2>/dev/null || true)"
 fi
 
+# Accumulate failures so one run shows every dependency that needs attention.
 missing=0
 
+# Keep result messages consistent. A failure increments the shared counter
+# instead of exiting immediately, which lets the doctor finish every check.
 ok() {
   echo "ok: $1"
 }
@@ -49,6 +63,7 @@ fail() {
   missing=$((missing + 1))
 }
 
+# Test for a usable capability, not package ownership; any command on PATH counts.
 check_command() {
   local label="$1"
   local command_name="$2"
@@ -60,6 +75,8 @@ check_command() {
   fi
 }
 
+# Some hosts use different names for the same capability. `shift` removes the
+# display label, leaving only the candidate command names in "$@".
 check_any_command() {
   local label="$1"
   shift
@@ -75,6 +92,8 @@ check_any_command() {
   fail "$label ($*)"
 }
 
+# Finding `nvim` is not enough; parse its first version line to enforce the
+# minimum version required by this configuration.
 check_neovim() {
   local version_line version major minor rest
 
@@ -83,6 +102,8 @@ check_neovim() {
     return
   fi
 
+  # These parameter expansions remove the text around MAJOR.MINOR. The numeric
+  # comparison accepts Neovim 0.12+ as well as any future major version.
   version_line="$(nvim --version | sed -n '1p')"
   version="${version_line#NVIM v}"
   version="${version%% *}"
@@ -98,6 +119,8 @@ check_neovim() {
   fi
 }
 
+# Tree-sitter also has a minimum supported version, so verify more than command
+# availability before reporting success.
 check_tree_sitter() {
   local version_line version major minor patch
 
@@ -106,6 +129,8 @@ check_tree_sitter() {
     return
   fi
 
+  # The regular expression stores major, minor, and patch in Bash's
+  # BASH_REMATCH array so the pieces can be compared as integers.
   version_line="$(tree-sitter --version 2>/dev/null || true)"
   version="${version_line#tree-sitter }"
   version="${version%% *}"
@@ -124,6 +149,8 @@ check_tree_sitter() {
   fail "Tree-sitter CLI 0.26.1+ (found: ${version_line:-unknown})"
 }
 
+# The Lua config explicitly knows this private fallback path, so it is valid
+# even when `graphql-lsp` is not globally available on PATH.
 check_graphql_lsp() {
   local fixed="$HOME/.local/graphql-lsp/bin/graphql-lsp"
 
@@ -136,6 +163,8 @@ check_graphql_lsp() {
   fi
 }
 
+# Explain when a pinned uv tool exists but PATH misses or shadows it. Never
+# patch PATH here, because doing so would hide a persistent shell setup gap.
 print_uv_path_guidance() {
   local command_name="$1"
   local resolved="$2"
@@ -162,6 +191,8 @@ print_uv_path_guidance() {
   echo "path: Persist that ordering through the machine-approved shell setup." >&2
 }
 
+# The mdformat version alone is insufficient: these exact extensions preserve
+# GFM, frontmatter, footnotes, alerts, and Obsidian wikilinks.
 check_mdformat_extensions() {
   local command_path version version_line
 
@@ -188,6 +219,8 @@ check_mdformat_extensions() {
   fi
 }
 
+# Ruff must be both the pinned version and the command that the caller's PATH
+# resolves; reuse the same shadowing guidance as mdformat when either drifts.
 check_ruff() {
   local command_path version_line
 
@@ -209,6 +242,7 @@ check_ruff() {
 
 echo "Neovim dependency check ($PROFILE)"
 
+# Core checks run for every profile.
 check_neovim
 check_command "Git" git
 check_command "ripgrep" rg
@@ -222,6 +256,7 @@ check_command "unzip" unzip
 check_any_command "tar" tar gtar
 check_command "gzip" gzip
 
+# Full includes core and adds language-server and formatter checks.
 if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
   check_command "Node.js" node
   check_command "npm" npm
@@ -242,12 +277,14 @@ if [[ "$PROFILE" == "full" || "$PROFILE" == "desktop" ]]; then
   echo "project: Prettier stays project-local and is not installed globally"
 fi
 
+# Desktop includes full and adds terminal image/PDF preview requirements.
 if [[ "$PROFILE" == "desktop" ]]; then
   check_command "ImageMagick" magick
   check_command "Ghostscript" gs
   check_any_command "system file opener" open xdg-open wslview
 fi
 
+# Convert the collected count into one nonzero exit status for scripts and CI.
 if ((missing > 0)); then
   echo "Neovim dependency check failed: $missing missing requirement(s)." >&2
   exit 1

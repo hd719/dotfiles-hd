@@ -74,6 +74,7 @@ return {
       -- GraphQL. Prefer an existing executable so system and managed installs
       -- work. The shared bootstrap falls back to a fixed, node-independent
       -- prefix without changing PATH. See setup/nvim/README.md.
+      -- `exepath` returns an absolute path, or an empty string when PATH has no match.
       local graphql_lsp = vim.fn.exepath("graphql-lsp")
       if graphql_lsp == "" then
         graphql_lsp = vim.fn.expand("~/.local/graphql-lsp/bin/graphql-lsp")
