@@ -17,6 +17,7 @@ return {
       { "gsf", desc = "Surround find right" },
       { "gsF", desc = "Surround find left" },
       { "gsh", desc = "Surround highlight" },
+      { "gsn", desc = "Surround search lines" },
     },
     opts = {
       mappings = {

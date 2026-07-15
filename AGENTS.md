@@ -75,11 +75,33 @@ When Hamel asks to set up the work laptop:
 
 ## Existing Helpers
 
+- `setup/nvim/link-config.sh`
+- `setup/nvim/bootstrap.sh`
+- `setup/nvim/check-dependencies.sh`
 - `config/zed/link-zed-config.sh`
 - `config/herdr/link-herdr-config.sh`
 - `setup/mac-resilience/link-terminal-editor-config.sh`
 
 Prefer these scripts when they match the task.
+
+## Portable Neovim Dependencies
+
+- Route every personal, work, Linux, and cloud host through
+  `setup/nvim/bootstrap.sh` and `setup/nvim/check-dependencies.sh`; do not assume
+  that Lazy installs external language servers or formatters.
+- Setup is capability-based. Accept a working command from Homebrew, mise, a
+  system package manager, or a work-managed runtime instead of installing a
+  duplicate.
+- Keep the Go toolchain host-managed. Never replace a work or cloud machine's
+  approved Go runtime merely to supply `gofmt`; report the missing prerequisite.
+- Keep `core`, `full`, and `desktop` profiles distinct. Never install
+  ImageMagick, Ghostscript, Ghostty, or Herdr on a headless host just to satisfy
+  the core editor.
+- When Neovim starts depending on a new executable, update the shared bootstrap,
+  dependency checker, `config/nvim/README.md`, and any affected machine runbook
+  in the same change.
+- Verify setup idempotence by running the chosen bootstrap twice, then run the
+  matching dependency check and Neovim's headless startup.
 
 ## Zed Theme Profiles
 

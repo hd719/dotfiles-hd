@@ -4,32 +4,72 @@ local map = vim.keymap.set
 map("n", "i", "a", { desc = "Insert after cursor" })
 map("n", "a", "i", { desc = "Insert before cursor" })
 
--- Kuncheng's Escape-to-save idea, guarded so it only writes changes actually
--- made in Insert mode. This prevents an accidental Normal-mode edit (a stray
--- `dw`, `x`, paste, etc.) from being silently saved to disk on the next Escape.
--- InsertLeave "arms" the save when the buffer was really edited; any write
--- "disarms" it.
+-- Kuncheng's Escape-to-save idea, guarded so it only writes a clean buffer that
+-- was changed during one Insert-mode session. Normal-mode edits, stale undo
+-- state, and entering/leaving Insert mode without typing never arm a write.
+local escape_save_group = vim.api.nvim_create_augroup("GuardedEscapeSave", { clear = true })
+
+local function clear_escape_save_state(buf)
+  vim.b[buf].insert_enter_changedtick = nil
+  vim.b[buf].insert_enter_was_modified = nil
+  vim.b[buf].save_on_esc_changedtick = nil
+end
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+  group = escape_save_group,
+  desc = "Record the buffer state before an Insert-mode edit",
+  callback = function(args)
+    vim.b[args.buf].insert_enter_changedtick = vim.api.nvim_buf_get_changedtick(args.buf)
+    vim.b[args.buf].insert_enter_was_modified = vim.bo[args.buf].modified
+    vim.b[args.buf].save_on_esc_changedtick = nil
+  end,
+})
+
 vim.api.nvim_create_autocmd("InsertLeave", {
+  group = escape_save_group,
   desc = "Arm Escape-to-save after a real Insert-mode edit",
   callback = function(args)
-    if vim.bo[args.buf].modified then
-      vim.b[args.buf].save_on_esc = true
+    local changedtick = vim.api.nvim_buf_get_changedtick(args.buf)
+    local insert_enter_changedtick = vim.b[args.buf].insert_enter_changedtick
+    local was_modified = vim.b[args.buf].insert_enter_was_modified
+
+    if
+      not was_modified
+      and vim.bo[args.buf].modified
+      and insert_enter_changedtick
+      and changedtick ~= insert_enter_changedtick
+    then
+      vim.b[args.buf].save_on_esc_changedtick = changedtick
+    else
+      vim.b[args.buf].save_on_esc_changedtick = nil
     end
+
+    vim.b[args.buf].insert_enter_changedtick = nil
+    vim.b[args.buf].insert_enter_was_modified = nil
   end,
 })
 
 vim.api.nvim_create_autocmd("BufWritePost", {
+  group = escape_save_group,
   desc = "Disarm Escape-to-save once the buffer is written",
   callback = function(args)
-    vim.b[args.buf].save_on_esc = false
+    clear_escape_save_state(args.buf)
   end,
 })
 
 map("n", "<Esc>", function()
   local buf = vim.api.nvim_get_current_buf()
   local name = vim.api.nvim_buf_get_name(buf)
+  local changedtick = vim.api.nvim_buf_get_changedtick(buf)
+  local armed_changedtick = vim.b[buf].save_on_esc_changedtick
+
+  if armed_changedtick and armed_changedtick ~= changedtick then
+    vim.b[buf].save_on_esc_changedtick = nil
+    return
+  end
+
   if
-    vim.b[buf].save_on_esc
+    armed_changedtick == changedtick
     and vim.bo.buftype == ""
     and vim.bo.modifiable
     and vim.bo.modified
@@ -37,6 +77,8 @@ map("n", "<Esc>", function()
   then
     vim.cmd.update()
     vim.notify("Saved " .. vim.fn.fnamemodify(name, ":t"), vim.log.levels.INFO)
+  elseif armed_changedtick then
+    vim.b[buf].save_on_esc_changedtick = nil
   end
 end, { desc = "Save a file edited in Insert mode" })
 
@@ -59,7 +101,7 @@ map("n", "<leader>o", function()
   if err then
     vim.notify(err, vim.log.levels.ERROR)
   end
-end, { desc = "Open file in macOS app" })
+end, { desc = "Open file in system app" })
 
 -- Copy paths to the system clipboard. WhichKey lists these under Space y, so
 -- there is nothing to memorize: press Space y and pick.

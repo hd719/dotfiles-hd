@@ -71,14 +71,17 @@ return {
         },
       })
 
-      -- GraphQL. graphql-lsp is an npm tool with no Homebrew formula, so it is
-      -- installed to a fixed, node-version-independent prefix and referenced by
-      -- absolute path (no PATH edits). See setup/mac-resilience/README.md for
-      -- the reproducible install. Scoped to .graphql files; schema-aware
-      -- features come from the project's graphql-config (e.g. graphql.config.ts).
+      -- GraphQL. Prefer an existing executable so system and managed installs
+      -- work. The shared bootstrap falls back to a fixed, node-independent
+      -- prefix without changing PATH. See setup/nvim/README.md.
+      local graphql_lsp = vim.fn.exepath("graphql-lsp")
+      if graphql_lsp == "" then
+        graphql_lsp = vim.fn.expand("~/.local/graphql-lsp/bin/graphql-lsp")
+      end
+
       vim.lsp.config("graphql", {
         cmd = {
-          vim.fn.expand("~/.local/graphql-lsp/bin/graphql-lsp"),
+          graphql_lsp,
           "server",
           "-m",
           "stream",

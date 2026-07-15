@@ -47,6 +47,6 @@ backup_and_link \
 backup_and_link \
   "$DOTFILES_DIR/config/herdr/config.toml" \
   "$HOME/.config/herdr/config.toml"
-backup_and_link "$DOTFILES_DIR/config/nvim" "$HOME/.config/nvim"
+DOTFILES_DIR="$DOTFILES_DIR" "$DOTFILES_DIR/setup/nvim/link-config.sh"
 
 echo "Resilience terminal/editor links are ready."

@@ -5,7 +5,8 @@ Hamel's existing Zed muscle memory.
 
 ## Requirements
 
-- Neovim 0.12+, ripgrep, fd, fzf, LazyGit, and the Tree-sitter CLI.
+- Core: Neovim 0.12+, Git, a C compiler, curl/wget, unzip, tar, gzip, ripgrep,
+  fd, fzf, LazyGit, and the Tree-sitter CLI.
 - Go: `gopls` and `gofmt`.
 - Lua: `lua-language-server` and `stylua`.
 - JavaScript and TypeScript: `vtsls` for language intelligence,
@@ -13,10 +14,11 @@ Hamel's existing Zed muscle memory.
   `prettier` for formatting.
 - Markdown: `mdformat`, installed through `uv` with GFM, frontmatter, footnote,
   alert, and Obsidian-wikilink plugins.
-- Python: `ruff`, installed through `uv tool install ruff@latest`.
-- GraphQL: `graphql-lsp` (from `graphql-language-service-cli`), installed to a
-  fixed prefix and referenced by absolute path. Schema-aware features need a
-  `graphql-config` (e.g. `graphql.config.ts`) in the project.
+- Python: `ruff`, pinned and installed through `uv tool install`.
+- GraphQL: `graphql-lsp` (from `graphql-language-service-cli`). An existing
+  executable is accepted; otherwise bootstrap installs it to a fixed prefix.
+  Schema-aware features need a `graphql-config` (e.g. `graphql.config.ts`) in
+  the project.
 - JSON, CSS, and HTML: `jsonls`, `cssls`, and `html` from
   `vscode-langservers-extracted` (already installed for ESLint); JSON schemas
   come from `SchemaStore.nvim`.
@@ -26,23 +28,27 @@ Hamel's existing Zed muscle memory.
 - Editing: `mini.pairs` auto-closes brackets and quotes; `mini.surround` adds,
   changes, and deletes surrounding pairs with a `gs` prefix.
 
-Install the Markdown formatter with:
+Use the shared, idempotent setup from any clone location:
 
 ```bash
-uv tool install 'mdformat==1.0.0' \
-  --with mdformat-gfm \
-  --with mdformat-frontmatter \
-  --with mdformat-footnote \
-  --with mdformat-gfm-alerts \
-  --with 'mdformat-wikilink==0.3.0'
+cd /path/to/dotfiles-hd
+./setup/nvim/link-config.sh
+./setup/nvim/bootstrap.sh full
 ```
 
-Install the GraphQL language server (no Homebrew formula) to a fixed,
-node-version-independent prefix that this config references by absolute path:
+Profiles keep server and desktop installs separate:
 
-```bash
-npm install -g --prefix "$HOME/.local/graphql-lsp" graphql-language-service-cli
-```
+- `core` installs the editor/search/plugin foundation.
+- `full` checks configured global language servers and formatters. The Go
+  toolchain stays host-managed, and Prettier stays project-local.
+- `desktop` adds ImageMagick and Ghostscript for image/PDF previews.
+
+The bootstrap accepts tools already supplied by mise or the operating system,
+uses Homebrew only when it is already available, installs `mdformat`/Ruff with
+`uv`, and installs a pinned `graphql-lsp` under `~/.local/graphql-lsp` only when
+one is not already on `PATH`. It never invokes `sudo`, installs a package
+manager, or changes shell startup files. See
+[`setup/nvim/README.md`](../../setup/nvim/README.md).
 
 ## Safety Net
 
@@ -53,6 +59,9 @@ npm install -g --prefix "$HOME/.local/graphql-lsp" graphql-language-service-cli
 - `:LspInfo` shows language-server status.
 - `:ConformInfo` shows formatter status.
 - `:TSStatus` shows Tree-sitter parsers.
+- `setup/nvim/check-dependencies.sh full` checks external tools on any machine.
+- `nvim --headless -u NONE -l config/nvim/tests/escape-save.lua` runs the
+  guarded Escape-save regression test from the dotfiles repo root.
 
 For a calm first run, open this file with `nvim ~/.config/nvim/README.md`, then
 press `Space` and pause to see the available commands.
@@ -74,7 +83,9 @@ Every agent teaching Neovim must read and update both files.
   `Escape` reaches Neovim both directly in Ghostty and inside Herdr.
 - In a Snacks picker, the first `Escape` leaves its search-input Insert mode;
   the second `Escape` closes the picker.
-- Normal-mode `Escape` saves an existing modified file.
+- After an Insert-mode edit that began from a clean buffer, the next
+  Normal-mode `Escape` saves it. Normal-mode or mixed Normal/Insert edits require
+  `Space w`, preventing accidental commands from being written silently.
 - `Ctrl-a` selects the whole file.
 
 ## Main Keys
@@ -99,7 +110,7 @@ Every agent teaching Neovim must read and update both files.
 | `]d` / `[d` | Next / previous diagnostic |
 | `Space y p/d/f` | Copy file path / working dir / file folder |
 | `Space r` | Reload files changed on disk |
-| `Space o` | Open the current file in its macOS app |
+| `Space o` | Open the current file in its system app |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
 | `Space z a/o/c` | Fold: toggle / open all / close all |
 | `gd` / `gh` | Definition / hover |
@@ -153,7 +164,8 @@ Opening an image or PDF renders it in Neovim through Snacks when the terminal
 supports the Kitty graphics protocol. Ghostty is supported; ImageMagick and
 Ghostscript provide the conversion tools. This is a quick, read-only preview,
 not a full PDF reader. Use `Space o` to open the current file in its default
-macOS app; PDFs normally open in Preview for zoom, search, and page navigation.
+system app; PDFs normally open in Preview on macOS for zoom, search, and page
+navigation.
 
 Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
 open all / close all) or the native `za` / `zR` / `zM`.

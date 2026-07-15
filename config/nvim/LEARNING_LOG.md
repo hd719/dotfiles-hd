@@ -1166,3 +1166,33 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   edits, and completing real search-edit-test-Git loops inside Neovim.
 - The next checkpoint remains Curriculum 3.5: finish undo/redo/repeat before
   moving into Lesson 4's motions, operators, and text objects.
+
+## 2026-07-15 — Session 009: Portable Setup and Escape Guard Correction
+
+### Escape Guard Correction
+
+- The first guarded Escape fix solved the common case, but `InsertLeave` only
+  checked whether the buffer was modified. A Normal-mode edit followed by an
+  empty Insert session could therefore arm and save the earlier edit.
+- The corrected guard records `changedtick` and whether the buffer was already
+  modified on `InsertEnter`. Escape saves only the exact tick produced by a real
+  Insert edit that began from a clean buffer. Undo, later Normal-mode changes,
+  empty Insert sessions, and mixed Normal/Insert edits require `Space w`.
+- Added a five-case headless regression test in
+  `config/nvim/tests/escape-save.lua` so this safety rule survives future edits.
+
+### Cross-Machine Setup Contract
+
+- Pulling dotfiles and restoring Lazy plugins does not install external language
+  servers or formatters. The work laptop had them because its runbook installed
+  them; the personal laptop was missing `bash-language-server` and
+  `graphql-lsp` even though all locked Neovim plugins were present.
+- Added shared `core`, `full`, and `desktop` setup profiles under `setup/nvim/`.
+  They accept tools from Homebrew, mise, system packages, or work-managed
+  runtimes, install only missing capabilities, preserve project-local Prettier,
+  and keep desktop image/PDF tools optional on cloud hosts.
+- The approved Go toolchain remains host-managed, while directly managed npm
+  and `uv` tools and Markdown extensions are version-pinned for repeatability.
+- Future agents must update the bootstrap, doctor, README, and affected machine
+  runbook together whenever Neovim gains a new external executable dependency.
+- The next teaching checkpoint remains Curriculum 3.5.

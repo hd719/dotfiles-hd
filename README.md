@@ -14,6 +14,20 @@ and link the Ghostty, Herdr, and Neovim setup on the work laptop. That runbook i
 intentionally narrower than the personal Mac inventory below so it does not
 replace work-specific shell, runtime, credential, or certificate state.
 
+## Portable Neovim Setup
+
+Every personal, work, Linux, or cloud host uses the same capability-based setup:
+
+```bash
+cd /path/to/dotfiles-hd
+./setup/nvim/link-config.sh
+./setup/nvim/bootstrap.sh full
+```
+
+Use `core` for a minimal server and `desktop` for Ghostty image/PDF previews.
+The scripts preserve tools already supplied by mise or the operating system and
+only fill missing capabilities. See [`setup/nvim/README.md`](setup/nvim/README.md).
+
 ## Current Personal Mac Symlinks
 
 These are the active symlinks on this Mac.

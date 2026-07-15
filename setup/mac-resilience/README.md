@@ -61,25 +61,11 @@ laptop.
 ```bash
 brew bundle install --no-upgrade \
   --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
-
-uv tool install 'mdformat==1.0.0' \
-  --with mdformat-gfm \
-  --with mdformat-frontmatter \
-  --with mdformat-footnote \
-  --with mdformat-gfm-alerts \
-  --with 'mdformat-wikilink==0.3.0'
-
-uv tool install ruff@latest
-uv tool update-shell
-export PATH="$(uv tool dir --bin):$PATH"
-
-# GraphQL language server: an npm tool with no Homebrew formula. Install it to a
-# fixed, node-version-independent prefix that the Neovim config references by
-# absolute path (~/.local/graphql-lsp/bin/graphql-lsp), so it survives Node
-# upgrades and does not depend on the work fnm Node. npm comes from the Homebrew
-# Node that vtsls/ESLint pulled in above.
-npm install -g --prefix "$HOME/.local/graphql-lsp" graphql-language-service-cli
 ```
+
+The shared Neovim bootstrap in step 4 owns the pinned `uv` and npm tools. This
+keeps the directly managed versions and install locations consistent across
+machines.
 
 `graphql-lsp` gives syntax and single-file features immediately; schema-aware
 completion, validation, and go-to-definition require a `graphql-config` file
@@ -122,13 +108,14 @@ replacing a non-matching destination. It links only these paths:
 ### 4. Install plugins and project tools
 
 ```bash
-nvim --headless '+Lazy! restore' +qa
+~/Developer/dotfiles-hd/setup/nvim/bootstrap.sh desktop
 ```
 
-Open Neovim once and let Tree-sitter finish installing its committed parser
-list. In each work repo, use that repo's documented package manager to install
-dependencies. Prettier stays project-local, and the ESLint server discovers the
-project's own ESLint configuration.
+The shared bootstrap installs only missing capabilities, restores the locked
+plugins, and verifies the full desktop profile. Open Neovim once and let
+Tree-sitter finish installing its committed parser list. In each work repo, use
+that repo's documented package manager to install dependencies. Prettier stays
+project-local, and the ESLint server discovers the project's own configuration.
 
 ### 5. Verify
 
@@ -136,16 +123,7 @@ project's own ESLint configuration.
 brew bundle check --verbose \
   --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
 
-for cmd in \
-  bash-language-server fd fzf gopls gs herdr lazygit lua-language-server \
-  magick nvim rg stylua tree-sitter uv vscode-eslint-language-server \
-  vscode-json-language-server vtsls mdformat ruff
-do
-  command -v "$cmd"
-done
-
-# graphql-lsp is installed at a fixed prefix (not on PATH); check it directly.
-test -x "$HOME/.local/graphql-lsp/bin/graphql-lsp" && echo "graphql-lsp ok"
+~/Developer/dotfiles-hd/setup/nvim/check-dependencies.sh desktop
 
 test "$(readlink "$HOME/.config/nvim")" = \
   "$HOME/Developer/dotfiles-hd/config/nvim"

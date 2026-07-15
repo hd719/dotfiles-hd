@@ -181,10 +181,11 @@ unexplained magic.
 - [ ] **6.4** Inspect and choose LSP actions with `Space c a`.
 - [ ] **6.5** Format Go and Lua manually with `Space p` and review the diff.
 - [ ] **6.6** Diagnose formatter availability with `:ConformInfo`.
-- [ ] **6.7** Explain the current coverage: Go, Lua, JavaScript, and TypeScript
-  have LSP support; Go, Lua, JavaScript, TypeScript, Markdown, and Python have
-  manual formatting; ESLint provides project lint diagnostics while automatic
-  formatting and lint fixes on save remain disabled.
+- [ ] **6.7** Explain the current coverage: Go, Lua, JavaScript, TypeScript,
+  GraphQL, JSON, CSS, HTML, and shell files have LSP support; Go, Lua,
+  JavaScript, TypeScript, Markdown, and Python have manual formatting; ESLint
+  provides project lint diagnostics while automatic formatting and lint fixes
+  on save remain disabled.
 
 ### Optional Deep Dives
 
