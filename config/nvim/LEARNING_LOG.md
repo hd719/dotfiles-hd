@@ -1134,5 +1134,35 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Added ImageMagick (`magick`) and Ghostscript (`gs`) to the Resilience
   Brewfile and verification loop. ImageMagick performs conversion; Ghostscript
   is specifically required for PDF rendering.
-- Added optional Curriculum 10.D6. It remains unchecked until Hamel opens a
-  real PDF in Ghostty and confirms the rendered view.
+- Herdr needed `experimental.kitty_graphics = true` before the converted image
+  could reach Ghostty. Hamel restarted Herdr and confirmed real PDFs rendered.
+- Explorer preview had queued conversions for every highlighted PDF. Set its
+  previewer to `none`; pressing `Enter` still opens the selected PDF directly.
+- Very tall PDFs produced graphics frames above Herdr's 32 MB limit. Reduced
+  PDF conversion to 120 DPI and capped output at 1920x1080. A measured example
+  dropped from 4.9 seconds to 1.5 seconds.
+- Snacks is useful as a quick read-only preview, but it lacks proper zoom,
+  search, and page navigation. Added `Space o` using `vim.ui.open()` to open the
+  current file in its default macOS app; PDFs normally open in Preview.
+- **Optional Curriculum 10.D6 complete:** Hamel opened real PDFs in
+  Herdr/Ghostty and distinguished the rendered preview from a full PDF reader.
+
+### Oil and Explorer Entry Points
+
+- `nvim .` starts Neovim with the current directory as its target, so Oil opens
+  that directory in the main editing window.
+- `Space e` toggles the separate Snacks explorer sidebar, intended to remain
+  visible beside a file while editing.
+- Keep both workflows, but normally use one at a time: use `nvim .` or
+  `Space h` for full-window directory work, then use `Space e` when a persistent
+  sidebar is useful beside an open file.
+
+### Warrior Gap Assessment
+
+- The config already has enough tools. Adding more plugins now would produce
+  less benefit than building fast, durable editing habits.
+- Highest-leverage gaps: safe recovery and repeat (`u`, `Ctrl-r`, `.`), Vim's
+  operator-plus-motion grammar, text objects, registers, macros, multi-file
+  edits, and completing real search-edit-test-Git loops inside Neovim.
+- The next checkpoint remains Curriculum 3.5: finish undo/redo/repeat before
+  moving into Lesson 4's motions, operators, and text objects.

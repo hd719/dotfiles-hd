@@ -99,6 +99,7 @@ Every agent teaching Neovim must read and update both files.
 | `]d` / `[d` | Next / previous diagnostic |
 | `Space y p/d/f` | Copy file path / working dir / file folder |
 | `Space r` | Reload files changed on disk |
+| `Space o` | Open the current file in its macOS app |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
 | `Space z a/o/c` | Fold: toggle / open all / close all |
 | `gd` / `gh` | Definition / hover |
@@ -150,7 +151,9 @@ files for performance.
 
 Opening an image or PDF renders it in Neovim through Snacks when the terminal
 supports the Kitty graphics protocol. Ghostty is supported; ImageMagick and
-Ghostscript provide the conversion tools. The original file remains read-only.
+Ghostscript provide the conversion tools. This is a quick, read-only preview,
+not a full PDF reader. Use `Space o` to open the current file in its default
+macOS app; PDFs normally open in Preview for zoom, search, and page navigation.
 
 Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
 open all / close all) or the native `za` / `zR` / `zM`.

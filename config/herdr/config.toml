@@ -78,6 +78,7 @@ resume_agents_on_restore = true
 manage_ssh_config = true
 
 [experimental]
+kitty_graphics = true
 pane_history = true
 
 [advanced]

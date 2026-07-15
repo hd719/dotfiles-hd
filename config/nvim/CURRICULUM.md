@@ -306,5 +306,5 @@ unexplained magic.
 - [ ] **10.D3** Add or remove a plugin while keeping the config understandable.
 - [ ] **10.D4** Explore Tree-sitter queries and custom captures.
 - [ ] **10.D5** Design a personal speed-and-retention practice routine.
-- [ ] **10.D6** Open an image or PDF inside Ghostty with Snacks and distinguish
-  the rendered view from editing the original file.
+- [x] **10.D6** Open an image or PDF inside Ghostty with Snacks and distinguish
+  the rendered view from editing the original file. — Session 008

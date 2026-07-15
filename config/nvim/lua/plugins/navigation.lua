@@ -28,7 +28,7 @@ return {
           -- Show dotfiles (e.g. .zshrc, .config) in the explorer sidebar so it
           -- matches Oil. Gitignored files stay hidden; press I in the tree to
           -- reveal them, or H to toggle dotfiles back off.
-          explorer = { hidden = true, ignored = false },
+          explorer = { hidden = true, ignored = false, preview = "none" },
         },
       },
       -- Free Snacks modules: big-file performance safety, reference highlighting
@@ -37,7 +37,26 @@ return {
       words = { enabled = true },
       indent = { enabled = true },
       -- Render images and PDFs directly in supported terminals such as Ghostty.
-      image = { enabled = true },
+      -- Keep PDF frames small enough to pass through Herdr's graphics transport.
+      image = {
+        enabled = true,
+        convert = {
+          magick = {
+            pdf = {
+              "-density",
+              120,
+              "{src}[{page}]",
+              "-background",
+              "white",
+              "-alpha",
+              "remove",
+              "-trim",
+              "-scale",
+              "1920x1080>",
+            },
+          },
+        },
+      },
       -- On-demand sidebar tree (Space e). Keep replace_netrw false so Oil stays
       -- the directory editor and the explorer never hijacks directory buffers.
       explorer = { replace_netrw = false },

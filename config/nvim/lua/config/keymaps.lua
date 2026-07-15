@@ -48,6 +48,18 @@ map("n", "<leader>v", "<cmd>rightbelow vsplit<cr>", { desc = "Split right" })
 map("n", "<leader>s", "<cmd>rightbelow split<cr>", { desc = "Split down" })
 map("n", "<leader>n", "<cmd>enew<cr>", { desc = "New file" })
 map("n", "<leader>r", "<cmd>checktime<cr>", { desc = "Reload files changed on disk" })
+map("n", "<leader>o", function()
+  local path = vim.api.nvim_buf_get_name(0)
+  if path == "" then
+    vim.notify("Current buffer has no file", vim.log.levels.WARN)
+    return
+  end
+
+  local _, err = vim.ui.open(path)
+  if err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = "Open file in macOS app" })
 
 -- Copy paths to the system clipboard. WhichKey lists these under Space y, so
 -- there is nothing to memorize: press Space y and pick.
