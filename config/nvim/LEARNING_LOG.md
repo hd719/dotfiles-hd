@@ -1166,3 +1166,16 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   edits, and completing real search-edit-test-Git loops inside Neovim.
 - The next checkpoint remains Curriculum 3.5: finish undo/redo/repeat before
   moving into Lesson 4's motions, operators, and text objects.
+
+### Maintenance: Safe Escape Auto-Save and Config Cleanup
+
+- Kept Hamel's preferred Normal-mode `Escape` auto-save for Insert-mode edits.
+- Corrected the guard to compare Neovim's per-buffer `changedtick`. If a Normal
+  command changes the buffer before saving, `Escape` now refuses to write it;
+  use `Space w` after checking the edit.
+- Removed the obsolete Mini Surround `gsn` option. The installed plugin no
+  longer supports that setting, so it never created a keymap.
+- Confirmed the Bash and GraphQL language servers are installed. An LSP is the
+  background helper that provides code errors, completion, hover details, and
+  go-to-definition for its language.
+- Ran StyLua on the dashboard actions in `navigation.lua`.

@@ -74,7 +74,8 @@ Every agent teaching Neovim must read and update both files.
   `Escape` reaches Neovim both directly in Ghostty and inside Herdr.
 - In a Snacks picker, the first `Escape` leaves its search-input Insert mode;
   the second `Escape` closes the picker.
-- Normal-mode `Escape` saves an existing modified file.
+- Normal-mode `Escape` auto-saves a named file only when every unsaved change
+  came from Insert mode. After a Normal-mode edit, use `Space w`.
 - `Ctrl-a` selects the whole file.
 
 ## Main Keys

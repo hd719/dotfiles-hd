@@ -4,24 +4,47 @@ local map = vim.keymap.set
 map("n", "i", "a", { desc = "Insert after cursor" })
 map("n", "a", "i", { desc = "Insert before cursor" })
 
--- Kuncheng's Escape-to-save idea, guarded so it only writes changes actually
--- made in Insert mode. This prevents an accidental Normal-mode edit (a stray
--- `dw`, `x`, paste, etc.) from being silently saved to disk on the next Escape.
--- InsertLeave "arms" the save when the buffer was really edited; any write
--- "disarms" it.
-vim.api.nvim_create_autocmd("InsertLeave", {
-  desc = "Arm Escape-to-save after a real Insert-mode edit",
+-- Kuncheng's Escape-to-save idea, guarded so it only writes when every unsaved
+-- change came from Insert mode. Normal-mode edits change the buffer tick and
+-- require an explicit Space-w instead.
+local function changedtick(buf)
+  return vim.api.nvim_buf_get_changedtick(buf)
+end
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+  desc = "Track whether Escape-to-save is safe for this Insert session",
   callback = function(args)
-    if vim.bo[args.buf].modified then
-      vim.b[args.buf].save_on_esc = true
+    local tick = changedtick(args.buf)
+    vim.b[args.buf].save_on_esc_insert_tick = tick
+    vim.b[args.buf].save_on_esc_insert_safe = not vim.bo[args.buf].modified
+      or vim.b[args.buf].save_on_esc_tick == tick
+  end,
+})
+
+vim.api.nvim_create_autocmd("InsertLeave", {
+  desc = "Arm Escape-to-save after a safe Insert-mode edit",
+  callback = function(args)
+    local tick = changedtick(args.buf)
+    local start_tick = vim.b[args.buf].save_on_esc_insert_tick
+    local was_safe = vim.b[args.buf].save_on_esc_insert_safe
+
+    if was_safe and start_tick ~= nil and tick ~= start_tick and vim.bo[args.buf].modified then
+      vim.b[args.buf].save_on_esc_tick = tick
+    elseif not was_safe then
+      vim.b[args.buf].save_on_esc_tick = nil
     end
+
+    vim.b[args.buf].save_on_esc_insert_tick = nil
+    vim.b[args.buf].save_on_esc_insert_safe = nil
   end,
 })
 
 vim.api.nvim_create_autocmd("BufWritePost", {
   desc = "Disarm Escape-to-save once the buffer is written",
   callback = function(args)
-    vim.b[args.buf].save_on_esc = false
+    vim.b[args.buf].save_on_esc_tick = nil
+    vim.b[args.buf].save_on_esc_insert_tick = nil
+    vim.b[args.buf].save_on_esc_insert_safe = nil
   end,
 })
 
@@ -29,7 +52,7 @@ map("n", "<Esc>", function()
   local buf = vim.api.nvim_get_current_buf()
   local name = vim.api.nvim_buf_get_name(buf)
   if
-    vim.b[buf].save_on_esc
+    vim.b[buf].save_on_esc_tick == changedtick(buf)
     and vim.bo.buftype == ""
     and vim.bo.modifiable
     and vim.bo.modified

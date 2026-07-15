@@ -68,13 +68,55 @@ return {
         preset = {
           header = anon_header(),
           keys = {
-            { icon = " ", key = "f", desc = "Find File", action = function() Snacks.dashboard.pick("files") end },
-            { icon = " ", key = "/", desc = "Find Text", action = function() Snacks.dashboard.pick("live_grep") end },
-            { icon = " ", key = "r", desc = "Recent Files", action = function() Snacks.dashboard.pick("oldfiles") end },
-            { icon = " ", key = "e", desc = "File Explorer", action = function() Snacks.explorer() end },
+            {
+              icon = " ",
+              key = "f",
+              desc = "Find File",
+              action = function()
+                Snacks.dashboard.pick("files")
+              end,
+            },
+            {
+              icon = " ",
+              key = "/",
+              desc = "Find Text",
+              action = function()
+                Snacks.dashboard.pick("live_grep")
+              end,
+            },
+            {
+              icon = " ",
+              key = "r",
+              desc = "Recent Files",
+              action = function()
+                Snacks.dashboard.pick("oldfiles")
+              end,
+            },
+            {
+              icon = " ",
+              key = "e",
+              desc = "File Explorer",
+              action = function()
+                Snacks.explorer()
+              end,
+            },
             { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
-            { icon = " ", key = "g", desc = "LazyGit", action = function() Snacks.lazygit() end },
-            { icon = " ", key = "c", desc = "Config", action = function() Snacks.dashboard.pick("files", { cwd = vim.fn.stdpath("config") }) end },
+            {
+              icon = " ",
+              key = "g",
+              desc = "LazyGit",
+              action = function()
+                Snacks.lazygit()
+              end,
+            },
+            {
+              icon = " ",
+              key = "c",
+              desc = "Config",
+              action = function()
+                Snacks.dashboard.pick("files", { cwd = vim.fn.stdpath("config") })
+              end,
+            },
             { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
             { icon = " ", key = "q", desc = "Quit", action = ":qa" },
           },
