@@ -13,6 +13,7 @@ brew "go"
 brew "gogcli"
 brew "lsd"
 brew "mise"
+brew "node", link: false
 brew "node@22", link: true
 brew "pnpm"
 brew "pgvector"

@@ -37,7 +37,8 @@ a server is normal, but you do not combine profiles on one machine. If a
 machine's role changes, rerun the higher profile—for example, move from `core`
 to `full` when a basic server becomes a development host. Repeating or upgrading
 is safe: matching links, installed commands, and pinned npm/uv tools become
-no-ops, while Lazy converges plugins to the committed lockfile.
+no-ops, while Lazy and Tree-sitter converge to the committed plugin pins and
+parser list without rewriting `lazy-lock.json`.
 
 Run `bootstrap.sh --help` or `check-dependencies.sh --help` to see the same
 profile guidance in the terminal.
@@ -50,6 +51,17 @@ Existing commands on `PATH` are accepted. When `graphql-lsp` is missing, the
 bootstrap installs its pinned fallback under `~/.local/graphql-lsp`.
 Install the machine's approved Go toolchain before using `full`; bootstrap never
 silently replaces it just to supply `gofmt`.
+
+The Node command and version already on `PATH` also stay host-managed. When a
+missing Homebrew language-server formula needs Homebrew Node, bootstrap installs
+that dependency without linking it into the global Homebrew prefix. The
+language-server launcher uses Homebrew's private Node path while the caller's
+Node remains active. A post-install check restores the original Homebrew link
+and fails if that invariant cannot be proven.
+
+If an active unversioned Homebrew Node is outdated, bootstrap stops before
+installing language servers. Upgrade that Node intentionally, or activate a
+versioned/external Node, and rerun bootstrap.
 
 For `full` and `desktop`, the directory printed by `uv tool dir --bin` must come
 before any stale `mdformat` or Ruff copies on the persistent `PATH` used to
@@ -69,8 +81,11 @@ export PATH="$(uv tool dir --bin):$PATH"
 ```bash
 ./setup/nvim/check-dependencies.sh full
 ./setup/nvim/tests/check-dependencies.sh
+./setup/nvim/tests/bootstrap.sh
 nvim --headless -u NONE -l \
   ./config/nvim/tests/escape-save.lua
+nvim --headless -u NONE -l \
+  ./config/nvim/tests/treesitter-install.lua
 ```
 
 Prettier deliberately remains project-local. Desktop image/PDF support is

@@ -96,6 +96,9 @@ Prefer these scripts when they match the task.
   directory inside the doctor in a way that can hide a missing persistent path.
 - Keep the Go toolchain host-managed. Never replace a work or cloud machine's
   approved Go runtime merely to supply `gofmt`; report the missing prerequisite.
+- Keep Node host-managed. Homebrew-backed language servers may use an unlinked
+  Homebrew Node dependency, but setup must preserve the Node command and version
+  that the caller had before bootstrap.
 - Keep `core`, `full`, and `desktop` profiles distinct. Never install
   ImageMagick, Ghostscript, Ghostty, or Herdr on a headless host just to satisfy
   the core editor.

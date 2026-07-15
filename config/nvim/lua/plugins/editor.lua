@@ -60,9 +60,14 @@ return {
       "neovim-treesitter/treesitter-parser-registry",
     },
     lazy = false,
-    build = ":TSUpdate",
+    build = function()
+      assert(require("nvim-treesitter").update():wait(300000))
+    end,
     config = function()
-      require("nvim-treesitter").install(parsers)
+      local install_task = require("nvim-treesitter").install(parsers)
+      if vim.env.DOTFILES_NVIM_BOOTSTRAP == "1" then
+        assert(install_task:wait(300000))
+      end
 
       vim.api.nvim_create_autocmd("FileType", {
         desc = "Enable Tree-sitter highlighting when a parser is installed",

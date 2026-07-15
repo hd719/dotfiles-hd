@@ -55,7 +55,10 @@ The bootstrap accepts tools already supplied by mise or the operating system,
 uses Homebrew only when it is already available, installs `mdformat`/Ruff with
 `uv`, and installs a pinned `graphql-lsp` under `~/.local/graphql-lsp` only when
 one is not already on `PATH`. It never invokes `sudo`, installs a package
-manager, or changes shell startup files. See
+manager, changes the host-managed Node command, or changes shell startup files.
+Homebrew-backed language servers use an unlinked Homebrew Node dependency when
+the machine already has Node. The bootstrap also waits for the committed
+Tree-sitter parsers and preserves `lazy-lock.json` byte-for-byte. See
 [`setup/nvim/README.md`](../../setup/nvim/README.md).
 
 The shell that launches Neovim must put `uv tool dir --bin` before any stale
@@ -74,8 +77,11 @@ the caller's resolved commands instead of changing their order for the check.
 - `setup/nvim/check-dependencies.sh full` checks external tools on any machine.
 - `setup/nvim/tests/check-dependencies.sh` tests version, download, and caller
   `PATH` handling in the dependency doctor.
+- `setup/nvim/tests/bootstrap.sh` tests lockfile and host-Node preservation.
 - `nvim --headless -u NONE -l config/nvim/tests/escape-save.lua` runs the
   guarded Escape-save regression test from the dotfiles repo root.
+- `nvim --headless -u NONE -l config/nvim/tests/treesitter-install.lua` tests
+  blocking parser setup during bootstrap and asynchronous interactive setup.
 
 For a calm first run, open this file with `nvim ~/.config/nvim/README.md`, then
 press `Space` and pause to see the available commands.

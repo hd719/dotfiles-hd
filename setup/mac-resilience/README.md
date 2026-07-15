@@ -64,9 +64,10 @@ brew bundle install --no-upgrade \
   --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
 ```
 
-The shared Neovim bootstrap in step 4 owns the pinned `uv` and npm tools. This
-keeps the directly managed versions and install locations consistent across
-machines.
+The shared Neovim bootstrap in step 4 owns the pinned `uv` and npm tools plus
+the Node-backed language servers. This keeps the directly managed versions and
+install locations consistent across machines without letting the Brewfile
+bypass the host-Node safety check.
 
 `graphql-lsp` gives syntax and single-file features immediately; schema-aware
 completion, validation, and go-to-definition require a `graphql-config` file
@@ -74,9 +75,10 @@ completion, validation, and go-to-definition require a `graphql-config` file
 auto-detects as its root marker. Do not add that config to a work repo without
 Hamel's request.
 
-The Brewfile does not deliberately manage work-repo runtime versions. The
-`vtsls` and ESLint formulae may install and link Homebrew Node as a dependency,
-so confirm inside each work repo that its approved version manager still wins:
+The Brewfile does not manage work-repo runtime versions. When a Homebrew
+language server needs its own Node, the shared bootstrap installs Homebrew Node
+without linking it globally and confirms that the approved work Node still
+wins. Verify inside each work repo:
 
 ```bash
 command -v node
@@ -84,9 +86,9 @@ node --version
 ```
 
 Do not change the work Node version to satisfy the language servers. Their
-Homebrew launchers can use their own Node dependency. `gofmt` becomes available
-when the work laptop's approved Go toolchain is on `PATH`; ask Hamel before
-installing a different Go runtime.
+Homebrew launchers use the unlinked Homebrew Node dependency. `gofmt` becomes
+available when the work laptop's approved Go toolchain is on `PATH`; ask Hamel
+before installing a different Go runtime.
 
 If Homebrew or a cask is blocked by company policy, report the blocker. Do not
 bypass device management or security controls.
@@ -116,10 +118,10 @@ replacing a non-matching destination. It links only these paths:
 foundation, so do not run the other profiles separately on this laptop.
 
 The shared bootstrap installs only missing capabilities, restores the locked
-plugins, and verifies the full desktop profile. Open Neovim once and let
-Tree-sitter finish installing its committed parser list. In each work repo, use
-that repo's documented package manager to install dependencies. Prettier stays
-project-local, and the ESLint server discovers the project's own configuration.
+plugins, waits for the committed Tree-sitter parser list, and verifies the full
+desktop profile. In each work repo, use that repo's documented package manager
+to install dependencies. Prettier stays project-local, and the ESLint server
+discovers the project's own configuration.
 
 If bootstrap reports that `mdformat` or Ruff is missing or stale, put
 `uv tool dir --bin` before the reported shadowing directory through the
