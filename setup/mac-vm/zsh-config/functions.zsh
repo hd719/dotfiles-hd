@@ -82,6 +82,32 @@ _write_marker_last_run_epoch_ms() {
   printf "%d\nLast run: %s\n" "$now_ms" "$(date '+%m/%d/%Y %I:%M:%S %p')" > "$marker_file"
 }
 
+_run_with_timeout() {
+  emulate -L zsh
+  unsetopt monitor notify
+  local -i timeout_seconds="$1"
+  shift
+
+  (( timeout_seconds > 0 && $# > 0 )) || return 2
+  zmodload zsh/zselect 2>/dev/null || return 125
+
+  "$@" &
+  local -i command_pid=$!
+  (
+    zselect -t $(( timeout_seconds * 100 ))
+    kill -TERM "$command_pid" 2>/dev/null
+    zselect -t 200
+    kill -KILL "$command_pid" 2>/dev/null
+  ) &
+  local -i timer_pid=$!
+
+  wait "$command_pid"
+  local -i exit_status=$?
+  kill -TERM "$timer_pid" 2>/dev/null
+  wait "$timer_pid" 2>/dev/null
+  return "$exit_status"
+}
+
 killport() {
     if [[ $# -ne 1 ]]; then
         echo "Add a port number to kill the process on that port. Example: killport 3000"
@@ -174,6 +200,7 @@ goodMorning() {
   set +x 2>/dev/null
 
   local cache_dir="$HOME/.cache/goodmorning"
+  local -i cleanup_timeout_seconds=30
   mkdir -p "$cache_dir"
   zmodload zsh/stat 2>/dev/null
 
@@ -203,8 +230,12 @@ goodMorning() {
   fi
   if [[ $run_downloads -eq 1 ]]; then
     echo "Clearing old Downloads (30+ days)..."
-    find ~/Downloads -type f -mtime +30 -delete 2>/dev/null && echo "Done!"
-    _write_marker_last_run_epoch_ms "$marker_file"
+    if _run_with_timeout "$cleanup_timeout_seconds" /usr/bin/find -x "$HOME/Downloads" -type f -mtime +30 -delete 2>/dev/null; then
+      echo "Done!"
+      _write_marker_last_run_epoch_ms "$marker_file"
+    else
+      echo "Downloads cleanup failed or timed out after ${cleanup_timeout_seconds}s; it will retry next run."
+    fi
   else
     if [[ -n "$downloads_elapsed_human" ]]; then
       echo "Skipping Downloads cleanup (last run: $downloads_last_run_human; elapsed: $downloads_elapsed_human; cooldown: $(_format_seconds "$cooldown_downloads_seconds"))"
@@ -236,8 +267,12 @@ goodMorning() {
   fi
   if [[ $run_dsstore -eq 1 ]]; then
     echo "Clearing .DS_Store files..."
-    find ~ -name ".DS_Store" -type f -delete 2>/dev/null && echo "Done!"
-    _write_marker_last_run_epoch_ms "$marker_file"
+    if _run_with_timeout "$cleanup_timeout_seconds" /usr/bin/find -x "$HOME" -name ".DS_Store" -type f -delete 2>/dev/null; then
+      echo "Done!"
+      _write_marker_last_run_epoch_ms "$marker_file"
+    else
+      echo ".DS_Store cleanup failed or timed out after ${cleanup_timeout_seconds}s; it will retry next run."
+    fi
   else
     if [[ -n "$dsstore_elapsed_human" ]]; then
       echo "Skipping .DS_Store cleanup (last run: $dsstore_last_run_human; elapsed: $dsstore_elapsed_human; cooldown: $(_format_seconds "$cooldown_dsstore_seconds"))"
