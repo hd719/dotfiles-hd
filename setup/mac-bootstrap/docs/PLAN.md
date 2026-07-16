@@ -1,8 +1,7 @@
 # Personal Mac Toolchain Standardization Plan
 
-- Status: Implementation and isolated QA complete in PR #9; the macOS VM gate
-  is waived, the live MacBook reboot canary is pending before merge, and the
-  Mac mini no-restart gate is pending after merge
+- Status: PR #9 is merged. MacBook live/reboot QA and immediate Mac mini
+  no-restart QA passed; one-hour and next-day observation remain open
 - Plan branch: `agent/plan-personal-mac-mise-standardization`
 - Base branch: `origin/master` (this repository uses `master`, not `main`)
 - Targets: personal MacBook (`mac-vm`), Mac mini (`mac-mini`), and a brand-new
@@ -21,9 +20,10 @@
   [`RESULTS.md`](RESULTS.md).
 - [x] Record Hamel's 2026-07-16 waiver of the clean Apple Silicon macOS VM gate
   because no macOS VM is available.
-- [ ] Complete the live MacBook canary, rollback drill, reboot, and post-reboot
+- [x] Complete the live MacBook canary, rollback drill, reboot, and post-reboot
   checks before merge.
-- [ ] Complete the Mac mini no-restart gate and observation window after merge.
+- [x] Complete the Mac mini no-restart activation and immediate QA after merge.
+- [ ] Complete the one-hour and next-day observation window.
 
 Unchecked items later in this plan are intentional live-machine gates;
 isolated temporary-home evidence does not mark them complete. The VM gate is
@@ -197,7 +197,7 @@ Exit gate: scope, versions, ownership, stop rules, and rollback are accepted.
 - [x] Add a verification doctor and temporary-home regression suite.
 - [x] Record the clean Apple Silicon macOS VM waiver; do not mark the VM test as
   passed.
-- [ ] Use the live MacBook reboot canary in [`QA.md`](QA.md) as the compensating
+- [x] Use the live MacBook reboot canary in [`QA.md`](QA.md) as the compensating
   pre-merge gate, including two applies and a rollback drill.
 
 Exit gate: automated temporary-home tests pass, then the live MacBook canary
@@ -205,15 +205,15 @@ proves apply, rollback, reapply, reboot, and post-reboot health before merge.
 
 ### Phase 1: Capture a two-machine baseline
 
-- [ ] Create a timestamped evidence directory on each Mac.
-- [ ] Record OS, architecture, Git state, symlink targets, tool paths, and
+- [x] Create a timestamped evidence directory on each Mac.
+- [x] Record OS, architecture, Git state, symlink targets, tool paths, and
   versions without capturing environment variables or secrets.
-- [ ] Record interactive and non-interactive shell resolution separately.
+- [x] Record interactive and non-interactive shell resolution separately.
 - [ ] Save `brew bundle dump` and `mise ls --json` rollback inventories.
-- [ ] On the Mac mini, record LaunchAgent command paths, running Node/pnpm
+- [x] On the Mac mini, record LaunchAgent command paths, running Node/pnpm
   process paths, `brew services list`, `pnpm runtime:status`, and
   `pnpm runtime:doctor`.
-- [ ] Confirm both dotfiles checkouts are clean before proceeding.
+- [x] Confirm both dotfiles checkouts are clean before proceeding.
 
 Exit gate: the baseline section of `QA.md` is green and evidence paths are
 recorded.
@@ -240,16 +240,17 @@ without touching the live symlinked config.
 
 ### Phase 3: MacBook canary
 
-- [ ] Install the approved shared pins without switching the global PATH.
-- [ ] Run the MacBook project matrix through `mise exec`.
-- [ ] Confirm Node/npm/npx/pnpm, Go, Python, and Bun paths and versions.
-- [ ] Activate the shared pins on the MacBook.
-- [ ] Validate a fresh non-interactive shell and IDE-launched terminal.
-- [ ] Run Neovim startup, health, formatter, Tree-sitter, and LSP checks.
-- [ ] Run `cortana-services` local CI and Go tests from a clean checkout.
+- [x] Install the approved shared pins without switching the global PATH.
+- [x] Run the MacBook project matrix through `mise exec`.
+- [x] Confirm Node/npm/npx/pnpm, Go, Python, and Bun paths and versions.
+- [x] Activate the shared pins on the MacBook.
+- [x] Validate a fresh non-interactive shell.
+- [ ] Validate an IDE-launched terminal.
+- [x] Run Neovim startup, health, formatter, Tree-sitter, and LSP checks.
+- [x] Run `cortana-services` local CI and Go tests from a clean checkout.
 - [ ] Complete at least one normal work session on the canary.
 - [ ] Prove per-command Homebrew rollback before continuing.
-- [ ] Reboot the MacBook, then repeat the doctor, fresh-shell, Neovim, project,
+- [x] Reboot the MacBook, then repeat the doctor, fresh-shell, Neovim, project,
   and clean-Git checks.
 
 Exit gate: all MacBook checks pass, its repositories remain clean, and Hamel
@@ -257,19 +258,20 @@ accepts the normal-work-session and post-reboot behavior before merge.
 
 ### Phase 4: Post-merge Mac mini interactive canary, no restart
 
-- [ ] Verify, then fast-forward the Mac mini dotfiles checkout to the exact
+- [x] Verify, then fast-forward the Mac mini dotfiles checkout to the exact
   merged `master` commit.
-- [ ] Back up any existing `~/.config/mise` and `.zprofile` before linking or
+- [x] Back up any existing `~/.config/mise` and `.zprofile` before linking or
   editing.
-- [ ] Preview, then apply the merged `mac-mini` profile, which backs up and
+- [x] Preview, then apply the merged `mac-mini` profile, which backs up and
   links the shared config without controlling services.
-- [ ] Install the approved shared tools with mise; do not remove Homebrew tools.
-- [ ] Test with `mise exec`, then a fresh interactive shell.
-- [ ] Re-run non-interactive, IDE, Neovim, and project checks.
-- [ ] Confirm already-running services use the same binaries as the baseline.
-- [ ] Run `brew services list`, `pnpm runtime:status`, and
+- [x] Install the approved shared tools with mise; do not remove Homebrew tools.
+- [x] Test with `mise exec`, then a fresh interactive shell.
+- [x] Re-run non-interactive, Neovim, and project checks.
+- [ ] Observe an IDE-launched terminal separately.
+- [x] Confirm already-running services use the same binaries as the baseline.
+- [x] Run `brew services list`, `pnpm runtime:status`, and
   `pnpm runtime:doctor` without restarting anything.
-- [ ] Run project and Neovim QA from isolated/clean worktrees; do not run an
+- [x] Run project and Neovim QA from isolated/clean worktrees; do not run an
   install inside the active Cortana runtime checkout.
 
 Exit gate: both interactive environments use the approved shared pins, all
@@ -282,8 +284,8 @@ This phase is conditional. If LaunchAgents safely remain on an explicit
 Homebrew Node 22 path, document that exception and skip the migration. If the
 runtime should move to mise, stop for approval.
 
-- [ ] Review every LaunchAgent and wrapper that starts Node or pnpm.
-- [ ] Choose and document one stable launch contract.
+- [x] Review every recorded LaunchAgent and wrapper that starts Node or pnpm.
+- [x] Keep and document the explicit Homebrew Node 22 launch contract.
 - [ ] Prepare a one-command Homebrew fallback before restart.
 - [ ] Obtain Hamel's explicit maintenance-window approval.
 - [ ] Restart only the affected services.
@@ -295,7 +297,7 @@ Exit gate: runtime health matches baseline and rollback remains available.
 ### Phase 6: Observe, then clean up
 
 - [ ] Recheck both machines immediately, after one hour, and the next day.
-- [ ] Run `mise install` twice and confirm the second run is a no-op.
+- [x] Run `mise install` twice and confirm the second run is a no-op.
 - [x] Keep `goodMorning()` out of rollout QA because it also performs unrelated
   Zoom, Downloads, `.DS_Store`, and cache housekeeping. Test `mise install`
   directly instead.
@@ -359,14 +361,14 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 - [ ] Both personal Macs follow the approved ownership policy.
 - [ ] Shared runtime versions are pinned or an intentional exception is written.
 - [ ] Interactive, non-interactive, and IDE shell checks pass on both machines.
-- [ ] Neovim and project QA pass on both machines.
+- [x] Neovim and project QA pass on both machines.
 - [ ] Mac mini runtime health matches its baseline through the next-day check.
-- [ ] No work-Mac, Ubuntu, credential, service-config, or unrelated files changed.
+- [x] No work-Mac, Ubuntu, credential, service-config, or unrelated files changed.
 - [ ] Rollback was tested before any fallback was removed.
 - [ ] Bootstrap documentation matches the final symlink and package state.
 - [x] The unavailable clean Apple Silicon macOS VM is explicitly waived rather
   than recorded as passed.
-- [ ] The live MacBook passes apply twice, rollback, reapply, reboot, Neovim,
+- [x] The live MacBook passes apply twice, rollback, reapply, reboot, Neovim,
   shell, project, and manual app checks from the exact reviewed commit.
 - [ ] PR #9 contains the completed pre-merge MacBook QA record; a QA-only
   follow-up PR records the post-merge Mac mini and observation results.

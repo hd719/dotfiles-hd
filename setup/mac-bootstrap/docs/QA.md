@@ -33,25 +33,25 @@ follow-up PR and complete the post-merge Mac mini and observation rows there.
 
 | Field | Value |
 | --- | --- |
-| Date/time | |
-| Operator | |
-| Dotfiles commit | |
-| Phase under test | |
-| MacBook evidence directory | |
-| Mac mini evidence directory | |
+| Date/time | 2026-07-16, immediate post-merge QA |
+| Operator | Codex, with Hamel approving each live activation gate |
+| Dotfiles commit | `429ee01b6afd00653c075e94b17a69b979ef3fe7` |
+| Phase under test | Post-merge MacBook reboot and Mac mini no-restart activation |
+| MacBook evidence directory | `~/.local/state/dotfiles-hd/mise-standardization/20260716-064353-post-merge-pr9-macbook` |
+| Mac mini evidence directory | `~/.local/state/dotfiles-hd/mise-standardization/20260716-064935-post-merge-pr9-macmini` |
 | Clean macOS VM gate | Waived by Hamel on 2026-07-16; no VM available |
-| Approved Node version | |
-| Approved pnpm version | |
-| Maintenance window approved? | `no` by default |
-| Rollback tested? | |
-| Mac mini LaunchAgent/wrapper files | |
-| Timestamped backup paths | |
-| Affected runtime services | |
-| Known-good Node path and version | |
-| Known-good pnpm path and version | |
-| Exact runtime rollback command | |
-| Exact runtime restart/reload command | |
-| Required post-rollback checks | |
+| Approved Node version | 24.18.0 for interactive/dev tools; Homebrew 22.23.1 remains the Mac mini service contract |
+| Approved pnpm version | 11.2.2 for interactive/dev tools |
+| Maintenance window approved? | `no`; none was needed or used |
+| Rollback tested? | MacBook config rollback/reapply passed; Mac mini rollback ref recorded, runtime migration not performed |
+| Mac mini LaunchAgent/wrapper files | Four `~/Library/LaunchAgents/ai.hermes.*.plist` files plus the recorded Cortana runtime scripts |
+| Timestamped backup paths | MacBook `~/.zprofile.backup-20260716-064639` and rollback-drill backup; Mac mini destinations were absent, so no backup was created |
+| Affected runtime services | None; existing Cortana, Hermes, PostgreSQL, and Tailscale services were observed only |
+| Known-good Node path and version | `/opt/homebrew/Cellar/node@22/22.23.1/bin/node`, 22.23.1 |
+| Known-good pnpm path and version | `~/.local/share/mise/shims/pnpm`, 11.2.2 for fresh shells; runtime services were not migrated to pnpm |
+| Exact runtime rollback command | Not invoked: services retained their explicit Homebrew Node 22 launch contract |
+| Exact runtime restart/reload command | Not authorized and not run |
+| Required post-rollback checks | `pnpm runtime:status` and `pnpm runtime:doctor` from a fresh login shell |
 
 ## Rules
 
@@ -701,7 +701,7 @@ Observation checklist:
 
 | Time | MacBook shell/project/Neovim | Mac mini shell/runtime/doctor | Result |
 | --- | --- | --- | --- |
-| Immediate | [ ] | [ ] | |
+| Immediate | [x] | [x] | Passed 2026-07-16; evidence paths are in the QA record |
 | One hour | [ ] | [ ] | |
 | Next day | [ ] | [ ] | |
 
@@ -788,25 +788,25 @@ and next-day rows are post-merge observation.
 
 | Gate | MacBook | Mac mini | Timing/evidence |
 | --- | --- | --- | --- |
-| Clean baseline | [ ] | [ ] | |
-| Symlinks verified | [ ] | [ ] | |
-| Interactive shell | [ ] | [ ] | |
-| Non-interactive shell | [ ] | [ ] | |
+| Clean baseline | [x] | [x] | Evidence directories in the QA record |
+| Symlinks verified | [x] | [x] | Doctor and link inventories |
+| Interactive shell | [x] | [x] | Approved path/version matrix |
+| Non-interactive shell | [x] | [x] | Approved path/version matrix |
 | IDE terminal | [ ] | [ ] | |
-| Approved versions | [ ] | [ ] | |
-| Project QA | [ ] | [ ] | |
-| Neovim QA | [ ] | [ ] | |
-| Services unchanged/healthy | N/A | [ ] | |
-| Runtime doctor | N/A | [ ] | |
-| Rollback proven | [ ] | [ ] | |
-| Idempotent second apply | [ ] | [ ] | |
-| Reboot check | [ ] | N/A | |
+| Approved versions | [x] | [x] | Node 24.18.0, pnpm 11.2.2, Go 1.26.3, Python 3.14.5, Bun 1.3.14 |
+| Project QA | [x] | [x] | Disposable Cortana clones; active checkout untouched |
+| Neovim QA | [x] | [x] | Locked plugins/parsers, StyLua, headless startup, lockfile unchanged |
+| Services unchanged/healthy | N/A | [x] | Status and PIDs unchanged; service Node remains 22.23.1 |
+| Runtime doctor | N/A | [x] | Same one pre-existing dev-log warning |
+| Rollback proven | [x] | [ ] | Mac mini runtime was not migrated; fallback remains installed |
+| Idempotent second apply | [x] | [x] | No new backup; GraphQL LSP fast path used |
+| Reboot check | [x] | N/A | MacBook post-reboot QA passed |
 | One-hour check | [ ] | [ ] | |
 | Next-day check | [ ] | [ ] | |
-| Worktrees clean | [ ] | [ ] | |
+| Worktrees clean | [x] | [x] | Both dotfiles repos and active Cortana checkout clean |
 
 Final approval:
 
 - [ ] Hamel confirms both machines work normally.
-- [ ] No fallback tool is removed until a separate cleanup PR is approved.
-- [ ] Final symlink, version, exception, and bootstrap state is documented.
+- [x] No fallback tool is removed until a separate cleanup PR is approved.
+- [x] Final symlink, version, exception, and bootstrap state is documented.
