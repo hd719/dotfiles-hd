@@ -18,10 +18,13 @@ Full evidence is recorded in [`RESULTS.md`](RESULTS.md).
   status update.
 - [x] Hamel waived the unavailable clean Apple Silicon macOS VM gate on
   2026-07-16; it is not recorded as passed.
-- [ ] Live MacBook activation, rollback, reboot, and manual app/editor checks
-  are the compensating pre-merge gate.
-- [ ] Mac mini activation and immediate/one-hour/next-day checks are the
-  post-merge gate.
+- [x] Live MacBook activation, rollback, reboot, and manual app/editor checks
+  passed as the compensating pre-merge gate; the IDE-terminal gate is N/A for
+  the Ghostty and Neovim daily-driver workflow.
+- [x] Mac mini activation and immediate post-merge checks passed.
+- [x] One-hour checks passed on both personal Macs through Everyday Mac Ops at
+  10:52 EDT on 2026-07-16.
+- [ ] Next-day checks remain a post-merge observation gate.
 
 Unchecked checklists below are deliberate live-machine gates, not missing
 results from the completed isolated QA.
@@ -44,10 +47,10 @@ follow-up PR and complete the post-merge Mac mini and observation rows there.
 | Approved pnpm version | 11.2.2 for interactive/dev tools |
 | Maintenance window approved? | `no`; none was needed or used |
 | Rollback tested? | MacBook config rollback/reapply passed; Mac mini rollback ref recorded, runtime migration not performed |
-| Mac mini LaunchAgent/wrapper files | Four `~/Library/LaunchAgents/ai.hermes.*.plist` files plus the recorded Cortana runtime scripts |
+| Mac mini LaunchAgent/wrapper files | Five `~/Library/LaunchAgents/ai.hermes.*.plist` files plus the recorded Cortana runtime scripts; the three gateway plists retain a deleted `22.22.3` Cellar path in `PATH` |
 | Timestamped backup paths | MacBook `~/.zprofile.backup-20260716-064639` and rollback-drill backup; Mac mini destinations were absent, so no backup was created |
 | Affected runtime services | None; existing Cortana, Hermes, PostgreSQL, and Tailscale services were observed only |
-| Known-good Node path and version | `/opt/homebrew/Cellar/node@22/22.23.1/bin/node`, 22.23.1 |
+| Known-good Node path and version | `/opt/homebrew/opt/node@22/bin/node`, 22.23.1; three Hermes gateway plists still name the deleted `/opt/homebrew/Cellar/node@22/22.22.3/bin` path |
 | Known-good pnpm path and version | `~/.local/share/mise/shims/pnpm`, 11.2.2 for fresh shells; runtime services were not migrated to pnpm |
 | Exact runtime rollback command | Not invoked: services retained their explicit Homebrew Node 22 launch contract |
 | Exact runtime restart/reload command | Not authorized and not run |
@@ -444,15 +447,15 @@ git status --short
 
 Manual checks:
 
-- [ ] Open a Lua file: LuaLS attaches and formatting works.
-- [ ] Open a shell file: Bash LSP attaches.
-- [ ] Open a TypeScript/TSX file: vtsls and ESLint resolve as configured.
-- [ ] Open a Go file: gopls attaches.
-- [ ] Open a GraphQL file: the pinned GraphQL LSP attaches from
+- [x] Open a Lua file: LuaLS attaches and formatting works.
+- [x] Open a shell file: Bash LSP attaches.
+- [x] Open a TypeScript/TSX file: vtsls and ESLint resolve as configured.
+- [x] Open a Go file: gopls attaches.
+- [x] Open a GraphQL file: the pinned GraphQL LSP attaches from
   `~/.local/graphql-lsp/bin/graphql-lsp`.
-- [ ] Open Markdown: mdformat is available through Conform.
-- [ ] Tree-sitter highlighting works in each tested language.
-- [ ] `Space f`, `Space /`, Oil, LazyGit, and split navigation open normally.
+- [x] Open Markdown: mdformat is available through Conform.
+- [x] Tree-sitter highlighting works in each tested language.
+- [x] `Space f`, `Space /`, Oil, LazyGit, and split navigation open normally.
 
 Pass criteria:
 
@@ -463,28 +466,29 @@ Pass criteria:
 
 ### MacBook observation gate
 
-- [ ] Fresh Ghostty window works.
-- [ ] Fresh IDE terminal works.
-- [ ] Zed opens with the linked settings, keymap, and theme.
-- [ ] Herdr opens with the linked config.
-- [ ] Karabiner-Elements opens after required macOS permissions are granted.
-- [ ] One normal coding session completes.
-- [ ] A new terminal still reports the approved versions.
-- [ ] Per-command Homebrew fallback was tested.
+- [x] Fresh Ghostty window works.
+- N/A: an IDE terminal is outside the approved Ghostty and Neovim daily-driver
+  workflow.
+- [x] Zed opens with the linked settings, keymap, and theme.
+- [x] Herdr opens with the linked config.
+- [x] Karabiner-Elements opens after required macOS permissions are granted.
+- [x] One normal coding session completes.
+- [x] A new terminal still reports the approved versions.
+- [x] Per-command Homebrew fallback was tested.
 
 ### MacBook rollback and reboot substitute gate
 
 Complete these steps before merging PR #9:
 
-- [ ] Restore every path changed by the canary using section 9 and prove the
+- [x] Restore every path changed by the canary using section 9 and prove the
   recorded baseline returns without losing user-owned content.
-- [ ] Reload the exact SHA from `$EVIDENCE/reviewed-commit.txt`, verify it
+- [x] Reload the exact SHA from `$EVIDENCE/reviewed-commit.txt`, verify it
   against a fresh fetch of PR #9, and reapply it twice; the second apply creates
   no new backup.
-- [ ] Reboot the MacBook and open a fresh Ghostty login shell.
-- [ ] Repeat the doctor, both shell modes, Neovim checks, project checks, and
+- [x] Reboot the MacBook and open a fresh Ghostty login shell.
+- [x] Repeat the doctor, both shell modes, Neovim checks, project checks, and
   clean-Git checks after reboot.
-- [ ] Hamel confirms the MacBook behaves normally.
+- [x] Hamel confirms the MacBook behaves normally.
 
 After reboot:
 
@@ -699,10 +703,10 @@ git -C "$HOME/Developer/dotfiles-hd" status --short --branch \
 
 Observation checklist:
 
-| Time | MacBook shell/project/Neovim | Mac mini shell/runtime/doctor | Result |
+| Time | MacBook shell/toolchain/Neovim | Mac mini shell/runtime/doctor | Result |
 | --- | --- | --- | --- |
 | Immediate | [x] | [x] | Passed 2026-07-16; evidence paths are in the QA record |
-| One hour | [ ] | [ ] | |
+| One hour | [x] | [x] | Everyday Mac Ops passed shell, toolchain, Neovim, and runtime health at 10:52 EDT on 2026-07-16 |
 | Next day | [ ] | [ ] | |
 
 Pass criteria:
@@ -783,8 +787,8 @@ than stacking more live changes.
 - [x] The unavailable clean macOS VM is explicitly waived for PR #9; no VM
   result is represented as passed.
 
-MacBook rows through the reboot check are required before merge. The one-hour
-and next-day rows are post-merge observation.
+MacBook rows through the reboot check are required before merge. The next-day
+row remains a post-merge observation.
 
 | Gate | MacBook | Mac mini | Timing/evidence |
 | --- | --- | --- | --- |
@@ -792,21 +796,22 @@ and next-day rows are post-merge observation.
 | Symlinks verified | [x] | [x] | Doctor and link inventories |
 | Interactive shell | [x] | [x] | Approved path/version matrix |
 | Non-interactive shell | [x] | [x] | Approved path/version matrix |
-| IDE terminal | [ ] | [ ] | |
+| IDE terminal | N/A | N/A | Ghostty and Neovim are the approved daily-driver workflow |
 | Approved versions | [x] | [x] | Node 24.18.0, pnpm 11.2.2, Go 1.26.3, Python 3.14.5, Bun 1.3.14 |
 | Project QA | [x] | [x] | Disposable Cortana clones; active checkout untouched |
 | Neovim QA | [x] | [x] | Locked plugins/parsers, StyLua, headless startup, lockfile unchanged |
 | Services unchanged/healthy | N/A | [x] | Status and PIDs unchanged; service Node remains 22.23.1 |
 | Runtime doctor | N/A | [x] | Same one pre-existing dev-log warning |
-| Rollback proven | [x] | [ ] | Mac mini runtime was not migrated; fallback remains installed |
+| Rollback proven | [x] | N/A | Mac mini runtime was not migrated; fallback remains installed |
 | Idempotent second apply | [x] | [x] | No new backup; GraphQL LSP fast path used |
 | Reboot check | [x] | N/A | MacBook post-reboot QA passed |
-| One-hour check | [ ] | [ ] | |
+| One-hour check | [x] | [x] | Everyday Mac Ops passed at 10:52 EDT on 2026-07-16 |
 | Next-day check | [ ] | [ ] | |
 | Worktrees clean | [x] | [x] | Both dotfiles repos and active Cortana checkout clean |
 
 Final approval:
 
-- [ ] Hamel confirms both machines work normally.
+- [x] Hamel confirmed both machines worked normally during immediate and
+  one-hour observation.
 - [x] No fallback tool is removed until a separate cleanup PR is approved.
 - [x] Final symlink, version, exception, and bootstrap state is documented.

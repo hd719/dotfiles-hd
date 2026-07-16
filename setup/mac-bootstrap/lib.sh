@@ -9,6 +9,7 @@ APPROVED_GO_VERSION="1.26.3"
 APPROVED_NODE_VERSION="24.18.0"
 APPROVED_PNPM_VERSION="11.2.2"
 APPROVED_PYTHON_VERSION="3.14.5"
+LAZY_NVIM_REPOSITORY="https://github.com/folke/lazy.nvim.git"
 
 # Keep this install list aligned with config/nvim/lua/plugins/editor.lua.
 NEOVIM_PARSERS=(
@@ -434,6 +435,23 @@ pin_lazy_manager() {
     || die "cannot activate locked lazy.nvim commit $expected_commit"
 }
 
+provision_lazy_manager() {
+  local lazy_dir="$1"
+
+  if [[ -d "$lazy_dir/.git" ]]; then
+    return 0
+  fi
+  [[ ! -e "$lazy_dir" && ! -L "$lazy_dir" ]] \
+    || die "lazy.nvim path exists but is not a Git checkout: $lazy_dir"
+  mkdir -p "$(dirname "$lazy_dir")" \
+    || die "cannot create lazy.nvim parent directory: $(dirname "$lazy_dir")"
+  if ! git clone --quiet --filter=blob:none --no-checkout \
+    "$LAZY_NVIM_REPOSITORY" "$lazy_dir"; then
+    rm -rf -- "$lazy_dir"
+    die "cannot clone lazy.nvim into $lazy_dir"
+  fi
+}
+
 validate_approved_mise_pins() {
   [[ "$BUN_VERSION" == "$APPROVED_BUN_VERSION" ]] \
     || die "unapproved bun pin: $BUN_VERSION (expected $APPROVED_BUN_VERSION)"
@@ -465,12 +483,16 @@ restore_neovim_plugins() {
     printf -v parser_list "%s'%s'," "$parser_list" "$parser"
   done
 
-  if nvim --headless '+Lazy! restore' '+qa'; then
+  if provision_lazy_manager "$lazy_dir"; then
     if pin_lazy_manager "$lazy_dir" "$lazy_commit"; then
-      if nvim --headless \
-        "+lua local ok=require('nvim-treesitter').install({$parser_list}):wait(); if not ok then vim.cmd('cquit 1') end" \
-        '+qa'; then
-        :
+      if nvim --headless '+Lazy! restore' '+qa'; then
+        if nvim --headless \
+          "+lua local ok=require('nvim-treesitter').install({$parser_list}):wait(); if not ok then vim.cmd('cquit 1') end" \
+          '+qa'; then
+          :
+        else
+          nvim_status=$?
+        fi
       else
         nvim_status=$?
       fi
@@ -490,13 +512,52 @@ restore_neovim_plugins() {
   [[ "$nvim_status" -eq 0 ]] || die "Neovim plugin restore failed"
 }
 
+verify_neovim_plugin_checkout() {
+  local plugin_dir="$1"
+  local expected_commit="$2"
+  local head
+  local untracked
+  local unexpected_untracked=0
+
+  [[ -d "$plugin_dir/.git" ]] || return 1
+  head="$(git -C "$plugin_dir" rev-parse HEAD 2>/dev/null)" || return 1
+  [[ "$head" == "$expected_commit" ]] || return 1
+  git -C "$plugin_dir" diff --quiet --ignore-submodules=none -- || return 1
+  git -C "$plugin_dir" diff --cached --quiet --ignore-submodules=none -- \
+    || return 1
+
+  while IFS= read -r -d '' untracked; do
+    if [[ "$untracked" != "doc/tags" ]]; then
+      unexpected_untracked=1
+      break
+    fi
+  done < <(git -C "$plugin_dir" ls-files --others --exclude-standard -z)
+  [[ "$unexpected_untracked" -eq 0 ]]
+}
+
 verify_neovim_plugins_restored() {
   local lockfile="$1"
+  local plugin_root="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy"
+  local name
+  local expected_commit
+  local bad=()
 
-  require_source "$lockfile" || return 1
-  DOTFILES_LAZY_LOCK="$lockfile" nvim --headless -u NONE -i NONE --noplugin \
-    "+lua local ok,lock=pcall(vim.json.decode,table.concat(vim.fn.readfile(vim.env.DOTFILES_LAZY_LOCK),'\\n')); if not ok or type(lock)~='table' then io.stderr:write('invalid Neovim lockfile\\n'); vim.cmd('cquit 1'); return end; local root=vim.fn.stdpath('data')..'/lazy/'; local bad={}; for name,entry in pairs(lock) do local dir=root..name; if vim.fn.isdirectory(dir)==0 then table.insert(bad,name..' (missing)') elseif type(entry)=='table' and entry.commit then local head=vim.fn.system({'git','-C',dir,'rev-parse','HEAD'}):gsub('%s+$',''); if vim.v.shell_error~=0 or head~=entry.commit then table.insert(bad,name..' (wrong commit)') end end end; if #bad>0 then table.sort(bad); io.stderr:write('invalid locked Neovim plugins: '..table.concat(bad,', ')..'\\n'); vim.cmd('cquit 1') end" \
-    '+qa!' >/dev/null 2>&1
+  validate_neovim_lockfile "$lockfile" || return 1
+  while IFS=$'\t' read -r name expected_commit; do
+    if ! verify_neovim_plugin_checkout \
+      "$plugin_root/$name" "$expected_commit"; then
+      bad+=("$name")
+    fi
+  done < <(/usr/bin/ruby -rjson -e '
+    JSON.parse(File.read(ARGV.fetch(0))).each do |name, entry|
+      puts "#{name}\t#{entry.fetch("commit")}"
+    end
+  ' "$lockfile")
+
+  if [[ "${#bad[@]}" -gt 0 ]]; then
+    printf 'invalid locked Neovim plugins: %s\n' "${bad[*]}" >&2
+    return 1
+  fi
 }
 
 verify_neovim_parsers_restored() {
