@@ -653,7 +653,9 @@ Use explicit paths while diagnosing shell activation:
 /opt/homebrew/bin/nvim --version
 ```
 
-On the Mac mini, Homebrew Node 22 may instead resolve under its opt prefix:
+The unversioned Homebrew Node path above is only a generic interactive-shell
+fallback. On the Mac mini, production services must use the pinned Node 22 opt
+prefix:
 
 ```bash
 /opt/homebrew/opt/node@22/bin/node --version

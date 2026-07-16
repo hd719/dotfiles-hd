@@ -5,7 +5,7 @@
 - Branch: `agent/plan-personal-mac-mise-standardization`
 - Host used for local QA: Apple Silicon, macOS 26.5.2
 - Tested implementation commit:
-  `faa0f16c09530048259e1b653cbf38135c19558b`
+  `d6b590c096fff7cf6dd4dc6f3656ecf49b312615`
 - Actual-tool isolated home (ephemeral):
   `/tmp/dotfiles-clean-home-qa-final.nvDyQP`
 - Durable sanitized evidence:
@@ -15,7 +15,7 @@
 ## Passed
 
 - Shell syntax, StyLua, whitespace, and all three Brewfile parse checks.
-- 116 temporary-home bootstrap assertions, including dry-run purity, profile
+- 118 temporary-home bootstrap assertions, including dry-run purity, profile
   selection, backups, idempotency, rollback, protected-state preservation,
   installer failures, Go version detection, and Lazy lockfile preservation.
 - An actual-tool temporary-home run using Homebrew, mise, uv, npm, and Neovim:
@@ -36,8 +36,9 @@
   `fc54e31fbd0608b909b552815a285bf62e6610f9`: Node 24.18.0 plus Bun 1.3.14
   frozen install and lint passed, and the checkout stayed clean.
 - Mac mini read-only/no-restart audit: running services stayed on Homebrew Node
-  22.23.1, runtime status stayed green, and no package, link, process, or
-  service state changed.
+  22.23.1 through LaunchAgent PATH entries that prepend
+  `/opt/homebrew/opt/node@22/bin`; runtime status stayed green, and no package,
+  link, process, or service state changed.
 
 ## Known Pre-existing or External Limits
 
