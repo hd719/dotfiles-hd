@@ -109,8 +109,10 @@ link_matches() {
 zprofile_block_matches() {
   local profile_path="$1"
   local fragment_path="$2"
-  local begin_marker="# BEGIN dotfiles-hd personal-mac mise shims"
-  local end_marker="# END dotfiles-hd personal-mac mise shims"
+  local begin_marker="# BEGIN dotfiles-hd mac-bootstrap mise shims"
+  local end_marker="# END dotfiles-hd mac-bootstrap mise shims"
+  local legacy_begin_marker="# BEGIN dotfiles-hd personal-mac mise shims"
+  local legacy_end_marker="# END dotfiles-hd personal-mac mise shims"
   local begin_line
   local end_line
   local quoted_fragment
@@ -123,6 +125,10 @@ zprofile_block_matches() {
   [[ "$(grep -Fxc "$begin_marker" "$profile_path" || true)" == "1" ]] \
     || return 1
   [[ "$(grep -Fxc "$end_marker" "$profile_path" || true)" == "1" ]] \
+    || return 1
+  [[ "$(grep -Fxc "$legacy_begin_marker" "$profile_path" || true)" == "0" ]] \
+    || return 1
+  [[ "$(grep -Fxc "$legacy_end_marker" "$profile_path" || true)" == "0" ]] \
     || return 1
 
   begin_line="$(grep -Fn "$begin_marker" "$profile_path")"
@@ -168,10 +174,17 @@ write_zprofile_block() {
   local fragment_path="$2"
   local stamp="$3"
   local dry_run="${4:-0}"
-  local begin_marker="# BEGIN dotfiles-hd personal-mac mise shims"
-  local end_marker="# END dotfiles-hd personal-mac mise shims"
+  local begin_marker="# BEGIN dotfiles-hd mac-bootstrap mise shims"
+  local end_marker="# END dotfiles-hd mac-bootstrap mise shims"
+  local legacy_begin_marker="# BEGIN dotfiles-hd personal-mac mise shims"
+  local legacy_end_marker="# END dotfiles-hd personal-mac mise shims"
   local begin_count=0
   local end_count=0
+  local legacy_begin_count=0
+  local legacy_end_count=0
+  local managed_begin_marker="$begin_marker"
+  local managed_end_marker="$end_marker"
+  local managed_count=0
   local begin_line=0
   local end_line=0
   local quoted_fragment
@@ -192,6 +205,8 @@ write_zprofile_block() {
   elif [[ -f "$profile_path" ]]; then
     begin_count="$(grep -Fxc "$begin_marker" "$profile_path" || true)"
     end_count="$(grep -Fxc "$end_marker" "$profile_path" || true)"
+    legacy_begin_count="$(grep -Fxc "$legacy_begin_marker" "$profile_path" || true)"
+    legacy_end_count="$(grep -Fxc "$legacy_end_marker" "$profile_path" || true)"
   elif [[ -e "$profile_path" || -L "$profile_path" ]]; then
     die "cannot manage non-file profile: $profile_path"
     return 1
@@ -202,10 +217,27 @@ write_zprofile_block() {
     return 1
   fi
 
-  if [[ "$begin_count" -eq 1 ]]; then
-    begin_line="$(grep -Fn "$begin_marker" "$profile_path")"
+  if [[ "$legacy_begin_count" -gt 1 || "$legacy_end_count" -gt 1 \
+    || "$legacy_begin_count" -ne "$legacy_end_count" ]]; then
+    die "malformed legacy managed block in $profile_path"
+    return 1
+  fi
+
+  managed_count=$((begin_count + legacy_begin_count))
+  if [[ "$managed_count" -gt 1 ]]; then
+    die "multiple managed blocks in $profile_path"
+    return 1
+  fi
+
+  if [[ "$legacy_begin_count" -eq 1 ]]; then
+    managed_begin_marker="$legacy_begin_marker"
+    managed_end_marker="$legacy_end_marker"
+  fi
+
+  if [[ "$managed_count" -eq 1 ]]; then
+    begin_line="$(grep -Fn "$managed_begin_marker" "$profile_path")"
     begin_line="${begin_line%%:*}"
-    end_line="$(grep -Fn "$end_marker" "$profile_path")"
+    end_line="$(grep -Fn "$managed_end_marker" "$profile_path")"
     end_line="${end_line%%:*}"
     if [[ "$begin_line" -ge "$end_line" ]]; then
       die "managed block markers are out of order in $profile_path"
@@ -221,9 +253,9 @@ write_zprofile_block() {
   mkdir -p "$(dirname "$profile_path")"
   temporary="$(mktemp "$(dirname "$profile_path")/.zprofile.dotfiles.XXXXXX")"
 
-  if [[ "$begin_count" -eq 1 ]]; then
+  if [[ "$managed_count" -eq 1 ]]; then
     while IFS= read -r line || [[ -n "$line" ]]; do
-      if [[ "$line" == "$begin_marker" ]]; then
+      if [[ "$line" == "$managed_begin_marker" ]]; then
         {
           printf '%s\n' "$begin_marker"
           printf 'if [[ -r %s ]]; then\n' "$quoted_fragment"
@@ -232,7 +264,7 @@ write_zprofile_block() {
           printf '%s\n' "$end_marker"
         } >> "$temporary"
         replacing=1
-      elif [[ "$replacing" == "1" && "$line" == "$end_marker" ]]; then
+      elif [[ "$replacing" == "1" && "$line" == "$managed_end_marker" ]]; then
         replacing=0
       elif [[ "$replacing" == "0" ]]; then
         printf '%s\n' "$line" >> "$temporary"
@@ -277,10 +309,10 @@ load_profile() {
   local dotfiles_dir="$2"
   local home_dir="$3"
 
-  COMMON_BREWFILE="$dotfiles_dir/setup/personal-mac/Brewfile"
+  COMMON_BREWFILE="$dotfiles_dir/setup/mac-bootstrap/Brewfile"
   PROFILE_BREWFILE="$dotfiles_dir/setup/$profile/Brewfile"
   MISE_CONFIG="${DOTFILES_MISE_CONFIG:-$dotfiles_dir/config/mise/config.toml}"
-  MISE_FRAGMENT="$dotfiles_dir/setup/personal-mac/mise-shims.zsh"
+  MISE_FRAGMENT="$dotfiles_dir/setup/mac-bootstrap/mise-shims.zsh"
 
   LINK_SPECS=(
     "$dotfiles_dir/config/btop|$home_dir/.config/btop"

@@ -61,19 +61,19 @@ From the implementation worktree:
 
 ```bash
 bash -n \
-  setup/personal-mac/bootstrap.sh \
-  setup/personal-mac/doctor.sh \
-  setup/personal-mac/lib.sh \
-  setup/personal-mac/tests/bootstrap-test.sh \
+  setup/mac-bootstrap/bootstrap.sh \
+  setup/mac-bootstrap/doctor.sh \
+  setup/mac-bootstrap/lib.sh \
+  setup/mac-bootstrap/tests/bootstrap-test.sh \
   setup/mac-vm/setup-vm.sh
 
 zsh -n \
-  setup/personal-mac/mise-shims.zsh \
+  setup/mac-bootstrap/mise-shims.zsh \
   setup/mac-vm/zsh-config/.zshrc \
   setup/mac-mini/.zshrc \
   setup/mac-vm/zsh-config/functions.zsh
 
-setup/personal-mac/tests/bootstrap-test.sh
+setup/mac-bootstrap/tests/bootstrap-test.sh
 git diff --check
 ```
 
@@ -81,7 +81,7 @@ Parse every Brewfile without updating Homebrew:
 
 ```bash
 for brewfile in \
-  setup/personal-mac/Brewfile \
+  setup/mac-bootstrap/Brewfile \
   setup/mac-vm/Brewfile \
   setup/mac-mini/Brewfile
 do
@@ -125,7 +125,7 @@ Required post-install commands:
 
 ```bash
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade \
-  --file setup/personal-mac/Brewfile
+  --file setup/mac-bootstrap/Brewfile
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade \
   --file setup/mac-vm/Brewfile
 mise install --dry-run-code
@@ -170,7 +170,7 @@ git -C "$HOME/Developer/dotfiles-hd" rev-parse HEAD \
   | tee "$EVIDENCE/dotfiles-commit.txt"
 
 GOOD_COMMIT="$(git -C "$HOME/Developer/dotfiles-hd" rev-parse HEAD)"
-ROLLBACK_REF="rollback/personal-mac-pre-mise-$STAMP"
+ROLLBACK_REF="rollback/mac-bootstrap-pre-mise-$STAMP"
 git -C "$HOME/Developer/dotfiles-hd" branch "$ROLLBACK_REF" "$GOOD_COMMIT"
 printf '%s %s\n' "$ROLLBACK_REF" "$GOOD_COMMIT" \
   | tee "$EVIDENCE/dotfiles-rollback-ref.txt"
@@ -359,13 +359,13 @@ test "$(git rev-parse FETCH_HEAD)" = "$REVIEWED_COMMIT"
 test "$(git rev-parse "$ROLLBACK_REF")" = "$GOOD_COMMIT"
 
 git switch --detach "$REVIEWED_COMMIT"
-setup/personal-mac/bootstrap.sh --profile mac-vm --dry-run
-setup/personal-mac/bootstrap.sh --profile mac-vm --apply
-setup/personal-mac/bootstrap.sh --profile mac-vm --apply
+setup/mac-bootstrap/bootstrap.sh --profile mac-vm --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-vm --apply
+setup/mac-bootstrap/bootstrap.sh --profile mac-vm --apply
 
 zsh -lic 'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
 zsh -lc  'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
-setup/personal-mac/doctor.sh --profile mac-vm
+setup/mac-bootstrap/doctor.sh --profile mac-vm
 test -z "$(git status --porcelain)"
 )
 ```
@@ -510,14 +510,14 @@ test "$(git rev-parse FETCH_HEAD)" = "$REVIEWED_COMMIT"
 test "$(git rev-parse "$ROLLBACK_REF")" = "$GOOD_COMMIT"
 git switch --detach "$REVIEWED_COMMIT"
 
-setup/personal-mac/bootstrap.sh --profile mac-mini --dry-run
-setup/personal-mac/bootstrap.sh --profile mac-mini --apply
-setup/personal-mac/bootstrap.sh --profile mac-mini --apply
+setup/mac-bootstrap/bootstrap.sh --profile mac-mini --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-mini --apply
+setup/mac-bootstrap/bootstrap.sh --profile mac-mini --apply
 readlink "$HOME/.config/mise"
 test -f "$HOME/.config/mise/config.toml"
 mise config
 mise install
-setup/personal-mac/doctor.sh --profile mac-mini
+setup/mac-bootstrap/doctor.sh --profile mac-mini
 test -z "$(git status --porcelain)"
 )
 ```

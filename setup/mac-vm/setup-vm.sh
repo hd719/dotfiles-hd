@@ -12,4 +12,4 @@ for argument in "$@"; do
   esac
 done
 
-exec "$SCRIPT_DIR/../personal-mac/bootstrap.sh" --profile mac-vm "$@"
+exec "$SCRIPT_DIR/../mac-bootstrap/bootstrap.sh" --profile mac-vm "$@"

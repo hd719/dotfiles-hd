@@ -2,8 +2,8 @@
 set -euo pipefail
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PERSONAL_MAC_DIR="$(cd "$TEST_DIR/.." && pwd)"
-REPO_DIR="$(cd "$PERSONAL_MAC_DIR/../.." && pwd)"
+MAC_BOOTSTRAP_DIR="$(cd "$TEST_DIR/.." && pwd)"
+REPO_DIR="$(cd "$MAC_BOOTSTRAP_DIR/../.." && pwd)"
 TMP_ROOT="$(mktemp -d)"
 TESTS=0
 
@@ -110,7 +110,7 @@ snapshot_protected_state() {
 }
 
 # shellcheck source=../lib.sh
-source "$PERSONAL_MAC_DIR/lib.sh"
+source "$MAC_BOOTSTRAP_DIR/lib.sh"
 
 test_link_helper() {
   local root="$TMP_ROOT/link-helper"
@@ -175,6 +175,8 @@ test_zprofile_helper() {
   local root="$TMP_ROOT/zprofile-helper"
   local profile="$root/.zprofile"
   local fragment="$root/mise shims.zsh"
+  local legacy_root="$root/legacy-migration"
+  local legacy_profile="$legacy_root/.zprofile"
   local backup_count
 
   mkdir -p "$root"
@@ -183,7 +185,7 @@ test_zprofile_helper() {
 
   write_zprofile_block "$profile" "$fragment" 20260715-120000 0 >/dev/null
   assert_contains "$profile" 'export KEEP_ME=yes'
-  assert_contains "$profile" '# BEGIN dotfiles-hd personal-mac mise shims'
+  assert_contains "$profile" '# BEGIN dotfiles-hd mac-bootstrap mise shims'
   assert_file "$profile.backup-20260715-120000"
   assert_eq "$(stat -f '%Lp' "$profile.backup-20260715-120000")" \
     "$(stat -f '%Lp' "$profile")" "managed zprofile preserves its file mode"
@@ -191,17 +193,70 @@ test_zprofile_helper() {
   write_zprofile_block "$profile" "$fragment" 20260715-120000 0 >/dev/null
   backup_count="$(find "$root" -maxdepth 1 -name '.zprofile.backup-*' | wc -l | tr -d ' ')"
   assert_eq 1 "$backup_count" "idempotent managed block creates no extra backup"
-  assert_eq 1 "$(grep -Fxc '# BEGIN dotfiles-hd personal-mac mise shims' "$profile")" "managed block appears once"
+  assert_eq 1 "$(grep -Fxc '# BEGIN dotfiles-hd mac-bootstrap mise shims' "$profile")" "managed block appears once"
 
-  printf '# BEGIN dotfiles-hd personal-mac mise shims\n' > "$root/malformed"
+  mkdir -p "$legacy_root"
+  printf '%s\n%s\n%s\n%s\n%s\n' \
+    'export LEGACY_KEEP=yes' \
+    '# BEGIN dotfiles-hd personal-mac mise shims' \
+    'source /tmp/dotfiles/setup/personal-mac/mise-shims.zsh' \
+    '# END dotfiles-hd personal-mac mise shims' \
+    'export LEGACY_AFTER=yes' > "$legacy_profile"
+  write_zprofile_block "$legacy_profile" "$fragment" 20260715-120001 0 >/dev/null
+  assert_eq 1 "$(grep -Fxc '# BEGIN dotfiles-hd mac-bootstrap mise shims' "$legacy_profile")" \
+    "legacy marker is migrated once"
+  assert_not_contains "$legacy_profile" 'dotfiles-hd personal-mac mise shims'
+  assert_not_contains "$legacy_profile" 'setup/personal-mac/mise-shims.zsh'
+  assert_contains "$legacy_profile" 'export LEGACY_KEEP=yes'
+  assert_contains "$legacy_profile" 'export LEGACY_AFTER=yes'
+  assert_file "$legacy_profile.backup-20260715-120001"
+  assert_contains "$legacy_profile.backup-20260715-120001" \
+    '# BEGIN dotfiles-hd personal-mac mise shims'
+  zprofile_block_matches "$legacy_profile" "$fragment" \
+    || fail "migrated legacy block should match the current fragment"
+  TESTS=$((TESTS + 1))
+
+  write_zprofile_block "$legacy_profile" "$fragment" 20260715-120002 0 >/dev/null
+  backup_count="$(find "$legacy_root" -maxdepth 1 -name '.zprofile.backup-*' | wc -l | tr -d ' ')"
+  assert_eq 1 "$backup_count" "second apply after legacy migration creates no backup"
+
+  printf '%s\n' '# BEGIN dotfiles-hd personal-mac mise shims' \
+    > "$root/malformed-legacy"
+  if write_zprofile_block \
+    "$root/malformed-legacy" "$fragment" 20260715-120003 0 >/dev/null 2>&1; then
+    fail "malformed legacy managed block should fail"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_eq '# BEGIN dotfiles-hd personal-mac mise shims' \
+    "$(cat "$root/malformed-legacy")" "malformed legacy block preserves profile bytes"
+
+  cp "$legacy_profile" "$root/dual-managed"
+  printf '%s\n%s\n%s\n' \
+    '# BEGIN dotfiles-hd personal-mac mise shims' \
+    'source /tmp/dotfiles/setup/personal-mac/mise-shims.zsh' \
+    '# END dotfiles-hd personal-mac mise shims' >> "$root/dual-managed"
+  cp "$root/dual-managed" "$root/dual-managed.before"
+  if write_zprofile_block \
+    "$root/dual-managed" "$fragment" 20260715-120004 0 >/dev/null 2>&1; then
+    fail "current and legacy managed blocks together should fail"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_eq "$(cat "$root/dual-managed.before")" "$(cat "$root/dual-managed")" \
+    "multiple managed blocks preserve profile bytes"
+  if zprofile_block_matches "$root/dual-managed" "$fragment"; then
+    fail "doctor helper should reject a stale legacy block beside the current block"
+  fi
+  TESTS=$((TESTS + 1))
+
+  printf '# BEGIN dotfiles-hd mac-bootstrap mise shims\n' > "$root/malformed"
   if write_zprofile_block "$root/malformed" "$fragment" 20260715-120000 0 >/dev/null 2>&1; then
     fail "malformed managed block should fail"
   fi
   TESTS=$((TESTS + 1))
 
   printf '%s\nkeep-before\n%s\nkeep-after\n' \
-    '# END dotfiles-hd personal-mac mise shims' \
-    '# BEGIN dotfiles-hd personal-mac mise shims' > "$root/reversed"
+    '# END dotfiles-hd mac-bootstrap mise shims' \
+    '# BEGIN dotfiles-hd mac-bootstrap mise shims' > "$root/reversed"
   cp "$root/reversed" "$root/reversed.before"
   if write_zprofile_block "$root/reversed" "$fragment" 20260715-120000 0 >/dev/null 2>&1; then
     fail "reversed managed block should fail"
@@ -210,10 +265,10 @@ test_zprofile_helper() {
   assert_eq "$(cat "$root/reversed.before")" "$(cat "$root/reversed")" "reversed markers preserve profile bytes"
 
   printf '%s\n%s\n%s\n%s\n' \
-    '# BEGIN dotfiles-hd personal-mac mise shims' \
-    '# BEGIN dotfiles-hd personal-mac mise shims' \
-    '# END dotfiles-hd personal-mac mise shims' \
-    '# END dotfiles-hd personal-mac mise shims' > "$root/nested"
+    '# BEGIN dotfiles-hd mac-bootstrap mise shims' \
+    '# BEGIN dotfiles-hd mac-bootstrap mise shims' \
+    '# END dotfiles-hd mac-bootstrap mise shims' \
+    '# END dotfiles-hd mac-bootstrap mise shims' > "$root/nested"
   if write_zprofile_block "$root/nested" "$fragment" 20260715-120000 0 >/dev/null 2>&1; then
     fail "nested managed blocks should fail"
   fi
@@ -571,7 +626,7 @@ test_full_bootstrap() {
   snapshot_home "$home_dir" "$before"
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-140000 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --dry-run >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --dry-run >/dev/null
   snapshot_home "$home_dir" "$after"
   assert_eq "$(cat "$before")" "$(cat "$after")" "dry-run writes nothing under HOME"
   assert_eq '' "$(cat "$log")" "dry-run invokes no package manager"
@@ -602,7 +657,7 @@ test_full_bootstrap() {
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-140000 \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
 
   assert_eq "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" "$(readlink "$home_dir/.zshrc")" "MacBook zshrc target"
   assert_eq "$REPO_DIR/config/ghostty/config" "$(readlink "$home_dir/Library/Application Support/com.mitchellh.ghostty/config")" "Ghostty path with spaces"
@@ -610,7 +665,7 @@ test_full_bootstrap() {
   assert_file "$home_dir/.zshrc.backup-20260715-140000"
   assert_file "$home_dir/.config/btop.backup-20260715-140000/sentinel"
   assert_contains "$home_dir/.zprofile" 'export KEEP_ME=yes'
-  assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/personal-mac/Brewfile"
+  assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-bootstrap/Brewfile"
   assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-vm/Brewfile"
   assert_contains "$log" "mise exec node@24.18.0 pnpm@11.2.2 -- pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0"
   assert_contains "$log" "pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0"
@@ -626,7 +681,7 @@ test_full_bootstrap() {
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-150000 \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
   backup_count_after="$(find "$home_dir" -name '*.backup-*' | wc -l | tr -d ' ')"
   assert_eq "$backup_count_before" "$backup_count_after" "second bootstrap creates no backup"
   assert_eq 1 "$(grep -Fxc "pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0" "$log")" \
@@ -653,7 +708,7 @@ test_full_bootstrap() {
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-160000 \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
   assert_eq "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" "$(readlink "$home_dir/.zshrc")" "bootstrap works after rollback"
 
   assert_not_contains "$log" 'brew upgrade'
@@ -664,14 +719,14 @@ test_full_bootstrap() {
 
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAIL_ON_MISE_AUTO_INSTALL=1 \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null
   TESTS=$((TESTS + 1))
 
   mv "$home_dir/.local/graphql-lsp/.pnpm-managed-version" \
     "$root/graphql-marker"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject an npm-layout GraphQL LSP without the pnpm marker"
   fi
   TESTS=$((TESTS + 1))
@@ -680,12 +735,12 @@ test_full_bootstrap() {
 
   cp "$home_dir/.zprofile" "$root/correct-zprofile"
   printf '%s\n' \
-    '# BEGIN dotfiles-hd personal-mac mise shims' \
+    '# BEGIN dotfiles-hd mac-bootstrap mise shims' \
     'source /tmp/not-the-reviewed-fragment' \
-    '# END dotfiles-hd personal-mac mise shims' > "$home_dir/.zprofile"
+    '# END dotfiles-hd mac-bootstrap mise shims' > "$home_dir/.zprofile"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject a stale managed zprofile block"
   fi
   TESTS=$((TESTS + 1))
@@ -693,28 +748,28 @@ test_full_bootstrap() {
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" MISE_WHERE_MISSING='node@24.18.0' \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject a matching PATH fallback when mise Node is missing"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAKE_ACTIVE_NODE_VERSION=v24.18.10 \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject a wrong active shell version"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAKE_NVIM_VERSION=0.11.9 \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject Neovim older than 0.12"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAKE_MDFORMAT_GFM_VERSION=1.0.01 \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject an mdformat plugin prefix-collision version"
   fi
   TESTS=$((TESTS + 1))
@@ -722,7 +777,7 @@ test_full_bootstrap() {
   rm -rf "$empty_mise"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" MISE_DATA_DIR="$empty_mise" MISE_WHERE_MISSING=1 \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should fail when pinned runtimes are missing"
   fi
   TESTS=$((TESTS + 1))
@@ -731,7 +786,7 @@ test_full_bootstrap() {
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAKE_NVIM_MISSING_PLUGIN=1 \
     NVIM_NORMAL_START_MARKER="$root/nvim-normal-started" \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject a missing locked Neovim plugin"
   fi
   TESTS=$((TESTS + 1))
@@ -740,7 +795,7 @@ test_full_bootstrap() {
   rm "$home_dir/.local/share/nvim/site/parser/bash.so"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject a missing required Tree-sitter parser"
   fi
   TESTS=$((TESTS + 1))
@@ -749,7 +804,7 @@ test_full_bootstrap() {
   rm -rf "$home_dir/.local/share/nvim/site/queries/ecma"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" \
-    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject missing query-only Tree-sitter state"
   fi
   TESTS=$((TESTS + 1))
@@ -803,7 +858,7 @@ test_mac_mini_apply() {
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-170000 \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-mini --apply >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-mini --apply >/dev/null
 
   assert_eq "$REPO_DIR/setup/mac-mini/.zshrc" "$(readlink "$home_dir/.zshrc")" "Mac mini zshrc target"
   assert_no_path "$home_dir/.config/karabiner"
@@ -835,14 +890,14 @@ test_xdg_bin_home() {
   printf '#!/usr/bin/env bash\nexit 0\n' > "$home_dir/.local/bin/ruff"
   chmod +x "$home_dir/.local/bin/ruff"
   resolved="$(HOME="$home_dir" XDG_BIN_HOME="$custom_bin" PATH=/usr/bin:/bin \
-    zsh -c "source '$PERSONAL_MAC_DIR/mise-shims.zsh'; command -v ruff")"
+    zsh -c "source '$MAC_BOOTSTRAP_DIR/mise-shims.zsh'; command -v ruff")"
   assert_eq "$custom_bin/ruff" "$resolved" "XDG_BIN_HOME is present in login shim PATH"
 
   for zshrc in \
     "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc"; do
     resolved="$(HOME="$home_dir" XDG_BIN_HOME="$custom_bin" PATH=/usr/bin:/bin \
-      zsh -dfc "source '$PERSONAL_MAC_DIR/mise-shims.zsh'; source '$zshrc'; command -v ruff" \
+      zsh -dfc "source '$MAC_BOOTSTRAP_DIR/mise-shims.zsh'; source '$zshrc'; command -v ruff" \
       2>/dev/null | tail -n 1)"
     assert_eq "$custom_bin/ruff" "$resolved" "$(basename "$(dirname "$zshrc")") zshrc keeps XDG_BIN_HOME first"
   done
@@ -862,19 +917,19 @@ test_profile_and_failure_guards() {
   : > "$log"
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --dry-run >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --dry-run >/dev/null 2>&1; then
     fail "missing profile should fail"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile unknown --dry-run >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile unknown --dry-run >/dev/null 2>&1; then
     fail "unknown profile should fail"
   fi
   TESTS=$((TESTS + 1))
 
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-mini --check >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-mini --check >/dev/null
   assert_contains "$log" "bundle check --no-upgrade --file $REPO_DIR/setup/mac-mini/Brewfile"
   assert_contains "$log" 'mise install --dry-run-code'
   assert_not_contains "$log" 'setup/mac-vm/Brewfile'
@@ -882,7 +937,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     MISE_DRY_RUN_CODE_STATUS=42 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --check >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --check >/dev/null 2>&1; then
     fail "check should fail when mise runtimes are missing"
   fi
   TESTS=$((TESTS + 1))
@@ -890,7 +945,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
     fail "noncanonical apply should fail"
   fi
   TESTS=$((TESTS + 1))
@@ -901,7 +956,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
     fail "apply should reject a symlinked zprofile before installers"
   fi
   TESTS=$((TESTS + 1))
@@ -910,16 +965,16 @@ test_profile_and_failure_guards() {
   assert_no_path "$home_dir/.zshrc"
   rm "$home_dir/.zprofile" "$profile_target"
 
-  printf '# BEGIN dotfiles-hd personal-mac mise shims\n' > "$home_dir/.zprofile"
+  printf '# BEGIN dotfiles-hd mac-bootstrap mise shims\n' > "$home_dir/.zprofile"
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
     fail "apply should reject a malformed zprofile before installers"
   fi
   TESTS=$((TESTS + 1))
   assert_eq '' "$(cat "$log")" "malformed zprofile stops before package managers"
-  assert_eq '# BEGIN dotfiles-hd personal-mac mise shims' "$(cat "$home_dir/.zprofile")" "malformed zprofile is unchanged"
+  assert_eq '# BEGIN dotfiles-hd mac-bootstrap mise shims' "$(cat "$home_dir/.zprofile")" "malformed zprofile is unchanged"
   assert_no_path "$home_dir/.zshrc"
   rm "$home_dir/.zprofile"
 
@@ -928,7 +983,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
     fail "apply should reject an unreadable zprofile before installers"
   fi
   TESTS=$((TESTS + 1))
@@ -944,7 +999,7 @@ test_profile_and_failure_guards() {
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_MISE_CONFIG="$drift_config" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
     fail "apply should reject unapproved runtime pins before installers"
   fi
   TESTS=$((TESTS + 1))
@@ -962,7 +1017,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 FAIL_BREW_INSTALL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
     fail "Homebrew failure should stop bootstrap"
   fi
   TESTS=$((TESTS + 1))
@@ -972,7 +1027,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 FAIL_MISE_INSTALL=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
     fail "mise failure should stop bootstrap"
   fi
   TESTS=$((TESTS + 1))
@@ -982,7 +1037,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 FAIL_PNPM_ADD=1 \
-    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
     fail "pnpm failure should stop bootstrap"
   fi
   TESTS=$((TESTS + 1))

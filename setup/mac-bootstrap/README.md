@@ -1,4 +1,4 @@
-# Personal Mac Bootstrap
+# Mac Bootstrap
 
 This is the supported setup path for an Apple Silicon personal Mac. It covers
 the shell, Ghostty, Zed, Herdr, Neovim, shared configuration, and pinned
@@ -39,22 +39,22 @@ a new physical MacBook too. Preview it first. Dry-run invokes no package
 manager and writes nothing:
 
 ```bash
-setup/personal-mac/bootstrap.sh --profile mac-vm --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-vm --dry-run
 ```
 
 Then audit installed dependencies. This can return nonzero while packages are
 missing; Homebrew or mise may populate their own caches during the audit.
 
 ```bash
-setup/personal-mac/bootstrap.sh --profile mac-vm --check
+setup/mac-bootstrap/bootstrap.sh --profile mac-vm --check
 ```
 
 Apply only from a clean checkout:
 
 ```bash
-setup/personal-mac/bootstrap.sh --profile mac-vm --apply
+setup/mac-bootstrap/bootstrap.sh --profile mac-vm --apply
 exec zsh -l
-setup/personal-mac/doctor.sh --profile mac-vm
+setup/mac-bootstrap/doctor.sh --profile mac-vm
 ```
 
 Run the apply command a second time. It must complete without creating another
@@ -82,7 +82,7 @@ the shared development environment plus the mini's package overlay.
 Do not run `--apply` on the existing production Mac mini until the clean-VM and
 MacBook gates are green, the Mac mini preflight passes, and Hamel explicitly
 approves the interactive step in
-[`../personal-mac-standardization/QA.md`](../personal-mac-standardization/QA.md).
+[`docs/QA.md`](docs/QA.md).
 That apply is what completes the no-restart gate. The bootstrap does not start
 or restart services, but a new login shell will resolve the shared mise
 versions. Existing Cortana and Hermes LaunchAgents prepend

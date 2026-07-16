@@ -19,14 +19,14 @@ replace work-specific shell, runtime, credential, or certificate state.
 This is the bootstrap target plus the explicitly noted existing manual link.
 
 For a new personal Mac, use the backed-up, idempotent
-[`personal-Mac runbook`](setup/personal-mac/README.md) instead of copying the
+[`Mac bootstrap runbook`](setup/mac-bootstrap/README.md) instead of copying the
 link commands below by hand. The legacy `mac-vm` profile name is correct for
 both a physical personal MacBook and a MacBook VM.
 
 | Tool | Live path | Dotfiles source | Status | Notes |
 | --- | --- | --- | --- | --- |
 | Shell | `~/.zshrc` | `setup/mac-vm/zsh-config/.zshrc` | Bootstrap-managed link | Personal MacBook shell entry point. |
-| Login PATH | marker-owned block in `~/.zprofile` | `setup/personal-mac/mise-shims.zsh` | Bootstrap-managed block | The rest of `.zprofile` remains user-owned. |
+| Login PATH | marker-owned block in `~/.zprofile` | `setup/mac-bootstrap/mise-shims.zsh` | Bootstrap-managed block | The rest of `.zprofile` remains user-owned. |
 | AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Existing manual link | Not installed or linked by the new-Mac bootstrap because the app is not in its reviewed Brewfiles. |
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
@@ -88,13 +88,13 @@ backup_and_link "$DOTFILES/config/zed/themes" "$HOME/.config/zed/themes"
 Personal Apple Silicon Mac:
 
 ```bash
-setup/personal-mac/bootstrap.sh --profile mac-vm --dry-run
-setup/personal-mac/bootstrap.sh --profile mac-vm --apply
-setup/personal-mac/doctor.sh --profile mac-vm
+setup/mac-bootstrap/bootstrap.sh --profile mac-vm --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-vm --apply
+setup/mac-bootstrap/doctor.sh --profile mac-vm
 ```
 
 The Mac mini uses `--profile mac-mini`. Read the
-[`personal-Mac runbook`](setup/personal-mac/README.md) first; the current Mac
+[`Mac bootstrap runbook`](setup/mac-bootstrap/README.md) first; the current Mac
 mini has a production-runtime boundary and must not be restarted by bootstrap
 work.
 

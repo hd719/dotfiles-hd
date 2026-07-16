@@ -1,4 +1,4 @@
 # Personal MacBook overlay. Shared development tools live in
-# ../personal-mac/Brewfile.
+# ../mac-bootstrap/Brewfile.
 
 cask "karabiner-elements"

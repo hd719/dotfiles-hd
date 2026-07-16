@@ -135,14 +135,14 @@ version decision; do not change the Mac mini production runtime in this PR.
 Keep portable policy separate from machine-specific setup:
 
 ```text
-config/mise/config.toml                  shared runtime pins
-setup/personal-mac/Brewfile              common personal-Mac packages
-setup/personal-mac/bootstrap.sh          check-first installer and linker
-setup/personal-mac/doctor.sh             verification without managed-config writes
-setup/mac-vm/Brewfile                    MacBook-only packages
-setup/mac-mini/Brewfile                  Mac-mini-only apps, services, and libraries
-setup/mac-vm/zsh-config/                 shared shell behavior
-setup/personal-mac-standardization/      this plan and QA record
+config/mise/config.toml             shared runtime pins
+setup/mac-bootstrap/Brewfile        common managed-Mac packages
+setup/mac-bootstrap/bootstrap.sh    check-first installer and linker
+setup/mac-bootstrap/doctor.sh       verification without managed-config writes
+setup/mac-bootstrap/docs/           this plan and QA record
+setup/mac-vm/Brewfile               MacBook-only packages
+setup/mac-mini/Brewfile             Mac-mini-only apps, services, and libraries
+setup/mac-vm/zsh-config/            shared shell behavior
 ```
 
 This shape is implemented in this PR. Removing already-installed Homebrew
@@ -300,10 +300,10 @@ These files implement the approved scope in PR #9.
 | `config/mise/config.toml` | Approved shared runtime and package-manager pins. |
 | `setup/mac-vm/zsh-config/functions.zsh` | Remove npm deletion and make maintenance migration-safe. |
 | `setup/mac-vm/zsh-config/.zshrc` | Keep interactive activation predictable. |
-| `setup/personal-mac/mise-shims.zsh` | Expose mise shims safely to non-interactive/IDE shells. |
-| `setup/personal-mac/bootstrap.sh` | Check-first personal-Mac installer and linker. |
-| `setup/personal-mac/doctor.sh` | Package, link, shell, runtime, and Neovim checks without managed-config writes. |
-| `setup/personal-mac/Brewfile` | Shared Homebrew baseline. |
+| `setup/mac-bootstrap/mise-shims.zsh` | Expose mise shims safely to non-interactive/IDE shells. |
+| `setup/mac-bootstrap/bootstrap.sh` | Check-first personal-Mac installer and linker. |
+| `setup/mac-bootstrap/doctor.sh` | Package, link, shell, runtime, and Neovim checks without managed-config writes. |
+| `setup/mac-bootstrap/Brewfile` | Shared Homebrew baseline. |
 | `setup/mac-vm/Brewfile` | MacBook-only overlay. |
 | `setup/mac-mini/Brewfile` | Mac mini apps, services, libraries, and documented exceptions. |
 | `README.md` and `AGENTS.md` | Final inventory, ownership rules, and recovery guidance. |

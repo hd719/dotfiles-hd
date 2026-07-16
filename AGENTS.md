@@ -9,8 +9,8 @@ work machines.
 - `setup/` contains machine bootstrap scripts and machine-specific setup files.
 - The current personal Mac symlink inventory lives in `README.md`.
 - The Resilience work Mac instructions live in `setup/mac-resilience/README.md`.
-- The personal Apple Silicon Mac bootstrap and safety boundary live in
-  `setup/personal-mac/README.md`.
+- The shared Apple Silicon Mac bootstrap and safety boundary live in
+  `setup/mac-bootstrap/README.md`.
 
 ## Before Editing
 
@@ -92,7 +92,7 @@ When Hamel asks to set up the work laptop:
 
 ## Existing Helpers
 
-- `setup/personal-mac/bootstrap.sh` and `doctor.sh` for personal Macs
+- `setup/mac-bootstrap/bootstrap.sh` and `doctor.sh` for managed Macs
 - `config/zed/link-zed-config.sh`
 - `config/herdr/link-herdr-config.sh`
 - `setup/mac-resilience/link-terminal-editor-config.sh`
