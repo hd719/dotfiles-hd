@@ -4,11 +4,12 @@
 - Operator: Codex
 - Branch: `agent/plan-personal-mac-mise-standardization`
 - Host used for local QA: Apple Silicon, macOS 26.5.2
-- Implementation commit: recorded after the implementation commit is created
+- Tested implementation commit:
+  `311ecc3aba944de5e9630ce411b961746fd1aba3`
 - Actual-tool isolated home (ephemeral):
   `/tmp/dotfiles-clean-home-qa-final.icyUt1`
 - Durable sanitized evidence:
-  `~/.local/state/dotfiles-hd/pr-9/20260715-clean-home-final`
+  `~/.local/state/dotfiles-hd/mise-standardization/20260715-clean-home-final`
 - Status: review-ready; **not merge-ready until every live gate below passes**
 
 ## Passed
