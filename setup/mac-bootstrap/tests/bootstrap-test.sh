@@ -1045,6 +1045,24 @@ test_profile_and_failure_guards() {
   assert_no_path "$home_dir/.zshrc"
 }
 
+test_goodmorning_timeout_helper() {
+  local functions_file="$REPO_DIR/setup/mac-vm/zsh-config/functions.zsh"
+  local start_epoch
+  local elapsed
+
+  /bin/zsh -c 'source "$1"; _run_with_timeout 2 /usr/bin/true' zsh "$functions_file" \
+    || fail "timeout helper should preserve successful command status"
+  TESTS=$((TESTS + 1))
+
+  start_epoch="$(date +%s)"
+  if /bin/zsh -c 'source "$1"; _run_with_timeout 1 /bin/sleep 10' zsh "$functions_file"; then
+    fail "timeout helper should stop an overlong command"
+  fi
+  elapsed=$(( $(date +%s) - start_epoch ))
+  TESTS=$((TESTS + 1))
+  (( elapsed < 5 )) || fail "timeout helper took ${elapsed}s to stop an overlong command"
+}
+
 test_link_helper
 test_zprofile_helper
 test_neovim_lock_guard
@@ -1053,5 +1071,6 @@ test_full_bootstrap
 test_mac_mini_apply
 test_xdg_bin_home
 test_profile_and_failure_guards
+test_goodmorning_timeout_helper
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"
