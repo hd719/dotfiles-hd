@@ -13,7 +13,7 @@ Hamel's existing Zed muscle memory.
   `prettier` for formatting.
 - Markdown: `mdformat`, installed through `uv` with GFM, frontmatter, footnote,
   alert, and Obsidian-wikilink plugins.
-- Python: `ruff`, installed through `uv tool install ruff@latest`.
+- Python: `ruff`, pinned through `uv`.
 - GraphQL: `graphql-lsp` (from `graphql-language-service-cli`), installed to a
   fixed prefix and referenced by absolute path. Schema-aware features need a
   `graphql-config` (e.g. `graphql.config.ts`) in the project.
@@ -30,18 +30,29 @@ Install the Markdown formatter with:
 
 ```bash
 uv tool install 'mdformat==1.0.0' \
-  --with mdformat-gfm \
-  --with mdformat-frontmatter \
-  --with mdformat-footnote \
-  --with mdformat-gfm-alerts \
+  --with 'mdformat-gfm==1.0.0' \
+  --with 'mdformat-frontmatter==2.1.2' \
+  --with 'mdformat-footnote==0.1.3' \
+  --with 'mdformat-gfm-alerts==2.0.0' \
   --with 'mdformat-wikilink==0.3.0'
+
+uv tool install 'ruff==0.15.21'
 ```
 
 Install the GraphQL language server (no Homebrew formula) to a fixed,
 node-version-independent prefix that this config references by absolute path:
 
 ```bash
-npm install -g --prefix "$HOME/.local/graphql-lsp" graphql-language-service-cli
+GRAPHQL_LSP_HOME="$HOME/.local/graphql-lsp"
+mkdir -p "$GRAPHQL_LSP_HOME/bin"
+PATH="$GRAPHQL_LSP_HOME/bin:$PATH" PNPM_HOME="$GRAPHQL_LSP_HOME" \
+  MISE_NO_CONFIG=1 mise exec node@24.18.0 pnpm@11.2.2 -- \
+  pnpm add --global --global-dir "$GRAPHQL_LSP_HOME/global" \
+  'graphql-language-service-cli@3.5.0'
+MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
+  "$GRAPHQL_LSP_HOME/bin/graphql-lsp" --version | grep -Fx '3.5.0' && \
+  printf '%s\n' 'graphql-language-service-cli@3.5.0 via pnpm@11.2.2' \
+    > "$GRAPHQL_LSP_HOME/.pnpm-managed-version"
 ```
 
 ## Safety Net

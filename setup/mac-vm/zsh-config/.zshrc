@@ -2,7 +2,7 @@
 # ZSH Configuration - Optimized for Speed (~35-45ms target)
 # =============================================================================
 
-ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-vm/zsh-config
+ZSH_CONFIG_DIR="$HOME/Developer/dotfiles-hd/setup/mac-vm/zsh-config"
 
 # -----------------------------------------------------------------------------
 # Core Configuration (order matters)
@@ -31,7 +31,7 @@ export FORCE_COLOR=1
 # -----------------------------------------------------------------------------
 typeset -gaU fpath
 fpath=(
-  /Users/hameldesai/.docker/completions
+  "$HOME/.docker/completions"
   /opt/homebrew/share/zsh/site-functions
   /usr/local/share/zsh/site-functions
   $fpath
@@ -49,6 +49,8 @@ if [[ -f ~/.zcompdump ]]; then
 else
   compinit       # First run
 fi
-export PATH="$HOME/.local/bin:$PATH"
+typeset -gaU path
+path=("${XDG_BIN_HOME:-$HOME/.local/bin}" $path)
+export PATH
 
 _activate_mise

@@ -50,8 +50,11 @@ fi
 # -----------------------------------------------------------------------------
 [[ -d /opt/homebrew/opt/curl/bin ]] && export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 [[ -d /opt/homebrew/opt/postgresql@17/bin ]] && export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
-# Mac mini local tools, including cua-driver-rs.
-export PATH="$HOME/.local/bin:$PATH"
+# uv tools may use XDG_BIN_HOME. Keep the default local bin too because the Mac
+# mini stores machine-local helpers such as cua-driver-rs there.
+typeset -gaU path
+path=("${XDG_BIN_HOME:-$HOME/.local/bin}" "$HOME/.local/bin" $path)
+export PATH
 
 if [[ -f "$HOME/.local/bin/env" ]]; then
   source "$HOME/.local/bin/env"
@@ -93,12 +96,6 @@ if (( $+commands[op] )); then
   [[ -f "$_op_cache" ]] && source "$_op_cache"
   compdef _op op 2>/dev/null
 fi
-
-export PNPM_HOME="$HOME/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
 
 if (( $+functions[_activate_mise] )); then
   _activate_mise
