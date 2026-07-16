@@ -19,10 +19,12 @@ Full evidence is recorded in [`RESULTS.md`](RESULTS.md).
 - [x] Hamel waived the unavailable clean Apple Silicon macOS VM gate on
   2026-07-16; it is not recorded as passed.
 - [x] Live MacBook activation, rollback, reboot, and manual app/editor checks
-  passed as the compensating pre-merge gate; IDE-terminal observation remains
-  pending below.
+  passed as the compensating pre-merge gate; the IDE-terminal gate is N/A for
+  the Ghostty and Neovim daily-driver workflow.
 - [x] Mac mini activation and immediate post-merge checks passed.
-- [ ] One-hour and next-day checks remain post-merge observation gates.
+- [x] One-hour checks passed on both personal Macs through Everyday Mac Ops at
+  10:52 EDT on 2026-07-16.
+- [ ] Next-day checks remain a post-merge observation gate.
 
 Unchecked checklists below are deliberate live-machine gates, not missing
 results from the completed isolated QA.
@@ -465,7 +467,8 @@ Pass criteria:
 ### MacBook observation gate
 
 - [x] Fresh Ghostty window works.
-- [ ] Fresh IDE terminal works.
+- N/A: an IDE terminal is outside the approved Ghostty and Neovim daily-driver
+  workflow.
 - [x] Zed opens with the linked settings, keymap, and theme.
 - [x] Herdr opens with the linked config.
 - [x] Karabiner-Elements opens after required macOS permissions are granted.
@@ -700,10 +703,10 @@ git -C "$HOME/Developer/dotfiles-hd" status --short --branch \
 
 Observation checklist:
 
-| Time | MacBook shell/project/Neovim | Mac mini shell/runtime/doctor | Result |
+| Time | MacBook shell/toolchain/Neovim | Mac mini shell/runtime/doctor | Result |
 | --- | --- | --- | --- |
 | Immediate | [x] | [x] | Passed 2026-07-16; evidence paths are in the QA record |
-| One hour | [ ] | [ ] | |
+| One hour | [x] | [x] | Everyday Mac Ops passed shell, toolchain, Neovim, and runtime health at 10:52 EDT on 2026-07-16 |
 | Next day | [ ] | [ ] | |
 
 Pass criteria:
@@ -784,8 +787,8 @@ than stacking more live changes.
 - [x] The unavailable clean macOS VM is explicitly waived for PR #9; no VM
   result is represented as passed.
 
-MacBook rows through the reboot check are required before merge. The one-hour
-and next-day rows are post-merge observation.
+MacBook rows through the reboot check are required before merge. The next-day
+row remains a post-merge observation.
 
 | Gate | MacBook | Mac mini | Timing/evidence |
 | --- | --- | --- | --- |
@@ -793,7 +796,7 @@ and next-day rows are post-merge observation.
 | Symlinks verified | [x] | [x] | Doctor and link inventories |
 | Interactive shell | [x] | [x] | Approved path/version matrix |
 | Non-interactive shell | [x] | [x] | Approved path/version matrix |
-| IDE terminal | [ ] | [ ] | |
+| IDE terminal | N/A | N/A | Ghostty and Neovim are the approved daily-driver workflow |
 | Approved versions | [x] | [x] | Node 24.18.0, pnpm 11.2.2, Go 1.26.3, Python 3.14.5, Bun 1.3.14 |
 | Project QA | [x] | [x] | Disposable Cortana clones; active checkout untouched |
 | Neovim QA | [x] | [x] | Locked plugins/parsers, StyLua, headless startup, lockfile unchanged |
@@ -802,12 +805,13 @@ and next-day rows are post-merge observation.
 | Rollback proven | [x] | N/A | Mac mini runtime was not migrated; fallback remains installed |
 | Idempotent second apply | [x] | [x] | No new backup; GraphQL LSP fast path used |
 | Reboot check | [x] | N/A | MacBook post-reboot QA passed |
-| One-hour check | [ ] | [ ] | |
+| One-hour check | [x] | [x] | Everyday Mac Ops passed at 10:52 EDT on 2026-07-16 |
 | Next-day check | [ ] | [ ] | |
 | Worktrees clean | [x] | [x] | Both dotfiles repos and active Cortana checkout clean |
 
 Final approval:
 
-- [x] Hamel confirms both machines work normally.
+- [x] Hamel confirmed both machines worked normally during immediate and
+  one-hour observation.
 - [x] No fallback tool is removed until a separate cleanup PR is approved.
 - [x] Final symlink, version, exception, and bootstrap state is documented.

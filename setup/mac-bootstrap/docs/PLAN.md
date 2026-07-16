@@ -1,7 +1,8 @@
 # Personal Mac Toolchain Standardization Plan
 
-- Status: PR #9 is merged. MacBook live/reboot QA and immediate Mac mini
-  no-restart QA passed; one-hour and next-day observation remain open
+- Status: PR #9 is merged. MacBook live/reboot QA passed. Immediate and
+  one-hour no-restart observation passed on both personal Macs; next-day
+  observation remains open
 - Plan branch: `agent/plan-personal-mac-mise-standardization`
 - Base branch: `origin/master` (this repository uses `master`, not `main`)
 - Targets: personal MacBook (`mac-vm`), Mac mini (`mac-mini`), and a brand-new
@@ -23,7 +24,8 @@
 - [x] Complete the live MacBook canary, rollback drill, reboot, and post-reboot
   checks before merge.
 - [x] Complete the Mac mini no-restart activation and immediate QA after merge.
-- [ ] Complete the one-hour and next-day observation window.
+- [x] Complete the one-hour observation window.
+- [ ] Complete the next-day observation window.
 
 Unchecked items later in this plan are intentional live-machine gates;
 isolated temporary-home evidence does not mark them complete. The VM gate is
@@ -56,8 +58,8 @@ does not mean every installed Homebrew formula must be identical.
 
 - One ownership model for personal Mac development tools.
 - A shared mise runtime policy for Node, pnpm, Go, Python, and Bun.
-- Reliable tool resolution in interactive, non-interactive login, and IDE
-  shells, plus documented fixed-path exceptions for scripts and LaunchAgents.
+- Reliable tool resolution in interactive and non-interactive login shells,
+  plus documented fixed-path exceptions for scripts and LaunchAgents.
 - Reproducible Homebrew inventories for common and machine-specific tools.
 - MacBook project validation and Mac mini runtime protection.
 - Backup, rollback, idempotency, and observation procedures.
@@ -210,7 +212,10 @@ proves apply, rollback, reapply, reboot, and post-reboot health before merge.
 - [x] Record OS, architecture, Git state, symlink targets, tool paths, and
   versions without capturing environment variables or secrets.
 - [x] Record interactive and non-interactive shell resolution separately.
-- [ ] Save `brew bundle dump` and `mise ls --json` rollback inventories.
+- [x] Record that the planned pre-change `brew bundle dump` and
+  `mise ls --json` inventories were not captured and cannot be reconstructed;
+  retain the recorded paths, versions, symlinks, backups, and Homebrew
+  fallbacks as the available rollback evidence.
 - [x] On the Mac mini, record LaunchAgent command paths, running Node/pnpm
   process paths, `brew services list`, `pnpm runtime:status`, and
   `pnpm runtime:doctor`.
@@ -232,7 +237,7 @@ recorded.
   soak. Keep normal maintenance as a separately reviewed concern.
 - [x] Preserve existing Homebrew runtimes as fallbacks.
 - [x] Add a safe, backed-up `.zprofile` shim strategy for non-interactive and
-  IDE shells, following mise's
+  login shells, following mise's
   [zsh shim guidance](https://mise.jdx.dev/dev-tools/shims.html); do not blindly
   replace an existing profile.
 
@@ -246,7 +251,8 @@ without touching the live symlinked config.
 - [x] Confirm Node/npm/npx/pnpm, Go, Python, and Bun paths and versions.
 - [x] Activate the shared pins on the MacBook.
 - [x] Validate a fresh non-interactive shell.
-- [ ] Validate an IDE-launched terminal.
+- N/A: an IDE-launched terminal is not part of the approved Ghostty and Neovim
+  daily-driver workflow.
 - [x] Run Neovim startup, health, formatter, Tree-sitter, and LSP checks.
 - [x] Run `cortana-services` local CI and Go tests from a clean checkout.
 - [x] Complete at least one normal work session on the canary.
@@ -268,7 +274,8 @@ accepts the normal-work-session and post-reboot behavior before merge.
 - [x] Install the approved shared tools with mise; do not remove Homebrew tools.
 - [x] Test with `mise exec`, then a fresh interactive shell.
 - [x] Re-run non-interactive, Neovim, and project checks.
-- [ ] Observe an IDE-launched terminal separately.
+- N/A: an IDE-launched terminal is not part of the approved Ghostty and Neovim
+  daily-driver workflow.
 - [x] Confirm already-running services use the same binaries as the baseline.
 - [x] Run `brew services list`, `pnpm runtime:status`, and
   `pnpm runtime:doctor` without restarting anything.
@@ -305,7 +312,9 @@ Exit gate: runtime health matches baseline and rollback remains available.
 
 ### Phase 6: Observe, then clean up
 
-- [ ] Recheck both machines immediately, after one hour, and the next day.
+- [x] Recheck both machines immediately.
+- [x] Recheck both machines after one hour with Everyday Mac Ops.
+- [ ] Recheck both machines the next day.
 - [x] Run `mise install` twice and confirm the second run is a no-op.
 - [x] Keep `goodMorning()` out of rollout QA because it also performs unrelated
   Zoom, Downloads, `.DS_Store`, and cache housekeeping. Test `mise install`
@@ -338,7 +347,7 @@ These files implement the approved scope in PR #9.
 | `config/mise/config.toml` | Approved shared runtime and package-manager pins. |
 | `setup/mac-vm/zsh-config/functions.zsh` | Remove npm deletion and make maintenance migration-safe. |
 | `setup/mac-vm/zsh-config/.zshrc` | Keep interactive activation predictable. |
-| `setup/mac-bootstrap/mise-shims.zsh` | Expose mise shims safely to non-interactive/IDE shells. |
+| `setup/mac-bootstrap/mise-shims.zsh` | Expose mise shims safely to non-interactive login shells. |
 | `setup/mac-bootstrap/bootstrap.sh` | Check-first personal-Mac installer and linker. |
 | `setup/mac-bootstrap/doctor.sh` | Package, link, shell, runtime, and Neovim checks without managed-config writes. |
 | `setup/mac-bootstrap/Brewfile` | Shared Homebrew baseline. |
@@ -369,7 +378,8 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 
 - [x] Both personal Macs follow the approved ownership policy.
 - [x] Shared runtime versions are pinned or an intentional exception is written.
-- [ ] Interactive, non-interactive, and IDE shell checks pass on both machines.
+- [x] Interactive and non-interactive shell checks pass on both machines; the
+  IDE-terminal gate is N/A for the Ghostty and Neovim daily-driver workflow.
 - [x] Neovim and project QA pass on both machines.
 - [ ] Mac mini runtime health matches its baseline through the next-day check.
 - [x] No work-Mac, Ubuntu, credential, service-config, or unrelated files changed.
@@ -382,4 +392,5 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
   shell, project, and manual app checks from the exact reviewed commit.
 - [x] PR #9 and `RESULTS.md` record the completed pre-merge MacBook and immediate
   post-merge Mac mini QA.
-- [ ] Record the one-hour and next-day observations in a later QA update.
+- [x] Record the one-hour observation in the QA update.
+- [ ] Record the next-day observation in a later QA update.

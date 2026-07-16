@@ -11,8 +11,8 @@
 - Durable sanitized evidence:
   `~/.local/state/dotfiles-hd/mise-standardization/20260715-mac-bootstrap-clean-home-6e3e9e2`
 - Merged commit: `429ee01b6afd00653c075e94b17a69b979ef3fe7`
-- Status: merged; MacBook canary and immediate Mac mini no-restart QA passed.
-  One-hour and next-day observation remain open.
+- Status: merged; MacBook canary QA passed. Immediate and one-hour no-restart
+  observation passed on both personal Macs. Next-day observation remains open.
 
 ## Passed
 
@@ -70,6 +70,10 @@
   that gate on 2026-07-16; it is not recorded as passed. This accepts residual
   risk around a truly cold Homebrew install and replaces the VM gate with the
   live MacBook rollback and reboot canary below.
+- The planned pre-change `brew bundle dump` and `mise ls --json` inventories
+  were not captured and cannot be reconstructed after activation. The retained
+  path/version matrices, symlink inventories, backups, and Homebrew fallbacks
+  are the available rollback evidence.
 
 ## Required Before Merge
 
@@ -83,8 +87,8 @@
   successfully twice.
 - [x] Complete the MacBook app and Neovim LSP checks.
 - [x] Complete manual app/editor checks and normal-work confirmation.
-- [ ] Complete the IDE-terminal observation now carried in the post-merge
-  `QA.md` checklist.
+- [x] Record the IDE-terminal gate as N/A because Ghostty and Neovim are the
+  approved daily-driver workflow.
 - [x] Reboot the MacBook and repeat the doctor, shell, Neovim, project, and
   clean-Git checks.
 - [x] Hamel confirms the post-reboot MacBook is ready for QA to continue.
@@ -95,7 +99,8 @@
   the interactive no-restart apply plus shell, project, Neovim, and runtime QA.
 - [x] Complete immediate observation on both machines and record Hamel's
   normal-use confirmation.
-- [ ] Complete one-hour and next-day observation on both machines.
+- [x] Complete one-hour observation on both machines through Everyday Mac Ops.
+- [ ] Complete next-day observation on both machines.
 - [x] Record the immediate post-merge evidence and reconciled checklist in a
   small follow-up PR.
 
@@ -142,9 +147,11 @@ Passed:
   regression.
 - Herdr appears in `brew services list` as installed and stopped. Existing
   service entries and health were unchanged.
+- Everyday Mac Ops passed at 10:52 EDT, more than one hour after activation:
+  both Macs passed Homebrew, mise, Node, pnpm, Neovim, and Codex checks; the Mac
+  mini runtime doctor retained only its existing warning, and no service was
+  restarted or migrated.
 
 Pending:
 
-- One-hour observation.
 - Next-day observation and Hamel's final normal-use confirmation.
-- IDE-launched terminal observation; it is not represented as passed.
