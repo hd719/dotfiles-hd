@@ -281,11 +281,11 @@ cd "$HOME"
 # The doctor separately verifies the reviewed config contains these exact pins.
 # --no-config prevents the live global config from merging into this install.
 MISE_NO_CONFIG=1 mise install \
-  node@22.23.1 pnpm@11.2.2 go@1.26.3 python@3.14.5 bun@1.3.14
-MISE_NO_CONFIG=1 mise exec node@22.23.1 -- node --version
-MISE_NO_CONFIG=1 mise exec node@22.23.1 -- npm --version
-MISE_NO_CONFIG=1 mise exec node@22.23.1 -- npx --version
-MISE_NO_CONFIG=1 mise exec node@22.23.1 pnpm@11.2.2 -- pnpm --version
+  node@24.18.0 pnpm@11.2.2 go@1.26.3 python@3.14.5 bun@1.3.14
+MISE_NO_CONFIG=1 mise exec node@24.18.0 -- node --version
+MISE_NO_CONFIG=1 mise exec node@24.18.0 -- npm --version
+MISE_NO_CONFIG=1 mise exec node@24.18.0 -- npx --version
+MISE_NO_CONFIG=1 mise exec node@24.18.0 pnpm@11.2.2 -- pnpm --version
 MISE_NO_CONFIG=1 mise exec go@1.26.3 -- go version
 MISE_NO_CONFIG=1 mise exec python@3.14.5 -- python --version
 MISE_NO_CONFIG=1 mise exec bun@1.3.14 -- bun --version
@@ -311,9 +311,9 @@ Start only from a clean project checkout:
 ```bash
 cd "$HOME/Developer/cortana-services"
 git status --short --branch
-MISE_NO_CONFIG=1 mise exec node@22.23.1 pnpm@11.2.2 -- \
+MISE_NO_CONFIG=1 mise exec node@24.18.0 pnpm@11.2.2 -- \
   pnpm install --frozen-lockfile
-MISE_NO_CONFIG=1 mise exec node@22.23.1 pnpm@11.2.2 -- pnpm ci:local
+MISE_NO_CONFIG=1 mise exec node@24.18.0 pnpm@11.2.2 -- pnpm ci:local
 MISE_NO_CONFIG=1 mise exec go@1.26.3 -- go -C apps/cortana-go test ./...
 git status --short
 ```

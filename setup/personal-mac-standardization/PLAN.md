@@ -106,21 +106,23 @@ exception and is not restarted or migrated.
 
 | Tool | Approved shared baseline | Reason |
 | --- | --- | --- |
-| Node | `22.23.1` | Matches the working Mac mini runtime and avoids combining manager migration with a major upgrade. |
+| Node | `24.18.0` | Latest Active LTS for the shared interactive daily driver; the Mac mini production runtime remains an explicit Homebrew Node 22 exception. |
 | pnpm | `11.2.2` | Matches `cortana-services` `packageManager`. |
 | Go | `1.26.3` | Existing shared mise pin; test before accepting the mini patch-level change. |
 | Python | `3.14.5` | Existing shared mise pin. Homebrew Python may remain as a dependency. |
 | Bun | `1.3.14` | Existing shared mise pin. |
 | Neovim | `0.12+`, Homebrew-owned | Keep the working release line without pretending Homebrew pins a patch. |
 
-Node 22 must pass the MacBook project matrix before live activation. If a real
+Node 24 must pass the MacBook project matrix before live activation. If a real
 project requires Node 26, use a project-local override or stop for a separate
 version decision; do not change the Mac mini production runtime in this PR.
 
 ### Approval checklist
 
 - [x] Hamel approves the ownership table.
-- [x] Hamel approves Node `22.23.1` as the shared default.
+- [x] Hamel approves Node `24.18.0` as the shared default. This supersedes the
+  earlier conservative Node `22.23.1` choice because Node 22 is now in
+  Maintenance LTS while Node 24 is Active LTS.
 - [x] Hamel approves pnpm `11.2.2` as the shared default.
 - [x] Every approved version is available through mise for the Apple Silicon
   target architecture.

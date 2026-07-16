@@ -368,9 +368,9 @@ if [[ "${1:-}" == "-e" ]]; then
   exit 1
 fi
 if [[ "${MISE_TEST_EXEC:-}" == "1" ]]; then
-  printf 'v22.23.1\n'
+  printf 'v24.18.0\n'
 else
-  printf '%s\n' "${FAKE_ACTIVE_NODE_VERSION:-v22.23.1}"
+  printf '%s\n' "${FAKE_ACTIVE_NODE_VERSION:-v24.18.0}"
 fi
 EOF
   chmod +x "$fake_bin/node"
@@ -656,14 +656,14 @@ test_full_bootstrap() {
   mv "$root/correct-zprofile" "$home_dir/.zprofile"
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
-    DOTFILES_DIR="$REPO_DIR" MISE_WHERE_MISSING='node@22.23.1' \
+    DOTFILES_DIR="$REPO_DIR" MISE_WHERE_MISSING='node@24.18.0' \
     "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject a matching PATH fallback when mise Node is missing"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
-    DOTFILES_DIR="$REPO_DIR" FAKE_ACTIVE_NODE_VERSION=v22.23.10 \
+    DOTFILES_DIR="$REPO_DIR" FAKE_ACTIVE_NODE_VERSION=v24.18.10 \
     "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
     fail "doctor should reject a wrong active shell version"
   fi
@@ -900,7 +900,7 @@ test_profile_and_failure_guards() {
   assert_eq 'unreadable-profile' "$(cat "$home_dir/.zprofile")" "unreadable zprofile is unchanged"
   rm "$home_dir/.zprofile"
 
-  sed 's/node = "22.23.1"/node = "99.0.0"/' \
+  sed 's/node = "24.18.0"/node = "99.0.0"/' \
     "$REPO_DIR/config/mise/config.toml" > "$drift_config"
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
