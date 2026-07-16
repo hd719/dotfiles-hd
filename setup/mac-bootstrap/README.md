@@ -85,9 +85,14 @@ mini preflight passes, and Hamel explicitly approves the interactive step in
 [`docs/QA.md`](docs/QA.md).
 That apply is what completes the no-restart gate. The bootstrap does not start
 or restart services, but a new login shell will resolve the shared mise
-versions. Existing Cortana and Hermes LaunchAgents prepend
-`/opt/homebrew/opt/node@22/bin` and keep using keg-only Homebrew Node 22 until a
-separate maintenance window is approved.
+versions. Existing Cortana processes continue using keg-only Homebrew Node 22.
+A read-only 2026-07-16 inventory found that the three live Hermes gateway
+LaunchAgents (`ai.hermes.gateway.plist`, `ai.hermes.gateway-spartan.plist`, and
+`ai.hermes.gateway-monitor.plist`) still include the deleted
+`/opt/homebrew/Cellar/node@22/22.22.3/bin` directory in `PATH`; the current
+Homebrew `node@22` is 22.23.1. This bootstrap does not edit or reload those
+plists. Correct them only in a separately approved maintenance window with
+runtime status and doctor checks.
 
 ## What apply changes
 

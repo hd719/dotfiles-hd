@@ -25,7 +25,8 @@ both a physical personal MacBook and a MacBook VM.
 
 | Tool | Live path | Dotfiles source | Status | Notes |
 | --- | --- | --- | --- | --- |
-| Shell | `~/.zshrc` | `setup/mac-vm/zsh-config/.zshrc` | Bootstrap-managed link | Personal MacBook shell entry point. |
+| Shell (MacBook) | `~/.zshrc` | `setup/mac-vm/zsh-config/.zshrc` | Bootstrap-managed link | Personal MacBook shell entry point. |
+| Shell (Mac mini) | `~/.zshrc` | `setup/mac-mini/.zshrc` | Bootstrap-managed link | Mac mini shell entry point. |
 | Login PATH | marker-owned block in `~/.zprofile` | `setup/mac-bootstrap/mise-shims.zsh` | Bootstrap-managed block | The rest of `.zprofile` remains user-owned. |
 | AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Existing manual link | Not installed or linked by the new-Mac bootstrap because the app is not in its reviewed Brewfiles. |
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
@@ -42,8 +43,9 @@ both a physical personal MacBook and a MacBook VM.
 ## Repair an Individual Link
 
 Use this only to repair one existing link. New Macs use the personal-Mac
-bootstrap above. This helper backs up anything already at the live path before
-linking.
+bootstrap above. Choose a source listed for the target machine; MacBook-only
+sources such as Karabiner do not belong on the Mac mini. This example repairs
+only the shared Neovim link and backs up anything already at the live path.
 
 ```bash
 backup_and_link() {
@@ -70,17 +72,7 @@ backup_and_link() {
 
 DOTFILES="$HOME/Developer/dotfiles-hd"
 
-backup_and_link "$DOTFILES/config/aerospace/aerospace.toml" "$HOME/.config/aerospace/aerospace.toml"
-backup_and_link "$DOTFILES/config/btop" "$HOME/.config/btop"
-backup_and_link "$DOTFILES/config/fastfetch" "$HOME/.config/fastfetch"
-backup_and_link "$DOTFILES/config/ghostty/config" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
-backup_and_link "$DOTFILES/config/karabiner" "$HOME/.config/karabiner"
-backup_and_link "$DOTFILES/config/mise" "$HOME/.config/mise"
 backup_and_link "$DOTFILES/config/nvim" "$HOME/.config/nvim"
-backup_and_link "$DOTFILES/config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
-backup_and_link "$DOTFILES/config/zed/settings.json" "$HOME/.config/zed/settings.json"
-backup_and_link "$DOTFILES/config/zed/keymap.json" "$HOME/.config/zed/keymap.json"
-backup_and_link "$DOTFILES/config/zed/themes" "$HOME/.config/zed/themes"
 ```
 
 ## Existing Bootstrap Scripts

@@ -315,10 +315,35 @@ EOF
 
   cat > "$fake_bin/git" <<'EOF'
 #!/usr/bin/env bash
-if [[ "$*" == *'/nvim/lazy/lazy.nvim'* ]]; then
-  printf 'git %s\n' "$*" >> "${COMMAND_LOG:?}"
-  if [[ "$*" == *'rev-parse HEAD'* ]]; then
-    printf '%s\n' "${FAKE_LAZY_COMMIT:-306a05526ada86a7b30af95c5cc81ffba93fef97}"
+command_line="$*"
+if [[ "$command_line" == *'/nvim/lazy/'* ]]; then
+  printf 'git %s\n' "$command_line" >> "${COMMAND_LOG:?}"
+  if [[ "${1:-}" == "clone" ]]; then
+    target="${!#}"
+    mkdir -p "$target/.git"
+    exit 0
+  fi
+  if [[ "$command_line" == *'rev-parse HEAD'* ]]; then
+    if [[ "${FAKE_NVIM_MISSING_PLUGIN:-0}" == "1" ]]; then
+      exit 31
+    fi
+    plugin_dir=""
+    args=("$@")
+    for ((index = 0; index < ${#args[@]}; index++)); do
+      if [[ "${args[$index]}" == "-C" ]]; then
+        plugin_dir="${args[$((index + 1))]}"
+        break
+      fi
+    done
+    plugin_name="$(basename "$plugin_dir")"
+    if [[ "${FAKE_NVIM_COMMIT_MISMATCH:-0}" == "1" ]]; then
+      printf '%040d\n' 0
+    else
+      lockfile="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/lazy-lock.json"
+      /usr/bin/ruby -rjson -e \
+        'puts JSON.parse(File.read(ARGV.fetch(0))).fetch(ARGV.fetch(1)).fetch("commit")' \
+        "$lockfile" "$plugin_name"
+    fi
   fi
   exit 0
 fi
@@ -486,6 +511,13 @@ fi
 [[ -z "${NVIM_NORMAL_START_MARKER:-}" ]] || : > "$NVIM_NORMAL_START_MARKER"
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/lazy.nvim"
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/lazy.nvim/.git"
+if [[ "$*" == *"Lazy! restore"* ]]; then
+  lockfile="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/lazy-lock.json"
+  while IFS= read -r plugin; do
+    mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/$plugin/.git"
+  done < <(/usr/bin/ruby -rjson -e \
+    'JSON.parse(File.read(ARGV.fetch(0))).each_key { |name| puts name }' "$lockfile")
+fi
 if [[ "$*" == *"nvim-treesitter"* ]]; then
   site_root="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site"
   mkdir -p "$site_root/parser" "$site_root/parser-info" "$site_root/queries"
@@ -528,34 +560,119 @@ test_neovim_lock_guard() {
   local fake_bin="$root/bin"
   local lockfile="$root/lazy-lock.json"
   local original="$root/original.json"
+  local log="$root/commands.log"
+  local pin_marker="$root/lazy-pinned"
 
   mkdir -p "$fake_bin"
+  : > "$log"
   printf '{"lazy.nvim":{"commit":"1111111111111111111111111111111111111111"}}\n' > "$lockfile"
   cp "$lockfile" "$original"
   cat > "$fake_bin/nvim" <<'EOF'
 #!/usr/bin/env bash
-mkdir -p "${XDG_DATA_HOME:?}/nvim/lazy/lazy.nvim/.git"
+printf 'nvim %s\n' "$*" >> "${COMMAND_LOG:?}"
+[[ -f "${LAZY_PIN_MARKER:?}" ]] || exit 86
 printf '{"lazy.nvim":{"commit":"drifted"}}\n' > "${TEST_LAZY_LOCK:?}"
 exit "${TEST_NVIM_STATUS:-0}"
 EOF
   chmod +x "$fake_bin/nvim"
   cat > "$fake_bin/git" <<'EOF'
 #!/usr/bin/env bash
+printf 'git %s\n' "$*" >> "${COMMAND_LOG:?}"
+if [[ "${1:-}" == "clone" ]]; then
+  target="${!#}"
+  mkdir -p "$target/.git"
+  [[ "${FAIL_LAZY_CLONE:-0}" != "1" ]] || exit 87
+fi
+if [[ "$*" == *'checkout --quiet --detach'* ]]; then
+  : > "${LAZY_PIN_MARKER:?}"
+fi
 exit 0
 EOF
   chmod +x "$fake_bin/git"
 
   PATH="$fake_bin:$PATH" XDG_DATA_HOME="$root/data" TEST_LAZY_LOCK="$lockfile" \
+    COMMAND_LOG="$log" LAZY_PIN_MARKER="$pin_marker" \
     restore_neovim_plugins "$lockfile" >/dev/null
+  assert_contains "$log" \
+    "git clone --quiet --filter=blob:none --no-checkout $LAZY_NVIM_REPOSITORY $root/data/nvim/lazy/lazy.nvim"
+  assert_contains "$log" \
+    'git -C '"$root/data/nvim/lazy/lazy.nvim"' checkout --quiet --detach 1111111111111111111111111111111111111111'
+  assert_contains "$log" 'nvim --headless +Lazy! restore +qa'
   assert_eq "$(cat "$original")" "$(cat "$lockfile")" "Neovim restore preserves the lockfile"
+
+  if PATH="$fake_bin:$PATH" XDG_DATA_HOME="$root/failed-data" \
+    TEST_LAZY_LOCK="$lockfile" FAIL_LAZY_CLONE=1 \
+    COMMAND_LOG="$log" LAZY_PIN_MARKER="$root/failed-pin" \
+    restore_neovim_plugins "$lockfile" >/dev/null 2>&1; then
+    fail "failed lazy.nvim clone should stop Neovim restore"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_no_path "$root/failed-data/nvim/lazy/lazy.nvim"
 
   if PATH="$fake_bin:$PATH" XDG_DATA_HOME="$root/data" \
     TEST_LAZY_LOCK="$lockfile" TEST_NVIM_STATUS=42 \
+    COMMAND_LOG="$log" LAZY_PIN_MARKER="$pin_marker" \
     restore_neovim_plugins "$lockfile" >/dev/null 2>&1; then
     fail "Neovim restore failure should propagate"
   fi
   TESTS=$((TESTS + 1))
   assert_eq "$(cat "$original")" "$(cat "$lockfile")" "failed Neovim restore preserves the lockfile"
+}
+
+test_neovim_plugin_checkout_integrity() {
+  local root="$TMP_ROOT/neovim-plugin-checkout-integrity"
+  local data_dir="$root/data"
+  local plugin_dir="$data_dir/nvim/lazy/example.nvim"
+  local lockfile="$root/lazy-lock.json"
+  local commit
+
+  mkdir -p "$plugin_dir"
+  /usr/bin/git -C "$plugin_dir" init --quiet
+  printf 'tracked\n' > "$plugin_dir/tracked.txt"
+  /usr/bin/git -C "$plugin_dir" add tracked.txt
+  /usr/bin/git -C "$plugin_dir" \
+    -c user.name='Bootstrap Test' \
+    -c user.email='bootstrap-test@example.invalid' \
+    -c commit.gpgsign=false \
+    commit --quiet -m initial
+  commit="$(/usr/bin/git -C "$plugin_dir" rev-parse HEAD)"
+  printf '{"example.nvim":{"commit":"%s"}}\n' "$commit" > "$lockfile"
+
+  PATH=/usr/bin:/bin XDG_DATA_HOME="$data_dir" \
+    verify_neovim_plugins_restored "$lockfile" \
+    || fail "clean locked Neovim plugin should pass verification"
+  TESTS=$((TESTS + 1))
+
+  mkdir -p "$plugin_dir/doc"
+  printf 'generated tags\n' > "$plugin_dir/doc/tags"
+  PATH=/usr/bin:/bin XDG_DATA_HOME="$data_dir" \
+    verify_neovim_plugins_restored "$lockfile" \
+    || fail "generated untracked doc/tags should be allowed"
+  TESTS=$((TESTS + 1))
+
+  printf 'unexpected\n' > "$plugin_dir/unexpected.txt"
+  if PATH=/usr/bin:/bin XDG_DATA_HOME="$data_dir" \
+    verify_neovim_plugins_restored "$lockfile" >/dev/null 2>&1; then
+    fail "unexpected untracked Neovim plugin files should fail verification"
+  fi
+  TESTS=$((TESTS + 1))
+  rm "$plugin_dir/unexpected.txt"
+
+  printf 'modified\n' >> "$plugin_dir/tracked.txt"
+  if PATH=/usr/bin:/bin XDG_DATA_HOME="$data_dir" \
+    verify_neovim_plugins_restored "$lockfile" >/dev/null 2>&1; then
+    fail "modified tracked Neovim plugin files should fail verification"
+  fi
+  TESTS=$((TESTS + 1))
+  printf 'tracked\n' > "$plugin_dir/tracked.txt"
+
+  printf 'staged\n' >> "$plugin_dir/tracked.txt"
+  /usr/bin/git -C "$plugin_dir" add tracked.txt
+  if PATH=/usr/bin:/bin XDG_DATA_HOME="$data_dir" \
+    verify_neovim_plugins_restored "$lockfile" >/dev/null 2>&1; then
+    fail "staged Neovim plugin files should fail verification"
+  fi
+  TESTS=$((TESTS + 1))
 }
 
 test_neovim_parser_manifest() {
@@ -814,14 +931,16 @@ test_full_bootstrap() {
   printf '{ invalid json\n' > "$root/invalid-lazy-lock.json"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     XDG_DATA_HOME="$home_dir/.local/share" \
-    verify_neovim_plugins_restored "$root/invalid-lazy-lock.json"; then
+    verify_neovim_plugins_restored "$root/invalid-lazy-lock.json" \
+      >/dev/null 2>&1; then
     fail "Neovim verifier should reject malformed lock JSON"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     XDG_DATA_HOME="$home_dir/.local/share" FAKE_NVIM_COMMIT_MISMATCH=1 \
-    verify_neovim_plugins_restored "$REPO_DIR/config/nvim/lazy-lock.json"; then
+    verify_neovim_plugins_restored "$REPO_DIR/config/nvim/lazy-lock.json" \
+      >/dev/null 2>&1; then
     fail "Neovim verifier should reject a wrong locked commit"
   fi
   TESTS=$((TESTS + 1))
@@ -1066,6 +1185,7 @@ test_goodmorning_timeout_helper() {
 test_link_helper
 test_zprofile_helper
 test_neovim_lock_guard
+test_neovim_plugin_checkout_integrity
 test_neovim_parser_manifest
 test_full_bootstrap
 test_mac_mini_apply

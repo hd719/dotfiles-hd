@@ -43,9 +43,8 @@
   `fc54e31fbd0608b909b552815a285bf62e6610f9`: Node 24.18.0 plus Bun 1.3.14
   frozen install and lint passed, and the checkout stayed clean.
 - Mac mini read-only/no-restart audit: running services stayed on Homebrew Node
-  22.23.1 through LaunchAgent PATH entries that prepend
-  `/opt/homebrew/opt/node@22/bin`; runtime status stayed green, and no package,
-  link, process, or service state changed.
+  22.23.1; runtime status stayed green, and no package, link, process, or
+  service state changed.
 
 ## Known Pre-existing or External Limits
 
@@ -54,6 +53,12 @@
   was not run with ignored local secret-bearing environment files.
 - The Mac mini doctor retains one pre-existing development-log warning and one
   unrelated pre-existing LaunchAgent failure. Neither changed during this work.
+- A later read-only inventory found that `ai.hermes.gateway.plist`,
+  `ai.hermes.gateway-spartan.plist`, and `ai.hermes.gateway-monitor.plist` still
+  include the deleted `/opt/homebrew/Cellar/node@22/22.22.3/bin` directory in
+  `PATH`. The current Homebrew `node@22` is 22.23.1. No plist was edited and no
+  service was reloaded; correction requires a separately approved maintenance
+  window.
 - `cortana-services` hosted CI still explicitly uses Node 22. Updating that
   project workflow is outside this dotfiles PR; the complete local suite passed
   under Node 24.18.0.
@@ -77,8 +82,9 @@
 - [x] Prove rollback restores every path changed by the canary, then reapply
   successfully twice.
 - [x] Complete the MacBook app and Neovim LSP checks.
-- [ ] Complete the IDE-terminal and normal-work observation now carried in the
-  post-merge `QA.md` checklist.
+- [x] Complete manual app/editor checks and normal-work confirmation.
+- [ ] Complete the IDE-terminal observation now carried in the post-merge
+  `QA.md` checklist.
 - [x] Reboot the MacBook and repeat the doctor, shell, Neovim, project, and
   clean-Git checks.
 - [x] Hamel confirms the post-reboot MacBook is ready for QA to continue.
@@ -87,10 +93,11 @@
 
 - [x] Complete the Mac mini preflight, obtain Hamel's explicit approval, and run
   the interactive no-restart apply plus shell, project, Neovim, and runtime QA.
-- [ ] Complete immediate, one-hour, and next-day observation on both machines;
-  Hamel confirms the final post-merge gate.
-- [ ] Record the post-merge evidence and completed checklist in a small QA-only
-  follow-up PR.
+- [x] Complete immediate observation on both machines and record Hamel's
+  normal-use confirmation.
+- [ ] Complete one-hour and next-day observation on both machines.
+- [x] Record the immediate post-merge evidence and reconciled checklist in a
+  small follow-up PR.
 
 No Mac mini restart, reload, runtime migration, cleanup, or fallback removal is
 authorized by this PR.
@@ -121,6 +128,9 @@ Passed:
 - Runtime status was byte-for-byte unchanged. Every PID remained stable, all
   Node services stayed on Homebrew Node 22.23.1, and the runtime doctor passed
   with the same single pre-existing service-api-dev log warning.
+- A follow-up read-only inventory corrected the documentation: the three Hermes
+  gateway plists retain a deleted `22.22.3` Cellar path in `PATH`. This follow-up
+  makes no plist or runtime change.
 - WHOOP Funnel, Hermes proxy, PostgreSQL, Tailscale routes, and provider
   integrations remained healthy. No restart or reload occurred.
 - Homebrew trust was granted only to `steipete/tap/remindctl`; the full tap
