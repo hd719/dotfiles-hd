@@ -5,20 +5,21 @@
 - Branch: `agent/plan-personal-mac-mise-standardization`
 - Host used for local QA: Apple Silicon, macOS 26.5.2
 - Tested implementation commit:
-  `39528cb727fe9a5629e8a1cbeb9d10987b96e0bc`
+  `6e3e9e2ef8c3ff473fd902df4beea884096f8467`
 - Actual-tool isolated home (ephemeral):
-  `/tmp/dotfiles-clean-home-qa-final.MCfB2N`
+  `/tmp/dotfiles-clean-home-qa-final.YfsTmx`
 - Durable sanitized evidence:
-  `~/.local/state/dotfiles-hd/mise-standardization/20260715-node24-pnpm-clean-home-final`
+  `~/.local/state/dotfiles-hd/mise-standardization/20260715-mac-bootstrap-clean-home-6e3e9e2`
 - Status: review-ready; **not merge-ready until every live gate below passes**
 
 ## Passed
 
 - Shell syntax, StyLua, whitespace, and all three Brewfile parse checks.
-- 127 temporary-home bootstrap assertions, including dry-run purity, profile
-  selection, backups, idempotency, rollback, protected-state preservation,
-  installer failures, legacy npm-layout migration, exact pinned pnpm execution,
-  Go version detection, and Lazy lockfile preservation.
+- 141 temporary-home bootstrap assertions, including dry-run purity, profile
+  selection, backups, idempotency, legacy `.zprofile` marker migration,
+  rollback, protected-state preservation, installer failures, legacy npm-layout
+  migration, exact pinned pnpm execution, Go version detection, and Lazy
+  lockfile preservation.
 - An actual-tool temporary-home run using Homebrew, mise, uv, pnpm, and Neovim:
   - two applies completed without an additional backup;
   - protected SSH, Herdr, Zed, and tmux sentinels were unchanged;
@@ -57,7 +58,7 @@
 - Local host preparation installed missing Homebrew `gopls` and
   `font-maple-mono-nf`, and cached mise Node 22.23.1 without activating it. No
   live dotfile link or active PATH was switched. The Node 24.18.0 rerun used a
-  fresh isolated mise root at `/tmp/dotfiles-mise-qa-node24.WcR21v`.
+  fresh isolated mise root at `/tmp/dotfiles-mise-qa-node24.1LfnIc`.
 
 ## Required Before Merge
 
