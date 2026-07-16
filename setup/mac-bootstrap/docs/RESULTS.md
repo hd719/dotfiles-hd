@@ -10,8 +10,9 @@
   `/tmp/dotfiles-clean-home-qa-final.YfsTmx`
 - Durable sanitized evidence:
   `~/.local/state/dotfiles-hd/mise-standardization/20260715-mac-bootstrap-clean-home-6e3e9e2`
-- Status: review-ready; **not merge-ready until the live MacBook rollback and
-  reboot substitute gate below passes**
+- Merged commit: `429ee01b6afd00653c075e94b17a69b979ef3fe7`
+- Status: merged; MacBook canary and immediate Mac mini no-restart QA passed.
+  One-hour and next-day observation remain open.
 
 ## Passed
 
@@ -69,21 +70,22 @@
 
 - [x] Record Hamel's clean macOS VM waiver without representing the VM gate as
   passed.
-- [ ] Preserve the existing uncommitted PLAN/QA edits in the live canonical
+- [x] Preserve the existing uncommitted PLAN/QA edits in the live canonical
   checkout before switching it to the exact reviewed commit.
-- [ ] Back up the live MacBook baseline, dry-run, apply the exact reviewed
+- [x] Back up the live MacBook baseline, dry-run, apply the exact reviewed
   commit twice, and pass fresh shells plus the doctor.
-- [ ] Prove rollback restores every path changed by the canary, then reapply
+- [x] Prove rollback restores every path changed by the canary, then reapply
   successfully twice.
-- [ ] Complete the manual MacBook app, IDE, Neovim LSP, and normal-work-session
-  observation gate.
-- [ ] Reboot the MacBook and repeat the doctor, shell, Neovim, project, and
+- [x] Complete the MacBook app and Neovim LSP checks.
+- [ ] Complete the IDE-terminal and normal-work observation now carried in the
+  post-merge `QA.md` checklist.
+- [x] Reboot the MacBook and repeat the doctor, shell, Neovim, project, and
   clean-Git checks.
-- [ ] Hamel confirms the MacBook behaves normally and approves merge.
+- [x] Hamel confirms the post-reboot MacBook is ready for QA to continue.
 
 ## Required After Merge
 
-- [ ] Complete the Mac mini preflight, obtain Hamel's explicit approval, and run
+- [x] Complete the Mac mini preflight, obtain Hamel's explicit approval, and run
   the interactive no-restart apply plus shell, project, Neovim, and runtime QA.
 - [ ] Complete immediate, one-hour, and next-day observation on both machines;
   Hamel confirms the final post-merge gate.
@@ -92,3 +94,47 @@
 
 No Mac mini restart, reload, runtime migration, cleanup, or fallback removal is
 authorized by this PR.
+
+## Post-Merge Live QA — 2026-07-16
+
+Evidence:
+
+- MacBook:
+  `~/.local/state/dotfiles-hd/mise-standardization/20260716-064353-post-merge-pr9-macbook`
+- Mac mini:
+  `~/.local/state/dotfiles-hd/mise-standardization/20260716-064935-post-merge-pr9-macmini`
+
+Passed:
+
+- MacBook apply twice, rollback/reapply, reboot, fresh shells, doctor, Neovim,
+  locked parsers/plugins, disposable Cortana local CI and Go tests, app
+  presence, and clean Git checks.
+- Mac mini dry-run and apply twice at the merged commit; the second apply made
+  no backup and reused the pnpm-managed GraphQL LSP 3.5.0 installation.
+- Mac mini fresh interactive and non-interactive shells resolve Node 24.18.0,
+  pnpm 11.2.2, Go 1.26.3, Python 3.14.5, Bun 1.3.14, Neovim 0.12.4, and bundled
+  npm/npx 11.16.0.
+- Mac mini doctor, StyLua, locked plugins, required Tree-sitter parsers,
+  headless Neovim, disposable Cortana frozen install, local CI, and Go tests.
+- `lazy-lock.json` remained unchanged at SHA-256
+  `44eba6ba132f2be90c07d66544b7342958651b9af3ebe4755d97fd5385ff7b9f`.
+- Runtime status was byte-for-byte unchanged. Every PID remained stable, all
+  Node services stayed on Homebrew Node 22.23.1, and the runtime doctor passed
+  with the same single pre-existing service-api-dev log warning.
+- WHOOP Funnel, Hermes proxy, PostgreSQL, Tailscale routes, and provider
+  integrations remained healthy. No restart or reload occurred.
+- Homebrew trust was granted only to `steipete/tap/remindctl`; the full tap
+  remains untrusted. The diagnostic Homebrew check updated Homebrew metadata
+  itself, but no installed formula or cask was broadly upgraded.
+- `:checkhealth` completed but reports seven errors and 17 warnings limited to
+  headless Snacks checks and optional providers. Tree-sitter is green; no
+  pre-apply Mac mini health artifact exists, so this is not labeled a
+  regression.
+- Herdr appears in `brew services list` as installed and stopped. Existing
+  service entries and health were unchanged.
+
+Pending:
+
+- One-hour observation.
+- Next-day observation and Hamel's final normal-use confirmation.
+- IDE-launched terminal observation; it is not represented as passed.
