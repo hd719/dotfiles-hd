@@ -3,6 +3,25 @@
 Use this runbook for every implementation PR from
 [`PLAN.md`](PLAN.md). Do not treat it as one large migration script.
 
+## PR #9 Completion Status
+
+Full evidence is recorded in [`RESULTS.md`](RESULTS.md).
+
+- [x] Bash and Zsh syntax, StyLua, whitespace, and all three Brewfiles pass.
+- [x] All 141 temporary-home bootstrap assertions pass.
+- [x] Actual Homebrew, mise, uv, pnpm, and Neovim clean-home QA passes twice.
+- [x] The second apply is idempotent and protected files remain unchanged.
+- [x] Node 24, pnpm, Go, Python, Bun, GraphQL LSP, and Neovim checks pass.
+- [x] Project compatibility and `pnpm audit --prod` pass.
+- [x] PR review has no remaining Critical, High, Medium, or Low findings.
+- [x] GitGuardian passes on the pushed PR commit.
+- [ ] Clean Apple Silicon macOS VM, reboot, and rollback acceptance are pending.
+- [ ] Live MacBook activation and manual app/editor checks are pending.
+- [ ] Mac mini activation and immediate/one-hour/next-day checks are pending.
+
+Unchecked checklists below are deliberate merge or activation gates, not
+missing results from the completed isolated QA.
+
 ## QA Record
 
 Copy this table into the implementation PR and fill every row.

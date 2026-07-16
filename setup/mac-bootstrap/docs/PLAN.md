@@ -1,11 +1,29 @@
 # Personal Mac Toolchain Standardization Plan
 
-- Status: Approved by Hamel; implementation and QA in progress in PR #9
+- Status: Implementation and isolated QA complete in PR #9; VM and live rollout
+  gates remain pending
 - Plan branch: `agent/plan-personal-mac-mise-standardization`
 - Base branch: `origin/master` (this repository uses `master`, not `main`)
 - Targets: personal MacBook (`mac-vm`), Mac mini (`mac-mini`), and a brand-new
   Apple Silicon personal Mac
 - QA runbook: [`QA.md`](QA.md)
+
+## PR #9 Completion Status
+
+- [x] Implement the shared bootstrap, ownership model, and exact runtime pins.
+- [x] Pass shell, formatting, Brewfile, and 141 bootstrap assertions.
+- [x] Pass the actual-tool isolated-home run twice without live PATH changes.
+- [x] Pass project compatibility, Neovim, GraphQL LSP, and security checks.
+- [x] Complete PR review with no remaining Critical, High, Medium, or Low
+  findings.
+- [x] Record the exact tested commit and durable evidence in
+  [`RESULTS.md`](RESULTS.md).
+- [ ] Pass the clean Apple Silicon macOS VM and reboot gate.
+- [ ] Complete the live MacBook canary.
+- [ ] Complete the Mac mini no-restart gate and observation window.
+
+Unchecked items later in this plan are intentional VM or live-machine gates;
+isolated temporary-home evidence does not mark them complete.
 
 ## Goal
 
@@ -269,7 +287,7 @@ Exit gate: runtime health matches baseline and rollback remains available.
 
 - [ ] Recheck both machines immediately, after one hour, and the next day.
 - [ ] Run `mise install` twice and confirm the second run is a no-op.
-- [ ] Keep `goodMorning()` out of rollout QA because it also performs unrelated
+- [x] Keep `goodMorning()` out of rollout QA because it also performs unrelated
   Zoom, Downloads, `.DS_Store`, and cache housekeeping. Test `mise install`
   directly instead.
 - [ ] Confirm no project or dotfiles drift was created.
