@@ -1602,3 +1602,42 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   buffer or `Space m`.
 - This previews Curriculum 10.5, but no checkbox was marked because Hamel has
   not yet done the later plugin-role recall exercise.
+
+### IDE-Style Debugging Deferred
+
+- Hamel asked whether Neovim can provide an IDE-style debugger with
+  breakpoints, stepping, variables, call stacks, watches, and a console.
+- The current config has no DAP/debugger plugin or language adapter installed.
+- Added optional Curriculum 10.D7 for a future `nvim-dap` workflow with a
+  visual debugger UI and one real language adapter. It remains optional so it
+  does not interrupt the core curriculum.
+- No plugin or debugger was installed and no keymap was added.
+- Resume the main track at Curriculum 4.1: word, line, file, and matching-pair
+  motions.
+
+### IDE Parity Gap Assessment
+
+- Hamel asked whether anything important was still missing from the IDE
+  experience and noted that curiosity can pull him ahead of the current lesson.
+- The daily coding loop is already covered: files and search, buffers and
+  splits, completion and snippets, LSP navigation and refactors, diagnostics,
+  formatting and linting, Git, terminals, replacement, folds, and previews.
+- Genuine future options are the already-deferred DAP debugger, a dedicated
+  test explorer if terminal-based testing becomes painful, and a Python LSP if
+  substantial Python work begins. None is required for the current workflow.
+- Curriculum 8.D3 already preserves a test-and-return exercise, and 7.D4
+  already preserves session restoration; no new plugin was added for either.
+- Corrected stale Curriculum 6.7 wording so it records all currently configured
+  language servers and the actual Python gap.
+- Decision: stop plugin shopping and add IDE conveniences only when a repeated
+  real-work problem identifies the need. Future-looking questions can be
+  captured as optional deep dives without interrupting the main track.
+- Resume Curriculum 4.1 with the pending `w` motion checkpoint.
+
+### Python Language Support Decision
+
+- Hamel clarified that he rarely writes Python.
+- Keep the existing Ruff formatter for occasional Python edits; do not add a
+  Python language server without a real recurring need.
+- The missing Python LSP is therefore an accepted scope choice, not a blocker
+  or an incomplete IDE setup.

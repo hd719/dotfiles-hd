@@ -188,10 +188,11 @@ unexplained magic.
 - [ ] **6.4** Inspect and choose LSP actions with `Space c a`.
 - [ ] **6.5** Format Go and Lua manually with `Space p` and review the diff.
 - [ ] **6.6** Diagnose formatter availability with `:ConformInfo`.
-- [ ] **6.7** Explain the current coverage: Go, Lua, JavaScript, and TypeScript
-  have LSP support; Go, Lua, JavaScript, TypeScript, Markdown, and Python have
-  manual formatting; ESLint provides project lint diagnostics while automatic
-  formatting and lint fixes on save remain disabled.
+- [ ] **6.7** Explain the current coverage: Go, Lua, JavaScript/TypeScript,
+  GraphQL, JSON, CSS, HTML, and shell have language-server support; Go, Lua,
+  JavaScript/TypeScript, Markdown, and Python have manual formatting; Python
+  does not yet have an LSP; ESLint provides project lint diagnostics while
+  automatic formatting and lint fixes on save remain disabled.
 
 ### Optional Deep Dives
 
@@ -315,3 +316,6 @@ unexplained magic.
 - [ ] **10.D5** Design a personal speed-and-retention practice routine.
 - [x] **10.D6** Open an image or PDF inside Ghostty with Snacks and distinguish
   the rendered view from editing the original file. — Session 008
+- [ ] **10.D7** Add IDE-style debugging with DAP, configure one real language
+  adapter, and practice breakpoints, continue, step over/into/out, variables,
+  call stacks, watches, and the debug console in a safe project.
