@@ -62,7 +62,7 @@ remove_legacy_packages() {
 remove_legacy_snaps() {
   local package
 
-  command -v snap >/dev/null 2>&1 || return
+  command -v snap >/dev/null 2>&1 || return 0
   log "Removing superseded development snaps"
   for package in ghostty kubectl fx ngrok; do
     if snap list "$package" >/dev/null 2>&1; then
@@ -80,6 +80,7 @@ remove_root_artifacts() {
     "${ROOT_PREFIX}/usr/local/bin/aws"
     "${ROOT_PREFIX}/usr/local/bin/aws_completer"
     "${ROOT_PREFIX}/usr/local/bin/kubectl"
+    "${ROOT_PREFIX}/usr/local/bin/starship"
     "${ROOT_PREFIX}/usr/local/bin/terraform"
   )
 
@@ -145,8 +146,8 @@ remove_ulauncher_shortcut() {
   local keep_paths=()
   local found=0
 
-  command -v gsettings >/dev/null 2>&1 || return
-  current="$(gsettings get "$media_schema" custom-keybindings 2>/dev/null)" || return
+  command -v gsettings >/dev/null 2>&1 || return 0
+  current="$(gsettings get "$media_schema" custom-keybindings 2>/dev/null)" || return 0
 
   while IFS= read -r path; do
     [[ -n "$path" ]] || continue
@@ -165,7 +166,7 @@ remove_ulauncher_shortcut() {
     fi
   done < <(printf '%s\n' "$current" | grep -oE "'/[^']+/'" | tr -d "'" || true)
 
-  ((found == 1)) || return
+  ((found == 1)) || return 0
 
   value="["
   for path in "${keep_paths[@]}"; do

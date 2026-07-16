@@ -10,6 +10,15 @@ NVIM_SOURCE="$ROOT_DIR/config/nvim"
 NVIM_TARGET="$HOME/.config/nvim"
 GRAPHQL_SOURCE="$SCRIPT_DIR/bin/graphql-lsp"
 GRAPHQL_TARGET="$HOME/.local/graphql-lsp/bin/graphql-lsp"
+LAZY_REPOSITORY="https://github.com/folke/lazy.nvim.git"
+TREE_SITTER_LANGUAGES=(
+  bash ecma go gomod gosum gowork graphql javascript json jsx lua markdown
+  markdown_inline python query toml tsx typescript vim vimdoc yaml
+)
+TREE_SITTER_PARSERS=(
+  bash go gomod gosum gowork graphql javascript json lua markdown
+  markdown_inline python query toml tsx typescript vim vimdoc yaml
+)
 
 print_usage() {
   cat <<'EOF'
@@ -128,6 +137,130 @@ restore_plugins() {
   "$MISE_BIN" exec -- nvim --headless "+Lazy! restore" +qa
 }
 
+locked_plugin_commit() {
+  local plugin="$1"
+
+  sed -n "s/^  \"${plugin}\":.*\"commit\": \"\([^\"]*\)\".*/\1/p" \
+    "$NVIM_SOURCE/lazy-lock.json"
+}
+
+pin_lazy_manager() {
+  local lazy_commit lazy_dir nvim_data
+
+  lazy_commit="$(locked_plugin_commit lazy.nvim)"
+  [[ -n "$lazy_commit" ]] || {
+    printf 'The Neovim lockfile has no lazy.nvim commit.\n' >&2
+    return 1
+  }
+
+  nvim_data="$(
+    "$MISE_BIN" exec -- nvim --clean --headless \
+      "+lua io.write(vim.fn.stdpath('data'))" +qa
+  )"
+  [[ -n "$nvim_data" ]] || {
+    printf 'Neovim returned an empty data directory.\n' >&2
+    return 1
+  }
+
+  lazy_dir="$nvim_data/lazy/lazy.nvim"
+  if [[ ! -d "$lazy_dir/.git" ]]; then
+    rm -rf -- "$lazy_dir"
+    mkdir -p "$(dirname "$lazy_dir")"
+    git clone --filter=blob:none --depth=1 --no-checkout \
+      "$LAZY_REPOSITORY" "$lazy_dir"
+  fi
+  if ! git -C "$lazy_dir" cat-file -e "${lazy_commit}^{commit}" 2>/dev/null; then
+    git -C "$lazy_dir" fetch --depth=1 origin "$lazy_commit"
+  fi
+  git -C "$lazy_dir" checkout --detach "$lazy_commit"
+}
+
+install_tree_sitter_parsers() {
+  local language
+  local lua_languages=""
+
+  for language in "${TREE_SITTER_LANGUAGES[@]}"; do
+    [[ -z "$lua_languages" ]] || lua_languages+=", "
+    lua_languages+="'$language'"
+  done
+
+  log "Installing Tree-sitter parsers"
+  "$MISE_BIN" exec -- nvim --headless \
+    "+lua local parsers = { $lua_languages }; assert(require('nvim-treesitter').install(parsers):wait(), 'Tree-sitter parser installation failed')" \
+    +qa
+}
+
+require_neovim_state() {
+  local nvim_data="$1"
+  local actual_commit expected_commit language parser plugin
+  local plugin_count=0
+
+  [[ -f "$NVIM_SOURCE/lazy-lock.json" ]] || {
+    printf 'Missing Neovim plugin lockfile: %s\n' "$NVIM_SOURCE/lazy-lock.json" >&2
+    return 1
+  }
+
+  while IFS=$'\t' read -r plugin expected_commit; do
+    [[ -n "$plugin" ]] || continue
+    plugin_count=$((plugin_count + 1))
+    [[ -d "$nvim_data/lazy/$plugin" ]] || {
+      printf 'Missing locked Neovim plugin: %s\n' "$plugin" >&2
+      return 1
+    }
+    actual_commit="$(git -C "$nvim_data/lazy/$plugin" rev-parse HEAD 2>/dev/null)" || {
+      printf 'Cannot read the installed Neovim plugin commit: %s\n' "$plugin" >&2
+      return 1
+    }
+    [[ "$actual_commit" == "$expected_commit" ]] || {
+      printf 'Neovim plugin is not at its locked commit: %s\n' "$plugin" >&2
+      return 1
+    }
+  done < <(
+    sed -n 's/^  "\([^"]*\)":.*"commit": "\([^"]*\)".*/\1\t\2/p' \
+      "$NVIM_SOURCE/lazy-lock.json"
+  )
+
+  ((plugin_count > 0)) || {
+    printf 'Neovim plugin lockfile contains no plugins.\n' >&2
+    return 1
+  }
+
+  for parser in "${TREE_SITTER_PARSERS[@]}"; do
+    [[ -f "$nvim_data/site/parser/$parser.so" ]] || {
+      printf 'Missing Tree-sitter parser: %s\n' "$parser" >&2
+      return 1
+    }
+  done
+  for language in "${TREE_SITTER_LANGUAGES[@]}"; do
+    [[ -d "$nvim_data/site/queries/$language" ]] || {
+      printf 'Missing Tree-sitter queries: %s\n' "$language" >&2
+      return 1
+    }
+  done
+}
+
+smoke_tree_sitter() {
+  local nvim_path="$1"
+  local parser
+  local lua_parsers=""
+
+  for parser in "${TREE_SITTER_PARSERS[@]}"; do
+    [[ -z "$lua_parsers" ]] || lua_parsers+=", "
+    lua_parsers+="'$parser'"
+  done
+
+  NVIM_LOG_FILE=/dev/null "$nvim_path" --clean --headless -i NONE \
+    "+lua local ok, err = xpcall(function() vim.opt.runtimepath:prepend(vim.fn.stdpath('data') .. '/site'); local parsers = { $lua_parsers }; for _, lang in ipairs(parsers) do local loaded, parser = pcall(vim.treesitter.get_string_parser, '', lang); assert(loaded, 'cannot load parser: ' .. lang .. ': ' .. tostring(parser)); local parsed, parse_err = pcall(function() parser:parse() end); assert(parsed, 'cannot parse with: ' .. lang .. ': ' .. tostring(parse_err)); assert(vim.treesitter.query.get(lang, 'highlights'), 'cannot load highlights query: ' .. lang) end end, debug.traceback); if not ok then io.stderr:write('Tree-sitter parser validation failed: ', tostring(err), '\n'); vim.cmd('cquit 1') else vim.cmd('qa!') end"
+}
+
+smoke_neovim_config() {
+  local nvim_path="$1"
+
+  DOTFILES_NVIM_SMOKE_INIT="$NVIM_SOURCE/init.lua" NVIM_LOG_FILE=/dev/null \
+    "$nvim_path" --headless -u NONE -i NONE \
+    "+lua local ok, err = xpcall(function() local init = vim.env.DOTFILES_NVIM_SMOKE_INIT; vim.go.loadplugins = true; vim.opt.runtimepath:prepend(vim.fs.dirname(init)); dofile(init); assert(vim.fn.exists(':Lazy') == 2, 'Lazy is unavailable') end, debug.traceback); if not ok then io.stderr:write('Neovim config validation failed: ', tostring(err), '\n'); vim.cmd('cquit 1') else vim.cmd('qa!') end"
+}
+
 require_mise_command() {
   local command_name="$1"
   local command_path
@@ -153,6 +286,7 @@ require_system_command() {
 
 check_daily_driver() {
   local command_name
+  local nvim_data
   local nvim_path
   local mise_commands=(
     bash-language-server
@@ -182,7 +316,7 @@ check_daily_driver() {
     vtsls
     zoxide
   )
-  local system_commands=(gs magick mdformat wl-copy xclip)
+  local system_commands=(git gs magick mdformat wl-copy xclip)
 
   export MISE_AUTO_INSTALL=0
   export MISE_EXEC_AUTO_INSTALL=0
@@ -210,8 +344,19 @@ check_daily_driver() {
 
   "$MISE_BIN" current >/dev/null
   nvim_path="$("$MISE_BIN" which nvim)"
-  "$nvim_path" --headless \
-    "+lua assert(vim.fn.exists(':Lazy') == 2, 'Lazy is unavailable')" +qa
+  "$nvim_path" --clean --headless \
+    "+lua assert(vim.fn.has('nvim-0.12') == 1, 'Neovim 0.12+ is required')" +qa
+  nvim_data="$(
+    "$nvim_path" --clean --headless \
+      "+lua io.write(vim.fn.stdpath('data'))" +qa
+  )"
+  [[ -n "$nvim_data" ]] || {
+    printf 'Neovim returned an empty data directory.\n' >&2
+    return 1
+  }
+  require_neovim_state "$nvim_data"
+  smoke_tree_sitter "$nvim_path"
+  smoke_neovim_config "$nvim_path"
   printf 'Neovim daily-driver check passed.\n'
 }
 
@@ -247,7 +392,9 @@ main() {
   install_mise
   link_configs
   install_tools
+  pin_lazy_manager
   restore_plugins
+  install_tree_sitter_parsers
   check_daily_driver
 }
 

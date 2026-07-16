@@ -3,7 +3,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
-MISE_BIN="${DOTFILES_MISE_BIN:-$HOME/.local/bin/mise}"
 NEOVIM_SETUP_SCRIPT="${DOTFILES_NEOVIM_SETUP_SCRIPT:-$SCRIPT_DIR/setup-neovim.sh}"
 
 print_usage() {
@@ -60,11 +59,6 @@ main() {
   sudo env DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
   sudo env DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
   sudo apt-get autoclean
-
-  if [[ -x "$MISE_BIN" ]]; then
-    log "Updating mise"
-    "$MISE_BIN" self-update -y
-  fi
 
   log "Refreshing the pinned Neovim setup"
   bash "$NEOVIM_SETUP_SCRIPT"

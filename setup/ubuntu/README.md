@@ -30,7 +30,8 @@ repairs missing packages and links without creating duplicate backups.
 ## Ubuntu Link Inventory
 
 - `~/.zshrc` -> `setup/ubuntu/.zshrc`
-- `~/.config/ghostty/config` -> `setup/ubuntu/ghostty.conf`
+- `~/.config/ghostty/config` -> `setup/ubuntu/ghostty.conf` ->
+  `config/ghostty/config`
 - `~/.config/starship.toml` -> `config/starship/starship.toml`
 - `~/.gitignore_global` -> `config/git/.gitignore_global`
 - `~/.config/mise/config.toml` -> `setup/ubuntu/mise.toml`
@@ -48,9 +49,9 @@ bash setup/ubuntu/setup-neovim.sh --check
 nvim ~/.config/nvim/README.md
 ```
 
-The Ubuntu Ghostty profile uses Hamel Nord, an 82% opaque background, blur, and
-Hasklug Nerd Font. Neovim continues to use the shared `config/nvim` setup; no
-Linux-only Lua fork is required.
+The shared Ghostty profile uses Hamel Nord, an 88% opaque background, blur, and
+Maple Mono NF with Hasklug Nerd Font as the Ubuntu fallback. Neovim continues to
+use the shared `config/nvim` setup; no Linux-only Lua fork is required.
 
 ## Update
 
@@ -72,5 +73,6 @@ bash setup/ubuntu/setup.sh
 
 It removes the old Docker CE repository/packages, AWS CLI, Terraform, kubectl,
 Redis, Ulauncher, VS Code, fastfetch PPA, APT Go, development snaps, rbenv, and
-superseded user-level editor toolchains. It preserves projects, Docker data,
-`~/.aws`, `~/.kube`, Firefox, Ubuntu system snaps, and the snap service.
+the old direct Starship install and superseded user-level editor toolchains. It
+preserves projects, Docker data, `~/.aws`, `~/.kube`, Firefox, Ubuntu system
+snaps, and the snap service.
