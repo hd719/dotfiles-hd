@@ -1513,3 +1513,92 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   the configuration and complete session notes.
 - Best next core lesson remains Curriculum 4.1: word, line, file, and matching-
   pair motions.
+
+### Resilience Work Mac Update Path
+
+- Hamel asked how the new plugin reaches the already-configured Resilience work
+  laptop.
+- When `~/.config/nvim` already links to
+  `~/Developer/dotfiles-hd/config/nvim`, run `git pull --ff-only` in the
+  dotfiles repo, then `nvim --headless '+Lazy! restore' +qa` to install the
+  newly locked Grug Far version.
+- If the Neovim link has never been created on that laptop, first follow
+  `setup/mac-resilience/README.md` and run its scoped link script; do not use the
+  personal Mac bootstrap there.
+- Hamel confirmed that pulling the latest `dotfiles-hd` changes succeeded on
+  the Resilience work laptop. Plugin restoration remains the final update
+  check.
+
+### Understanding the Headless Plugin Restore
+
+- Hamel asked what `nvim --headless '+Lazy! restore' +qa` does instead of
+  copying the command blindly.
+- `nvim` starts Neovim and loads the linked config; `--headless` runs it without
+  opening the editor interface.
+- `+Lazy! restore` runs Lazy's `restore` command after startup. It installs
+  missing plugins and makes installed plugins match the exact commits recorded
+  in `lazy-lock.json`; it does not update them to arbitrary latest versions.
+- The `!` tells Lazy to wait until restoration finishes. `+qa` then runs
+  `quitall`, closing the headless Neovim process only after that wait.
+- Mental model: reproduce the repo's locked plugin set on another machine, then
+  exit automatically.
+
+### Installed Versus Loaded Plugins
+
+- Hamel compared Lazy on the Resilience and personal Macs and initially read
+  `mini.surround` under `Not Loaded` as missing.
+- In Lazy, `Not Loaded` contains installed plugins that are waiting for their
+  configured trigger. A genuinely missing plugin appears under `Not Installed`.
+- `mini.surround` is key-triggered, so it stays unloaded until a mapping such as
+  `gsa`, `gsd`, or `gsr` is used. The personal screenshot showing it under
+  `Not Loaded` is healthy and saves startup work.
+- The same rule applies to `grug-far.nvim` before `Space R`, `mini.pairs` before
+  entering Insert mode, and Conform before a configured file or formatting
+  action triggers it.
+- Clarification from Hamel: on the Resilience work laptop, every other plugin
+  had already loaded; only `mini.surround` remained installed-but-unloaded.
+  This is still expected because none of its `gs` mappings had been used yet.
+- Hamel asked whether the personal Mac should force the same loaded state. It
+  should not: loaded counts depend on which actions and file types occurred in
+  that Neovim session, so healthy machines can show different counts.
+- The useful cross-machine check is that nothing appears under `Not Installed`;
+  Lazy should load each installed plugin naturally when its trigger is used.
+
+### Plugin Catalog and Responsibility Map
+
+- Hamel asked what every plugin in the 20-plugin Lazy view does and whether
+  those responsibilities were documented anywhere.
+- `lazy-lock.json` is the exact-version record, and `lua/plugins/*.lua` is the
+  behavior and trigger source of truth. Neither was a quick plain-English
+  reference by itself.
+- Added a complete plugin catalog to `README.md`, including the purpose and load
+  trigger or main action for all 20 installed plugins.
+- Mental groups: Lazy/Nord/icons are foundation and appearance; Snacks, Oil,
+  bufferline, lualine, and WhichKey are navigation and interface; LSPConfig,
+  Blink, snippets, SchemaStore, Tree-sitter, its parser registry, Conform, and
+  Gitsigns support coding; pairs, surround, Grug Far, and render-markdown add
+  focused editing workflows.
+- No curriculum item was checked off because this was documentation and an
+  explanation, not a hands-on plugin-recall exercise.
+
+### How Lazy Loads Each Plugin
+
+- Hamel followed up by asking how and when each plugin moves from installed to
+  loaded.
+- Lazy reads all plugin recipes during startup, but a recipe can run now or
+  register a trigger for later. A key-triggered recipe leaves a lightweight
+  placeholder mapping so the first keypress can load the plugin and then run
+  the requested action. Once loaded, the plugin stays loaded until Neovim exits.
+- Bootstrap: `lazy.nvim` loads first so it can manage everything else.
+- Every startup (`lazy = false`): Nord, Snacks, Blink, LSPConfig, Tree-sitter,
+  and Oil.
+- Startup dependencies: friendly-snippets loads for Blink, SchemaStore for
+  LSPConfig, the parser registry for Tree-sitter, and mini.icons for Oil.
+- Just after startup (`VeryLazy`): bufferline, lualine, and WhichKey.
+- File events: Conform and Gitsigns load on the first file read or new file;
+  Conform can also load from `Space p` or `:ConformInfo`.
+- On-demand: mini.pairs waits for Insert mode, mini.surround waits for a `gs`
+  action, Grug Far waits for `Space R`, and render-markdown waits for a Markdown
+  buffer or `Space m`.
+- This previews Curriculum 10.5, but no checkbox was marked because Hamel has
+  not yet done the later plugin-role recall exercise.

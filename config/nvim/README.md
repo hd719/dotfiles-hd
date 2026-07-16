@@ -55,6 +55,52 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
     > "$GRAPHQL_LSP_HOME/.pnpm-managed-version"
 ```
 
+## Plugin Catalog
+
+All 20 plugins below are installed. In `:Lazy`, **Loaded** means a plugin's
+trigger has happened in this session; **Not Loaded** means it is installed and
+waiting for that trigger. `lazy-lock.json` pins exact versions, while the Lua
+files under `lua/plugins/` define their behavior.
+
+Lazy reads every plugin recipe at launch. A recipe can load immediately with
+`lazy = false`, wait for an event/filetype/key/command, or load as a dependency
+immediately before another plugin needs it. Key-triggered plugins still have
+their placeholder mapping available before the plugin itself loads. Once a
+plugin loads, it stays loaded until that Neovim session ends.
+
+| Plugin | What it does here | Exact load trigger |
+| --- | --- | --- |
+| `blink.cmp` | Autocomplete from LSP, paths, snippets, and buffer words | Every startup: `lazy = false` |
+| `bufferline.nvim` | Shows open buffers across the top | Just after startup: `VeryLazy` event |
+| `friendly-snippets` | Ready-made snippets consumed by Blink | Immediately before Blink as its dependency |
+| `lazy.nvim` | Installs, pins, restores, and lazy-loads plugins | Bootstrapped before all managed plugins |
+| `lualine.nvim` | Bottom status line for mode, Git, diagnostics, LSP, and location | Just after startup: `VeryLazy` event |
+| `mini.icons` | File and folder icons shared by other plugins | Immediately before startup-loaded Oil as its dependency |
+| `nord.nvim` | Transparent Nord colors and custom highlights | Early every startup: `lazy = false`, priority `1000` |
+| `nvim-lspconfig` | Connects installed language servers to matching files | Every startup: `lazy = false` |
+| `nvim-treesitter` | Structure-aware highlighting and folding | Every startup: `lazy = false` |
+| `oil.nvim` | Editable directory browser and file manager | Every startup: `lazy = false` |
+| `schemastore.nvim` | JSON schemas for files such as `package.json` and `tsconfig.json` | Immediately before LSPConfig as its dependency |
+| `snacks.nvim` | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and media previews | Early every startup: `lazy = false`, priority `1000` |
+| `treesitter-parser-registry` | Catalog that tells Tree-sitter where language parsers and queries live | Immediately before Tree-sitter as its dependency |
+| `which-key.nvim` | Shows available mappings after a key prefix | Just after startup: `VeryLazy` event |
+| `conform.nvim` | Runs gofmt, StyLua, Prettier, mdformat, and Ruff | First file read/new file, `Space p`, or `:ConformInfo` |
+| `gitsigns.nvim` | Git add/change/delete gutter marks and current-line blame | First file read or new file: `BufReadPre` / `BufNewFile` |
+| `grug-far.nvim` | Reviewed, exact-word replacement in the current file | First `Space R` |
+| `mini.pairs` | Automatically closes brackets and quotes | First entry into Insert mode: `InsertEnter` |
+| `mini.surround` | Adds, deletes, or replaces quotes, brackets, and tags | First `gsa`, `gsd`, `gsr`, `gsf`, `gsF`, or `gsh` |
+| `render-markdown.nvim` | Decorates Markdown headings, lists, checkboxes, tables, and code blocks | First Markdown buffer or `Space m` |
+
+Configuration map:
+
+- `lua/config/lazy.lua`: Lazy bootstrap.
+- `lua/plugins/colorscheme.lua`: Nord.
+- `lua/plugins/editor.lua`: WhichKey and Tree-sitter.
+- `lua/plugins/navigation.lua`: Snacks, Oil, and icons.
+- `lua/plugins/lsp.lua`: completion, LSP, schemas, and formatting.
+- `lua/plugins/git.lua`, `bufferline.lua`, `statusline.lua`,
+  `markdown.lua`, and `editing.lua`: their matching focused features.
+
 ## Safety Net
 
 - `nvim --clean` starts Neovim without this config.
