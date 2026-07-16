@@ -94,7 +94,7 @@ Baseline hazards found before PR #9 implementation:
 | mise | Node, pnpm, Go, Python, Bun | Pin version-sensitive development runtimes in one shared config. |
 | Homebrew initially | Neovim, Tree-sitter CLI, LuaLS, StyLua, Bash LSP, vtsls, VS Code LSPs | They already work. Revisit only in a later editor-tool PR. |
 | uv | Ruff and mdformat | Pin exact versions; do not use `latest`. |
-| Fixed npm prefix | GraphQL LSP `3.5.0` under `~/.local/graphql-lsp` | Keep the path expected by Neovim and pin the install command exactly. |
+| Fixed pnpm home | GraphQL LSP `3.5.0` under `~/.local/graphql-lsp` | Keep the path expected by Neovim and pin the pnpm install command exactly. |
 | Project | Prettier, ESLint, and project-specific runtime overrides | A repository requirement beats the global default. |
 | Documented exception | Mac mini production runtime on keg-only Homebrew `node@22`; LaunchAgents prepend its opt path | Safety beats cosmetic uniformity. Keeping it unlinked avoids conflicts with Homebrew tools that depend on unversioned Node. Remove the exception only in a maintenance window. |
 

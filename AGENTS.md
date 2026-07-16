@@ -18,6 +18,15 @@ work machines.
 2. Inspect the live path and the dotfiles source before changing anything.
 3. Use `readlink`, `cmp`, `diff`, or `find` to understand whether a path is already linked, equal, different, or app-managed runtime state.
 
+## Node Package Manager
+
+- Use pnpm for dotfiles-managed global Node tools. Do not add new `npm install`
+  commands for those tools.
+- Inside a project, follow its declared `packageManager` and existing lockfile;
+  never convert a pnpm, Bun, npm, or Yarn project implicitly.
+- Keep npm and npx available because Node and third-party tooling may expect
+  them, but they are compatibility tools rather than the default installer.
+
 ## Symlink Rules
 
 - If Hamel explicitly asks to symlink a tool, do it.

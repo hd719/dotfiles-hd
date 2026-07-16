@@ -106,7 +106,7 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "would install Brewfile: $PROFILE_BREWFILE"
   say "would install pinned mise runtimes from: $MISE_CONFIG"
   say "would install pinned Ruff and mdformat tools with uv"
-  say "would install GraphQL LSP 3.5.0 under: $HOME/.local/graphql-lsp"
+  say "would install GraphQL LSP 3.5.0 with pinned pnpm under: $HOME/.local/graphql-lsp"
   say "would restore locked Neovim plugins and required Tree-sitter parsers without changing lazy-lock.json"
   say "would run the verification doctor"
 
@@ -164,16 +164,23 @@ uv tool install 'mdformat==1.0.0' \
   --with 'mdformat-wikilink==0.3.0'
 uv tool install 'ruff==0.15.21'
 
-graphql_package="$HOME/.local/graphql-lsp/lib/node_modules/graphql-language-service-cli/package.json"
-if [[ -x "$HOME/.local/graphql-lsp/bin/graphql-lsp" ]] \
-  && MISE_NO_CONFIG=1 mise exec "node@$NODE_VERSION" -- node -e \
-    'const p=require(process.argv[1]);process.exit(p.version===process.argv[2]?0:1)' \
-    "$graphql_package" 3.5.0; then
+graphql_home="$HOME/.local/graphql-lsp"
+graphql_lsp="$graphql_home/bin/graphql-lsp"
+graphql_marker="$graphql_home/.pnpm-managed-version"
+graphql_marker_value="graphql-language-service-cli@3.5.0 via pnpm@$PNPM_VERSION"
+if [[ -x "$graphql_lsp" ]] \
+  && [[ -f "$graphql_marker" ]] \
+  && [[ "$(cat "$graphql_marker")" == "$graphql_marker_value" ]] \
+  && [[ "$(MISE_NO_CONFIG=1 mise exec "node@$NODE_VERSION" -- \
+    "$graphql_lsp" --version 2>/dev/null || true)" == "3.5.0" ]]; then
   say "GraphQL LSP 3.5.0 is already installed."
 else
-  MISE_NO_CONFIG=1 mise exec "node@$NODE_VERSION" -- \
-    npm install -g --prefix "$HOME/.local/graphql-lsp" \
+  mkdir -p "$graphql_home/bin"
+  PATH="$graphql_home/bin:$PATH" PNPM_HOME="$graphql_home" \
+    MISE_NO_CONFIG=1 mise exec "node@$NODE_VERSION" "pnpm@$PNPM_VERSION" -- \
+    pnpm add --global --global-dir "$graphql_home/global" \
     'graphql-language-service-cli@3.5.0'
+  printf '%s\n' "$graphql_marker_value" > "$graphql_marker"
 fi
 
 for spec in "${LINK_SPECS[@]}"; do

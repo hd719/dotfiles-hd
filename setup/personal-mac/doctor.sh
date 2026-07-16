@@ -215,12 +215,16 @@ for expected_component in \
 done
 
 graphql_lsp="$HOME/.local/graphql-lsp/bin/graphql-lsp"
+graphql_marker="$HOME/.local/graphql-lsp/.pnpm-managed-version"
+graphql_marker_value="graphql-language-service-cli@3.5.0 via pnpm@$PNPM_VERSION"
 if [[ "$MISE_RUNTIME_FAILURES" -eq 0 ]]; then
   graphql_output="$(MISE_NO_CONFIG=1 mise exec "node@$NODE_VERSION" -- "$graphql_lsp" --version 2>/dev/null || true)"
-  if [[ "$graphql_output" == "3.5.0" ]]; then
-    pass "GraphQL LSP 3.5.0 at fixed prefix"
+  if [[ "$graphql_output" == "3.5.0" ]] \
+    && [[ -f "$graphql_marker" ]] \
+    && [[ "$(cat "$graphql_marker")" == "$graphql_marker_value" ]]; then
+    pass "GraphQL LSP 3.5.0 installed with pnpm at fixed prefix"
   else
-    fail "GraphQL LSP expected 3.5.0, got '${graphql_output:-missing}'"
+    fail "GraphQL LSP expected pnpm-managed 3.5.0, got '${graphql_output:-missing}'"
   fi
 else
   fail "GraphQL LSP check skipped because pinned mise Node is missing"

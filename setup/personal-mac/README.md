@@ -97,7 +97,7 @@ separate maintenance window is approved.
 - Adds one marker-owned mise-shims block to `~/.zprofile`; it never replaces
   the whole profile.
 - Installs exact mise versions for Node, pnpm, Go, Python, and Bun.
-- Installs pinned Ruff, mdformat, and GraphQL LSP versions.
+- Installs pinned Ruff and mdformat versions plus a pnpm-managed GraphQL LSP.
 - Restores the exact Neovim plugin lock and required Tree-sitter parsers without
   rewriting `lazy-lock.json`.
 - Runs the verification doctor before reporting success. Its package and

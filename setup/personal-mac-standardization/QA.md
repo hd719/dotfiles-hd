@@ -263,6 +263,8 @@ Pass criteria after activation:
 - Any intentional Mac mini runtime exception is documented, not hidden.
 - `~/.local/graphql-lsp/bin/graphql-lsp` exists, is executable, and reports the
   pinned version.
+- `~/.local/graphql-lsp/.pnpm-managed-version` records the exact GraphQL LSP
+  and pnpm versions; no `npm install` command is used.
 - Plain `zsh -c` output is recorded for comparison. Missing mise tools there
   are acceptable only when scripts and LaunchAgents use an explicit launch
   contract.

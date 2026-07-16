@@ -348,18 +348,29 @@ exit 0
 EOF
   chmod +x "$fake_bin/uv"
 
-  cat > "$fake_bin/npm" <<'EOF'
+  make_fake_command "$fake_bin" npm 11.0.0
+
+  cat > "$fake_bin/pnpm" <<'EOF'
 #!/usr/bin/env bash
-printf 'npm %s\n' "$*" >> "${COMMAND_LOG:?}"
-  if [[ "${1:-}" == "install" ]]; then
-    mkdir -p "$HOME/.local/graphql-lsp/bin"
-    printf '#!/usr/bin/env bash\n[[ "${MISE_TEST_EXEC:-}" == "1" ]] || exit 127\nprintf "3.5.0\\n"\n' > "$HOME/.local/graphql-lsp/bin/graphql-lsp"
+printf 'pnpm %s\n' "$*" >> "${COMMAND_LOG:?}"
+if [[ "${1:-}" == "add" ]]; then
+  [[ "${MISE_TEST_EXEC:-}" == "1" ]] || exit 40
+  [[ "${PNPM_HOME:-}" == "$HOME/.local/graphql-lsp" ]] || exit 41
+  case ":$PATH:" in
+    *":$PNPM_HOME/bin:"*) ;;
+    *) exit 42 ;;
+  esac
+  [[ "$*" == "add --global --global-dir $HOME/.local/graphql-lsp/global graphql-language-service-cli@3.5.0" ]] \
+    || exit 43
+  [[ "${FAIL_PNPM_ADD:-0}" != "1" ]] || exit 44
+  mkdir -p "$HOME/.local/graphql-lsp/bin"
+  printf '#!/usr/bin/env bash\n[[ "${MISE_TEST_EXEC:-}" == "1" ]] || exit 127\nprintf "3.5.0\\n"\n' > "$HOME/.local/graphql-lsp/bin/graphql-lsp"
   chmod +x "$HOME/.local/graphql-lsp/bin/graphql-lsp"
 else
-  printf '11.0.0\n'
+  printf '11.2.2\n'
 fi
 EOF
-  chmod +x "$fake_bin/npm"
+  chmod +x "$fake_bin/pnpm"
 
   cat > "$fake_bin/node" <<'EOF'
 #!/usr/bin/env bash
@@ -375,7 +386,6 @@ fi
 EOF
   chmod +x "$fake_bin/node"
   make_fake_command "$fake_bin" npx 11.0.0
-  make_fake_command "$fake_bin" pnpm 11.2.2
   cat > "$fake_bin/go" <<'EOF'
 #!/usr/bin/env bash
 printf 'go %s\n' "$*" >> "${COMMAND_LOG:?}"
@@ -568,6 +578,14 @@ test_full_bootstrap() {
 
   printf 'old-zshrc\n' > "$home_dir/.zshrc"
   printf 'export KEEP_ME=yes\n' > "$home_dir/.zprofile"
+  mkdir -p \
+    "$home_dir/.local/graphql-lsp/bin" \
+    "$home_dir/.local/graphql-lsp/lib/node_modules/graphql-language-service-cli"
+  printf '#!/usr/bin/env bash\nprintf "3.5.0\\n"\n' \
+    > "$home_dir/.local/graphql-lsp/bin/graphql-lsp"
+  chmod +x "$home_dir/.local/graphql-lsp/bin/graphql-lsp"
+  printf '{"version":"3.5.0"}\n' \
+    > "$home_dir/.local/graphql-lsp/lib/node_modules/graphql-language-service-cli/package.json"
   mkdir -p "$home_dir/.config/btop"
   printf 'old-btop\n' > "$home_dir/.config/btop/sentinel"
   snapshot_managed_paths mac-vm "$home_dir" "$managed_before"
@@ -594,6 +612,11 @@ test_full_bootstrap() {
   assert_contains "$home_dir/.zprofile" 'export KEEP_ME=yes'
   assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/personal-mac/Brewfile"
   assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-vm/Brewfile"
+  assert_contains "$log" "mise exec node@24.18.0 pnpm@11.2.2 -- pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0"
+  assert_contains "$log" "pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0"
+  assert_contains "$home_dir/.local/graphql-lsp/.pnpm-managed-version" \
+    'graphql-language-service-cli@3.5.0 via pnpm@11.2.2'
+  assert_not_contains "$log" 'npm install'
   assert_not_contains "$log" 'setup/mac-mini/Brewfile'
 
   snapshot_protected_state "$home_dir" "$protected_after"
@@ -606,6 +629,8 @@ test_full_bootstrap() {
     "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
   backup_count_after="$(find "$home_dir" -name '*.backup-*' | wc -l | tr -d ' ')"
   assert_eq "$backup_count_before" "$backup_count_after" "second bootstrap creates no backup"
+  assert_eq 1 "$(grep -Fxc "pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0" "$log")" \
+    "second bootstrap does not reinstall GraphQL LSP"
 
   rm "$home_dir/.zshrc"
   mv "$home_dir/.zshrc.backup-20260715-140000" "$home_dir/.zshrc"
@@ -641,6 +666,17 @@ test_full_bootstrap() {
     DOTFILES_DIR="$REPO_DIR" FAIL_ON_MISE_AUTO_INSTALL=1 \
     "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null
   TESTS=$((TESTS + 1))
+
+  mv "$home_dir/.local/graphql-lsp/.pnpm-managed-version" \
+    "$root/graphql-marker"
+  if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" \
+    "$PERSONAL_MAC_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    fail "doctor should reject an npm-layout GraphQL LSP without the pnpm marker"
+  fi
+  TESTS=$((TESTS + 1))
+  mv "$root/graphql-marker" \
+    "$home_dir/.local/graphql-lsp/.pnpm-managed-version"
 
   cp "$home_dir/.zprofile" "$root/correct-zprofile"
   printf '%s\n' \
@@ -942,6 +978,16 @@ test_profile_and_failure_guards() {
   TESTS=$((TESTS + 1))
   assert_no_path "$home_dir/.zshrc"
   assert_not_contains "$log" 'uv tool install'
+
+  : > "$log"
+  if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
+    DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 FAIL_PNPM_ADD=1 \
+    "$PERSONAL_MAC_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    fail "pnpm failure should stop bootstrap"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_no_path "$home_dir/.local/graphql-lsp/.pnpm-managed-version"
+  assert_no_path "$home_dir/.zshrc"
 }
 
 test_link_helper

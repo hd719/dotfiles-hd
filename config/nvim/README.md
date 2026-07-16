@@ -43,8 +43,16 @@ Install the GraphQL language server (no Homebrew formula) to a fixed,
 node-version-independent prefix that this config references by absolute path:
 
 ```bash
-npm install -g --prefix "$HOME/.local/graphql-lsp" \
+GRAPHQL_LSP_HOME="$HOME/.local/graphql-lsp"
+mkdir -p "$GRAPHQL_LSP_HOME/bin"
+PATH="$GRAPHQL_LSP_HOME/bin:$PATH" PNPM_HOME="$GRAPHQL_LSP_HOME" \
+  MISE_NO_CONFIG=1 mise exec node@24.18.0 pnpm@11.2.2 -- \
+  pnpm add --global --global-dir "$GRAPHQL_LSP_HOME/global" \
   'graphql-language-service-cli@3.5.0'
+MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
+  "$GRAPHQL_LSP_HOME/bin/graphql-lsp" --version | grep -Fx '3.5.0' && \
+  printf '%s\n' 'graphql-language-service-cli@3.5.0 via pnpm@11.2.2' \
+    > "$GRAPHQL_LSP_HOME/.pnpm-managed-version"
 ```
 
 ## Safety Net

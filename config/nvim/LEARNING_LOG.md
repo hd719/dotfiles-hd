@@ -1179,3 +1179,13 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   background helper that provides code errors, completion, hover details, and
   go-to-definition for its language.
 - Ran StyLua on the dashboard actions in `navigation.lua`.
+
+### Maintenance: pnpm-only GraphQL LSP installation
+
+- Superseded Session 008's npm install command. The GraphQL LSP is now installed
+  with pnpm under the same fixed `~/.local/graphql-lsp` home.
+- The stable Neovim entry point remains
+  `~/.local/graphql-lsp/bin/graphql-lsp`; changing package managers does not
+  change the LSP keymaps or behavior.
+- npm and npx remain available for Node ecosystem compatibility, but pnpm is the
+  default installer for JavaScript/TypeScript packages and global tools.
