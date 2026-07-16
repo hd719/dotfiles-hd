@@ -47,6 +47,10 @@ shell-integration-features = no-cursor
 macos-titlebar-style = transparent
 macos-titlebar-proxy-icon = hidden
 
+# Nord icon from https://github.com/jasonlong/ghostty-theme-icons.
+macos-icon = custom
+macos-custom-icon = ~/Developer/dotfiles-hd/config/ghostty/nord.icns
+
 mouse-hide-while-typing = true
 mouse-scroll-multiplier = 2
 
