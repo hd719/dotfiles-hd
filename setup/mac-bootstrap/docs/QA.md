@@ -14,7 +14,8 @@ Full evidence is recorded in [`RESULTS.md`](RESULTS.md).
 - [x] Node 24, pnpm, Go, Python, Bun, GraphQL LSP, and Neovim checks pass.
 - [x] Project compatibility and `pnpm audit --prod` pass.
 - [x] PR review has no remaining Critical, High, Medium, or Low findings.
-- [x] GitGuardian passes on the pushed PR commit.
+- [x] GitGuardian passed on implementation head `5ae95fe` before this docs-only
+  status update.
 - [ ] Clean Apple Silicon macOS VM, reboot, and rollback acceptance are pending.
 - [ ] Live MacBook activation and manual app/editor checks are pending.
 - [ ] Mac mini activation and immediate/one-hour/next-day checks are pending.
