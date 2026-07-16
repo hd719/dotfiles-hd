@@ -85,8 +85,9 @@ approves the interactive step in
 [`../personal-mac-standardization/QA.md`](../personal-mac-standardization/QA.md).
 That apply is what completes the no-restart gate. The bootstrap does not start
 or restart services, but a new login shell will resolve the shared mise
-versions. Existing Cortana and Hermes LaunchAgents remain explicitly pinned to
-Homebrew Node 22 until a separate maintenance window is approved.
+versions. Existing Cortana and Hermes LaunchAgents prepend
+`/opt/homebrew/opt/node@22/bin` and keep using keg-only Homebrew Node 22 until a
+separate maintenance window is approved.
 
 ## What apply changes
 

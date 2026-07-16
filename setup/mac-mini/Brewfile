@@ -5,9 +5,10 @@ brew "diff-so-fancy"
 brew "ffmpeg"
 brew "git-filter-repo"
 brew "gogcli"
-# Runtime exception: existing LaunchAgents stay on Homebrew Node and pnpm
-# until a separate maintenance window is approved and completed.
-brew "node@22", link: true
+# Runtime exception: LaunchAgents prepend /opt/homebrew/opt/node@22/bin and stay
+# on Homebrew Node until a separate maintenance window is approved. Keep this
+# keg-only so unversioned Node dependencies cannot create link conflicts.
+brew "node@22"
 brew "pnpm"
 brew "pgvector"
 brew "poppler"

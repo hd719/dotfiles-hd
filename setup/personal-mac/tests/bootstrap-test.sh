@@ -754,6 +754,8 @@ test_mac_mini_apply() {
   local protected_after="$root/protected.after.txt"
 
   mkdir -p "$home_dir/Developer"
+  assert_contains "$REPO_DIR/setup/mac-mini/Brewfile" 'brew "node@22"'
+  assert_not_contains "$REPO_DIR/setup/mac-mini/Brewfile" 'brew "node@22", link:'
   ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
   make_fake_toolchain "$fake_bin"
   seed_protected_state "$home_dir"

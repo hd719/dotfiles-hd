@@ -96,7 +96,7 @@ Baseline hazards found before PR #9 implementation:
 | uv | Ruff and mdformat | Pin exact versions; do not use `latest`. |
 | Fixed npm prefix | GraphQL LSP `3.5.0` under `~/.local/graphql-lsp` | Keep the path expected by Neovim and pin the install command exactly. |
 | Project | Prettier, ESLint, and project-specific runtime overrides | A repository requirement beats the global default. |
-| Documented exception | Mac mini production runtime, if LaunchAgents must remain on Homebrew Node 22 | Safety beats cosmetic uniformity. Remove the exception only in a maintenance window. |
+| Documented exception | Mac mini production runtime on keg-only Homebrew `node@22`; LaunchAgents prepend its opt path | Safety beats cosmetic uniformity. Keeping it unlinked avoids conflicts with Homebrew tools that depend on unversioned Node. Remove the exception only in a maintenance window. |
 
 ## Approved Shared Pins and Activation Gate
 
@@ -106,7 +106,7 @@ exception and is not restarted or migrated.
 
 | Tool | Approved shared baseline | Reason |
 | --- | --- | --- |
-| Node | `24.18.0` | Latest Active LTS for the shared interactive daily driver; the Mac mini production runtime remains an explicit Homebrew Node 22 exception. |
+| Node | `24.18.0` | Active LTS baseline approved on 2026-07-15 for the shared interactive daily driver; the Mac mini production runtime remains an explicit Homebrew Node 22 exception. |
 | pnpm | `11.2.2` | Matches `cortana-services` `packageManager`. |
 | Go | `1.26.3` | Existing shared mise pin; test before accepting the mini patch-level change. |
 | Python | `3.14.5` | Existing shared mise pin. Homebrew Python may remain as a dependency. |
@@ -122,7 +122,7 @@ version decision; do not change the Mac mini production runtime in this PR.
 - [x] Hamel approves the ownership table.
 - [x] Hamel approves Node `24.18.0` as the shared default. This supersedes the
   earlier conservative Node `22.23.1` choice because Node 22 is now in
-  Maintenance LTS while Node 24 is Active LTS.
+  Maintenance LTS while Node 24 is Active LTS at approval time.
 - [x] Hamel approves pnpm `11.2.2` as the shared default.
 - [x] Every approved version is available through mise for the Apple Silicon
   target architecture.
