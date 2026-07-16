@@ -20,11 +20,11 @@ unexplained magic.
 
 ## Current Checkpoint
 
-- **Lesson:** 3 — Safe Editing and Recovery
-- **Next core sub-lesson:** 3.5 — undo with `u`, redo with `Ctrl-r`, and repeat
-  with `.`
-- **Why Lesson 3 remains open:** undo, redo, repeat, clipboard, modified-buffer
-  prompts, and intentional change abandonment remain.
+- **Lesson:** 4 — Motions, Operators, and Text Objects
+- **Next core sub-lesson:** 4.1 — navigate with word, line, file, and
+  matching-pair motions.
+- **Why Lesson 4 remains open:** its core motion, operator, count, text-object,
+  search, selection, indentation, movement, and commenting drills remain.
 
 ## Lesson 1 — Editor Foundations
 
@@ -94,7 +94,7 @@ unexplained magic.
 
 ## Lesson 3 — Safe Editing and Recovery
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 009
 
 ### Core Sub-Lessons
 
@@ -106,10 +106,13 @@ unexplained magic.
   — Session 001
 - [x] **3.4** Save with `Space w` and save-and-quit with `Space x`. — Session
   001
-- [ ] **3.5** Undo with `u`, redo with `Ctrl-r`, and repeat with `.`.
-- [ ] **3.6** Yank, paste, and use the system clipboard safely.
-- [ ] **3.7** Recognize modified buffers and unsaved-change prompts.
-- [ ] **3.8** Abandon a practice change intentionally without losing real work.
+- [x] **3.5** Undo with `u`, redo with `Ctrl-r`, and repeat with `.`. — Session
+  009
+- [x] **3.6** Yank, paste, and use the system clipboard safely. — Session 009
+- [x] **3.7** Recognize modified buffers and unsaved-change prompts. — Session
+  009
+- [x] **3.8** Abandon a practice change intentionally without losing real work.
+  — Session 009
 
 ### Optional Deep Dives
 
@@ -142,6 +145,10 @@ unexplained magic.
 - [ ] **4.D3** Build repeatable editing chains around the `.` command.
 - [ ] **4.D4** Use `mini.surround` (`gsa` / `gsd` / `gsr`) to add, delete, and
   change surrounding quotes, brackets, and tags.
+- [ ] **4.D5** Replace the character under the cursor with `r{character}` and
+  distinguish it from redo with `Ctrl-r`.
+- [x] **4.D6** Use a visual current-file search-and-replace workflow, prefilled
+  from the word under the cursor and reviewed before applying. — Session 010
 
 ## Lesson 5 — Code Navigation with LSP
 

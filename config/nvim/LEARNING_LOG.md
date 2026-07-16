@@ -1189,3 +1189,327 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   change the LSP keymaps or behavior.
 - npm and npx remain available for Node ecosystem compatibility, but pnpm is the
   default installer for JavaScript/TypeScript packages and global tools.
+
+## 2026-07-16 — Session 009: Undo, Redo, and Repeat
+
+### Safe Scratch Buffer
+
+- Resumed the main curriculum at 3.5 after the intervening configuration deep
+  dives.
+- Hamel pressed `Space n` and confirmed that a blank unnamed buffer opened.
+- Next: create two separate Insert-mode change blocks, then practice repeated
+  `u`, `Ctrl-r`, and `.` without touching a real file.
+
+### First Change Block
+
+- Hamel inserted `[ONE]` and returned to Normal mode.
+- Clarification: an unnamed buffer has no disk path, so `[ONE]` remains only in
+  Neovim memory unless the buffer is later given a filename.
+- Next: create `[TWO]` during a second Insert-mode visit so each marker has its
+  own undo block.
+
+### Second Change Block
+
+- Hamel inserted `[TWO]` during a separate Insert-mode visit and confirmed that
+  `[ONE][TWO]` were both visible.
+- Because the markers came from separate Insert-mode visits, Normal-mode `u`
+  should undo `[TWO]` first while leaving `[ONE]` intact.
+
+### First Multi-Step Undo
+
+- Hamel pressed `u` once and confirmed that the newest change block, `[TWO]`,
+  was undone while `[ONE]` remained.
+- Next: press `u` again to walk one more step backward and remove `[ONE]`.
+
+### Repeated Undo Confirmed
+
+- Hamel pressed `u` a second time and confirmed that `[ONE]` disappeared,
+  leaving the scratch buffer blank.
+- Mental model: each Normal-mode `u` walks backward by one change block, so two
+  separate Insert-mode visits required two undo presses.
+- Next: use `Ctrl-r` to redo the change blocks one at a time.
+
+### `r` Versus `Ctrl-r`
+
+- Hamel asked what plain `r` does before practicing redo.
+- In Normal mode, `r{character}` replaces the single character under the cursor
+  and stays in Normal mode. For example, `rX` replaces the current character
+  with `X`.
+- `Ctrl-r` is unrelated to replacement; it walks forward through changes that
+  were undone.
+- Added optional Curriculum 4.D5 for hands-on single-character replacement.
+- The active 3.5 checkpoint remains one `Ctrl-r` press to restore `[ONE]`.
+
+### Replacing a Whole Word
+
+- Hamel asked whether plain `r` can replace an entire word.
+- `r` is limited to one character. `ciw` means “change inside word”: it removes
+  the word under the cursor and enters Insert mode for the replacement.
+- Example: with the cursor anywhere in `hello`, `ciwgoodbye<Escape>` produces
+  `goodbye`.
+- Curriculum 4.4 remains unchecked until Hamel practices the text object.
+- Return to Curriculum 3.5: press `Ctrl-r` once to restore `[ONE]`.
+
+### First Redo Confirmed
+
+- Hamel pressed `Ctrl-r` once and confirmed that `[ONE]` returned.
+- Mental model: `Ctrl-r` walks forward through undone change blocks, one step
+  per press.
+- Next: press `Ctrl-r` once more to restore `[TWO]`.
+
+### Repeated Redo Confirmed
+
+- Hamel pressed `Ctrl-r` a second time and confirmed that `[ONE][TWO]` were
+  visible again.
+- Repeated `Ctrl-r` walks forward through the redo stack one change block at a
+  time, mirroring repeated `u` in the opposite direction.
+- Undo and redo are confirmed; Curriculum 3.5 remains open for `.` repeat.
+
+### Preparing a Controlled Repeat
+
+- Hamel pressed `0` in Normal mode and confirmed that the cursor moved to the
+  first character of the line, the opening `[` in `[ONE][TWO]`.
+- This previews the start-of-line motion from Curriculum 4.1 without marking
+  that future lesson complete.
+- Next: delete that opening bracket with `x` to create a simple repeatable
+  change.
+
+### Repeatable Change Created
+
+- Hamel pressed `x` on the first `[` and confirmed that `[ONE][TWO]` became
+  `ONE][TWO]`.
+- That single-character deletion is now Neovim's most recent repeatable change.
+- Next: move one character with `l`, then press `.` to repeat the deletion at
+  the new cursor position.
+
+### What `.` Repeats
+
+- Hamel paused before pressing `.` and asked what it does.
+- In Normal mode, `.` repeats the most recent text-changing command at the
+  current cursor position.
+- Cursor movement such as `l` is not a text change, so in this exercise `.`
+  will repeat the earlier `x` deletion instead of repeating the movement.
+- Curriculum 3.5 remains unchecked until Hamel performs and confirms `.`.
+
+### Coding Use Case for `.`
+
+- Hamel asked for a durable note and a coding use case for the dot command.
+- Example: when several nearby lines contain the same extra comma, delete the
+  first comma with `x`, move to the next extra comma, and press `.` to repeat
+  the deletion there.
+- `.` is best for repeating small mechanical edits. A project-wide semantic
+  symbol rename should use the LSP rename workflow instead.
+- Added `u`, `Ctrl-r`, and `.` plus this coding example to `README.md` for quick
+  reference.
+
+### Dot Repeat Confirmed
+
+- Hamel moved one character right with `l`, pressed `.`, and confirmed that the
+  earlier `x` deletion repeated at the new cursor position: `ONE][TWO]` became
+  `OE][TWO]`.
+- Curriculum 3.5 is complete: repeated `u`, repeated `Ctrl-r`, and `.` were all
+  performed and confirmed in an unnamed scratch buffer.
+- Next core checkpoint: Curriculum 3.6, safe yank, paste, and system clipboard.
+
+### Safe Yank-and-Paste Scratch
+
+- Hamel opened a fresh unnamed buffer with `Space n` for Curriculum 3.6.
+- The buffer has no disk path, so the yank-and-paste exercise cannot overwrite
+  a real file.
+- Next: insert one practice line, then use `yy` and `p` to copy and paste it.
+
+### Yank Practice Line
+
+- Hamel inserted `alpha beta` into the unnamed buffer and returned to Normal
+  mode.
+- Next: press `yy` to yank the whole current line without changing its visible
+  text.
+
+### Whole-Line Yank Confirmed
+
+- Hamel pressed `yy` and confirmed the yank.
+- `yy` copies the entire current line without deleting it; the brief highlight
+  comes from this config's `TextYankPost` feedback.
+- Because this config sets `clipboard=unnamedplus`, the unnamed yank also goes
+  to the macOS system clipboard.
+- Next: press `p` to paste the line below the current line.
+
+### Whole-Line Paste Confirmed
+
+- Hamel pressed `p` and confirmed that the yanked `alpha beta` line was pasted
+  below the current line.
+- Because `yy` yanks a whole line, lowercase `p` pastes it on the next line.
+- Next: paste into the Codex message box with macOS `Cmd-v` to verify the yank
+  crossed the Neovim boundary through the system clipboard.
+
+### macOS Clipboard Confirmed
+
+- Hamel used `Cmd-v` in the Codex message box and confirmed that the same
+  `alpha beta` text yanked with `yy` appeared outside Neovim.
+- This verifies the full path: `yy` writes through `clipboard=unnamedplus` to
+  the macOS clipboard, `p` pastes inside Neovim, and `Cmd-v` pastes in other
+  applications.
+- Curriculum 3.6 is complete. Next is 3.7: modified buffers and unsaved-change
+  prompts.
+
+### Modified Buffer Marker
+
+- Hamel found `[+]` beside the unnamed buffer's name in the status line.
+- `[+]` means the buffer contains changes that have not been written to disk;
+  for this unnamed scratch, there is not yet a filename to write.
+- Next: press `Space q` once. The normal `:quit` command should refuse to close
+  the modified buffer and show a no-write warning, preserving the scratch.
+
+### Unsaved-Change Refusal Confirmed
+
+- Hamel pressed `Space q` and confirmed that Neovim refused to close the
+  modified scratch buffer and displayed its no-write warning.
+- `Space q` runs normal `:quit`; without `!`, Neovim protects unsaved work
+  instead of silently discarding it.
+- Curriculum 3.7 is complete. Next is 3.8: intentionally abandon only this
+  known disposable scratch buffer with `:bd!`.
+
+### Intentional Scratch Abandonment Confirmed
+
+- Hamel ran `:bd!` and confirmed that the disposable modified scratch buffer
+  closed and the previous buffer appeared.
+- `bd` removes the buffer from Neovim; `!` explicitly discards that buffer's
+  unsaved changes. It does not delete a named file from disk.
+- Useful case: abandon accidental edits in a known disposable scratch or test
+  buffer after carefully confirming the current buffer is the intended target.
+- Added the safety note to `README.md` at Hamel's request.
+- Curriculum 3.8 and all of Lesson 3 are complete. Next is Lesson 4.1: motions.
+
+## 2026-07-16 — Session 010: In-File Search
+
+### Search the Current File
+
+- Hamel asked how to search the current file for the word `mason`.
+- `/mason<Enter>` searches forward inside the current buffer. This is different
+  from `Space /`, which searches file contents across the project.
+- Curriculum 4.5 is being practiced early at Hamel's request and remains
+  unchecked until `/`, `n`, and `N` are all performed and confirmed.
+- First checkpoint: run `/mason<Enter>` in a file that contains `mason`.
+
+### Cycle Through Search Matches
+
+- Hamel asked how to move after the first in-file match.
+- In Normal mode, `n` moves to the next match in the current search direction;
+  `N` moves to the previous match in the opposite direction.
+- Curriculum 4.5 remains unchecked until both directions are performed and
+  confirmed.
+
+### Current-File Diagnostics Detour
+
+- Hamel asked how to view ESLint issues or warnings in the current file.
+- `Space c d` opens the current buffer's diagnostics picker. It includes ESLint
+  and any other attached diagnostic source, such as the TypeScript language
+  server.
+- `Space c D` is the project-wide version, but the first checkpoint is only the
+  current-file picker.
+- Curriculum 6.1 is being previewed early and remains unchecked until Hamel
+  opens and reads a real diagnostic.
+
+### Safe Current-File Replace
+
+- Hamel asked how to replace every occurrence of a word such as `java` in the
+  current file.
+- Safe template: `:%s/\<java\>/replacement/gc`.
+- `%` selects the whole file, `s` substitutes, `\<java\>` matches the exact
+  word instead of text inside a larger word, `g` replaces every match on each
+  line, and `c` asks for confirmation at every occurrence.
+- At the confirmation prompt: `y` replaces, `n` skips, `a` replaces all
+  remaining matches, and `q` or `Escape` stops.
+- Normal-mode `u` can undo the substitution if the result is wrong.
+- Added optional Curriculum 4.D6; it remains unchecked until Hamel practices
+  the substitution safely and confirms the result.
+
+### Easier Replacement Workflow Research
+
+- Hamel rejected the `:%s/...` syntax as too cumbersome and asked for primary-
+  source research into an easier workflow.
+- Native fallback after `/java`: use `cgn`, type the replacement, press
+  `Escape`, then press `.` for each next match. This reuses the dot-repeat skill
+  from Curriculum 3.5 but remains one-at-a-time.
+- Snacks provides grep but no replacement UI, and Kuncheng's current Neovim
+  config does not include a search-and-replace plugin.
+- Recommended option: add `grug-far.nvim` on `Space R`, prefilled with the word
+  under the cursor and limited to the current file. It provides editable search
+  and replacement fields plus a diff to review before applying changes.
+- The earlier substitute command remains a fallback, not the preferred lesson.
+  Revised optional Curriculum 4.D6 to track the visual workflow.
+- Full primary-source findings are in `SEARCH_REPLACE_RESEARCH.md`. No plugin or
+  keymap change has been made without Hamel's approval.
+
+### Visual Replacement Installed for Testing
+
+- With Hamel's approval, installed `grug-far.nvim` and added `Space R` as an
+  experimental current-file replacement workflow.
+- The mapping requires a named, saved file; it pre-fills the word under the
+  cursor, the current file path, and exact literal whole-word flags, then puts
+  the cursor in the Replace field.
+- Headless validation confirmed Neovim startup, plugin loading, the `Space R`
+  mapping, all prefills, current-file scope, exact-word flags, and replacement-
+  field focus.
+- Lazy's two unrelated plugin updates were removed; the lockfile adds only
+  `grug-far.nvim`.
+- No commit or push will happen until Hamel completes the live test and decides
+  the workflow is useful. Curriculum 4.D6 remains unchecked until then.
+
+### Safe Live Replacement Fixture
+
+- Hamel opened `/tmp/nvim-replace-test.txt`, inserted
+  `java javascript java`, and returned to Normal mode.
+- The two standalone `java` words should match; the `java` inside `javascript`
+  should remain untouched, proving the whole-word guard works.
+- Next: save the temporary file before opening the disk-backed replacement UI.
+
+### Replacement Fixture Saved
+
+- Hamel saved `/tmp/nvim-replace-test.txt` with `:w` and confirmed the write.
+- The cursor remains on the final standalone `java`, ready to test the
+  word-under-cursor prefill.
+
+### First Grug Far View and Visual Refinement
+
+- Hamel pressed `Space R` and confirmed that Grug Far opened with `java`, the
+  temporary file path, exact-word flags, and two matches. The `java` inside
+  `javascript` was correctly excluded.
+- Hamel found the default full-screen form visually noisy and asked for a more
+  polished interface before continuing the usefulness test.
+- Reworked the experimental UI into a centered rounded Nord panel with compact
+  inputs, no example-text clutter, no fold gutter or result-number badge, and a
+  footer showing `Space r` apply, `Space c` close, and `g?` help.
+- Added Nord-specific result, diff, border, and input colors. The replacement
+  behavior and current-file safety scope are unchanged.
+- Headless validation confirmed the styled float, compact layout, replacement-
+  field focus, two exact matches in one file, clean close, and no per-open
+  hidden-buffer leak.
+- Live visual approval and the actual replacement are still pending. Nothing
+  has been committed or pushed.
+
+### Refined Panel Approved
+
+- Hamel reopened `Space R` and approved the centered compact Nord panel.
+- The live screen showed search `test`, an active empty Replace field, the
+  current temporary-file path, exact-word flags, and exactly two matches while
+  leaving `javascript` unmatched.
+- The actual replacement and post-apply file check remain before Curriculum
+  4.D6 can be completed or the experimental config can be committed.
+
+### Visual Current-File Replacement Confirmed
+
+- Hamel entered `hi` as the replacement and applied it with `Space r`.
+- Grug Far reported `replace completed`; the file reloaded from disk and showed
+  `hi javascript hi`.
+- Both standalone `test` matches changed while the text inside `javascript`
+  stayed untouched, confirming the exact whole-word and current-file guards.
+- Hamel completed optional Curriculum 4.D6. The tested config remains
+  uncommitted until Hamel explicitly chooses to keep it.
+
+### Workflow Accepted
+
+- Hamel confirmed the workflow is useful and asked to keep, commit, and push
+  the configuration and complete session notes.
+- Best next core lesson remains Curriculum 4.1: word, line, file, and matching-
+  pair motions.

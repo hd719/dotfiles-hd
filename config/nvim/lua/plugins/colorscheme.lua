@@ -11,6 +11,65 @@ return {
         highlights.FloatBorder.bg = colors.none
         highlights.FloatBorder.fg = colors.frost.ice
 
+        -- Give the current-file replacement workflow its own calm Nord panel.
+        highlights.GrugFarNormal = {
+          fg = colors.snow_storm.origin,
+          bg = colors.polar_night.origin,
+        }
+        highlights.GrugFarBorder = {
+          fg = colors.frost.ice,
+          bg = colors.polar_night.origin,
+        }
+        highlights.GrugFarTitle = {
+          fg = colors.snow_storm.brightest,
+          bg = colors.polar_night.origin,
+          bold = true,
+        }
+        highlights.GrugFarFooter = {
+          fg = colors.frost.polar_water,
+          bg = colors.polar_night.origin,
+        }
+        highlights.GrugFarEndOfBuffer = {
+          fg = colors.polar_night.origin,
+          bg = colors.polar_night.origin,
+        }
+        highlights.GrugFarCursorLine = { bg = colors.polar_night.bright }
+        highlights.GrugFarInputLabel = { fg = colors.frost.ice, bold = true }
+        highlights.GrugFarInputPlaceholder = {
+          fg = "#B5B5B5",
+          italic = true,
+        }
+        highlights.GrugFarResultsHeader = { fg = colors.frost.polar_water }
+        highlights.GrugFarResultsStats = { fg = "#B5B5B5" }
+        highlights.GrugFarResultsPath = { fg = colors.frost.ice, bold = true }
+        highlights.GrugFarResultsMatch = {
+          fg = colors.snow_storm.brightest,
+          bg = colors.polar_night.brightest,
+          bold = true,
+        }
+        highlights.GrugFarResultsMatchAdded = {
+          fg = colors.aurora.green,
+          bg = colors.polar_night.bright,
+          bold = true,
+        }
+        highlights.GrugFarResultsMatchRemoved = {
+          fg = colors.aurora.red,
+          bg = colors.polar_night.bright,
+          bold = true,
+        }
+        highlights.GrugFarResultsChangeIndicator = {
+          fg = colors.aurora.yellow,
+          bg = colors.none,
+        }
+        highlights.GrugFarResultsRemoveIndicator = {
+          fg = colors.aurora.red,
+          bg = colors.none,
+        }
+        highlights.GrugFarResultsAddIndicator = {
+          fg = colors.aurora.green,
+          bg = colors.none,
+        }
+
         -- Match Zed's readable comment tone without losing Nord's italics.
         highlights.Comment.fg = "#B5B5B5"
         highlights["@comment"].fg = "#B5B5B5"

@@ -64,6 +64,11 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 - `:LspInfo` shows language-server status.
 - `:ConformInfo` shows formatter status.
 - `:TSStatus` shows Tree-sitter parsers.
+- `[+]` beside a buffer name means it has unsaved changes. Normal `Space q`
+  refuses to close that buffer instead of silently discarding them.
+- `:bd!` removes only the current buffer from Neovim and discards its unsaved
+  changes; it does not delete the file from disk. Use it only after confirming
+  the current buffer is disposable.
 
 For a calm first run, open this file with `nvim ~/.config/nvim/README.md`, then
 press `Space` and pause to see the available commands.
@@ -100,6 +105,9 @@ Every agent teaching Neovim must read and update both files.
 | `Space b` | Pick a buffer |
 | `Space d` | Close the current buffer |
 | `Space w` / `Space x` | Save / save and quit |
+| `Space R` | Replace the word under the cursor in the current file |
+| `u` / `Ctrl-r` / `.` | Undo / redo / repeat the last change |
+| `yy` / `p` | Yank the current line / paste after |
 | `Space v` / `Space s` | Split right / down |
 | `Ctrl-h/j/k/l` | Focus window left / down / up / right |
 | `Space q` | Close the current window |
@@ -117,6 +125,19 @@ Every agent teaching Neovim must read and update both files.
 | `gd` / `gh` | Definition / hover |
 | `gsa` / `gsd` / `gsr` | Surround add / delete / replace |
 | `H` / `L` | Previous / next buffer |
+
+Use `.` for repeated mechanical code edits. For example, if several lines have
+the same extra comma, delete the first comma with `x`, move to the next one, and
+press `.` to repeat that deletion. Use LSP rename for project-wide symbol
+renames instead of repeating manual edits.
+
+This config sets `clipboard=unnamedplus`, so regular yanks such as `yy` also
+copy to the macOS clipboard for `Cmd-v` in other applications.
+
+For visual current-file replacement, save the file, put the cursor on the exact
+word, and press `Space R`. Type the replacement, review the diff, then press
+`Space r` inside Grug Far to apply it. The search is limited to that file and
+does not match the word inside a larger word.
 
 `Space g` resolves the repository from the current file. In Oil, it resolves
 from the directory being viewed, so it does not depend on Neovim's `:pwd`.
