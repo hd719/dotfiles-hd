@@ -5,26 +5,30 @@
 - Branch: `agent/plan-personal-mac-mise-standardization`
 - Host used for local QA: Apple Silicon, macOS 26.5.2
 - Tested implementation commit:
-  `d6b590c096fff7cf6dd4dc6f3656ecf49b312615`
+  `39528cb727fe9a5629e8a1cbeb9d10987b96e0bc`
 - Actual-tool isolated home (ephemeral):
-  `/tmp/dotfiles-clean-home-qa-final.nvDyQP`
+  `/tmp/dotfiles-clean-home-qa-final.MCfB2N`
 - Durable sanitized evidence:
-  `~/.local/state/dotfiles-hd/mise-standardization/20260715-node24-clean-home-final`
+  `~/.local/state/dotfiles-hd/mise-standardization/20260715-node24-pnpm-clean-home-final`
 - Status: review-ready; **not merge-ready until every live gate below passes**
 
 ## Passed
 
 - Shell syntax, StyLua, whitespace, and all three Brewfile parse checks.
-- 118 temporary-home bootstrap assertions, including dry-run purity, profile
+- 127 temporary-home bootstrap assertions, including dry-run purity, profile
   selection, backups, idempotency, rollback, protected-state preservation,
-  installer failures, Go version detection, and Lazy lockfile preservation.
-- An actual-tool temporary-home run using Homebrew, mise, uv, npm, and Neovim:
+  installer failures, legacy npm-layout migration, exact pinned pnpm execution,
+  Go version detection, and Lazy lockfile preservation.
+- An actual-tool temporary-home run using Homebrew, mise, uv, pnpm, and Neovim:
   - two applies completed without an additional backup;
   - protected SSH, Herdr, Zed, and tmux sentinels were unchanged;
   - `lazy-lock.json` was unchanged;
   - interactive and non-interactive login shells resolved Node 24.18.0, pnpm
     11.2.2, Go 1.26.3, Python 3.14.5, and Bun 1.3.14;
-  - the doctor verified exact Ruff, mdformat/plugin, and GraphQL LSP versions;
+  - the doctor verified exact Ruff, mdformat/plugin, and pnpm-managed GraphQL
+    LSP versions;
+  - the pnpm-installed GraphQL LSP reported 3.5.0, the second apply skipped its
+    reinstall, and `pnpm audit --prod` found no known vulnerabilities;
   - Neovim restored every exact locked plugin plus all required Tree-sitter
     parsers, started headlessly, and left `lazy-lock.json` unchanged.
 - Isolated mise installs and execution for every approved runtime pin.
@@ -53,7 +57,7 @@
 - Local host preparation installed missing Homebrew `gopls` and
   `font-maple-mono-nf`, and cached mise Node 22.23.1 without activating it. No
   live dotfile link or active PATH was switched. The Node 24.18.0 rerun used a
-  fresh isolated mise root at `/tmp/dotfiles-mise-qa-node24.Cjyz1b`.
+  fresh isolated mise root at `/tmp/dotfiles-mise-qa-node24.WcR21v`.
 
 ## Required Before Merge
 
