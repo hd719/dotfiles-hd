@@ -79,9 +79,9 @@ It no longer accepts a GitHub token or manages SSH, Nix, nvm, or rbenv.
 For a new Mac mini toolchain, substitute `--profile mac-mini`. This installs
 the shared development environment plus the mini's package overlay.
 
-Do not run `--apply` on the existing production Mac mini until the clean-VM and
-MacBook gates are green, the Mac mini preflight passes, and Hamel explicitly
-approves the interactive step in
+Do not run `--apply` on the existing production Mac mini until the reviewed
+change is merged, the MacBook rollback/reboot gate is green, the post-merge Mac
+mini preflight passes, and Hamel explicitly approves the interactive step in
 [`docs/QA.md`](docs/QA.md).
 That apply is what completes the no-restart gate. The bootstrap does not start
 or restart services, but a new login shell will resolve the shared mise

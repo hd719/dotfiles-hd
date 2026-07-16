@@ -10,7 +10,8 @@
   `/tmp/dotfiles-clean-home-qa-final.YfsTmx`
 - Durable sanitized evidence:
   `~/.local/state/dotfiles-hd/mise-standardization/20260715-mac-bootstrap-clean-home-6e3e9e2`
-- Status: review-ready; **not merge-ready until every live gate below passes**
+- Status: review-ready; **not merge-ready until the live MacBook rollback and
+  reboot substitute gate below passes**
 
 ## Passed
 
@@ -59,22 +60,35 @@
   `font-maple-mono-nf`, and cached mise Node 22.23.1 without activating it. No
   live dotfile link or active PATH was switched. The Node 24.18.0 rerun used a
   fresh isolated mise root at `/tmp/dotfiles-mise-qa-node24.1LfnIc`.
+- No disposable Apple Silicon macOS VM is available. Hamel explicitly waived
+  that gate on 2026-07-16; it is not recorded as passed. This accepts residual
+  risk around a truly cold Homebrew install and replaces the VM gate with the
+  live MacBook rollback and reboot canary below.
 
 ## Required Before Merge
 
-- [ ] Run the exact reviewed commit twice in a disposable Apple Silicon macOS
-  VM with a non-Hamel username.
-- [ ] Reboot that VM and repeat the doctor, shell, Neovim, and clean-Git checks.
-- [ ] Restore every seeded backup byte-for-byte, then apply successfully again.
-- [ ] Record the VM macOS version and durable evidence path here.
+- [x] Record Hamel's clean macOS VM waiver without representing the VM gate as
+  passed.
+- [ ] Preserve the existing uncommitted PLAN/QA edits in the live canonical
+  checkout before switching it to the exact reviewed commit.
+- [ ] Back up the live MacBook baseline, dry-run, apply the exact reviewed
+  commit twice, and pass fresh shells plus the doctor.
+- [ ] Prove rollback restores every path changed by the canary, then reapply
+  successfully twice.
 - [ ] Complete the manual MacBook app, IDE, Neovim LSP, and normal-work-session
   observation gate.
-- [ ] Activate the exact reviewed commit on the MacBook only after the VM gate,
-  then prove both applies, rollback, fresh shells, and the doctor.
+- [ ] Reboot the MacBook and repeat the doctor, shell, Neovim, project, and
+  clean-Git checks.
+- [ ] Hamel confirms the MacBook behaves normally and approves merge.
+
+## Required After Merge
+
 - [ ] Complete the Mac mini preflight, obtain Hamel's explicit approval, and run
   the interactive no-restart apply plus shell, project, Neovim, and runtime QA.
 - [ ] Complete immediate, one-hour, and next-day observation on both machines;
-  Hamel confirms the final gate before merge.
+  Hamel confirms the final post-merge gate.
+- [ ] Record the post-merge evidence and completed checklist in a small QA-only
+  follow-up PR.
 
 No Mac mini restart, reload, runtime migration, cleanup, or fallback removal is
 authorized by this PR.

@@ -1,7 +1,8 @@
 # Personal Mac Toolchain Standardization Plan
 
-- Status: Implementation and isolated QA complete in PR #9; VM and live rollout
-  gates remain pending
+- Status: Implementation and isolated QA complete in PR #9; the macOS VM gate
+  is waived, the live MacBook reboot canary is pending before merge, and the
+  Mac mini no-restart gate is pending after merge
 - Plan branch: `agent/plan-personal-mac-mise-standardization`
 - Base branch: `origin/master` (this repository uses `master`, not `main`)
 - Targets: personal MacBook (`mac-vm`), Mac mini (`mac-mini`), and a brand-new
@@ -18,12 +19,15 @@
   findings.
 - [x] Record the exact tested commit and durable evidence in
   [`RESULTS.md`](RESULTS.md).
-- [ ] Pass the clean Apple Silicon macOS VM and reboot gate.
-- [ ] Complete the live MacBook canary.
-- [ ] Complete the Mac mini no-restart gate and observation window.
+- [x] Record Hamel's 2026-07-16 waiver of the clean Apple Silicon macOS VM gate
+  because no macOS VM is available.
+- [ ] Complete the live MacBook canary, rollback drill, reboot, and post-reboot
+  checks before merge.
+- [ ] Complete the Mac mini no-restart gate and observation window after merge.
 
-Unchecked items later in this plan are intentional VM or live-machine gates;
-isolated temporary-home evidence does not mark them complete.
+Unchecked items later in this plan are intentional live-machine gates;
+isolated temporary-home evidence does not mark them complete. The VM gate is
+waived, not passed.
 
 ## Goal
 
@@ -40,7 +44,7 @@ does not mean every installed Homebrew formula must be identical.
 - The MacBook is the canary. The Mac mini is never first.
 - The approved shared pins are installed and tested in isolation before any
   live PATH switch. The MacBook activates them first; the Mac mini follows only
-  after that canary is green.
+  after that canary is green and PR #9 is merged.
 - Homebrew fallbacks stay installed through the initial rollout and soak.
 - No service or runtime restart happens without Hamel's approval.
 - A failed hard gate stops the rollout. Do not improvise around it.
@@ -169,8 +173,9 @@ fallbacks remains deferred; Brewfile reorganization does not uninstall them.
 ## Implementation Sequence
 
 Implementation and isolated QA may proceed in parallel. Live activation gates
-are sequential: a later machine cannot be activated while an earlier live gate
-is red.
+are sequential: the MacBook reboot canary is the pre-merge substitute for the
+waived VM, and the Mac mini cannot be activated after merge while the MacBook
+gate is red.
 
 ### Phase 0: Approve the plan
 
@@ -190,11 +195,13 @@ Exit gate: scope, versions, ownership, stop rules, and rollback are accepted.
 - [x] Add an explicit check/apply bootstrap with safe backups and no cleanup,
   credential handling, or service control.
 - [x] Add a verification doctor and temporary-home regression suite.
-- [ ] Pass the clean Apple Silicon macOS VM test in [`QA.md`](QA.md) twice.
-- [ ] Prove rollback restores seeded files byte-for-byte in that VM.
+- [x] Record the clean Apple Silicon macOS VM waiver; do not mark the VM test as
+  passed.
+- [ ] Use the live MacBook reboot canary in [`QA.md`](QA.md) as the compensating
+  pre-merge gate, including two applies and a rollback drill.
 
-Exit gate: automated temporary-home tests and the real clean-macOS acceptance
-test pass. The real VM evidence is a merge blocker, not an optional follow-up.
+Exit gate: automated temporary-home tests pass, then the live MacBook canary
+proves apply, rollback, reapply, reboot, and post-reboot health before merge.
 
 ### Phase 1: Capture a two-machine baseline
 
@@ -242,17 +249,19 @@ without touching the live symlinked config.
 - [ ] Run `cortana-services` local CI and Go tests from a clean checkout.
 - [ ] Complete at least one normal work session on the canary.
 - [ ] Prove per-command Homebrew rollback before continuing.
+- [ ] Reboot the MacBook, then repeat the doctor, fresh-shell, Neovim, project,
+  and clean-Git checks.
 
 Exit gate: all MacBook checks pass, its repositories remain clean, and Hamel
-accepts the normal-work-session behavior.
+accepts the normal-work-session and post-reboot behavior before merge.
 
-### Phase 4: Mac mini interactive canary, no restart
+### Phase 4: Post-merge Mac mini interactive canary, no restart
 
-- [ ] Verify, then detach the Mac mini dotfiles checkout at the exact approved
-  commit.
+- [ ] Verify, then fast-forward the Mac mini dotfiles checkout to the exact
+  merged `master` commit.
 - [ ] Back up any existing `~/.config/mise` and `.zprofile` before linking or
   editing.
-- [ ] Preview, then apply the reviewed `mac-mini` profile, which backs up and
+- [ ] Preview, then apply the merged `mac-mini` profile, which backs up and
   links the shared config without controlling services.
 - [ ] Install the approved shared tools with mise; do not remove Homebrew tools.
 - [ ] Test with `mise exec`, then a fresh interactive shell.
@@ -341,7 +350,8 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 - PostgreSQL, Tailscale, Hermes, or a Cortana lane becomes unhealthy.
 - The Lazy lockfile or application config changes unexpectedly.
 - A restart is required before its maintenance window is approved.
-- A clean Apple Silicon macOS VM cannot complete bootstrap twice and rollback.
+- The MacBook canary cannot complete apply twice, rollback, reapply, reboot, or
+  post-reboot verification.
 - Rollback fails once. Stop instead of attempting repeated live repairs.
 
 ## Definition of Done
@@ -354,6 +364,9 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 - [ ] No work-Mac, Ubuntu, credential, service-config, or unrelated files changed.
 - [ ] Rollback was tested before any fallback was removed.
 - [ ] Bootstrap documentation matches the final symlink and package state.
-- [ ] A clean Apple Silicon macOS VM passes install, reboot, rerun, Neovim,
-  shell, and rollback checks from the exact reviewed commit.
-- [ ] Every implementation PR contains its completed QA record.
+- [x] The unavailable clean Apple Silicon macOS VM is explicitly waived rather
+  than recorded as passed.
+- [ ] The live MacBook passes apply twice, rollback, reapply, reboot, Neovim,
+  shell, project, and manual app checks from the exact reviewed commit.
+- [ ] PR #9 contains the completed pre-merge MacBook QA record; a QA-only
+  follow-up PR records the post-merge Mac mini and observation results.

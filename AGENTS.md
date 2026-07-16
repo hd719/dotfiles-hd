@@ -103,9 +103,10 @@ For a brand-new personal Mac, run the bootstrap in `--dry-run` mode first and
 then `--apply` only from a clean canonical clone. The legacy `mac-vm` profile
 name is correct for a physical personal MacBook too. Never use the personal
 bootstrap on the Resilience work Mac. On the existing Mac mini, apply requires
-a green clean-VM/MacBook canary, a green Mac mini preflight, and Hamel's
-explicit approval. Service restart remains forbidden without a separate
-maintenance-window approval.
+the reviewed change to be merged, a green MacBook rollback/reboot canary, a
+green post-merge Mac mini preflight, and Hamel's explicit approval. PR #9's
+unavailable clean-VM gate is explicitly waived, not passed. Service restart
+remains forbidden without a separate maintenance-window approval.
 
 ## Zed Theme Profiles
 

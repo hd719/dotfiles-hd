@@ -16,16 +16,20 @@ Full evidence is recorded in [`RESULTS.md`](RESULTS.md).
 - [x] PR review has no remaining Critical, High, Medium, or Low findings.
 - [x] GitGuardian passed on implementation head `5ae95fe` before this docs-only
   status update.
-- [ ] Clean Apple Silicon macOS VM, reboot, and rollback acceptance are pending.
-- [ ] Live MacBook activation and manual app/editor checks are pending.
-- [ ] Mac mini activation and immediate/one-hour/next-day checks are pending.
+- [x] Hamel waived the unavailable clean Apple Silicon macOS VM gate on
+  2026-07-16; it is not recorded as passed.
+- [ ] Live MacBook activation, rollback, reboot, and manual app/editor checks
+  are the compensating pre-merge gate.
+- [ ] Mac mini activation and immediate/one-hour/next-day checks are the
+  post-merge gate.
 
-Unchecked checklists below are deliberate merge or activation gates, not
-missing results from the completed isolated QA.
+Unchecked checklists below are deliberate live-machine gates, not missing
+results from the completed isolated QA.
 
 ## QA Record
 
-Copy this table into the implementation PR and fill every row.
+Copy the pre-merge MacBook rows into PR #9. Carry the record into the QA-only
+follow-up PR and complete the post-merge Mac mini and observation rows there.
 
 | Field | Value |
 | --- | --- |
@@ -35,8 +39,7 @@ Copy this table into the implementation PR and fill every row.
 | Phase under test | |
 | MacBook evidence directory | |
 | Mac mini evidence directory | |
-| Clean macOS VM evidence directory | |
-| Clean macOS version | |
+| Clean macOS VM gate | Waived by Hamel on 2026-07-16; no VM available |
 | Approved Node version | |
 | Approved pnpm version | |
 | Maintenance window approved? | `no` by default |
@@ -66,14 +69,17 @@ Copy this table into the implementation PR and fill every row.
 - Plain `zsh -c` and LaunchAgents do not automatically inherit `.zprofile`.
   Record their behavior, but give them an explicit `mise exec` or fixed-path
   launch contract instead of assuming shell activation.
-- A temporary `$HOME` test does not replace the clean Apple Silicon macOS VM
-  gate. VM evidence from the exact reviewed commit is required before merge.
+- A temporary `$HOME` test does not replace live validation. Because Hamel
+  waived the unavailable macOS VM gate for PR #9, the live MacBook rollback and
+  reboot canary below is required before merge.
 
-## 0. Clean-machine Acceptance Gate
+## 0. Clean-machine Acceptance Evidence
 
-This gate proves the new personal MacBook path. The existing Mac mini is proven
-separately by the preflight and no-restart gates; this VM does not claim to
-recreate its Cortana/Hermes services, credentials, LaunchAgents, or databases.
+The automated tier proves the bootstrap in an isolated home. Hamel waived the
+disposable macOS VM tier for PR #9 on 2026-07-16 because no macOS VM is
+available. The live MacBook rollback and reboot canary in section 4 replaces it
+as the pre-merge gate. The Mac mini is proven separately after merge by the
+preflight and no-restart gates.
 
 ### Automated local tier
 
@@ -120,10 +126,12 @@ Pass criteria:
 - No command log contains upgrade, cleanup, autoremove, uninstall, SSH-key,
   restart, or credential operations.
 
-### Real clean macOS tier — required before merge
+### Optional future clean macOS tier — waived for PR #9
 
-Use a disposable Apple Silicon macOS VM with a non-Hamel username. A new local
-user is insufficient because it shares the host's Homebrew installation.
+These steps remain useful when a disposable Apple Silicon macOS VM becomes
+available, but they are not a PR #9 merge gate and must not be marked passed.
+A new local user is not equivalent because it shares the host's Homebrew
+installation.
 
 1. Record the macOS version and snapshot the clean VM.
 2. Confirm Homebrew, mise, and all managed links are absent.
@@ -360,10 +368,12 @@ cannot catch real compatibility problems.
 
 ### Approval-gated activation of the reviewed commit
 
-Run only after the clean-VM gate is green and Hamel explicitly approves the
-MacBook canary. The canonical checkout feeds live symlinks, so switching it is
-an activation step. Fill in the exact reviewed PR #9 SHA; never test a moving
-branch name.
+Run only after the isolated QA is green and Hamel explicitly approves the
+MacBook canary. For PR #9, this live rollback and reboot canary replaces the
+waived VM gate and must pass before merge. The canonical checkout feeds live
+symlinks, so switching it is an activation step. Preserve any uncommitted work
+with Hamel's approval, require a clean checkout, and fill in the exact reviewed
+PR #9 SHA; never test a moving branch name.
 
 ```bash
 (
@@ -376,7 +386,10 @@ test "$REVIEWED_COMMIT" != "<full PR #9 commit SHA>"
 test -z "$(git status --porcelain)"
 git fetch origin pull/9/head
 test "$(git rev-parse FETCH_HEAD)" = "$REVIEWED_COMMIT"
+read -r ROLLBACK_REF GOOD_COMMIT \
+  < "$EVIDENCE/dotfiles-rollback-ref.txt"
 test "$(git rev-parse "$ROLLBACK_REF")" = "$GOOD_COMMIT"
+printf '%s\n' "$REVIEWED_COMMIT" > "$EVIDENCE/reviewed-commit.txt"
 
 git switch --detach "$REVIEWED_COMMIT"
 setup/mac-bootstrap/bootstrap.sh --profile mac-vm --dry-run
@@ -392,8 +405,9 @@ test -z "$(git status --porcelain)"
 
 All commands must pass, the final Git output must be empty, and the second
 apply must create no backup. If the canary fails, move new managed links aside,
-restore every recorded backup, switch back with `git switch "$ROLLBACK_REF"`,
-and run section 9. Never use `git reset --hard`.
+restore every recorded backup, reload `ROLLBACK_REF` and `GOOD_COMMIT` from the
+evidence file, verify the ref, switch back with `git switch "$ROLLBACK_REF"`, and
+run section 9. Never use `git reset --hard`.
 
 Open a fresh Ghostty login shell before manual checks. Automated commands below
 invoke their toolchain through `zsh -lic` so the pre-activation outer-shell PATH
@@ -458,9 +472,39 @@ Pass criteria:
 - [ ] A new terminal still reports the approved versions.
 - [ ] Per-command Homebrew fallback was tested.
 
-Do not continue to the Mac mini until Hamel confirms this gate.
+### MacBook rollback and reboot substitute gate
 
-## 5. Mac mini Preflight
+Complete these steps before merging PR #9:
+
+- [ ] Restore every path changed by the canary using section 9 and prove the
+  recorded baseline returns without losing user-owned content.
+- [ ] Reload the exact SHA from `$EVIDENCE/reviewed-commit.txt`, verify it
+  against a fresh fetch of PR #9, and reapply it twice; the second apply creates
+  no new backup.
+- [ ] Reboot the MacBook and open a fresh Ghostty login shell.
+- [ ] Repeat the doctor, both shell modes, Neovim checks, project checks, and
+  clean-Git checks after reboot.
+- [ ] Hamel confirms the MacBook behaves normally.
+
+After reboot:
+
+```bash
+EVIDENCE="<MacBook evidence directory from the QA record>"
+test "$EVIDENCE" != "<MacBook evidence directory from the QA record>"
+test -d "$EVIDENCE"
+cd "$HOME/Developer/dotfiles-hd"
+test "$(git rev-parse HEAD)" = "$(cat "$EVIDENCE/reviewed-commit.txt")"
+setup/mac-bootstrap/doctor.sh --profile mac-vm
+zsh -lic 'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
+zsh -lc  'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
+nvim --headless '+qa!'
+git status --short
+```
+
+Do not merge until Hamel confirms this gate. Start the Mac mini preflight only
+after PR #9 is merged.
+
+## 5. Post-merge Mac mini Preflight
 
 Run from the MacBook unless already connected:
 
@@ -510,25 +554,30 @@ Pass criteria:
 - Every Mac mini rollback field in the QA record is filled before a maintenance
   window can be approved.
 
-## 6. Mac mini Interactive Activation, No Restart
+## 6. Post-merge Mac mini Interactive Activation, No Restart
 
-Do not run this section until the MacBook canary is green and Hamel approves
-the Mac mini interactive step. Preview the reviewed profile first; its apply
-path backs up existing destinations and links the shared config without
-starting or restarting services. Fill in and verify the exact reviewed PR #9
-SHA; never apply a moving branch name.
+Do not run this section until PR #9 is merged, the MacBook canary is green, and
+Hamel approves the Mac mini interactive step. Preview the merged profile
+first; its apply path backs up existing destinations and links the shared
+config without starting or restarting services. Fill in and verify the exact
+merged `master` SHA; never apply a moving branch name.
 
 ```bash
 (
 set -euo pipefail
-REVIEWED_COMMIT="<full PR #9 commit SHA>"
+MERGED_COMMIT="<full merged master SHA>"
 cd "$HOME/Developer/dotfiles-hd"
-test "$REVIEWED_COMMIT" != "<full PR #9 commit SHA>"
+test "$MERGED_COMMIT" != "<full merged master SHA>"
 test -z "$(git status --porcelain)"
-git fetch origin pull/9/head
-test "$(git rev-parse FETCH_HEAD)" = "$REVIEWED_COMMIT"
+git fetch origin master
+test "$(git rev-parse FETCH_HEAD)" = "$MERGED_COMMIT"
+read -r ROLLBACK_REF GOOD_COMMIT \
+  < "$EVIDENCE/dotfiles-rollback-ref.txt"
 test "$(git rev-parse "$ROLLBACK_REF")" = "$GOOD_COMMIT"
-git switch --detach "$REVIEWED_COMMIT"
+printf '%s\n' "$MERGED_COMMIT" > "$EVIDENCE/merged-commit.txt"
+git switch master
+git merge --ff-only "$MERGED_COMMIT"
+test "$(git rev-parse HEAD)" = "$MERGED_COMMIT"
 
 setup/mac-bootstrap/bootstrap.sh --profile mac-mini --dry-run
 setup/mac-bootstrap/bootstrap.sh --profile mac-mini --apply
@@ -731,23 +780,30 @@ than stacking more live changes.
 
 ## 10. Final Sign-off
 
-| Gate | Clean macOS VM | MacBook | Mac mini | Evidence/notes |
-| --- | --- | --- | --- | --- |
-| Clean baseline | [ ] | [ ] | [ ] | |
-| Symlinks verified | [ ] | [ ] | [ ] | |
-| Interactive shell | [ ] | [ ] | [ ] | |
-| Non-interactive shell | [ ] | [ ] | [ ] | |
-| IDE terminal | [ ] | [ ] | [ ] | |
-| Approved versions | [ ] | [ ] | [ ] | |
-| Project QA | N/A | [ ] | [ ] | |
-| Neovim QA | [ ] | [ ] | [ ] | |
-| Services unchanged/healthy | N/A | N/A | [ ] | |
-| Runtime doctor | N/A | N/A | [ ] | |
-| Rollback proven | [ ] | [ ] | [ ] | |
-| Idempotent second apply | [ ] | [ ] | [ ] | |
-| One-hour check | N/A | [ ] | [ ] | |
-| Next-day check | N/A | [ ] | [ ] | |
-| Worktrees clean | [ ] | [ ] | [ ] | |
+- [x] The unavailable clean macOS VM is explicitly waived for PR #9; no VM
+  result is represented as passed.
+
+MacBook rows through the reboot check are required before merge. The one-hour
+and next-day rows are post-merge observation.
+
+| Gate | MacBook | Mac mini | Timing/evidence |
+| --- | --- | --- | --- |
+| Clean baseline | [ ] | [ ] | |
+| Symlinks verified | [ ] | [ ] | |
+| Interactive shell | [ ] | [ ] | |
+| Non-interactive shell | [ ] | [ ] | |
+| IDE terminal | [ ] | [ ] | |
+| Approved versions | [ ] | [ ] | |
+| Project QA | [ ] | [ ] | |
+| Neovim QA | [ ] | [ ] | |
+| Services unchanged/healthy | N/A | [ ] | |
+| Runtime doctor | N/A | [ ] | |
+| Rollback proven | [ ] | [ ] | |
+| Idempotent second apply | [ ] | [ ] | |
+| Reboot check | [ ] | N/A | |
+| One-hour check | [ ] | [ ] | |
+| Next-day check | [ ] | [ ] | |
+| Worktrees clean | [ ] | [ ] | |
 
 Final approval:
 
