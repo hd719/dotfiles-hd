@@ -41,5 +41,7 @@ alias d='docker'
 alias dc='docker compose'
 alias lg='lazygit'
 
+source_if_exists "$HOME/.config/zsh/lsd-aliases.zsh"
+
 source_if_exists /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source_if_exists /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

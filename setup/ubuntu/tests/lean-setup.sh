@@ -10,6 +10,8 @@ MISE_CONFIG="$ROOT_DIR/setup/ubuntu/mise.toml"
 ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
+LSD_ALIASES="$ROOT_DIR/config/zsh/lsd-aliases.zsh"
+MAC_ALIASES="$ROOT_DIR/setup/mac-vm/zsh-config/alias.zsh"
 NVIM_EDITOR_CONFIG="$ROOT_DIR/config/nvim/lua/plugins/editor.lua"
 TEST_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TEST_ROOT"' EXIT
@@ -381,7 +383,7 @@ EOF
 }
 
 test_zsh_config_is_linux_native() {
-  local forbidden output
+  local case_dir forbidden output
 
   while IFS= read -r expected; do
     [[ -n "$expected" ]] && assert_file_contains "$ZSH_CONFIG" "$expected"
@@ -396,7 +398,20 @@ eval "$(zoxide init --cmd cd zsh)"
 /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 alias gs='git status --short --branch'
 alias dc='docker compose'
+source_if_exists "$HOME/.config/zsh/lsd-aliases.zsh"
 EOF
+
+  while IFS= read -r expected; do
+    [[ -n "$expected" ]] && assert_file_contains "$LSD_ALIASES" "$expected"
+  done <<'EOF'
+alias ls='lsd --tree --depth 1'
+alias lss='lsd --tree --depth 2'
+alias lsss='lsd --tree --depth 3'
+alias ll='lsd -la --tree --depth 1'
+alias l='lsd -l'
+alias la='lsd -a'
+EOF
+  assert_file_contains "$MAC_ALIASES" "source \"\$ZSH_CONFIG_DIR/../../../config/zsh/lsd-aliases.zsh\""
 
   for forbidden in mac-vm linuxbrew rbenv 'code --wait' kubectl terraform; do
     if grep -Fq -- "$forbidden" "$ZSH_CONFIG"; then
@@ -411,6 +426,21 @@ EOF
       zsh -f -c 'source "$1"; printf "%s|%s|%s" "$EDITOR" "$TERM" "$path[1]"' _ "$ZSH_CONFIG"
   )"
   [[ "$output" == "nvim|xterm-test|$TEST_ROOT/zsh-home/.local/bin" ]] || fail "Ubuntu zsh config did not load cleanly in isolation"
+
+  case_dir="$TEST_ROOT/zsh-lsd-aliases"
+  mkdir -p "$case_dir/home/.config/zsh" "$case_dir/bin"
+  ln -s "$LSD_ALIASES" "$case_dir/home/.config/zsh/lsd-aliases.zsh"
+  cat > "$case_dir/bin/lsd" <<EOF
+#!/usr/bin/env bash
+printf '%s\n' "\$*" >> "$case_dir/lsd.log"
+EOF
+  chmod +x "$case_dir/bin/lsd"
+
+  HOME="$case_dir/home" \
+    PATH="$case_dir/bin:/usr/bin:/bin" \
+    zsh -f -c 'source "$1"; eval "ls -la"; eval "ll"' _ "$ZSH_CONFIG"
+  [[ "$(sed -n '1p' "$case_dir/lsd.log")" == "--tree --depth 1 -la" ]] || fail "Ubuntu ls alias did not preserve lsd tree output"
+  [[ "$(sed -n '2p' "$case_dir/lsd.log")" == "-la --tree --depth 1" ]] || fail "Ubuntu ll alias did not match the Mac profile"
 }
 
 test_setup_is_lean_and_rerunnable() {
@@ -456,6 +486,8 @@ EOF
   [[ "$(find "$case_dir/home/.config" -maxdepth 1 -name 'ghostty.backup.*' | wc -l | tr -d ' ')" == "1" ]] || fail "setup did not preserve the whole-directory Ghostty link"
   assert_file_contains "$case_dir/legacy-ghostty/config" "legacy shared Ghostty config"
   [[ -L "$case_dir/home/.config/starship.toml" ]] || fail "setup did not link Starship config"
+  [[ -L "$case_dir/home/.config/zsh/lsd-aliases.zsh" ]] || fail "setup did not link shared lsd aliases"
+  [[ "$(readlink "$case_dir/home/.config/zsh/lsd-aliases.zsh")" == "$LSD_ALIASES" ]] || fail "shared lsd aliases point to the wrong source"
 
   assert_file_contains "$case_dir/mutations.log" "apt-get update"
   assert_file_contains "$case_dir/mutations.log" "docker.io"
@@ -486,6 +518,7 @@ docker.io
 docker-compose-v2
 imagemagick
 ghostscript
+lsd
 wl-clipboard
 xclip
 zsh-autosuggestions

@@ -4,8 +4,8 @@ Lean daily-driver setup for Hamel's Ubuntu VM. Tested on Ubuntu 26.04 ARM64.
 
 ## What Owns What
 
-- APT: Git, Zsh, Ghostty, Docker, build libraries, clipboard tools, ImageMagick,
-  Ghostscript, and Zsh plugins.
+- APT: Git, Zsh, Ghostty, Docker, `lsd`, build libraries, clipboard tools,
+  ImageMagick, Ghostscript, and Zsh plugins.
 - mise: exact versions of Neovim, runtimes, language servers, formatters, and
   editor command-line tools from [`mise.toml`](mise.toml).
 - User fonts: Hasklug Nerd Font `3.4.0`, because Ubuntu APT does not provide a
@@ -13,6 +13,10 @@ Lean daily-driver setup for Hamel's Ubuntu VM. Tested on Ubuntu 26.04 ARM64.
 
 The default setup does not install cloud tools, Ruby, Redis, VS Code, extra
 launchers, or alternate package managers.
+
+The Ubuntu shell reuses the shared `lsd` aliases used by the Mac profiles for
+`ls`, `ll`, `l`, `la`, `lss`, and `lsss`, providing the same colorful tree
+listings.
 
 ## Fresh Setup
 
@@ -32,6 +36,7 @@ repairs missing packages and links without creating duplicate backups.
 - `~/.zshrc` -> `setup/ubuntu/.zshrc`
 - `~/.config/ghostty/config` -> `setup/ubuntu/ghostty.conf` ->
   `config/ghostty/config`
+- `~/.config/zsh/lsd-aliases.zsh` -> `config/zsh/lsd-aliases.zsh`
 - `~/.config/starship.toml` -> `config/starship/starship.toml`
 - `~/.gitignore_global` -> `config/git/.gitignore_global`
 - `~/.config/mise/config.toml` -> `setup/ubuntu/mise.toml`

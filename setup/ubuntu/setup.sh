@@ -104,6 +104,7 @@ install_apt_packages() {
     libreadline-dev
     libsqlite3-dev
     libssl-dev
+    lsd
     pkg-config
     tk-dev
     unzip
@@ -182,6 +183,7 @@ link_configs() {
   ensure_directory "$HOME/.config/ghostty"
   safe_link "$SCRIPT_DIR/.zshrc" "$HOME/.zshrc"
   safe_link "$SCRIPT_DIR/ghostty.conf" "$HOME/.config/ghostty/config"
+  safe_link "$ROOT_DIR/config/zsh/lsd-aliases.zsh" "$HOME/.config/zsh/lsd-aliases.zsh"
   safe_link "$ROOT_DIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
   safe_link "$ROOT_DIR/config/git/.gitignore_global" "$HOME/.gitignore_global"
 
