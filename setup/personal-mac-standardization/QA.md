@@ -15,6 +15,8 @@ Copy this table into the implementation PR and fill every row.
 | Phase under test | |
 | MacBook evidence directory | |
 | Mac mini evidence directory | |
+| Clean macOS VM evidence directory | |
+| Clean macOS version | |
 | Approved Node version | |
 | Approved pnpm version | |
 | Maintenance window approved? | `no` by default |
@@ -44,6 +46,98 @@ Copy this table into the implementation PR and fill every row.
 - Plain `zsh -c` and LaunchAgents do not automatically inherit `.zprofile`.
   Record their behavior, but give them an explicit `mise exec` or fixed-path
   launch contract instead of assuming shell activation.
+- A temporary `$HOME` test does not replace the clean Apple Silicon macOS VM
+  gate. VM evidence from the exact reviewed commit is required before merge.
+
+## 0. Clean-machine Acceptance Gate
+
+This gate proves the new personal MacBook path. The existing Mac mini is proven
+separately by the preflight and no-restart gates; this VM does not claim to
+recreate its Cortana/Hermes services, credentials, LaunchAgents, or databases.
+
+### Automated local tier
+
+From the implementation worktree:
+
+```bash
+bash -n \
+  setup/personal-mac/bootstrap.sh \
+  setup/personal-mac/doctor.sh \
+  setup/personal-mac/lib.sh \
+  setup/personal-mac/tests/bootstrap-test.sh \
+  setup/mac-vm/setup-vm.sh
+
+zsh -n \
+  setup/personal-mac/mise-shims.zsh \
+  setup/mac-vm/zsh-config/.zshrc \
+  setup/mac-mini/.zshrc \
+  setup/mac-vm/zsh-config/functions.zsh
+
+setup/personal-mac/tests/bootstrap-test.sh
+git diff --check
+```
+
+Parse every Brewfile without updating Homebrew:
+
+```bash
+for brewfile in \
+  setup/personal-mac/Brewfile \
+  setup/mac-vm/Brewfile \
+  setup/mac-mini/Brewfile
+do
+  HOMEBREW_NO_AUTO_UPDATE=1 brew bundle list --all --file "$brewfile"
+done
+```
+
+Pass criteria:
+
+- Dry-run writes nothing.
+- Missing/unknown profiles and simulated installer failures stop before links.
+- Files, directories, wrong links, and broken links receive timestamped
+  backups; correct links are no-ops.
+- Rerunning bootstrap creates no additional backup.
+- Herdr sessions, Zed prompts, tmux plugins, SSH, and credentials are untouched.
+- No command log contains upgrade, cleanup, autoremove, uninstall, SSH-key,
+  restart, or credential operations.
+
+### Real clean macOS tier — required before merge
+
+Use a disposable Apple Silicon macOS VM with a non-Hamel username. A new local
+user is insufficient because it shares the host's Homebrew installation.
+
+1. Record the macOS version and snapshot the clean VM.
+2. Confirm Homebrew, mise, and all managed links are absent.
+3. Install Xcode Command Line Tools and Homebrew, complete Homebrew's printed
+   shell `Next steps`, then clone the exact PR commit over HTTPS to
+   `~/Developer/dotfiles-hd`.
+4. Seed sentinel `.zshrc`, `.zprofile`, btop, Ghostty, Herdr, and Zed paths.
+5. Run `--profile mac-vm --dry-run`; confirm zero filesystem change.
+6. Run `--profile mac-vm --apply`, reboot, then run the doctor.
+7. Verify exact mise versions, both shell modes, Neovim restore/startup, and a
+   clean Git worktree.
+8. Open Ghostty, Zed, Herdr, and Karabiner-Elements. Confirm linked settings are
+   active and complete Karabiner's required macOS permissions.
+9. Run apply again and prove it is a no-op.
+10. Restore every seeded backup byte-for-byte, remove every managed link that
+    was originally absent, rerun the baseline, then apply once more.
+
+Required post-install commands:
+
+```bash
+HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade \
+  --file setup/personal-mac/Brewfile
+HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade \
+  --file setup/mac-vm/Brewfile
+mise install --dry-run-code
+zsh -lic 'command -v node npm npx pnpm go python bun nvim'
+zsh -lc  'command -v node npm npx pnpm go python bun nvim'
+nvim --headless '+Lazy! restore' '+qa'
+nvim --headless '+qa!'
+git status --porcelain
+```
+
+All commands must pass, the Git output must be empty, and `lazy-lock.json` must
+not change.
 
 ## 1. Create an Evidence Directory
 
@@ -178,37 +272,29 @@ Pass criteria after activation:
 Never test a new shared config by editing the live symlink target.
 
 ```bash
-IMPLEMENTATION_WORKTREE="$HOME/Developer/dotfiles-hd-mise-standardization"
-# Point this at the reviewed transition or convergence config for this phase.
-TEST_MISE_CONFIG="$IMPLEMENTATION_WORKTREE/config/mise/config.toml"
-
-export MISE_GLOBAL_CONFIG_FILE="$TEST_MISE_CONFIG"
-export MISE_CEILING_PATHS="$HOME"
 export MISE_DATA_DIR="$EVIDENCE/mise-data"
 export MISE_CACHE_DIR="$EVIDENCE/mise-cache"
 export MISE_STATE_DIR="$EVIDENCE/mise-state"
 export MISE_TMP_DIR="$EVIDENCE/mise-tmp"
 cd "$HOME"
 
-# Stop here unless this lists only the test config and expected local files.
-mise config
-
-# Installation is isolated from the live mise data, cache, state, and shims.
-mise install
-mise exec -- node --version
-mise exec -- npm --version
-mise exec -- npx --version
-mise exec -- pnpm --version
-mise exec -- go version
-mise exec -- python --version
-mise exec -- bun --version
+# The doctor separately verifies the reviewed config contains these exact pins.
+# --no-config prevents the live global config from merging into this install.
+MISE_NO_CONFIG=1 mise install \
+  node@22.23.1 pnpm@11.2.2 go@1.26.3 python@3.14.5 bun@1.3.14
+MISE_NO_CONFIG=1 mise exec node@22.23.1 -- node --version
+MISE_NO_CONFIG=1 mise exec node@22.23.1 -- npm --version
+MISE_NO_CONFIG=1 mise exec node@22.23.1 -- npx --version
+MISE_NO_CONFIG=1 mise exec node@22.23.1 pnpm@11.2.2 -- pnpm --version
+MISE_NO_CONFIG=1 mise exec go@1.26.3 -- go version
+MISE_NO_CONFIG=1 mise exec python@3.14.5 -- python --version
+MISE_NO_CONFIG=1 mise exec bun@1.3.14 -- bun --version
 ```
 
 Pass criteria:
 
 - The worktree path is not the target of a live config symlink.
-- `mise config` lists the isolated global config and only expected local files.
-- Every command resolves to the candidate version.
+- Every command resolves to the approved version.
 - npm and npx still exist after `mise install`.
 - The live `~/.local/share/mise` installation and shims are unchanged.
 - No tracked file outside the implementation worktree changes.
@@ -225,10 +311,10 @@ Start only from a clean project checkout:
 ```bash
 cd "$HOME/Developer/cortana-services"
 git status --short --branch
-mise config | tee "$EVIDENCE/cortana-mise-config.txt"
-mise exec -- pnpm install --frozen-lockfile
-mise exec -- pnpm ci:local
-mise exec -- go -C apps/cortana-go test ./...
+MISE_NO_CONFIG=1 mise exec node@22.23.1 pnpm@11.2.2 -- \
+  pnpm install --frozen-lockfile
+MISE_NO_CONFIG=1 mise exec node@22.23.1 pnpm@11.2.2 -- pnpm ci:local
+MISE_NO_CONFIG=1 mise exec go@1.26.3 -- go -C apps/cortana-go test ./...
 git status --short
 ```
 
@@ -238,17 +324,58 @@ Pass criteria:
 - Local CI and Go tests pass.
 - No tracked project files change.
 
-After the isolated tests, return to normal discovery before live-shell QA:
+After the isolated tests, clear the isolated paths. Keep this shell open so the
+evidence and rollback variables remain available:
 
 ```bash
-unset MISE_GLOBAL_CONFIG_FILE MISE_CEILING_PATHS
 unset MISE_DATA_DIR MISE_CACHE_DIR MISE_STATE_DIR MISE_TMP_DIR
-exec zsh -l
+hash -r
 ```
 
 For Python and Bun, select one real existing project for each runtime and add
 its command and result to the QA record. Do not invent a synthetic project that
 cannot catch real compatibility problems.
+
+### Approval-gated activation of the reviewed commit
+
+Run only after the clean-VM gate is green and Hamel explicitly approves the
+MacBook canary. The canonical checkout feeds live symlinks, so switching it is
+an activation step. Fill in the exact reviewed PR #9 SHA; never test a moving
+branch name.
+
+```bash
+(
+set -euo pipefail
+DOTFILES="$HOME/Developer/dotfiles-hd"
+REVIEWED_COMMIT="<full PR #9 commit SHA>"
+
+cd "$DOTFILES"
+test "$REVIEWED_COMMIT" != "<full PR #9 commit SHA>"
+test -z "$(git status --porcelain)"
+git fetch origin pull/9/head
+test "$(git rev-parse FETCH_HEAD)" = "$REVIEWED_COMMIT"
+test "$(git rev-parse "$ROLLBACK_REF")" = "$GOOD_COMMIT"
+
+git switch --detach "$REVIEWED_COMMIT"
+setup/personal-mac/bootstrap.sh --profile mac-vm --dry-run
+setup/personal-mac/bootstrap.sh --profile mac-vm --apply
+setup/personal-mac/bootstrap.sh --profile mac-vm --apply
+
+zsh -lic 'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
+zsh -lc  'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
+setup/personal-mac/doctor.sh --profile mac-vm
+test -z "$(git status --porcelain)"
+)
+```
+
+All commands must pass, the final Git output must be empty, and the second
+apply must create no backup. If the canary fails, move new managed links aside,
+restore every recorded backup, switch back with `git switch "$ROLLBACK_REF"`,
+and run section 9. Never use `git reset --hard`.
+
+Open a fresh Ghostty login shell before manual checks. Automated commands below
+invoke their toolchain through `zsh -lic` so the pre-activation outer-shell PATH
+cannot produce a false pass.
 
 ### Neovim checks
 
@@ -259,10 +386,14 @@ cd "$HOME/Developer/dotfiles-hd"
 shasum -a 256 config/nvim/lazy-lock.json \
   | tee "$EVIDENCE/nvim-lock.before.txt"
 
-stylua --check config/nvim
-nvim --headless '+lua print(vim.version().major, vim.version().minor, vim.version().patch)' '+qa'
-nvim --headless '+checkhealth' \
-  "+write! $EVIDENCE/nvim-checkhealth.after.txt" '+qa'
+EVIDENCE="$EVIDENCE" zsh -lic '
+  set -euo pipefail
+  cd "$HOME/Developer/dotfiles-hd"
+  stylua --check config/nvim
+  nvim --headless "+lua print(vim.version().major, vim.version().minor, vim.version().patch)" "+qa"
+  nvim --headless "+checkhealth" \
+    "+write! $EVIDENCE/nvim-checkhealth.after.txt" "+qa"
+'
 test -s "$EVIDENCE/nvim-checkhealth.after.txt"
 diff -u \
   "$EVIDENCE/nvim-checkhealth.before.txt" \
@@ -298,6 +429,9 @@ Pass criteria:
 
 - [ ] Fresh Ghostty window works.
 - [ ] Fresh IDE terminal works.
+- [ ] Zed opens with the linked settings, keymap, and theme.
+- [ ] Herdr opens with the linked config.
+- [ ] Karabiner-Elements opens after required macOS permissions are granted.
 - [ ] One normal coding session completes.
 - [ ] A new terminal still reports the approved versions.
 - [ ] Per-command Homebrew fallback was tested.
@@ -312,9 +446,12 @@ Run from the MacBook unless already connected:
 ssh mac-mini-ts
 ```
 
-On the Mac mini:
+On the Mac mini, rerun sections 1 and 2 first. Create a mini-local evidence
+directory and rollback ref; do not reuse the MacBook shell's variables. Then:
 
 ```bash
+(
+set -euo pipefail
 cd "$HOME/Developer/dotfiles-hd"
 git status --short --branch
 
@@ -326,6 +463,7 @@ pnpm runtime:doctor | tee "$EVIDENCE/runtime-doctor.before.txt"
 brew services list > "$EVIDENCE/brew-services.runtime-before.txt"
 pg_isready > "$EVIDENCE/postgres.before.txt" 2>&1 || true
 tailscale status > "$EVIDENCE/tailscale.before.txt" 2>&1 || true
+)
 ```
 
 Capture executable paths without dumping arguments or process environments:
@@ -350,28 +488,41 @@ Pass criteria:
 - Every Mac mini rollback field in the QA record is filled before a maintenance
   window can be approved.
 
-## 6. Mac mini Manager-only Activation, No Restart
+## 6. Mac mini Interactive Activation, No Restart
 
-During the manager-only phase, use the reviewed machine-local transition
-config. It must preserve the Mac mini's effective versions and must not be a
-symlink to the shared convergence config.
-
-Back up the existing destination before the reviewed transition-config
-installer writes anything. Then verify:
+Do not run this section until the MacBook canary is green and Hamel approves
+the Mac mini interactive step. Preview the reviewed profile first; its apply
+path backs up existing destinations and links the shared config without
+starting or restarting services. Fill in and verify the exact reviewed PR #9
+SHA; never apply a moving branch name.
 
 ```bash
-test ! -L "$HOME/.config/mise"
+(
+set -euo pipefail
+REVIEWED_COMMIT="<full PR #9 commit SHA>"
+cd "$HOME/Developer/dotfiles-hd"
+test "$REVIEWED_COMMIT" != "<full PR #9 commit SHA>"
+test -z "$(git status --porcelain)"
+git fetch origin pull/9/head
+test "$(git rev-parse FETCH_HEAD)" = "$REVIEWED_COMMIT"
+test "$(git rev-parse "$ROLLBACK_REF")" = "$GOOD_COMMIT"
+git switch --detach "$REVIEWED_COMMIT"
+
+setup/personal-mac/bootstrap.sh --profile mac-mini --dry-run
+setup/personal-mac/bootstrap.sh --profile mac-mini --apply
+setup/personal-mac/bootstrap.sh --profile mac-mini --apply
+readlink "$HOME/.config/mise"
 test -f "$HOME/.config/mise/config.toml"
 mise config
 mise install
-mise doctor
+setup/personal-mac/doctor.sh --profile mac-mini
+test -z "$(git status --porcelain)"
+)
 ```
 
-Stop if `mise config` lists an unexpected file or if any effective version
-differs from the Mac mini transition table in `PLAN.md`.
-
-Back up `.zprofile` separately before a marker-owned edit. Do not replace or
-symlink the whole profile.
+Stop if `mise config` lists an unexpected file or any interactive version
+differs from the approved shared table in `PLAN.md`. The bootstrap marker-edits
+`.zprofile`; it does not replace or symlink the whole profile.
 
 ```bash
 CHECK_TOOLS='for tool in mise node npm npx pnpm go python python3 bun nvim rg fd fzf lazygit tree-sitter lua-language-server stylua vtsls vscode-eslint-language-server bash-language-server gopls ruff mdformat; do printf "%-32s " "$tool"; command -v "$tool" || printf "MISSING\n"; done'
@@ -381,14 +532,18 @@ zsh -lc "$CHECK_TOOLS" > "$EVIDENCE/paths.noninteractive.after.txt" 2>&1
 zsh -c "$CHECK_TOOLS" > "$EVIDENCE/paths.plain-script.after.txt" 2>&1
 ```
 
-Run the project checks from a disposable worktree at the same Cortana commit;
-never install dependencies into the active runtime checkout. Run the Neovim
-checks from section 4 on the Mac mini as well. Record both results in the final
-sign-off table.
+Open a second, fresh SSH login session after activation and reload the recorded
+mini evidence path there. Run the project checks from a disposable worktree at
+the same Cortana commit; never install dependencies into the active runtime
+checkout. Run the Neovim checks from section 4 on the Mac mini as well. If a
+second session is unavailable, wrap every post-activation tool command in
+`zsh -lic`. Record both results in the final sign-off table.
 
 Without restarting anything, repeat:
 
 ```bash
+(
+set -euo pipefail
 cd "$HOME/Developer/cortana-services"
 pnpm runtime:status | tee "$EVIDENCE/runtime-status.no-restart.txt"
 pnpm runtime:doctor | tee "$EVIDENCE/runtime-doctor.no-restart.txt"
@@ -397,6 +552,7 @@ for pid in $(pgrep -f 'node|pnpm|cortana|hermes'); do
   ps -p "$pid" -o pid=,comm=
   lsof -a -p "$pid" -d txt -Fn 2>/dev/null | sed -n 's/^n//p'
 done > "$EVIDENCE/runtime-executables.no-restart.txt"
+)
 ```
 
 Pass criteria:
@@ -405,43 +561,6 @@ Pass criteria:
 - Existing runtime process paths match the baseline.
 - No service was restarted.
 - Runtime health is unchanged.
-
-## 6B. Mac mini Shared-convergence Activation
-
-Do not run this section until manager-only section 6 is green and the separate
-Phase 4B convergence change is approved. Use the repository's reviewed
-backup-and-link pattern. It moves the machine-local transition config to a
-timestamped backup beside the original path, then verifies the shared link:
-
-```bash
-DOTFILES="$HOME/Developer/dotfiles-hd"
-SOURCE="$DOTFILES/config/mise"
-DEST="$HOME/.config/mise"
-STAMP="$(date +%Y%m%d-%H%M%S)"
-
-if [[ -L "$DEST" && "$(readlink "$DEST")" == "$SOURCE" ]]; then
-  printf 'already linked: %s -> %s\n' "$DEST" "$SOURCE"
-else
-  if [[ -e "$DEST" || -L "$DEST" ]]; then
-    mv "$DEST" "$DEST.backup-$STAMP"
-  fi
-  ln -s "$SOURCE" "$DEST"
-fi
-
-readlink "$DEST"
-test -f "$DEST/config.toml"
-```
-
-Then rerun the shell, project, Neovim, no-restart runtime, and observation
-checks from sections 4, 6, and 8. The shared link is accepted only if the full
-matrix is green on both machines.
-
-```bash
-readlink "$HOME/.config/mise"
-test -f "$HOME/.config/mise/config.toml"
-mise install
-mise doctor
-```
 
 ## 7. Optional Mac mini Maintenance Window
 
@@ -461,6 +580,8 @@ Use the runtime's documented reload command only after approval. Immediately
 afterward, run:
 
 ```bash
+(
+set -euo pipefail
 cd "$HOME/Developer/cortana-services"
 pnpm runtime:status | tee "$EVIDENCE/runtime-status.after-restart.txt"
 pnpm runtime:doctor | tee "$EVIDENCE/runtime-doctor.after-restart.txt"
@@ -469,6 +590,7 @@ for pid in $(pgrep -f 'node|pnpm|cortana|hermes'); do
   ps -p "$pid" -o pid=,comm=
   lsof -a -p "$pid" -d txt -Fn 2>/dev/null | sed -n 's/^n//p'
 done > "$EVIDENCE/runtime-executables.after-restart.txt"
+)
 ```
 
 Run the existing prod/dev lane smoke procedure from the Cortana runtime
@@ -485,19 +607,23 @@ Any failure triggers immediate rollback.
 
 ## 8. Idempotency and Observation
 
-Do not run the full `goodMorning()` function during rollout because it includes
-Homebrew upgrade, cleanup, and autoremove. Test the reviewed mise portion with
-the commands below and separately verify that npm and npx remain present.
+Do not run the full `goodMorning()` function during rollout because it performs
+unrelated Zoom, Downloads, `.DS_Store`, and cache housekeeping. Its former
+broad Homebrew upgrade/cleanup steps are removed by this PR. Test mise directly
+with the commands below and separately verify that npm and npx remain present.
 
 On both machines:
 
 ```bash
+(
+set -euo pipefail
 mise install | tee "$EVIDENCE/mise-install.first.txt"
 mise install | tee "$EVIDENCE/mise-install.second.txt"
 mise which npm
 mise which npx
 git -C "$HOME/Developer/dotfiles-hd" status --short --branch \
   | tee "$EVIDENCE/dotfiles-git.after.txt"
+)
 ```
 
 Observation checklist:
@@ -536,13 +662,21 @@ On the Mac mini, Homebrew Node 22 may instead resolve under its opt prefix:
 ### Config rollback
 
 1. Stop affected interactive work. Do not delete the failed evidence.
-2. Restore the timestamped `.zprofile` or mise path backup.
-3. Return the live dotfiles checkout to the recorded known-good commit or
+2. For every managed destination that had a backup, move the new symlink aside
+   and restore the timestamped backup. For every destination originally absent,
+   move the newly created symlink aside so the path is absent again.
+3. Restore the timestamped `.zprofile` backup. If bootstrap created the file,
+   move that new file aside instead; never delete user-owned content outside
+   the marked block.
+4. Return the live dotfiles checkout to the recorded known-good commit or
    rollback branch with `git switch`. Do not use `git reset --hard`. If the
    worktree is dirty, stop for review rather than forcing the switch.
-4. Start a fresh login shell.
-5. Verify Homebrew fallback paths and versions.
-6. Run the shell, project, Neovim, and runtime baseline checks again.
+5. Start a fresh login shell.
+6. Verify Homebrew fallback paths and versions.
+7. Run the shell, project, Neovim, and runtime baseline checks again.
+
+Config rollback leaves installed packages, mise runtimes, and tool caches in
+place. Uninstall and cleanup are deliberately outside this PR.
 
 Typical post-rollback verification:
 
@@ -573,22 +707,23 @@ than stacking more live changes.
 
 ## 10. Final Sign-off
 
-| Gate | MacBook | Mac mini | Evidence/notes |
-| --- | --- | --- | --- |
-| Clean baseline | [ ] | [ ] | |
-| Symlinks verified | [ ] | [ ] | |
-| Interactive shell | [ ] | [ ] | |
-| Non-interactive shell | [ ] | [ ] | |
-| IDE terminal | [ ] | [ ] | |
-| Approved versions | [ ] | [ ] | |
-| Project QA | [ ] | [ ] | |
-| Neovim QA | [ ] | [ ] | |
-| Services unchanged/healthy | N/A | [ ] | |
-| Runtime doctor | N/A | [ ] | |
-| Rollback proven | [ ] | [ ] | |
-| One-hour check | [ ] | [ ] | |
-| Next-day check | [ ] | [ ] | |
-| Worktrees clean | [ ] | [ ] | |
+| Gate | Clean macOS VM | MacBook | Mac mini | Evidence/notes |
+| --- | --- | --- | --- | --- |
+| Clean baseline | [ ] | [ ] | [ ] | |
+| Symlinks verified | [ ] | [ ] | [ ] | |
+| Interactive shell | [ ] | [ ] | [ ] | |
+| Non-interactive shell | [ ] | [ ] | [ ] | |
+| IDE terminal | [ ] | [ ] | [ ] | |
+| Approved versions | [ ] | [ ] | [ ] | |
+| Project QA | N/A | [ ] | [ ] | |
+| Neovim QA | [ ] | [ ] | [ ] | |
+| Services unchanged/healthy | N/A | N/A | [ ] | |
+| Runtime doctor | N/A | N/A | [ ] | |
+| Rollback proven | [ ] | [ ] | [ ] | |
+| Idempotent second apply | [ ] | [ ] | [ ] | |
+| One-hour check | N/A | [ ] | [ ] | |
+| Next-day check | N/A | [ ] | [ ] | |
+| Worktrees clean | [ ] | [ ] | [ ] | |
 
 Final approval:
 

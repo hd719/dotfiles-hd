@@ -1,6 +1,8 @@
 # [Prompt]
 # --------------------------------------------------------------------------------------------------------
-export PATH="/opt/homebrew/bin:$PATH"
+typeset -gaU path
+path+=(/opt/homebrew/bin)
+export PATH
 export TERM=xterm-256color
 
 # Cache directory for init scripts (created once in functions.zsh)

@@ -1,27 +1,28 @@
 # Personal Mac Toolchain Standardization Plan
 
-- Status: Planning only
+- Status: Approved by Hamel; implementation and QA in progress in PR #9
 - Plan branch: `agent/plan-personal-mac-mise-standardization`
 - Base branch: `origin/master` (this repository uses `master`, not `main`)
-- Targets: personal MacBook (`mac-vm`) and Mac mini (`mac-mini`)
+- Targets: personal MacBook (`mac-vm`), Mac mini (`mac-mini`), and a brand-new
+  Apple Silicon personal Mac
 - QA runbook: [`QA.md`](QA.md)
 
 ## Goal
 
-Make both personal Macs reproducible without risking the working Mac mini
-runtime.
+Make both personal Macs reproducible, including a clean-machine rebuild path,
+without risking the working Mac mini runtime.
 
 Standardization means the same ownership rules and tested version policy. It
 does not mean every installed Homebrew formula must be identical.
 
 ## Safety Contract
 
-- This branch changes documentation only.
-- Implementation happens in small pull requests after this plan is approved.
+- Hamel explicitly approved implementing the plan in this same PR.
+- The implementation remains surgical and cannot bypass a failed QA gate.
 - The MacBook is the canary. The Mac mini is never first.
-- Manager migration and version upgrades are separate changes. Temporary
-  per-machine transition pins preserve current versions during the manager
-  move; shared-version convergence follows only after that is green.
+- The approved shared pins are installed and tested in isolation before any
+  live PATH switch. The MacBook activates them first; the Mac mini follows only
+  after that canary is green.
 - Homebrew fallbacks stay installed through the initial rollout and soak.
 - No service or runtime restart happens without Hamel's approval.
 - A failed hard gate stops the rollout. Do not improvise around it.
@@ -34,11 +35,13 @@ does not mean every installed Homebrew formula must be identical.
 - One ownership model for personal Mac development tools.
 - A shared mise runtime policy for Node, pnpm, Go, Python, and Bun.
 - Reliable tool resolution in interactive, non-interactive login, and IDE
-  shells, plus explicit launch contracts for scripts and LaunchAgents.
+  shells, plus documented fixed-path exceptions for scripts and LaunchAgents.
 - Reproducible Homebrew inventories for common and machine-specific tools.
 - MacBook project validation and Mac mini runtime protection.
 - Backup, rollback, idempotency, and observation procedures.
 - Documentation of each machine's intentional exceptions.
+- A check-first, backed-up, idempotent clean-Mac bootstrap and verification
+  doctor.
 
 ### Explicitly excluded
 
@@ -47,9 +50,10 @@ does not mean every installed Homebrew formula must be identical.
 - Credentials, SSH, GitHub auth, certificates, Docker state, or app databases.
 - PostgreSQL, pgvector, Tailscale, Hermes, or Cortana feature changes.
 - Neovim Lua/plugin changes.
-- A Node 26 upgrade on the Mac mini during the manager migration.
+- Any manager or version change for the Mac mini production runtime.
 - Homebrew cleanup, `brew autoremove`, or fallback uninstalls during rollout.
-- Repairing the old `setup/mac-vm/setup-vm.sh` in the first implementation PR.
+- Full reconstruction of Mac mini Cortana/Hermes services, LaunchAgents,
+  secrets, or runtime databases. This PR covers its toolchain only.
 
 ## Current State
 
@@ -65,17 +69,19 @@ versions, or control the PATH used by services.
 | Go | mise `1.26.3` | Homebrew `1.26.5` | Different manager and patch version. |
 | Python | mise `3.14.5` | Homebrew `3.14.6` | Homebrew Python may remain as another formula's dependency. |
 | Bun | mise `1.3.14` | Missing | Bun projects are not reproducible on the mini. |
-| Neovim | Homebrew `0.12.4` | Homebrew `0.12.4` | Already aligned; do not move it in the runtime phase. |
+| Neovim | Observed Homebrew `0.12.4` | Observed Homebrew `0.12.4` | Already aligned; keep Homebrew ownership and require `0.12+`. |
 | Non-interactive shell | Homebrew fallbacks win; some mise tools are absent | Homebrew wins | Scripts, IDEs, and LaunchAgents may not see mise. |
 | Mac mini runtime | N/A | Running on Homebrew Node 22 and pnpm-linked paths | Highest-risk dependency; Node migrates last. |
 
-Additional known hazards:
+Baseline hazards found before PR #9 implementation:
 
-- `goodMorning()` runs broad Homebrew upgrades and cleanup.
-- `_remove_mise_npm()` deletes npm and npx from the mise Node installation.
-- The MacBook has no current Brewfile.
-- `setup/mac-vm/setup-vm.sh` still references nvm, rbenv, removed Nix files,
-  and a nonexistent shell source. It is not a safe rebuild path today.
+- `goodMorning()` ran broad Homebrew upgrades and cleanup. This PR pauses those
+  operations while fallbacks are required.
+- `_remove_mise_npm()` deleted npm and npx from the mise Node installation.
+  This PR removes that function and call.
+- The MacBook had no Brewfile. This PR adds a shared baseline and thin overlay.
+- `setup/mac-vm/setup-vm.sh` referenced nvm, rbenv, removed Nix files, and a
+  nonexistent shell source. This PR replaces it with the safe bootstrap wrapper.
 - The MacBook's live `~/.config/mise` symlink points into this checkout. Future
   mise edits must be tested in a separate worktree with an isolated config.
 
@@ -92,47 +98,35 @@ Additional known hazards:
 | Project | Prettier, ESLint, and project-specific runtime overrides | A repository requirement beats the global default. |
 | Documented exception | Mac mini production runtime, if LaunchAgents must remain on Homebrew Node 22 | Safety beats cosmetic uniformity. Remove the exception only in a maintenance window. |
 
-## Transition Pins and Version Decision Gate
+## Approved Shared Pins and Activation Gate
 
-First preserve the current effective versions while testing mise ownership:
+These are the single shared interactive-development defaults implemented by
+this PR. The existing Mac mini production runtime remains a separate Homebrew
+exception and is not restarted or migrated.
 
-| Tool | MacBook transition pin | Mac mini transition pin |
-| --- | --- | --- |
-| Node | `26.1.0` | `22.23.1` |
-| pnpm | `11.11.0` | `11.11.0` for the interactive shell; keep the runtime's recorded `11.2.2` path unchanged |
-| Go | `1.26.3` | `1.26.5` |
-| Python | `3.14.5` | `3.14.6` |
-| Bun | `1.3.14` | Not activated during manager-only migration |
-
-The Mac mini transition config remains machine-local and unlinked. This lets us
-prove mise ownership without silently changing versions. It is removed only
-after the shared convergence pins pass their own PR and QA cycle.
-
-Do not edit or link the shared convergence pins until the candidate set passes
-isolated tests on both machines.
-
-| Tool | Candidate shared convergence baseline | Reason |
+| Tool | Approved shared baseline | Reason |
 | --- | --- | --- |
 | Node | `22.23.1` | Matches the working Mac mini runtime and avoids combining manager migration with a major upgrade. |
 | pnpm | `11.2.2` | Matches `cortana-services` `packageManager`. |
 | Go | `1.26.3` | Existing shared mise pin; test before accepting the mini patch-level change. |
 | Python | `3.14.5` | Existing shared mise pin. Homebrew Python may remain as a dependency. |
 | Bun | `1.3.14` | Existing shared mise pin. |
-| Neovim | `0.12.4`, Homebrew-owned | Both machines already match. |
+| Neovim | `0.12+`, Homebrew-owned | Keep the working release line without pretending Homebrew pins a patch. |
 
-The Node recommendation is provisional. Test Node 22 on the MacBook without a
-PATH switch. If its real projects fail, stop and decide between a project-local
-Node 26 override and a separately planned Mac mini Node 26 upgrade.
+Node 22 must pass the MacBook project matrix before live activation. If a real
+project requires Node 26, use a project-local override or stop for a separate
+version decision; do not change the Mac mini production runtime in this PR.
 
 ### Approval checklist
 
-- [ ] Hamel approves the ownership table.
-- [ ] Both per-machine transition pin sets are confirmed against fresh-shell
-  baselines.
-- [ ] Hamel approves Node `22.23.1` as the candidate shared default.
-- [ ] Hamel approves pnpm `11.2.2` as the candidate shared default.
-- [ ] Every candidate version is available through mise on both architectures.
-- [ ] Project-local runtime requirements are inventoried before changing PATH.
+- [x] Hamel approves the ownership table.
+- [x] Hamel approves Node `22.23.1` as the shared default.
+- [x] Hamel approves pnpm `11.2.2` as the shared default.
+- [x] Every approved version is available through mise for the Apple Silicon
+  target architecture.
+- [x] Project-local runtime requirements are inventoried before changing PATH.
+  Cortana pins pnpm `11.2.2` and Go `1.26.3`; the personal Next.js monorepo pins
+  Bun `1.3.3` and accepts Bun `>=1.0.0`.
 
 ## Proposed Repository Shape
 
@@ -141,30 +135,46 @@ Keep portable policy separate from machine-specific setup:
 ```text
 config/mise/config.toml                  shared runtime pins
 setup/personal-mac/Brewfile              common personal-Mac packages
+setup/personal-mac/bootstrap.sh          check-first installer and linker
+setup/personal-mac/doctor.sh             verification without managed-config writes
 setup/mac-vm/Brewfile                    MacBook-only packages
 setup/mac-mini/Brewfile                  Mac-mini-only apps, services, and libraries
 setup/mac-vm/zsh-config/                 shared shell behavior
 setup/personal-mac-standardization/      this plan and QA record
 ```
 
-This shape is a target, not a change on this branch. Existing Mac mini formulae
-move only after the runtime migration is stable. Do not combine Brewfile
-reorganization with tool activation.
+This shape is implemented in this PR. Removing already-installed Homebrew
+fallbacks remains deferred; Brewfile reorganization does not uninstall them.
 
 ## Implementation Sequence
 
-Each phase is its own reviewable PR or explicit approval gate. A later phase
-cannot begin while an earlier gate is red.
+Implementation and isolated QA may proceed in parallel. Live activation gates
+are sequential: a later machine cannot be activated while an earlier live gate
+is red.
 
 ### Phase 0: Approve the plan
 
-- [ ] Review this plan and [`QA.md`](QA.md).
-- [ ] Resolve the version decision gate.
-- [ ] Confirm `mac-resilience` and Ubuntu remain excluded.
-- [ ] Confirm the Mac mini maintenance window requires a separate approval.
-- [ ] Record approval in the PR.
+- [x] Review this plan and [`QA.md`](QA.md).
+- [x] Resolve the shared Node and pnpm decision gate.
+- [x] Confirm `mac-resilience` and Ubuntu remain excluded.
+- [x] Confirm the Mac mini maintenance window requires a separate approval.
+- [x] Record Hamel's approval in this PR branch.
 
 Exit gate: scope, versions, ownership, stop rules, and rollback are accepted.
+
+### Phase 0B: Build and prove the clean-machine path
+
+- [x] Replace the unsafe legacy Mac setup script with a thin compatibility
+  wrapper.
+- [x] Add common and profile-specific Brewfiles.
+- [x] Add an explicit check/apply bootstrap with safe backups and no cleanup,
+  credential handling, or service control.
+- [x] Add a verification doctor and temporary-home regression suite.
+- [ ] Pass the clean Apple Silicon macOS VM test in [`QA.md`](QA.md) twice.
+- [ ] Prove rollback restores seeded files byte-for-byte in that VM.
+
+Exit gate: automated temporary-home tests and the real clean-macOS acceptance
+test pass. The real VM evidence is a merge blocker, not an optional follow-up.
 
 ### Phase 1: Capture a two-machine baseline
 
@@ -183,50 +193,48 @@ recorded.
 
 ### Phase 2: Make testing safe and deterministic
 
-- [ ] Create implementation branches in a separate Git worktree, not the
+- [x] Create implementation branches in a separate Git worktree, not the
   checkout targeted by live symlinks.
-- [ ] Test candidate pins with an isolated `MISE_GLOBAL_CONFIG_FILE` and
-  `mise exec`.
-- [ ] Add exact per-machine transition pins first; do not use `latest`.
-- [ ] Remove `_remove_mise_npm()` before mise owns Node/pnpm.
-- [ ] Disable broad `brew cleanup` and `brew autoremove` during migration and
+- [x] Test exact candidate specs in isolated mise directories with
+  `MISE_NO_CONFIG=1` and `mise exec`.
+- [x] Add exact approved shared pins; do not use `latest`. Activation still
+  follows the MacBook-first and Mac-mini no-restart gates.
+- [x] Remove `_remove_mise_npm()` before mise owns Node/pnpm.
+- [x] Disable broad upgrade, `brew cleanup`, and `brew autoremove` during migration and
   soak. Keep normal maintenance as a separately reviewed concern.
-- [ ] Preserve existing Homebrew runtimes as fallbacks.
-- [ ] Add a safe, backed-up `.zprofile` shim strategy for non-interactive and
+- [x] Preserve existing Homebrew runtimes as fallbacks.
+- [x] Add a safe, backed-up `.zprofile` shim strategy for non-interactive and
   IDE shells, following mise's
   [zsh shim guidance](https://mise.jdx.dev/dev-tools/shims.html); do not blindly
   replace an existing profile.
 
-Exit gate: the transition pins match each machine's baseline and resolve in
-both supported shell modes without touching the live symlinked config.
+Exit gate: the approved pins install and execute from isolated directories
+without touching the live symlinked config.
 
 ### Phase 3: MacBook canary
 
-- [ ] Install the MacBook transition pins without switching the global PATH.
+- [ ] Install the approved shared pins without switching the global PATH.
 - [ ] Run the MacBook project matrix through `mise exec`.
 - [ ] Confirm Node/npm/npx/pnpm, Go, Python, and Bun paths and versions.
-- [ ] Activate the MacBook transition pins for a fresh interactive shell only.
+- [ ] Activate the shared pins on the MacBook.
 - [ ] Validate a fresh non-interactive shell and IDE-launched terminal.
 - [ ] Run Neovim startup, health, formatter, Tree-sitter, and LSP checks.
 - [ ] Run `cortana-services` local CI and Go tests from a clean checkout.
 - [ ] Complete at least one normal work session on the canary.
 - [ ] Prove per-command Homebrew rollback before continuing.
 
-After the manager-only canary is green, repeat the isolated project matrix for
-the proposed shared convergence versions. Treat activation of those versions
-as a separate reviewed change.
-
 Exit gate: all MacBook checks pass, its repositories remain clean, and Hamel
 accepts the normal-work-session behavior.
 
 ### Phase 4: Mac mini interactive canary, no restart
 
-- [ ] Fast-forward the Mac mini dotfiles checkout to the exact approved commit.
+- [ ] Verify, then detach the Mac mini dotfiles checkout at the exact approved
+  commit.
 - [ ] Back up any existing `~/.config/mise` and `.zprofile` before linking or
   editing.
-- [ ] Install and activate the machine-local transition config; do not link the
-  shared convergence config yet.
-- [ ] Install the matching tools with mise; do not remove Homebrew tools.
+- [ ] Preview, then apply the reviewed `mac-mini` profile, which backs up and
+  links the shared config without controlling services.
+- [ ] Install the approved shared tools with mise; do not remove Homebrew tools.
 - [ ] Test with `mise exec`, then a fresh interactive shell.
 - [ ] Re-run non-interactive, IDE, Neovim, and project checks.
 - [ ] Confirm already-running services use the same binaries as the baseline.
@@ -235,20 +243,9 @@ accepts the normal-work-session behavior.
 - [ ] Run project and Neovim QA from isolated/clean worktrees; do not run an
   install inside the active Cortana runtime checkout.
 
-Exit gate: interactive use is green and the existing runtime is unchanged.
-
-### Phase 4B: Shared-version convergence
-
-- [ ] Test the proposed shared pins through isolated `mise exec` on both Macs.
-- [ ] Run the full project, Neovim, shell, and runtime matrix.
-- [ ] Activate the shared pins on the MacBook first and repeat its soak.
-- [ ] Activate the shared pins for Mac mini interactive use without restarting
-  services.
-- [ ] Only after both machines pass, back up and replace the Mac mini local
-  transition config with the reviewed shared-config symlink.
-
-Exit gate: both interactive environments use the approved shared pins and the
-Mac mini runtime remains unchanged.
+Exit gate: both interactive environments use the approved shared pins, all
+Mac mini service processes still use their baseline Homebrew paths, and runtime
+health is unchanged.
 
 ### Phase 5: Mac mini runtime decision and maintenance window
 
@@ -270,8 +267,9 @@ Exit gate: runtime health matches baseline and rollback remains available.
 
 - [ ] Recheck both machines immediately, after one hour, and the next day.
 - [ ] Run `mise install` twice and confirm the second run is a no-op.
-- [ ] Review `goodMorning()` and test its revised mise sub-step separately.
-  Do not execute the full upgrade/cleanup function during rollout.
+- [ ] Keep `goodMorning()` out of rollout QA because it also performs unrelated
+  Zoom, Downloads, `.DS_Store`, and cache housekeeping. Test `mise install`
+  directly instead.
 - [ ] Confirm no project or dotfiles drift was created.
 - [ ] Unlink duplicate formulae before uninstalling them.
 - [ ] Remove shared duplicates from machine Brewfiles only in a cleanup PR.
@@ -281,32 +279,29 @@ Exit gate: runtime health matches baseline and rollback remains available.
 
 Exit gate: both machines remain green through the observation window.
 
-### Phase 7: Reproducible bootstrap and optional editor-tool follow-up
+### Phase 7: Optional editor-tool follow-up
 
-- [ ] Add a common personal-Mac Brewfile and thin machine overlays.
-- [ ] Add a dry-run/audit command that reports drift without deleting packages.
-- [ ] Repair or replace `setup/mac-vm/setup-vm.sh` in a dedicated PR.
-- [ ] Test a fresh-shell bootstrap twice for idempotency.
 - [ ] Decide separately whether Neovim and version-sensitive editor tools should
   move from Homebrew to mise.
 - [ ] If approved, migrate one editor tool family at a time and rerun the full
   Neovim QA matrix.
 
-Exit gate: a rebuild is documented and reproducible without changing the work
-Mac or Ubuntu setup.
+Exit gate: any optional editor migration is proven independently without
+changing the work Mac or Ubuntu setup.
 
-## Expected Future File Scope
+## Key Files
 
-These are candidates for later implementation PRs. They are not changed by the
-planning branch.
+These files implement the approved scope in PR #9.
 
 | File | Expected purpose |
 | --- | --- |
 | `config/mise/config.toml` | Approved shared runtime and package-manager pins. |
 | `setup/mac-vm/zsh-config/functions.zsh` | Remove npm deletion and make maintenance migration-safe. |
 | `setup/mac-vm/zsh-config/.zshrc` | Keep interactive activation predictable. |
-| New shared profile fragment | Expose mise shims safely to non-interactive/IDE shells. |
-| `setup/personal-mac/Brewfile` | Shared Homebrew baseline after runtime stabilization. |
+| `setup/personal-mac/mise-shims.zsh` | Expose mise shims safely to non-interactive/IDE shells. |
+| `setup/personal-mac/bootstrap.sh` | Check-first personal-Mac installer and linker. |
+| `setup/personal-mac/doctor.sh` | Package, link, shell, runtime, and Neovim checks without managed-config writes. |
+| `setup/personal-mac/Brewfile` | Shared Homebrew baseline. |
 | `setup/mac-vm/Brewfile` | MacBook-only overlay. |
 | `setup/mac-mini/Brewfile` | Mac mini apps, services, libraries, and documented exceptions. |
 | `README.md` and `AGENTS.md` | Final inventory, ownership rules, and recovery guidance. |
@@ -316,7 +311,7 @@ planning branch.
 Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 
 - A dirty dotfiles or project checkout cannot be explained.
-- A manager-only phase changes an effective tool version.
+- An isolation phase changes the live effective tool version.
 - Node changes major version before the Node gate is approved.
 - npm or npx disappears from the mise Node installation.
 - `pnpm --version` differs from the approved project version during project QA.
@@ -326,6 +321,7 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 - PostgreSQL, Tailscale, Hermes, or a Cortana lane becomes unhealthy.
 - The Lazy lockfile or application config changes unexpectedly.
 - A restart is required before its maintenance window is approved.
+- A clean Apple Silicon macOS VM cannot complete bootstrap twice and rollback.
 - Rollback fails once. Stop instead of attempting repeated live repairs.
 
 ## Definition of Done
@@ -338,4 +334,6 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 - [ ] No work-Mac, Ubuntu, credential, service-config, or unrelated files changed.
 - [ ] Rollback was tested before any fallback was removed.
 - [ ] Bootstrap documentation matches the final symlink and package state.
+- [ ] A clean Apple Silicon macOS VM passes install, reboot, rerun, Neovim,
+  shell, and rollback checks from the exact reviewed commit.
 - [ ] Every implementation PR contains its completed QA record.

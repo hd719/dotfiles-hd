@@ -14,17 +14,24 @@ and link the Ghostty, Herdr, and Neovim setup on the work laptop. That runbook i
 intentionally narrower than the personal Mac inventory below so it does not
 replace work-specific shell, runtime, credential, or certificate state.
 
-## Current Personal Mac Symlinks
+## Personal Mac Config Inventory
 
-These are the active symlinks on this Mac.
+This is the bootstrap target plus the explicitly noted existing manual link.
+
+For a new personal Mac, use the backed-up, idempotent
+[`personal-Mac runbook`](setup/personal-mac/README.md) instead of copying the
+link commands below by hand. The legacy `mac-vm` profile name is correct for
+both a physical personal MacBook and a MacBook VM.
 
 | Tool | Live path | Dotfiles source | Status | Notes |
 | --- | --- | --- | --- | --- |
-| AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Linked file | Only `aerospace.toml` is linked; monitor IDs and app-to-workspace rules are machine-specific. Includes Ghostty tiling workaround. |
+| Shell | `~/.zshrc` | `setup/mac-vm/zsh-config/.zshrc` | Bootstrap-managed link | Personal MacBook shell entry point. |
+| Login PATH | marker-owned block in `~/.zprofile` | `setup/personal-mac/mise-shims.zsh` | Bootstrap-managed block | The rest of `.zprofile` remains user-owned. |
+| AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Existing manual link | Not installed or linked by the new-Mac bootstrap because the app is not in its reviewed Brewfiles. |
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Matches Zed's Maple Mono NF and Hamel Nord Blur appearance. |
-| Karabiner | `~/.config/karabiner` | `config/karabiner` | Linked dir | Personal Mac should be 1:1 with dotfiles. |
+| Karabiner | `~/.config/karabiner` | `config/karabiner` | MacBook-only linked dir | The Mac mini profile does not link it. |
 | mise | `~/.config/mise` | `config/mise` | Linked dir | Global toolchain config. |
 | Neovim | `~/.config/nvim` | `config/nvim` | Linked dir | Lua config, plugins, keymaps, LSP, and Hamel Nord. |
 | Herdr | `~/.config/herdr/config.toml` | `config/herdr/config.toml` | Linked file | Only config is linked; runtime state stays local. |
@@ -32,9 +39,11 @@ These are the active symlinks on this Mac.
 | Zed keymap | `~/.config/zed/keymap.json` | `config/zed/keymap.json` | Linked file | User-owned Zed keybindings. |
 | Zed themes | `~/.config/zed/themes` | `config/zed/themes` | Linked dir | Custom Zed themes. |
 
-## Link Current Mac Config
+## Repair an Individual Link
 
-Use this pattern when setting up a new Mac or repairing symlinks. It backs up anything already at the live path before linking.
+Use this only to repair one existing link. New Macs use the personal-Mac
+bootstrap above. This helper backs up anything already at the live path before
+linking.
 
 ```bash
 backup_and_link() {
@@ -75,6 +84,19 @@ backup_and_link "$DOTFILES/config/zed/themes" "$HOME/.config/zed/themes"
 ```
 
 ## Existing Bootstrap Scripts
+
+Personal Apple Silicon Mac:
+
+```bash
+setup/personal-mac/bootstrap.sh --profile mac-vm --dry-run
+setup/personal-mac/bootstrap.sh --profile mac-vm --apply
+setup/personal-mac/doctor.sh --profile mac-vm
+```
+
+The Mac mini uses `--profile mac-mini`. Read the
+[`personal-Mac runbook`](setup/personal-mac/README.md) first; the current Mac
+mini has a production-runtime boundary and must not be restarted by bootstrap
+work.
 
 Zed:
 

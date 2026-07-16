@@ -9,6 +9,8 @@ work machines.
 - `setup/` contains machine bootstrap scripts and machine-specific setup files.
 - The current personal Mac symlink inventory lives in `README.md`.
 - The Resilience work Mac instructions live in `setup/mac-resilience/README.md`.
+- The personal Apple Silicon Mac bootstrap and safety boundary live in
+  `setup/personal-mac/README.md`.
 
 ## Before Editing
 
@@ -25,23 +27,29 @@ work machines.
 - Update the matching machine inventory whenever symlink state changes. Do not
   overwrite the personal Mac inventory with work Mac state.
 
-## Current Personal Mac Links
+## Bootstrap-managed Personal Mac State
 
 Whole directory links:
 
 - `~/.config/btop` -> `config/btop`
 - `~/.config/fastfetch` -> `config/fastfetch`
-- `~/.config/karabiner` -> `config/karabiner`
+- `~/.config/karabiner` -> `config/karabiner` on the MacBook only
 - `~/.config/mise` -> `config/mise`
 - `~/.config/nvim` -> `config/nvim`
 
 Single file or subdirectory links:
 
+- `~/.zshrc` -> `setup/mac-vm/zsh-config/.zshrc` on the MacBook
+- `~/.zshrc` -> `setup/mac-mini/.zshrc` on the Mac mini
 - `~/Library/Application Support/com.mitchellh.ghostty/config` -> `config/ghostty/config`
 - `~/.config/herdr/config.toml` -> `config/herdr/config.toml`
 - `~/.config/zed/settings.json` -> `config/zed/settings.json`
 - `~/.config/zed/keymap.json` -> `config/zed/keymap.json`
 - `~/.config/zed/themes` -> `config/zed/themes`
+
+The bootstrap also owns one marked mise-shims block inside `~/.zprofile`; it
+does not replace or symlink the whole file. AeroSpace remains an existing
+manual link and is not installed or linked by this bootstrap.
 
 ## Do Not Blindly Symlink
 
@@ -75,11 +83,20 @@ When Hamel asks to set up the work laptop:
 
 ## Existing Helpers
 
+- `setup/personal-mac/bootstrap.sh` and `doctor.sh` for personal Macs
 - `config/zed/link-zed-config.sh`
 - `config/herdr/link-herdr-config.sh`
 - `setup/mac-resilience/link-terminal-editor-config.sh`
 
 Prefer these scripts when they match the task.
+
+For a brand-new personal Mac, run the bootstrap in `--dry-run` mode first and
+then `--apply` only from a clean canonical clone. The legacy `mac-vm` profile
+name is correct for a physical personal MacBook too. Never use the personal
+bootstrap on the Resilience work Mac. On the existing Mac mini, apply requires
+a green clean-VM/MacBook canary, a green Mac mini preflight, and Hamel's
+explicit approval. Service restart remains forbidden without a separate
+maintenance-window approval.
 
 ## Zed Theme Profiles
 
