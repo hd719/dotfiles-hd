@@ -1974,3 +1974,13 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   `fg=#7B8496`; a blank result means the protected work shell needs a small,
   explicit follow-up edit.
 - Best next lesson: resume Curriculum 4.1 at the pending `w` motion checkpoint.
+
+### Work-Specific Autosuggestion Override
+
+- Hamel clarified that Resilience should keep its work-specific shell settings
+  instead of depending on every shared personal-Mac choice.
+- Added `ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#7B8496'` directly to
+  `setup/mac-resilience/.zshrc`, before its deferred plugin loader.
+- The shared value remains for the personal Mac and Mac mini; the Resilience
+  profile now owns an explicit matching override that can diverge later.
+- Best next lesson remains Curriculum 4.1 at the pending `w` motion checkpoint.
