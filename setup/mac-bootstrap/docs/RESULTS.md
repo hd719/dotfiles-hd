@@ -11,8 +11,9 @@
 - Durable sanitized evidence:
   `~/.local/state/dotfiles-hd/mise-standardization/20260715-mac-bootstrap-clean-home-6e3e9e2`
 - Merged commit: `429ee01b6afd00653c075e94b17a69b979ef3fe7`
-- Status: merged; MacBook canary QA passed. Immediate and one-hour no-restart
-  observation passed on both personal Macs. Next-day observation remains open.
+- Status: merged; MacBook canary QA passed. Immediate, one-hour, and next-day
+  no-restart technical observation passed on both personal Macs. Hamel's final
+  next-day normal-use confirmation remains open.
 
 ## Passed
 
@@ -100,7 +101,7 @@
 - [x] Complete immediate observation on both machines and record Hamel's
   normal-use confirmation.
 - [x] Complete one-hour observation on both machines through Everyday Mac Ops.
-- [ ] Complete next-day observation on both machines.
+- [x] Complete next-day observation on both machines.
 - [x] Record the immediate post-merge evidence and reconciled checklist in a
   small follow-up PR.
 
@@ -152,6 +153,32 @@ Passed:
   mini runtime doctor retained only its existing warning, and no service was
   restarted or migrated.
 
+## Next-Day Live QA — 2026-07-17
+
+Evidence:
+
+- MacBook:
+  `~/.local/state/dotfiles-hd/mise-standardization/20260717-074253-next-day-pr9-macbook`
+- Mac mini:
+  `~/.local/state/dotfiles-hd/mise-standardization/20260717-074253-next-day-pr9-macmini`
+
+Passed:
+
+- Both fresh login shells retain the approved Node 24.18.0, pnpm 11.2.2, Go
+  1.26.3, Python 3.14.5, Bun 1.3.14, and Neovim 0.12.4 versions.
+- Both dotfiles worktrees are clean. The MacBook matches live `origin/master`.
+  The Mac mini remains clean on `f2915d2`, which contains PRs 9, 11, and 13;
+  seven later unrelated commits were observed but intentionally not pulled.
+- Neovim starts headlessly on both machines and each tracked lockfile remains
+  unchanged by QA. The MacBook's newer committed lock entry is expected from
+  `1224ddc`.
+- MacBook bootstrap doctor passes. Mac mini runtime status and doctor pass with
+  the same single existing `service-api-dev.log` warning.
+- Mac mini runtime PIDs match the 2026-07-16 baseline exactly, and every Node
+  service remains on Homebrew Node 22.23.1.
+- No pull, install, repository/config edit, reload, restart, runtime migration,
+  cleanup, or fallback removal occurred on either machine.
+
 Pending:
 
-- Next-day observation and Hamel's final normal-use confirmation.
+- Hamel's final next-day normal-use confirmation.

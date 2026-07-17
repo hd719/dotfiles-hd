@@ -1,8 +1,8 @@
 # Personal Mac Toolchain Standardization Plan
 
-- Status: PR #9 is merged. MacBook live/reboot QA passed. Immediate and
-  one-hour no-restart observation passed on both personal Macs; next-day
-  observation remains open
+- Status: PR #9 is merged. MacBook live/reboot QA and immediate, one-hour, and
+  next-day no-restart observation passed on both personal Macs; Hamel's final
+  next-day normal-use confirmation remains open
 - Plan branch: `agent/plan-personal-mac-mise-standardization`
 - Base branch: `origin/master` (this repository uses `master`, not `main`)
 - Targets: personal MacBook (`mac-vm`), Mac mini (`mac-mini`), and a brand-new
@@ -25,7 +25,8 @@
   checks before merge.
 - [x] Complete the Mac mini no-restart activation and immediate QA after merge.
 - [x] Complete the one-hour observation window.
-- [ ] Complete the next-day observation window.
+- [x] Complete the next-day observation window.
+- [ ] Record Hamel's final next-day normal-use confirmation.
 
 Unchecked items later in this plan are intentional live-machine gates;
 isolated temporary-home evidence does not mark them complete. The VM gate is
@@ -381,7 +382,7 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 - [x] Interactive and non-interactive shell checks pass on both machines; the
   IDE-terminal gate is N/A for the Ghostty and Neovim daily-driver workflow.
 - [x] Neovim and project QA pass on both machines.
-- [ ] Mac mini runtime health matches its baseline through the next-day check.
+- [x] Mac mini runtime health matches its baseline through the next-day check.
 - [x] No work-Mac, Ubuntu, credential, service-config, or unrelated files changed.
 - [x] Rollback was tested before any fallback was removed; no fallback was
   removed.
@@ -393,4 +394,4 @@ Stop and use the rollback section in [`QA.md`](QA.md) when any of these occurs:
 - [x] PR #9 and `RESULTS.md` record the completed pre-merge MacBook and immediate
   post-merge Mac mini QA.
 - [x] Record the one-hour observation in the QA update.
-- [ ] Record the next-day observation in a later QA update.
+- [x] Record the next-day observation in a later QA update.
