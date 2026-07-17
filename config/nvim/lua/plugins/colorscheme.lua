@@ -94,16 +94,6 @@ return {
             bg = colors.none,
           })
         end
-
-        -- Give the current-line bar a faint Nord tint (nord0, one shade below
-        -- the default nord1) in the editor and the Snacks explorer/tree, so it
-        -- marks the active line subtly instead of as a heavy dark bar.
-        -- SnacksPickerListCursorLine is the focused explorer row; the unfocused
-        -- row falls back to CursorLine, so both are covered.
-        highlights.CursorLine = vim.tbl_extend("force", highlights.CursorLine or {}, {
-          bg = colors.polar_night.origin,
-        })
-        highlights.SnacksPickerListCursorLine = { bg = colors.polar_night.origin }
       end,
     },
     config = function(_, opts)

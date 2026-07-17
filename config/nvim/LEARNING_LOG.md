@@ -1665,3 +1665,6 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   it cleanly on a clean working tree. Verified both groups resolve to `#2E3440`
   with `nvim_get_hl`.
 - Left the Snacks `indent` vertical lines (#3) untouched.
+- Update: Hamel did not like the tint and asked to revert it, so the override
+  was removed. The current-line bar is back to the Nord default (`nord1`,
+  `#3B4252`). Kept this entry as a record of the exploration.
