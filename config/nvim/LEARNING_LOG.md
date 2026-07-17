@@ -1761,3 +1761,25 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Accepted final state: the editor current line blends into Ghostty, while the
   Explorer selection remains visible across focus changes.
 - Resume Curriculum 4.1 with the pending `w` motion checkpoint.
+
+### Git Blame Contrast Trial
+
+- The inline Git blame text still used Nord's muted `#616E88`, which became too
+  faint over light content behind Ghostty's transparent background.
+- Raised only `GitSignsCurrentLineBlame` to brighter Nord `#D8DEE9` while
+  keeping its background transparent.
+- Live confirmation over both light and dark backgrounds is pending.
+
+### Subtle Git Blame Gray Trial
+
+- Hamel confirmed `#D8DEE9` made inline blame compete with normal code text.
+- Replaced it with neutral light gray `#A7ADB7`, keeping the background
+  transparent and the blame readable without making it prominent.
+- Live confirmation over both light and dark backgrounds is pending.
+
+### Final Git Blame Confirmation
+
+- Hamel confirmed the subtle light gray looks right.
+- Accepted final state: inline blame uses transparent `#A7ADB7`, remaining
+  readable without competing with the code.
+- Resume Curriculum 4.1 with the pending `w` motion checkpoint.

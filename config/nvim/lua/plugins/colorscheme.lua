@@ -103,6 +103,13 @@ return {
           })
         end
 
+        -- Keep inline blame readable over both light and dark blurred content.
+        highlights.GitSignsCurrentLineBlame =
+          vim.tbl_extend("force", highlights.GitSignsCurrentLineBlame or {}, {
+            fg = "#A7ADB7",
+            bg = colors.none,
+          })
+
         -- Let Ghostty's transparent background show through the editor's
         -- current line. The bright line number and cursor still show position.
         highlights.CursorLine = vim.tbl_extend("force", highlights.CursorLine or {}, {
