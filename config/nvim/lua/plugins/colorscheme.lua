@@ -103,14 +103,13 @@ return {
           })
         end
 
-        -- Use the same neutral Nord row color in the editor and the Snacks
-        -- explorer/tree. The focused explorer row stays bold, while the
-        -- editor and unfocused explorer preserve their native text colors.
-        -- SnacksPickerListCursorLine is the focused explorer row; the unfocused
-        -- row falls back to CursorLine, so both are covered.
+        -- Let Ghostty's transparent background show through the editor's
+        -- current line. The bright line number and cursor still show position.
         highlights.CursorLine = vim.tbl_extend("force", highlights.CursorLine or {}, {
-          bg = colors.polar_night.brighter,
+          bg = colors.none,
         })
+
+        -- Keep the Snacks selection visible without overriding icon colors.
         highlights.SnacksPickerListCursorLine = {
           bg = colors.polar_night.brighter,
           bold = true,

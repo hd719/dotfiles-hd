@@ -1740,3 +1740,24 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - This supersedes Session 011's earlier `#2E3440` active-state decision.
 - Headless highlight verification passed; live confirmation after restart is
   pending.
+
+### Transparent Editor Line With Persistent Explorer Selection
+
+- After trying the shared `#434C5E` color, Hamel decided the editor's full-width
+  current-line bar was distracting and asked for the terminal background to
+  show through instead.
+- Set the global editor `CursorLine` background to `NONE`; the cursor and bright
+  current line number still show the editing position.
+- Decoupled Snacks picker windows from the global fallback: their window-local
+  `CursorLine` mapping now stays on `SnacksPickerListCursorLine` after focus
+  moves into the editor.
+- Final intent: editor current line transparent; Explorer selection remains
+  bold Nord `#434C5E` with native icon and filename colors.
+- Live visual confirmation after restart is pending.
+
+### Final Transparent Editor Confirmation
+
+- Hamel restarted Neovim and confirmed this split treatment looks much cleaner.
+- Accepted final state: the editor current line blends into Ghostty, while the
+  Explorer selection remains visible across focus changes.
+- Resume Curriculum 4.1 with the pending `w` motion checkpoint.

@@ -129,6 +129,37 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      local Snacks = require("snacks")
+      Snacks.setup(opts)
+
+      -- Snacks normally falls back to the editor's CursorLine when its list
+      -- loses focus. Keep picker rows on their dedicated highlight so the
+      -- editor can stay transparent without hiding the Explorer selection.
+      local group = vim.api.nvim_create_augroup("snacks_picker_selection", { clear = true })
+      local function keep_picker_selection()
+        vim.schedule(function()
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_is_valid(win) then
+              local buf = vim.api.nvim_win_get_buf(win)
+              if vim.bo[buf].filetype == "snacks_picker_list" then
+                local current = vim.api.nvim_get_option_value("winhighlight", { win = win })
+                Snacks.util.wo(win, {
+                  winhighlight = Snacks.util.winhl(current, {
+                    CursorLine = "SnacksPickerListCursorLine",
+                  }),
+                })
+              end
+            end
+          end
+        end)
+      end
+
+      vim.api.nvim_create_autocmd({ "FileType", "WinEnter", "WinLeave" }, {
+        group = group,
+        callback = keep_picker_selection,
+      })
+    end,
     keys = {
       {
         "<leader>f",
