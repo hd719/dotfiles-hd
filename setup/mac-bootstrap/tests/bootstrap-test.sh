@@ -1168,6 +1168,123 @@ test_profile_and_failure_guards() {
   assert_no_path "$home_dir/.zshrc"
 }
 
+test_shared_zsh_completions() {
+  local module="$REPO_DIR/config/zsh/completions.zsh"
+  local root="$TMP_ROOT/shared-zsh-completions"
+  local home_dir="$root/home"
+  local completion_dir="$root/docker-completions"
+  local compinit_log="$root/compinit.log"
+  local dump_file="$home_dir/.zcompdump"
+  local cache_file="$root/tool-completion.zsh"
+  local fake_bin="$root/bin"
+  local actual
+  local zsh_file
+
+  mkdir -p "$home_dir" "$completion_dir" "$fake_bin"
+
+  for zsh_file in \
+    "$module" \
+    "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
+    "$REPO_DIR/setup/mac-mini/.zshrc" \
+    "$REPO_DIR/setup/mac-resilience/.zshrc"; do
+    /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
+    TESTS=$((TESTS + 1))
+  done
+
+  for zsh_file in \
+    "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
+    "$REPO_DIR/setup/mac-mini/.zshrc" \
+    "$REPO_DIR/setup/mac-resilience/.zshrc"; do
+    assert_contains "$zsh_file" 'config/zsh/completions.zsh'
+  done
+
+  actual="$(
+    HOME="$home_dir" /bin/zsh -dfc '
+      source "$1"
+      compinit_log="$2"
+      dump_file="$3"
+      completion_dir="$4"
+
+      compinit() {
+        if [[ "${1:-}" == "-C" ]]; then
+          print -r -- cached >> "$compinit_log"
+        else
+          print -r -- full >> "$compinit_log"
+        fi
+      }
+
+      _zsh_add_completion_dirs "$completion_dir" "$completion_dir"
+      count=0
+      for entry in $fpath; do
+        [[ "$entry" == "$completion_dir" ]] && (( count++ ))
+      done
+      print -r -- "$count"
+
+      rm -f "$dump_file"
+      _zsh_init_completions daily "$dump_file"
+      : > "$dump_file"
+      _zsh_init_completions daily "$dump_file"
+      /usr/bin/touch -t 202001010000 "$dump_file"
+      _zsh_init_completions daily "$dump_file"
+      /usr/bin/touch "$dump_file"
+      _zsh_init_completions 43200 "$dump_file"
+    ' zsh "$module" "$compinit_log" "$dump_file" "$completion_dir"
+  )"
+  assert_eq 1 "$actual" "shared completion paths stay unique"
+  assert_eq $'full\ncached\nfull\ncached' "$(cat "$compinit_log")" "compinit preserves profile cache policies"
+
+  actual="$(
+    HOME="$home_dir" /bin/zsh -dfc '
+      source "$1"
+      cache_file="$2"
+
+      rm -f "$cache_file"
+      _zsh_cache_needs_refresh "$cache_file" && print -r -- missing
+      print -r -- cached > "$cache_file"
+      _zsh_cache_needs_refresh "$cache_file" || print -r -- fresh
+      /usr/bin/touch -t 202001010000 "$cache_file"
+      _zsh_cache_needs_refresh "$cache_file" && print -r -- stale
+    ' zsh "$module" "$cache_file"
+  )"
+  assert_eq $'missing\nfresh\nstale' "$actual" "shared cache freshness handles missing, fresh, and stale files"
+
+  mkdir -p "$home_dir/Developer" "$home_dir/.local/bin"
+  ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
+  : > "$home_dir/.local/bin/env"
+  printf '#!/bin/sh\nprintf "Linux\\n"\n' > "$fake_bin/uname"
+  chmod +x "$fake_bin/uname"
+  actual="$(
+    HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
+      source "$HOME/Developer/dotfiles-hd/setup/mac-resilience/.zshrc"
+      whence -w _zsh_load_common_tool_completions _zsh_cache_and_source
+      alias v
+    ' 2>/dev/null
+  )"
+  assert_eq $'_zsh_load_common_tool_completions: function\n_zsh_cache_and_source: function\nv=nvim' "$actual" "Resilience shell tolerates missing optional completion tools"
+
+  printf '#!/bin/sh\nprintf "shared_completion_state=generated\\n"\n' > "$fake_bin/completion-ok"
+  printf '#!/bin/sh\nexit 1\n' > "$fake_bin/completion-fail"
+  chmod +x "$fake_bin/completion-ok" "$fake_bin/completion-fail"
+  actual="$(
+    HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
+      source "$1"
+      cache_file="$2"
+
+      rm -f "$cache_file"
+      _zsh_cache_and_source completion-ok "$cache_file" completion-ok
+      print -r -- "first=$shared_completion_state"
+
+      print -r -- shared_completion_state=preserved > "$cache_file"
+      /usr/bin/touch -t 202001010000 "$cache_file"
+      unset shared_completion_state
+      _zsh_cache_and_source completion-fail "$cache_file" completion-fail
+      print -r -- "second=$shared_completion_state"
+      print -r -- "disk=$(<"$cache_file")"
+    ' zsh "$module" "$cache_file"
+  )"
+  assert_eq $'first=generated\nsecond=preserved\ndisk=shared_completion_state=preserved' "$actual" "failed refresh preserves a valid completion cache"
+}
+
 test_goodmorning_timeout_helper() {
   local functions_file="$REPO_DIR/setup/mac-vm/zsh-config/functions.zsh"
   local start_epoch
@@ -1195,6 +1312,7 @@ test_full_bootstrap
 test_mac_mini_apply
 test_xdg_bin_home
 test_profile_and_failure_guards
+test_shared_zsh_completions
 test_goodmorning_timeout_helper
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"

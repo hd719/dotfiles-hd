@@ -7,6 +7,10 @@ This repo is the source of truth for rebuilding my personal and work machines.
 - `config/` - portable app and tool config. This is where personal settings, themes, keymaps, terminal config, and app exports live.
 - `setup/` - machine setup scripts and machine-specific bootstrap files for macOS, Linux, VMs, and servers.
 
+Shared shell mechanics live in `config/zsh/`. Each machine keeps its own
+`.zshrc` entry point so plugin timing, runtimes, credentials, and work-specific
+behavior remain profile-owned.
+
 ## Resilience Work Mac
 
 Use [`setup/mac-resilience/README.md`](setup/mac-resilience/README.md) to install

@@ -101,9 +101,11 @@ bash -n \
   setup/mac-vm/setup-vm.sh
 
 zsh -n \
+  config/zsh/completions.zsh \
   setup/mac-bootstrap/mise-shims.zsh \
   setup/mac-vm/zsh-config/.zshrc \
   setup/mac-mini/.zshrc \
+  setup/mac-resilience/.zshrc \
   setup/mac-vm/zsh-config/functions.zsh
 
 setup/mac-bootstrap/tests/bootstrap-test.sh
