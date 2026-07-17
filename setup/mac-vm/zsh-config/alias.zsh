@@ -84,6 +84,9 @@ alias code-restart="killall electron && killall node && killall code"
 ## LSD - Modern ls replacement with colors and icons
 source "$ZSH_CONFIG_DIR/../../../config/zsh/lsd-aliases.zsh"
 
+## Hunk - Review-first Git diff viewer
+source "$ZSH_CONFIG_DIR/../../../config/zsh/hunk-aliases.zsh"
+
 ## Bat
 alias cat="bat --paging never --theme Nord"
 

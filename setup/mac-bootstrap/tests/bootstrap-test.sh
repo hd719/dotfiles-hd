@@ -103,6 +103,7 @@ snapshot_protected_state() {
     '.config/gh/hosts.yml' \
     '.config/op/sentinel' \
     '.config/herdr/session' \
+    '.config/hunk/state.json' \
     '.config/zed/prompts/sentinel' \
     '.config/tmux/plugins/sentinel'; do
     snapshot_path "$home_dir/$relative" >> "$output"
@@ -541,7 +542,7 @@ EOF
   for command_name in \
     rg fd fzf lazygit tree-sitter lua-language-server stylua vtsls \
     vscode-eslint-language-server bash-language-server gopls \
-    zoxide starship bat lsd btop fastfetch herdr; do
+    zoxide starship bat lsd btop fastfetch herdr hunk; do
     make_fake_command "$fake_bin" "$command_name" ''
   done
 
@@ -701,6 +702,7 @@ seed_protected_state() {
     "$home_dir/.config/gh" \
     "$home_dir/.config/op" \
     "$home_dir/.config/herdr" \
+    "$home_dir/.config/hunk" \
     "$home_dir/.config/zed/prompts" \
     "$home_dir/.config/tmux/plugins"
   printf 'ssh\n' > "$home_dir/.ssh/sentinel"
@@ -712,6 +714,7 @@ seed_protected_state() {
   printf 'github\n' > "$home_dir/.config/gh/hosts.yml"
   printf 'op\n' > "$home_dir/.config/op/sentinel"
   printf 'session\n' > "$home_dir/.config/herdr/session"
+  printf '{"version":1}\n' > "$home_dir/.config/hunk/state.json"
   printf 'prompt\n' > "$home_dir/.config/zed/prompts/sentinel"
   printf 'plugin\n' > "$home_dir/.config/tmux/plugins/sentinel"
 }
@@ -778,6 +781,7 @@ test_full_bootstrap() {
 
   assert_eq "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" "$(readlink "$home_dir/.zshrc")" "MacBook zshrc target"
   assert_eq "$REPO_DIR/config/ghostty/config" "$(readlink "$home_dir/Library/Application Support/com.mitchellh.ghostty/config")" "Ghostty path with spaces"
+  assert_eq "$REPO_DIR/config/hunk/config.toml" "$(readlink "$home_dir/.config/hunk/config.toml")" "Hunk config target"
   assert_eq "$REPO_DIR/config/karabiner" "$(readlink "$home_dir/.config/karabiner")" "MacBook profile link"
   assert_file "$home_dir/.zshrc.backup-20260715-140000"
   assert_file "$home_dir/.config/btop.backup-20260715-140000/sentinel"

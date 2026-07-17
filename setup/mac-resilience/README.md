@@ -1,4 +1,4 @@
-# Resilience Work Mac: Ghostty, Herdr, and Neovim
+# Resilience Work Mac: Ghostty, Herdr, Hunk, and Neovim
 
 This is the agent runbook for reproducing Hamel's terminal/editor setup on the
 Resilience work laptop without replacing work-specific state.
@@ -9,10 +9,52 @@ Set up only:
 
 - Ghostty with Maple Mono NF and Hamel Nord Blur.
 - Herdr with `Ctrl-b` as the prefix.
+- Hunk with the shared Hamel Nord review theme.
 - Neovim with the committed plugins, keymaps, LSPs, formatters, and curriculum.
 
 Do not replace `.zshrc`, `config/mise`, Git identity, credentials, certificates,
 Docker state, Zed, Karabiner, or company-managed applications unless Hamel asks.
+
+## Apply This Setup on the Existing Work Laptop
+
+Run these commands only from a clean work-laptop clone:
+
+```bash
+cd ~/Developer/dotfiles-hd
+git status --short --branch
+git pull --ff-only
+brew bundle install --no-upgrade --file=setup/mac-resilience/Brewfile
+./setup/mac-resilience/link-terminal-editor-config.sh
+exec zsh
+hunk --version
+alias hwatch
+```
+
+The bundle command installs missing tools without upgrading existing packages.
+The linker creates timestamped backups before replacing a non-matching config.
+Stop before pulling if `git status` shows local changes you do not recognize.
+
+If `alias hwatch` prints the alias, the existing work shell already loads the
+shared Mac aliases and no `.zshrc` edit is needed. If it reports that `hwatch`
+does not exist, preserve the work shell and add only this source line:
+
+```bash
+cp "$HOME/.zshrc" "$HOME/.zshrc.backup-$(date +%Y%m%d-%H%M%S)"
+nvim "$HOME/.zshrc"
+```
+
+```zsh
+source "$HOME/Developer/dotfiles-hd/config/zsh/hunk-aliases.zsh"
+```
+
+Save the file, then run `exec zsh` and `alias hwatch` again. Do not replace the
+rest of the work `.zshrc`.
+
+For daily Cursor reviews, open Ghostty in the same repo or worktree and run
+`hwatch`. It includes new files and refreshes while Cursor edits. See the
+[Hunk documentation](https://www.hunk.dev/), the
+[shared theme](../../config/hunk/config.toml), and the
+[shared aliases](../../config/zsh/hunk-aliases.zsh).
 
 ## Agent Workflow
 
@@ -42,6 +84,7 @@ git pull --ff-only
 for path in \
   "$HOME/.config/nvim" \
   "$HOME/.config/herdr/config.toml" \
+  "$HOME/.config/hunk/config.toml" \
   "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 do
   ls -ld "$path" 2>/dev/null || true
@@ -117,6 +160,7 @@ replacing a non-matching destination. It links only these paths:
 | --- | --- | --- |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` |
 | Herdr | `~/.config/herdr/config.toml` | `config/herdr/config.toml` |
+| Hunk | `~/.config/hunk/config.toml` | `config/hunk/config.toml` |
 | Neovim | `~/.config/nvim` | `config/nvim` |
 
 ### 4. Install plugins and project tools
@@ -137,7 +181,7 @@ brew bundle check --verbose \
   --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
 
 for cmd in \
-  bash-language-server fd fzf gopls gs herdr lazygit lua-language-server \
+  bash-language-server fd fzf gopls gs herdr hunk lazygit lua-language-server \
   magick nvim rg stylua tree-sitter uv vscode-eslint-language-server \
   vscode-json-language-server vtsls mdformat ruff
 do
@@ -151,11 +195,15 @@ test "$(readlink "$HOME/.config/nvim")" = \
   "$HOME/Developer/dotfiles-hd/config/nvim"
 test "$(readlink "$HOME/.config/herdr/config.toml")" = \
   "$HOME/Developer/dotfiles-hd/config/herdr/config.toml"
+test "$(readlink "$HOME/.config/hunk/config.toml")" = \
+  "$HOME/Developer/dotfiles-hd/config/hunk/config.toml"
 test "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" = \
   "$HOME/Developer/dotfiles-hd/config/ghostty/config"
 
 /Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config
 herdr --version
+hunk --version
+zsh -lic 'alias hwatch; alias hdiff; alias hstaged; alias hshow'
 nvim --headless +qa!
 ```
 
@@ -169,7 +217,8 @@ herdr status
 Inside Neovim, check `:checkhealth`, `:checkhealth snacks`, `:LspInfo`,
 `:ConformInfo`, and `:TSStatus`. Open a PDF in Ghostty and confirm that it
 renders. Open a work TypeScript file and confirm highlighting, completion,
-ESLint diagnostics, `Space p` formatting, and `Space g` LazyGit.
+ESLint diagnostics, `Space p` formatting, and `Space g` LazyGit. From the same
+worktree, run `hwatch` in Ghostty and confirm Hunk refreshes while Cursor edits.
 
 Report every backup and validation result. Do not commit or push from the work
 laptop unless Hamel asks.
@@ -179,11 +228,13 @@ laptop unless Hamel asks.
 ```text
 Open ~/Developer/dotfiles-hd and read AGENTS.md, README.md,
 setup/mac-resilience/README.md, and config/nvim/README.md. Follow the
-mac-resilience runbook to set up only Ghostty, Herdr, and Neovim. Inspect the
+mac-resilience runbook to set up only Ghostty, Herdr, Hunk, and Neovim. Inspect the
 repo and every live destination first, preserve all work-specific state, and
 timestamp-backup any non-matching destination before linking. Never touch
 Git/SSH/GitHub auth, Git identity, AWS/Doppler/1Password state, company
 certificates, Docker state, .zshrc, or work-repo runtimes. Install only the
 documented scoped dependencies, verify every link and app, and report every
-backup or company-policy blocker. Do not commit or push.
+backup or company-policy blocker. If `hwatch` is not loaded, report the one-line
+source instruction from this runbook instead of editing .zshrc. Do not commit or
+push.
 ```

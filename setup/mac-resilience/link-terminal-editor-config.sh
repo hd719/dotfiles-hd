@@ -33,6 +33,7 @@ backup_and_link() {
 for source in \
   "$DOTFILES_DIR/config/ghostty/config" \
   "$DOTFILES_DIR/config/herdr/config.toml" \
+  "$DOTFILES_DIR/config/hunk/config.toml" \
   "$DOTFILES_DIR/config/nvim"
 do
   if [[ ! -e "$source" ]]; then
@@ -47,6 +48,9 @@ backup_and_link \
 backup_and_link \
   "$DOTFILES_DIR/config/herdr/config.toml" \
   "$HOME/.config/herdr/config.toml"
+backup_and_link \
+  "$DOTFILES_DIR/config/hunk/config.toml" \
+  "$HOME/.config/hunk/config.toml"
 backup_and_link "$DOTFILES_DIR/config/nvim" "$HOME/.config/nvim"
 
 echo "Resilience terminal/editor links are ready."

@@ -10,9 +10,9 @@ This repo is the source of truth for rebuilding my personal and work machines.
 ## Resilience Work Mac
 
 Use [`setup/mac-resilience/README.md`](setup/mac-resilience/README.md) to install
-and link the Ghostty, Herdr, and Neovim setup on the work laptop. That runbook is
-intentionally narrower than the personal Mac inventory below so it does not
-replace work-specific shell, runtime, credential, or certificate state.
+and link the Ghostty, Herdr, Hunk, and Neovim setup on the work laptop. That
+runbook is intentionally narrower than the personal Mac inventory below so it
+does not replace work-specific shell, runtime, credential, or certificate state.
 
 ## Personal Mac Config Inventory
 
@@ -32,6 +32,7 @@ both a physical personal MacBook and a MacBook VM.
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Matches Zed's Maple Mono NF and Hamel Nord Blur appearance. |
+| Hunk | `~/.config/hunk/config.toml` | `config/hunk/config.toml` | Linked file | Uses Hamel Nord; Hunk runtime state stays local. |
 | Karabiner | `~/.config/karabiner` | `config/karabiner` | MacBook-only linked dir | The Mac mini profile does not link it. |
 | mise | `~/.config/mise` | `config/mise` | Linked dir | Global toolchain config. |
 | Neovim | `~/.config/nvim` | `config/nvim` | Linked dir | Lua config, plugins, keymaps, LSP, and Hamel Nord. |
@@ -123,6 +124,28 @@ Herdr:
 
 This links only `~/.config/herdr/config.toml`.
 
+### Review Changes With Hunk
+
+Run Hunk from the same repo or worktree that your coding agent is editing:
+
+```bash
+hwatch
+```
+
+`hwatch` opens `hunk diff --watch`, including new untracked files, and refreshes
+as Cursor or another agent edits. The shared aliases are:
+
+| Alias | Command | Purpose |
+| --- | --- | --- |
+| `hwatch` | `hunk diff --watch` | Live working-tree review. |
+| `hdiff` | `hunk diff` | One-time working-tree review. |
+| `hstaged` | `hunk diff --staged` | Review only staged changes. |
+| `hshow` | `hunk show` | Review the latest commit. |
+
+See the [Hunk documentation](https://www.hunk.dev/), the
+[shared Hunk theme](config/hunk/config.toml), and the
+[shared aliases](config/zsh/hunk-aliases.zsh).
+
 ## Not Linked By Default
 
 | Area | Why |
@@ -130,6 +153,7 @@ This links only `~/.config/herdr/config.toml`.
 | `~/.config/tmux` | The live directory contains plugins. Link/review `tmux.conf`, not the whole folder. |
 | `~/.gitconfig` | Live config differs from repo. Review before linking. |
 | `~/.config/herdr` | Contains logs, sockets, release notes, and session state. Link only `config.toml`. |
+| `~/.config/hunk` | Contains runtime state. Link only `config.toml`. |
 | `~/.config/raycast` | Raycast has extension/runtime state. Treat `config/raycast` as exports, not a live symlink target. |
 | `~/.config/zed` | Contains prompt database state. Link settings, keymap, and themes only. |
 | `~/.config/zed/prompts` | Zed runtime database state, not portable config. |

@@ -320,6 +320,7 @@ load_profile() {
     "$dotfiles_dir/config/fastfetch|$home_dir/.config/fastfetch"
     "$dotfiles_dir/config/ghostty/config|$home_dir/Library/Application Support/com.mitchellh.ghostty/config"
     "$dotfiles_dir/config/herdr/config.toml|$home_dir/.config/herdr/config.toml"
+    "$dotfiles_dir/config/hunk/config.toml|$home_dir/.config/hunk/config.toml"
     "$dotfiles_dir/config/mise|$home_dir/.config/mise"
     "$dotfiles_dir/config/nvim|$home_dir/.config/nvim"
     "$dotfiles_dir/config/zed/keymap.json|$home_dir/.config/zed/keymap.json"

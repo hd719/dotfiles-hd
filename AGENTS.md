@@ -52,6 +52,7 @@ Single file or subdirectory links:
 - `~/.zshrc` -> `setup/mac-mini/.zshrc` on the Mac mini
 - `~/Library/Application Support/com.mitchellh.ghostty/config` -> `config/ghostty/config`
 - `~/.config/herdr/config.toml` -> `config/herdr/config.toml`
+- `~/.config/hunk/config.toml` -> `config/hunk/config.toml`
 - `~/.config/zed/settings.json` -> `config/zed/settings.json`
 - `~/.config/zed/keymap.json` -> `config/zed/keymap.json`
 - `~/.config/zed/themes` -> `config/zed/themes`
@@ -69,16 +70,17 @@ manual link and is not installed or linked by this bootstrap.
 - `~/.config/zed/prompts` because it is Zed runtime database state.
 - `~/Library/Application Support/Zed` because it is app runtime state.
 - Herdr logs, sockets, sessions, and release notes under `~/.config/herdr`.
+- Hunk runtime state under `~/.config/hunk`; link only `config.toml`.
 
 ## Resilience Work Mac
 
 When Hamel asks to set up the work laptop:
 
 1. Read `setup/mac-resilience/README.md` and follow it as the runbook.
-2. Default to only Ghostty, Herdr, and Neovim. Do not apply the full personal
+2. Default to only Ghostty, Herdr, Hunk, and Neovim. Do not apply the full personal
    Mac symlink list.
 3. Use `setup/mac-resilience/Brewfile` for the terminal/editor dependencies and
-   `setup/mac-resilience/link-terminal-editor-config.sh` for the three links.
+   `setup/mac-resilience/link-terminal-editor-config.sh` for the four links.
    Never run `setup/mac-mini/Brewfile` or `setup/mac-vm/setup-vm.sh` on the
    work laptop.
 4. Inspect and timestamp-backup every existing destination before replacing it.
