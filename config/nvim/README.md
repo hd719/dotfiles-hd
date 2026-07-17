@@ -217,9 +217,9 @@ Use `]d` / `[d` to jump between them, `Ctrl-w d` for the detail float, and
 `Space c d` / `Space c D` for a searchable list of the current buffer's or the
 project's diagnostics.
 
-The statusline (lualine) shows the current mode, git branch and diff,
-diagnostics, the attached LSP client(s), filetype, encoding, and cursor
-location.
+The statusline (lualine) keeps its center transparent while showing the current
+mode, Git branch and diff, filename, diagnostics, attached LSP client(s),
+filetype, and compact cursor location/progress.
 
 In Markdown files, render-markdown decorates headings, checkboxes, code blocks,
 tables, and quotes in the editor; `Space m` toggles between raw and rendered.
@@ -238,7 +238,8 @@ Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
 open all / close all) or the native `za` / `zR` / `zM`.
 
 The cursor line stays vertically centered as you move up and down
-(`scrolloff = 999`).
+(`scrolloff = 999`). An always-on blue-gray row-and-column crosshair marks the
+cursor position without an extra plugin.
 
 Opening Neovim with no file shows a start dashboard (Snacks) with shortcuts
 (find, grep, recent, explorer, new, LazyGit, config, Lazy, quit), a recent-files

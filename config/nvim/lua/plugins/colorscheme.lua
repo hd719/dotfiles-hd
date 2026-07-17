@@ -19,6 +19,14 @@ return {
           })
         end
 
+        -- Let lualine's center section show Ghostty's background while its
+        -- mode, Git, and position pills keep their explicit colors.
+        for _, group in ipairs({ "StatusLine", "StatusLineNC" }) do
+          highlights[group] = vim.tbl_extend("force", highlights[group] or {}, {
+            bg = colors.none,
+          })
+        end
+
         -- Give the current-file replacement workflow its own calm Nord panel.
         highlights.GrugFarNormal = {
           fg = colors.snow_storm.origin,
@@ -110,11 +118,27 @@ return {
             bg = colors.none,
           })
 
-        -- Let Ghostty's transparent background show through the editor's
-        -- current line. The bright line number and cursor still show position.
+        -- Keep the current row visible over both light and dark content behind
+        -- Ghostty by using a subtle, fixed Nord background.
         highlights.CursorLine = vim.tbl_extend("force", highlights.CursorLine or {}, {
-          bg = colors.none,
+          bg = "#5C6A7D",
         })
+        highlights.CursorColumn = vim.tbl_extend("force", highlights.CursorColumn or {}, {
+          bg = "#5C6A7D",
+        })
+
+        -- Keep rendered Markdown code panels distinct from both light and dark
+        -- content behind Ghostty.
+        for _, group in ipairs({
+          "RenderMarkdownCode",
+          "RenderMarkdownCodeBorder",
+          "RenderMarkdownCodeFallback",
+          "RenderMarkdownCodeInline",
+        }) do
+          highlights[group] = vim.tbl_extend("force", highlights[group] or {}, {
+            bg = colors.polar_night.origin,
+          })
+        end
 
         -- Keep the Snacks selection visible without overriding icon colors.
         highlights.SnacksPickerListCursorLine = {

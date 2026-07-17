@@ -22,9 +22,24 @@ return {
         return " " .. table.concat(names, ",")
       end
 
+      local function position()
+        local line = vim.fn.line(".")
+        local column = vim.fn.charcol(".")
+        local total = math.max(vim.fn.line("$"), 1)
+        local progress = math.floor((line / total) * 100)
+
+        -- Statusline text uses '%' as control syntax, so display one literal
+        -- percent sign by returning the escaped '%%' sequence.
+        return string.format("%d:%d · %d%%%%", line, column, progress)
+      end
+
+      local theme = require("lualine.themes.nord")
+      theme.normal.c.bg = "NONE"
+      theme.inactive.c.bg = "NONE"
+
       require("lualine").setup({
         options = {
-          theme = "nord",
+          theme = theme,
           globalstatus = true,
         },
         sections = {
@@ -44,8 +59,8 @@ return {
           },
           lualine_c = { { "filename", path = 1 } },
           lualine_x = { "diagnostics", lsp_clients, "filetype" },
-          lualine_y = { "encoding" },
-          lualine_z = { "location", "progress" },
+          lualine_y = {},
+          lualine_z = { position },
         },
       })
     end,

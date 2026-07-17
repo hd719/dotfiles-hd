@@ -1783,3 +1783,163 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Accepted final state: inline blame uses transparent `#A7ADB7`, remaining
   readable without competing with the code.
 - Resume Curriculum 4.1 with the pending `w` motion checkpoint.
+
+## 2026-07-17 — Session 013: Neovim and Ghostty Visual Polish
+
+### Cursor Row and Neovim Launch Shortcut
+
+- Hamel decided to restore a highlight on the editor row containing the cursor.
+- The crosshair effect does not require a plugin: Neovim provides `cursorline`
+  for the row and `cursorcolumn` for the column.
+- Enabled only the row with opaque Nord `#3B4252`, so its contrast stays stable
+  over both light and dark content behind Ghostty. The column remains off until
+  Hamel chooses to test the busier full crosshair.
+- Added the shared shell alias `v='nvim'`. Examples: `v`, `v .`, and
+  `v README.md`.
+- Run `exec zsh` once in an existing terminal to load the new alias.
+- Live visual and shell confirmation are pending.
+
+### Full Cursor Crosshair Trial
+
+- Hamel confirmed the row highlight stays visible over both light and dark
+  backgrounds, then asked why the vertical crosshair was missing.
+- Enabled Neovim's built-in `cursorcolumn` option and matched `CursorColumn` to
+  the row's opaque Nord `#3B4252` background.
+- The cursor now marks both its row and column without adding a plugin.
+- Live confirmation of the full crosshair is pending.
+
+### Cross-Background Crosshair Color Trial
+
+- The initial `#3B4252` crosshair was clear over light blurred content but
+  blended into Ghostty when the content behind it was dark.
+- Changed both `CursorLine` and `CursorColumn` to the middle Nord shade
+  `#434C5E`, which sits between the observed light and dark terminal states.
+- Live confirmation over both backgrounds is pending.
+
+### Wrapped-Line Crosshair Gap Explained
+
+- Hamel noticed a short break in the vertical crosshair beside a long Markdown
+  list item.
+- The line was soft-wrapped onto another screen row. Native `cursorcolumn`
+  follows the buffer's virtual column, so it does not repeat the stripe at the
+  same screen position on that wrapped continuation row.
+- This is normal Neovim rendering, not missing text or a theme failure.
+- Keeping readable Markdown wrapping preserves this small visual gap; an
+  uninterrupted screen ruler would require disabling wrapping or custom
+  rendering.
+
+### Muted Blue Crosshair Trial
+
+- Neutral `#434C5E` remained too close to Ghostty's darkest observed background.
+- Changed the row and column to muted Nord blue `#526A88`. Its blue hue creates
+  separation from both the light and dark gray backgrounds without using a
+  bright accent color.
+- Live confirmation over both backgrounds is pending.
+
+### Toggle Word Wrap
+
+- `:set wrap!` toggles visible line wrapping in the current window.
+- `:set wrap` explicitly enables it; `:set nowrap` disables it.
+- Wrapping changes only how long lines display. It does not modify the file.
+- This config already enables `linebreak`, so wrapped prose breaks at word
+  boundaries when possible.
+
+### Graphite-Plum Crosshair Trial
+
+- Hamel found muted Nord blue `#526A88` too colorful for the editor crosshair.
+- Replaced it with quieter graphite-plum `#554D5E`. The warm tint separates it
+  from both light and dark blue-gray terminal backgrounds without looking like
+  an accent color.
+- Live confirmation over both backgrounds is pending.
+
+### Neutral Gray Crosshair Trial
+
+- Hamel rejected the blue and graphite-plum directions and chose a colorless
+  crosshair instead.
+- Set both `CursorLine` and `CursorColumn` to true neutral gray `#5B5B5B`.
+- Live confirmation over both light and dark backgrounds is pending.
+
+### Balanced Steel Gray Crosshair Trial
+
+- True neutral gray `#5B5B5B` did not fit the surrounding Nord UI.
+- Changed both crosshair directions to balanced steel gray `#60656D`, which is
+  slightly lighter than both observed terminal backgrounds without becoming a
+  bright accent.
+- Live confirmation over both backgrounds is pending.
+
+### Dusty Blue-Gray Crosshair Trial
+
+- Balanced steel gray `#60656D` still felt too neutral.
+- Hamel asked for a slightly lighter grayish blue, so both crosshair directions
+  now use desaturated dusty blue-gray `#687483`.
+- Live confirmation over both backgrounds is pending.
+
+### Darker Blue-Gray Crosshair Trial
+
+- Hamel asked to make dusty blue-gray `#687483` slightly darker and bluer.
+- Adjusted both crosshair directions to `#5C6A7D`, retaining more gray than the
+  earlier saturated Nord blue trial.
+- Live confirmation over both backgrounds is pending.
+
+### Final Crosshair Confirmation
+
+- Hamel confirmed darker blue-gray `#5C6A7D` looks right.
+- Accepted final state: built-in `cursorline` and `cursorcolumn` use the same
+  opaque blue-gray background for a consistent crosshair across Ghostty's light
+  and dark blurred backdrops.
+- Resume Curriculum 4.1 with the pending `w` motion checkpoint.
+
+### Markdown Code Panel and Statusline Trial
+
+- Rendered Markdown code inherited Nord `#3B4252` from `ColorColumn`, which
+  blended into Ghostty over dark content.
+- Changed fenced, border, fallback, and inline rendered-code backgrounds to
+  opaque Nord `#2E3440` so they remain distinct over both light and dark
+  backdrops.
+- Simplified lualine by making its center transparent, removing the redundant
+  `utf-8` segment, and combining cursor location and progress into one display
+  such as `150:1 · 85%`.
+- The mode and position edge pills remain opaque for stable contrast.
+- Live visual confirmation is pending.
+
+### Statusline Percentage Escape Fix
+
+- The first combined `line:column · progress%` component returned a bare `%`.
+  Neovim interpreted it as statusline control syntax and rejected the whole
+  lualine render with `E539`, leaving only an empty strip.
+- Escaped the percent sign as `%%`, restoring the full statusline while keeping
+  the compact display.
+- Live confirmation after restarting Neovim is pending.
+
+### Transparent Statusline Center Fix
+
+- The lualine center component had no background of its own, but Neovim's base
+  `StatusLine` highlight still painted Nord `#434C5E` underneath it.
+- Made `StatusLine` and `StatusLineNC` transparent. The `oil:///...` or filename
+  center now shows Ghostty's background while the mode, Git, and position pills
+  remain opaque.
+- Live confirmation over both light and dark backgrounds is pending.
+
+### Session 013 Corrections and Ghostty Update
+
+- Correction: native `cursorcolumn` marks the cursor's screen column. The gap
+  observed beside wrapped Markdown was a rendering limitation in that layout,
+  not evidence that it follows a buffer virtual column.
+- The crosshair, rendered-code panels, and statusline edge pills use fixed
+  background colors. Ghostty still applies its configured 90% cell opacity, so
+  the earlier word `opaque` was imprecise.
+- Ghostty now uses `background-opacity = 0.90` and `background-blur = 20`.
+- `ghostty +validate-config` passes. A full Ghostty quit and restart is still
+  required before judging the opacity and blur change visually.
+- The custom statusline now uses `charcol()` so its column number stays correct
+  when a line contains multibyte characters.
+
+### Zsh Autosuggestion Investigation
+
+- The Homebrew `zsh-autosuggestions` plugin is installed, sourced, and active.
+- In a fresh interactive shell, typing `git st` produced the history suggestion
+  `atus`, proving the plugin still works.
+- The suggestion uses palette color 8 (`#4C566A`), which is too close to the
+  Nord background (`#3B4252`) after Ghostty transparency and blur.
+- No autosuggestion color was changed yet. The proposed next test is muted
+  steel blue-gray `#7B8496`.

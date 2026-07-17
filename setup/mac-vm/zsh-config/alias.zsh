@@ -58,6 +58,7 @@ alias gsshort='gs | grep -e "Your branch" -e "modified"'
 ## Misc
 alias home='cd ~'
 alias c=clear
+alias v='nvim'
 alias open-desktop='cd ~/Desktop/ && open .'
 alias open-home='cd ~ && open .'
 alias dhd='cd ~/Developer/dotfiles-hd && code .'
