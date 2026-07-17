@@ -23,6 +23,100 @@ reload() {
   printf "Zsh configuration reloaded in %.0fms\n" $duration
 }
 
+carchive() {
+  emulate -L zsh
+
+  local state_db="$HOME/.codex/state_5.sqlite"
+  local session_index="$HOME/.codex/session_index.jsonl"
+  local jq_bin
+  local selected session_id updated_at title cwd confirmation
+
+  if ! command -v codex >/dev/null 2>&1; then
+    echo "Codex CLI is not installed."
+    return 1
+  fi
+
+  if ! command -v fzf >/dev/null 2>&1; then
+    echo "fzf is not installed."
+    return 1
+  fi
+
+  jq_bin="$(command -v jq 2>/dev/null)" || {
+    echo "jq is not installed."
+    return 1
+  }
+
+  if [[ ! -f "$state_db" ]]; then
+    echo "Codex session database not found: $state_db"
+    return 1
+  fi
+
+  if [[ ! -f "$session_index" ]]; then
+    echo "Codex session name index not found: $session_index"
+    return 1
+  fi
+
+  selected=$(
+    /usr/bin/awk -F $'\t' -v OFS=$'\t' '
+      FNR == NR {
+        names[$1] = $2
+        next
+      }
+      {
+        title = (($1 in names) ? names[$1] : $3)
+        gsub(/[\r\n\t]/, " ", title)
+        if (length(title) > 100) {
+          title = substr(title, 1, 97) "..."
+        }
+        print $1, $2, title, $4
+      }
+    ' \
+      <("$jq_bin" -rs '
+        reduce .[] as $row ({};
+          if ($row.id? and $row.thread_name?) then
+            .[$row.id] = ($row.thread_name | gsub("[\\t\\r\\n]"; " "))
+          else
+            .
+          end
+        )
+        | to_entries[]
+        | [.key, .value]
+        | @tsv
+      ' "$session_index") \
+      <(/usr/bin/sqlite3 -readonly -separator $'\t' "$state_db" "
+        SELECT
+          id,
+          datetime(recency_at, 'unixepoch', 'localtime'),
+          replace(replace(replace(title, char(9), ' '), char(10), ' '), char(13), ' '),
+          cwd
+        FROM threads
+        WHERE archived = 0
+          AND source = 'vscode'
+          AND preview <> ''
+        ORDER BY recency_at_ms DESC;
+      ") | fzf \
+      --delimiter=$'\t' \
+      --with-nth=2,3,4 \
+      --prompt='Archive Codex chat > ' \
+      --header='Updated | Title | Folder' \
+      --height=80% \
+      --layout=reverse \
+      --border
+  ) || return 0
+
+  [[ -n "$selected" ]] || return 0
+  IFS=$'\t' read -r session_id updated_at title cwd <<< "$selected"
+
+  printf "Archive '%s'? [y/N] " "$title"
+  read -r confirmation
+  [[ "$confirmation" == [yY] ]] || {
+    echo "Cancelled."
+    return 0
+  }
+
+  codex archive "$session_id"
+}
+
 _now_epoch_ms() {
   zmodload zsh/datetime 2>/dev/null
   local -i now_ms=$(( EPOCHREALTIME * 1000 ))

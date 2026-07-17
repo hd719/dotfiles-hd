@@ -64,6 +64,7 @@ alias dhd='cd ~/Developer/dotfiles-hd && code .'
 alias open-zshrc='code ~/.zshrc'
 alias ff='fastfetch'
 alias r='reload'
+alias ca='carchive'
 
 ## Brew
 alias open-brew='cd /opt/homebrew'
