@@ -11,6 +11,14 @@ return {
         highlights.FloatBorder.bg = colors.none
         highlights.FloatBorder.fg = colors.frost.ice
 
+        -- Keep Neovim's base tabline transparent when Bufferline has no tabs
+        -- to draw, such as while Oil is the only visible buffer.
+        for _, group in ipairs({ "TabLine", "TabLineFill", "TabLineSel" }) do
+          highlights[group] = vim.tbl_extend("force", highlights[group] or {}, {
+            bg = colors.none,
+          })
+        end
+
         -- Give the current-file replacement workflow its own calm Nord panel.
         highlights.GrugFarNormal = {
           fg = colors.snow_storm.origin,
@@ -95,15 +103,18 @@ return {
           })
         end
 
-        -- Give the current-line bar a faint Nord tint (nord0, one shade below
-        -- the default nord1) in the editor and the Snacks explorer/tree, so it
-        -- marks the active line subtly instead of as a heavy dark bar.
+        -- Use the same neutral Nord row color in the editor and the Snacks
+        -- explorer/tree. The focused explorer row stays bold, while the
+        -- editor and unfocused explorer preserve their native text colors.
         -- SnacksPickerListCursorLine is the focused explorer row; the unfocused
         -- row falls back to CursorLine, so both are covered.
         highlights.CursorLine = vim.tbl_extend("force", highlights.CursorLine or {}, {
-          bg = colors.polar_night.origin,
+          bg = colors.polar_night.brighter,
         })
-        highlights.SnacksPickerListCursorLine = { bg = colors.polar_night.origin }
+        highlights.SnacksPickerListCursorLine = {
+          bg = colors.polar_night.brighter,
+          bold = true,
+        }
       end,
     },
     config = function(_, opts)

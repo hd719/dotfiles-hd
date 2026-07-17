@@ -1669,3 +1669,74 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   it), but once the alternative was the default dark bar he preferred the subtle
   tint after all, so it was restored. Net result: the nord0 (`#2E3440`) tint is
   the active, committed state.
+
+## 2026-07-17 — Session 012: Transparent Bufferline
+
+### Bufferline Background Refinement
+
+- Hamel identified the dark strip behind the open filenames at the top of
+  Neovim and asked for it to blend into Ghostty's transparent background.
+- The strip belongs to `bufferline.nvim`, not Ghostty.
+- Configured every Bufferline background state, including active, visible,
+  inactive, diagnostic, icon, separator, and fill areas, to use `NONE` while
+  preserving the existing Nord foreground colors for readable filenames.
+- Live visual confirmation is still pending. Resume the curriculum at 4.1 with
+  the pending `w` motion checkpoint after confirming the tab bar appearance.
+
+### Base Tabline Fallback Correction
+
+- After restarting, Hamel confirmed the empty dark strip still appeared while
+  Oil was the only visible buffer.
+- The remaining color came from Neovim's base `TabLineFill` highlight, which
+  Bufferline falls back to when it has no filename tabs to draw.
+- Made `TabLine`, `TabLineFill`, and `TabLineSel` transparent in the Nord theme.
+- A second live visual confirmation is pending.
+
+### Snacks Explorer Selection Contrast
+
+- Hamel confirmed the base tabline correction removed the dark strip.
+- Hamel then asked for the selected file row in Snacks Explorer to be lighter.
+- Changed only `SnacksPickerListCursorLine` to Nord's lighter `polar_night.brightest`
+  shade so the current file is easier to spot without changing the explorer's
+  transparent background.
+- Live visual confirmation of the lighter selected row is pending.
+
+### Cross-Background Explorer Selection Trial
+
+- The lighter gray still blended into Ghostty when the blurred content behind
+  the transparent window changed between light and dark.
+- Started a live trial using Nord frost blue `#81A1C1` with dark `#2E3440`
+  bold text for the selected Snacks Explorer row.
+- The selection color is intentionally opaque so its contrast stays stable
+  while the surrounding terminal remains transparent and blurred.
+- Keep or revise this trial after Hamel checks it over both backgrounds.
+
+### Explorer Icon Contrast Correction
+
+- Hamel confirmed the frost-blue row worked against the changing background,
+  but its color was too close to the cyan folder icons.
+- Replaced the trial with neutral Nord `#434C5E` and removed the forced text
+  color so Snacks can preserve each icon and filename's native color.
+- The row remains bold and opaque; live confirmation over both backgrounds is
+  pending.
+
+### Final Visual Confirmation
+
+- Hamel confirmed the final result looks good.
+- Final state: Bufferline and Neovim's fallback tabline are transparent; the
+  Snacks Explorer selection uses bold Nord `#434C5E` while preserving native
+  icon and filename colors.
+- Resume Curriculum 4.1 with the pending `w` motion checkpoint.
+
+### Focused Editor Color Alignment
+
+- When focus moved from Snacks Explorer into the editor, the selected tree row
+  fell back to the global `CursorLine` color from Session 011.
+- Hamel asked for the editor current line and the focused or unfocused Explorer
+  row to use the same neutral Nord `#434C5E` background.
+- Updated `CursorLine` to `polar_night.brighter`; the focused Explorer row keeps
+  that same background plus bold text, while native editor and icon colors stay
+  intact.
+- This supersedes Session 011's earlier `#2E3440` active-state decision.
+- Headless highlight verification passed; live confirmation after restart is
+  pending.
