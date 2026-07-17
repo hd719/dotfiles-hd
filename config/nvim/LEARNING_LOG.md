@@ -1641,3 +1641,27 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   Python language server without a real recurring need.
 - The missing Python LSP is therefore an accepted scope choice, not a blocker
   or an incomplete IDE setup.
+
+## 2026-07-17 — Session 011: Faint Current-Line Tint
+
+- Hamel noticed the "dark lines" in the UI and asked to identify them. Mapping:
+  the editor's current-line bar is `cursorline` (the `CursorLine` group); the
+  highlighted row in the file tree is the Snacks explorer's current row
+  (`SnacksPickerListCursorLine` when the explorer is focused, `CursorLine` when
+  it is not); the vertical lines are the Snacks `indent` guides + scope.
+- He wanted the editor bar (#1) and the tree row (#2) less prominent. We first
+  tried full transparency (`bg = none`), then he chose a faint tint instead.
+- Set both `CursorLine` and `SnacksPickerListCursorLine` to Nord `nord0`
+  (`#2E3440`, `colors.polar_night.origin`) — one shade below the default `nord1`
+  (`#3B4252`) — in the `on_highlights` hook of
+  `config/nvim/lua/plugins/colorscheme.lua`. The bold, bright `CursorLineNr`
+  still marks the active line, so the line is easy to spot without a heavy bar.
+- Why the override sticks: nord applies every key in its highlights table
+  (including ones we add) via `nvim_set_hl`, and Snacks defines
+  `SnacksPickerListCursorLine` with `default = true`, so our explicit color wins
+  and is not clobbered when the explorer first opens.
+- Gotcha: an earlier transparent edit was silently reverted when a stale open
+  buffer of `colorscheme.lua` saved over it (the Escape-to-save workflow). Re-did
+  it cleanly on a clean working tree. Verified both groups resolve to `#2E3440`
+  with `nvim_get_hl`.
+- Left the Snacks `indent` vertical lines (#3) untouched.
