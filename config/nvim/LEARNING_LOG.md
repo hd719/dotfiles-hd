@@ -1984,3 +1984,13 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - The shared value remains for the personal Mac and Mac mini; the Resilience
   profile now owns an explicit matching override that can diverge later.
 - Best next lesson remains Curriculum 4.1 at the pending `w` motion checkpoint.
+
+### Work-Specific Neovim Shortcut
+
+- Mirrored the existing `v='nvim'` shortcut directly in
+  `setup/mac-resilience/.zshrc` so the work profile owns it independently.
+- No separate `nv` alias exists in the current dotfiles, so no new shortcut was
+  invented.
+- After pulling on the work Mac, run `exec zsh`; `v`, `v .`, and
+  `v README.md` then launch Neovim.
+- Best next lesson remains Curriculum 4.1 at the pending `w` motion checkpoint.

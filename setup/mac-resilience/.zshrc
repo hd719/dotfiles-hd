@@ -13,6 +13,9 @@ source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
 source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
 source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
 
+# Work-owned shortcut so this profile can stay independent of shared aliases.
+alias v='nvim'
+
 # -----------------------------------------------------------------------------
 # Plugins (Homebrew) - Smart deferred loading (~32ms savings)
 # -----------------------------------------------------------------------------
