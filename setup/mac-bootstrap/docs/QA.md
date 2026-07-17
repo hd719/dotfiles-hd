@@ -24,7 +24,9 @@ Full evidence is recorded in [`RESULTS.md`](RESULTS.md).
 - [x] Mac mini activation and immediate post-merge checks passed.
 - [x] One-hour checks passed on both personal Macs through Everyday Mac Ops at
   10:52 EDT on 2026-07-16.
-- [ ] Next-day checks remain a post-merge observation gate.
+- [x] Next-day technical checks passed on both personal Macs at 07:42 EDT on
+  2026-07-17 without a restart, reload, install, or runtime change.
+- [ ] Hamel's final next-day normal-use confirmation remains open.
 
 Unchecked checklists below are deliberate live-machine gates, not missing
 results from the completed isolated QA.
@@ -42,6 +44,8 @@ follow-up PR and complete the post-merge Mac mini and observation rows there.
 | Phase under test | Post-merge MacBook reboot and Mac mini no-restart activation |
 | MacBook evidence directory | `~/.local/state/dotfiles-hd/mise-standardization/20260716-064353-post-merge-pr9-macbook` |
 | Mac mini evidence directory | `~/.local/state/dotfiles-hd/mise-standardization/20260716-064935-post-merge-pr9-macmini` |
+| MacBook next-day evidence | `~/.local/state/dotfiles-hd/mise-standardization/20260717-074253-next-day-pr9-macbook` |
+| Mac mini next-day evidence | `~/.local/state/dotfiles-hd/mise-standardization/20260717-074253-next-day-pr9-macmini` |
 | Clean macOS VM gate | Waived by Hamel on 2026-07-16; no VM available |
 | Approved Node version | 24.18.0 for interactive/dev tools; Homebrew 22.23.1 remains the Mac mini service contract |
 | Approved pnpm version | 11.2.2 for interactive/dev tools |
@@ -707,7 +711,7 @@ Observation checklist:
 | --- | --- | --- | --- |
 | Immediate | [x] | [x] | Passed 2026-07-16; evidence paths are in the QA record |
 | One hour | [x] | [x] | Everyday Mac Ops passed shell, toolchain, Neovim, and runtime health at 10:52 EDT on 2026-07-16 |
-| Next day | [ ] | [ ] | |
+| Next day | [x] | [x] | Shells, Git, Neovim, and the Mac mini runtime passed at 07:42 EDT on 2026-07-17; no machine state changed |
 
 Pass criteria:
 
@@ -787,8 +791,8 @@ than stacking more live changes.
 - [x] The unavailable clean macOS VM is explicitly waived for PR #9; no VM
   result is represented as passed.
 
-MacBook rows through the reboot check are required before merge. The next-day
-row remains a post-merge observation.
+MacBook rows through the reboot check were required before merge. The technical
+next-day observation passed; Hamel's final normal-use confirmation remains open.
 
 | Gate | MacBook | Mac mini | Timing/evidence |
 | --- | --- | --- | --- |
@@ -806,12 +810,14 @@ row remains a post-merge observation.
 | Idempotent second apply | [x] | [x] | No new backup; GraphQL LSP fast path used |
 | Reboot check | [x] | N/A | MacBook post-reboot QA passed |
 | One-hour check | [x] | [x] | Everyday Mac Ops passed at 10:52 EDT on 2026-07-16 |
-| Next-day check | [ ] | [ ] | |
+| Next-day check | [x] | [x] | Technical gate passed at 07:42 EDT on 2026-07-17; evidence paths are in the QA record |
 | Worktrees clean | [x] | [x] | Both dotfiles repos and active Cortana checkout clean |
 
 Final approval:
 
 - [x] Hamel confirmed both machines worked normally during immediate and
   one-hour observation.
+- [ ] Hamel confirms both machines worked normally through the next-day
+  observation.
 - [x] No fallback tool is removed until a separate cleanup PR is approved.
 - [x] Final symlink, version, exception, and bootstrap state is documented.
