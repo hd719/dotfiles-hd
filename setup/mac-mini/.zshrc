@@ -17,6 +17,7 @@ _source_zsh_config "$ZSH_CONFIG_DIR/tooling.zsh"
 _source_zsh_config "$ZSH_CONFIG_DIR/functions.zsh"
 _source_zsh_config "$ZSH_CONFIG_DIR/alias.zsh"
 _source_zsh_config "$ZSH_CONFIG_DIR/k8s.zsh"
+_source_zsh_config "$ZSH_CONFIG_DIR/../../../config/zsh/completions.zsh"
 
 # -----------------------------------------------------------------------------
 # Plugins
@@ -29,20 +30,9 @@ fi
 # -----------------------------------------------------------------------------
 # Completions
 # -----------------------------------------------------------------------------
-[[ -d "$HOME/.docker/completions" ]] && fpath=("$HOME/.docker/completions" $fpath)
-
-autoload -Uz compinit
-if [[ -f "$HOME/.zcompdump" ]]; then
-  typeset _zcomp_mtime _today_start
-  zstat -A _zcomp_mtime +mtime "$HOME/.zcompdump" 2>/dev/null
-  _today_start=$(( EPOCHSECONDS - (EPOCHSECONDS % 86400) ))
-  if (( _zcomp_mtime >= _today_start )); then
-    compinit -C
-  else
-    compinit
-  fi
-else
-  compinit
+if (( $+functions[_zsh_init_completions] )); then
+  _zsh_add_completion_dirs "$HOME/.docker/completions"
+  _zsh_init_completions daily
 fi
 
 # -----------------------------------------------------------------------------
@@ -71,30 +61,8 @@ export GOG_ACCOUNT="hameldesai3@gmail.com"
 # -----------------------------------------------------------------------------
 # Tool Init Scripts
 # -----------------------------------------------------------------------------
-_cache_needs_refresh() {
-  local cache_file="$1"
-  [[ ! -f "$cache_file" ]] && return 0
-
-  local file_mtime
-  zstat -A file_mtime +mtime "$cache_file" 2>/dev/null || return 0
-  (( EPOCHSECONDS - file_mtime > 86400 ))
-}
-
-if (( $+commands[uv] )); then
-  _uv_cache="$_ZSH_CACHE_DIR/uv-completion.zsh"
-  if _cache_needs_refresh "$_uv_cache"; then
-    uv generate-shell-completion zsh > "$_uv_cache" 2>/dev/null
-  fi
-  [[ -f "$_uv_cache" ]] && source "$_uv_cache"
-fi
-
-if (( $+commands[op] )); then
-  _op_cache="$_ZSH_CACHE_DIR/op-completion.zsh"
-  if _cache_needs_refresh "$_op_cache"; then
-    op completion zsh > "$_op_cache" 2>/dev/null
-  fi
-  [[ -f "$_op_cache" ]] && source "$_op_cache"
-  compdef _op op 2>/dev/null
+if (( $+functions[_zsh_load_common_tool_completions] )); then
+  _zsh_load_common_tool_completions
 fi
 
 if (( $+functions[_activate_mise] )); then

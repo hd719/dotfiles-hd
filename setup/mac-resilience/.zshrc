@@ -12,6 +12,7 @@ source $ZSH_CONFIG_DIR/tooling.zsh     # Dev tools config
 source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
 source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
 source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
+source "$ZSH_CONFIG_DIR/../../../config/zsh/completions.zsh"
 
 # Work-owned shortcut so this profile can stay independent of shared aliases.
 alias v='nvim'
@@ -35,21 +36,8 @@ add-zsh-hook precmd _load_deferred_plugins
 # -----------------------------------------------------------------------------
 # Completions (cached compinit for speed)
 # -----------------------------------------------------------------------------
-# Uses zsh native EPOCHSECONDS and zstat (loaded in prompt.zsh) instead of external commands
-fpath=(/Users/hameldesai/.docker/completions $fpath)
-autoload -Uz compinit
-if [[ -f ~/.zcompdump ]]; then
-  local _zcomp_mtime _today_start
-  zstat -A _zcomp_mtime +mtime ~/.zcompdump 2>/dev/null
-  _today_start=$(( EPOCHSECONDS - (EPOCHSECONDS % 86400) ))
-  if (( _zcomp_mtime >= _today_start )); then
-    compinit -C  # Cached (fast)
-  else
-    compinit     # Full rebuild (once per day)
-  fi
-else
-  compinit       # First run
-fi
+_zsh_add_completion_dirs "$HOME/.docker/completions"
+_zsh_init_completions daily
 
 # -----------------------------------------------------------------------------
 # Work Environment
@@ -64,37 +52,11 @@ export HUSKY=0
 # -----------------------------------------------------------------------------
 # Tool Init Scripts (cached for speed)
 # -----------------------------------------------------------------------------
-# Helper: Check if cache file needs refresh (older than 1 day)
-# Uses zsh native EPOCHSECONDS and zstat instead of external commands
-_cache_needs_refresh() {
-  local cache_file="$1"
-  [[ ! -f "$cache_file" ]] && return 0
-  local file_mtime
-  zstat -A file_mtime +mtime "$cache_file" 2>/dev/null || return 0
-  (( EPOCHSECONDS - file_mtime > 86400 ))
-}
-
-# Cache uv completions
-_uv_cache="$_ZSH_CACHE_DIR/uv-completion.zsh"
-if _cache_needs_refresh "$_uv_cache"; then
-  uv generate-shell-completion zsh > "$_uv_cache" 2>/dev/null
-fi
-[[ -f "$_uv_cache" ]] && source "$_uv_cache"
-
-# Cache 1Password completions
-_op_cache="$_ZSH_CACHE_DIR/op-completion.zsh"
-if _cache_needs_refresh "$_op_cache"; then
-  op completion zsh > "$_op_cache" 2>/dev/null
-fi
-[[ -f "$_op_cache" ]] && source "$_op_cache"
-compdef _op op
+_zsh_load_common_tool_completions
 
 # Cache fnm environment
 _fnm_cache="$_ZSH_CACHE_DIR/fnm-env.zsh"
-if _cache_needs_refresh "$_fnm_cache"; then
-  fnm env --use-on-cd > "$_fnm_cache" 2>/dev/null
-fi
-[[ -f "$_fnm_cache" ]] && source "$_fnm_cache"
+_zsh_cache_and_source fnm "$_fnm_cache" fnm env --use-on-cd
 
 set_code_artifact() {
     export CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain arceo --query authorizationToken --output text)"

@@ -12,6 +12,7 @@ source $ZSH_CONFIG_DIR/tooling.zsh     # Dev tools config
 source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
 source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
 source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
+source "$ZSH_CONFIG_DIR/../../../config/zsh/completions.zsh"
 
 # -----------------------------------------------------------------------------
 # Plugins - Load immediately for better UX
@@ -29,26 +30,11 @@ export FORCE_COLOR=1
 # Completions (cached compinit for speed)
 # Uses zsh native stat instead of external stat command
 # -----------------------------------------------------------------------------
-typeset -gaU fpath
-fpath=(
-  "$HOME/.docker/completions"
-  /opt/homebrew/share/zsh/site-functions
+_zsh_add_completion_dirs \
+  "$HOME/.docker/completions" \
+  /opt/homebrew/share/zsh/site-functions \
   /usr/local/share/zsh/site-functions
-  $fpath
-)
-autoload -Uz compinit
-# Check if zcompdump is fresh enough to reuse.
-if [[ -f ~/.zcompdump ]]; then
-  local _zcomp_mtime
-  zstat -A _zcomp_mtime +mtime ~/.zcompdump 2>/dev/null
-  if (( EPOCHSECONDS - _zcomp_mtime < 43200 )); then
-    compinit -C  # Cached (fast)
-  else
-    compinit     # Full rebuild
-  fi
-else
-  compinit       # First run
-fi
+_zsh_init_completions 43200
 typeset -gaU path
 path=("${XDG_BIN_HOME:-$HOME/.local/bin}" $path)
 export PATH
