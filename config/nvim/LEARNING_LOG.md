@@ -1943,3 +1943,34 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   Nord background (`#3B4252`) after Ghostty transparency and blur.
 - No autosuggestion color was changed yet. The proposed next test is muted
   steel blue-gray `#7B8496`.
+
+## 2026-07-17 — Session 014: Shared Zsh Autosuggestion Contrast
+
+- Set `ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#7B8496'` in the shared
+  `setup/mac-vm/zsh-config/prompt.zsh` file.
+- The personal Mac, Mac mini, and repo-managed Resilience shell entry points all
+  source that file before loading `zsh-autosuggestions`.
+- Fresh-shell checks confirmed all three entry points inherit `fg=#7B8496`.
+- Run `exec zsh`, then type the beginning of a command from shell history to
+  judge the new muted steel blue-gray suggestion color.
+- Live visual confirmation is pending; nothing is committed yet.
+
+### Shared Autosuggestion Confirmation
+
+- Hamel confirmed the muted steel blue-gray suggestion color looks good.
+- Accepted final state: `#7B8496` lives in shared `prompt.zsh`, so the personal
+  Mac, Mac mini, and repo-managed Resilience shell entry points inherit it.
+- After pulling on another machine, run `exec zsh` to load the new color.
+
+### Resilience Boundary and Next Lesson
+
+- The personal Mac and Mac mini are guaranteed to load the shared setting from
+  their repo-managed shell entry points.
+- The repo's Resilience entry point also loads it, but the real work `.zshrc`
+  is intentionally preserved. A pull alone changes the work shell only if that
+  live file already sources the shared `prompt.zsh`.
+- After pulling on the work Mac, run `exec zsh`, then
+  `print -r -- "$ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE"`. The expected result is
+  `fg=#7B8496`; a blank result means the protected work shell needs a small,
+  explicit follow-up edit.
+- Best next lesson: resume Curriculum 4.1 at the pending `w` motion checkpoint.
