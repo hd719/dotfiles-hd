@@ -127,18 +127,48 @@ return {
           bg = "#5C6A7D",
         })
 
-        -- Keep rendered Markdown code panels distinct from both light and dark
-        -- content behind Ghostty.
+        -- Give rendered Markdown Codex's Catppuccin Mocha accents while the
+        -- rest of Neovim keeps its transparent Nord base.
+        local markdown_heading_bg = "#45475A"
+        for level, foreground in ipairs({
+          "#F38BA8",
+          "#FAB387",
+          "#F9E2AF",
+          "#A6E3A1",
+          "#74C7EC",
+          "#B4BEFE",
+        }) do
+          highlights["RenderMarkdownH" .. level] = {
+            fg = foreground,
+            bold = true,
+          }
+          highlights["RenderMarkdownH" .. level .. "Bg"] = {
+            bg = markdown_heading_bg,
+          }
+        end
+
         for _, group in ipairs({
           "RenderMarkdownCode",
           "RenderMarkdownCodeBorder",
           "RenderMarkdownCodeFallback",
-          "RenderMarkdownCodeInline",
         }) do
-          highlights[group] = vim.tbl_extend("force", highlights[group] or {}, {
-            bg = colors.polar_night.origin,
-          })
+          highlights[group] = { bg = "#313244" }
         end
+        highlights.RenderMarkdownCodeInfo = {
+          fg = "#89DCEB",
+          bg = "#313244",
+        }
+        highlights.RenderMarkdownCodeInline = {
+          fg = "#A6E3A1",
+          bg = "#313244",
+        }
+        highlights.RenderMarkdownTableHead = { fg = "#89DCEB", bold = true }
+        highlights.RenderMarkdownTableRow = { fg = "#585B70" }
+        highlights.RenderMarkdownBullet = { fg = "#94E2D5" }
+        highlights.RenderMarkdownLink = { fg = "#89B4FA" }
+        highlights.RenderMarkdownLinkTitle = { fg = "#89B4FA" }
+        highlights.RenderMarkdownWikiLink = { fg = "#B4BEFE" }
+        highlights["@markup.link.label.markdown_inline"] = { fg = "#89B4FA" }
 
         -- Keep the Snacks selection visible without overriding icon colors.
         highlights.SnacksPickerListCursorLine = {

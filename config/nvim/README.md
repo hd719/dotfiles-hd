@@ -223,6 +223,8 @@ filetype, and compact cursor location/progress.
 
 In Markdown files, render-markdown decorates headings, checkboxes, code blocks,
 tables, and quotes in the editor; `Space m` toggles between raw and rendered.
+Those decorations use Catppuccin Mocha accents over Neovim's transparent Nord
+base, with compact heading bands and trimmed table cells.
 
 Snacks also provides indent guides with scope highlighting, highlights other
 uses of the symbol under the cursor, and disables heavy features on very large

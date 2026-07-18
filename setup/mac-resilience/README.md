@@ -9,7 +9,7 @@ Set up only:
 
 - Ghostty with Maple Mono NF and Hamel Nord Blur.
 - Herdr with `Ctrl-b` as the prefix.
-- Hunk with the shared Hamel Nord review theme.
+- Hunk with the shared Catppuccin Mocha review theme.
 - Neovim with the committed plugins, keymaps, LSPs, formatters, and curriculum.
 
 Do not replace `.zshrc`, `config/mise`, Git identity, credentials, certificates,

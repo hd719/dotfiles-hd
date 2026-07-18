@@ -1,58 +1,8 @@
-# Hamel Nord, matched to Ghostty and Zed.
-theme = "custom"
+# Catppuccin Mocha accents with Ghostty's background showing through.
+theme = "catppuccin-mocha"
 mode = "auto"
 line_numbers = true
 wrap_lines = false
 menu_bar = true
 agent_notes = false
 transparent_background = true
-
-[custom_theme]
-base = "nord"
-label = "Hamel Nord"
-background = "#3b4252"
-panel = "#3b4252"
-panelAlt = "#434c5e"
-border = "#4c566a"
-accent = "#88c0d0"
-accentMuted = "#4c566a"
-text = "#d8dee9"
-muted = "#a0aec8"
-addedBg = "#505b5e"
-removedBg = "#554857"
-movedAddedBg = "#4a5b6b"
-movedRemovedBg = "#4a5b6b"
-contextBg = "#3b4252"
-addedContentBg = "#586562"
-removedContentBg = "#604b59"
-contextContentBg = "#3b4252"
-addedSignColor = "#a3be8c"
-removedSignColor = "#bf616a"
-lineNumberBg = "#3b4252"
-lineNumberFg = "#eceff4"
-selectedHunk = "#4e6272"
-badgeAdded = "#a3be8c"
-badgeRemoved = "#bf616a"
-badgeNeutral = "#ebcb8b"
-fileNew = "#a3be8c"
-fileDeleted = "#bf616a"
-fileRenamed = "#88c0d0"
-fileModified = "#ebcb8b"
-fileUntracked = "#b48ead"
-noteBorder = "#b48ead"
-noteBackground = "#434c5e"
-noteTitleBackground = "#4c566a"
-noteTitleText = "#d8dee9"
-
-[custom_theme.syntax]
-default = "#d8dee9"
-keyword = "#81a1c1"
-string = "#c5e0a3"
-comment = "#b5b5b5"
-number = "#d08770"
-function = "#88c0d0"
-property = "#8fbcbb"
-type = "#8fbcbb"
-variable = "#d8dee9"
-operator = "#81a1c1"
-punctuation = "#d8dee9"

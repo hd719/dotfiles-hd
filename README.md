@@ -36,7 +36,7 @@ both a physical personal MacBook and a MacBook VM.
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Matches Zed's Maple Mono NF and Hamel Nord Blur appearance. |
-| Hunk | `~/.config/hunk/config.toml` | `config/hunk/config.toml` | Linked file | Uses Hamel Nord; Hunk runtime state stays local. |
+| Hunk | `~/.config/hunk/config.toml` | `config/hunk/config.toml` | Linked file | Uses Catppuccin Mocha; Hunk runtime state stays local. |
 | Karabiner | `~/.config/karabiner` | `config/karabiner` | MacBook-only linked dir | The Mac mini profile does not link it. |
 | mise | `~/.config/mise` | `config/mise` | Linked dir | Global toolchain config. |
 | Neovim | `~/.config/nvim` | `config/nvim` | Linked dir | Lua config, plugins, keymaps, LSP, and Hamel Nord. |

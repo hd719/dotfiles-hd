@@ -1994,3 +1994,19 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - After pulling on the work Mac, run `exec zsh`; `v`, `v .`, and
   `v README.md` then launch Neovim.
 - Best next lesson remains Curriculum 4.1 at the pending `w` motion checkpoint.
+
+## 2026-07-17 — Session 015: Catppuccin Markdown and Hunk
+
+- Kept Neovim's transparent Nord base and applied Catppuccin Mocha only to
+  rendered Markdown headings, code, tables, bullets, and links.
+- Shortened heading bands with block width and one-cell side padding; trimmed
+  table cells to reduce unnecessary width and wrapping.
+- Hamel visually confirmed the rendered Markdown result.
+- Switched Hunk from the hand-maintained Hamel Nord palette to Hunk's built-in
+  `catppuccin-mocha` theme while preserving its transparent background.
+- Mental model: plugin-specific highlights can use another palette without
+  replacing the editor's main colorscheme, and a built-in Hunk theme avoids a
+  duplicate local color map.
+- `Space m` still toggles raw and rendered Markdown. Restart Hunk to load its
+  new theme after pulling on another machine.
+- Best next lesson remains Curriculum 4.1 at the pending `w` motion checkpoint.
