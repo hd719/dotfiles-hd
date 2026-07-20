@@ -150,17 +150,28 @@ See the [Hunk documentation](https://www.hunk.dev/), the
 [shared Hunk theme](config/hunk/config.toml), and the
 [shared aliases](config/zsh/hunk-aliases.zsh).
 
-### Archive Codex Chats
+### Use Codex CLI
 
-Reload the MacBook shell, then open the interactive Codex chat picker:
+Reload the MacBook shell, then use the `cod`-prefixed aliases:
 
 ```bash
 reload
-ca
+cod
 ```
 
-`ca` shows active Codex app chats with the same renamed titles used by the app,
-lets `fzf` filter the list, and asks for confirmation before running
+| Alias | Command | Purpose |
+| --- | --- | --- |
+| `cod` | `codex` | Start an interactive CLI session. |
+| `codr` | `codex resume` | Pick a session to resume. |
+| `codrl` | `codex resume --last` | Resume the latest session in this directory. |
+| `codx` | `codex exec` | Run a non-interactive task. |
+| `codrv` | `codex review --uncommitted` | Review local uncommitted changes. |
+| `coda` | `carchive` | Pick and archive an active Codex app chat. |
+| `codd` | `codex doctor` | Diagnose the local Codex installation. |
+| `codu` | `brew upgrade --cask codex` | Update the Homebrew-managed Codex CLI. |
+
+`coda` shows active Codex app chats with the same renamed titles used by the
+app, lets `fzf` filter the list, and asks for confirmation before running
 `codex archive`. Press `Esc` to cancel. Restore a chat with
 `codex unarchive "<session name or UUID>"`.
 

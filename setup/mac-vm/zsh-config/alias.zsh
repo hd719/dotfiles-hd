@@ -65,7 +65,16 @@ alias dhd='cd ~/Developer/dotfiles-hd && code .'
 alias open-zshrc='code ~/.zshrc'
 alias ff='fastfetch'
 alias r='reload'
-alias ca='carchive'
+
+## Codex
+alias cod='codex'
+alias coda='carchive'
+alias codd='codex doctor'
+alias codr='codex resume'
+alias codrl='codex resume --last'
+alias codrv='codex review --uncommitted'
+alias codu='brew upgrade --cask codex'
+alias codx='codex exec'
 
 ## Brew
 alias open-brew='cd /opt/homebrew'
