@@ -22,7 +22,7 @@ alias v='nvim'
 # -----------------------------------------------------------------------------
 # Plugins load before first prompt via precmd hook (better UX than preexec)
 # This keeps fast startup but plugins are active before you start typing
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#7B8496'
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#9399b2'
 _deferred_plugins_loaded=0
 _load_deferred_plugins() {
   (( _deferred_plugins_loaded )) && return

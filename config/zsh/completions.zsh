@@ -4,6 +4,22 @@
 zmodload zsh/datetime 2>/dev/null
 zmodload zsh/stat 2>/dev/null
 
+# Accept a pending history suggestion with Tab; otherwise keep normal completion.
+_zsh_tab_accept_or_complete() {
+  if [[ -n "$POSTDISPLAY" && "$CURSOR" -eq "${#BUFFER}" ]] &&
+    (( $+widgets[autosuggest-accept] )); then
+    zle autosuggest-accept
+    zle -I
+    zle redisplay
+  else
+    zle expand-or-complete
+  fi
+}
+
+zle -N _zsh_tab_accept_or_complete
+bindkey -M emacs '^I' _zsh_tab_accept_or_complete
+bindkey -M viins '^I' _zsh_tab_accept_or_complete
+
 _ZSH_CACHE_DIR="${_ZSH_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/zsh}"
 [[ -d "$_ZSH_CACHE_DIR" ]] || mkdir -p "$_ZSH_CACHE_DIR"
 

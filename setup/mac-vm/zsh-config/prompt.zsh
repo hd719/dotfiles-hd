@@ -6,7 +6,7 @@ export PATH
 export TERM=xterm-256color
 
 # Shared contrast for history suggestions over Ghostty's blurred Nord theme.
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#7B8496'
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#9399b2'
 
 # Cache directory for init scripts (created once in functions.zsh)
 _ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
