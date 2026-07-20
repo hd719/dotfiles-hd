@@ -2010,3 +2010,109 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - `Space m` still toggles raw and rendered Markdown. Restart Hunk to load its
   new theme after pulling on another machine.
 - Best next lesson remains Curriculum 4.1 at the pending `w` motion checkpoint.
+
+## 2026-07-19 — Session 016: Motions
+
+### Resume Point
+
+- Resumed the clean `master` branch at Curriculum 4.1: word, line, file, and
+  matching-pair motions.
+- First checkpoint: open a fresh unnamed buffer with `Space n`, add controlled
+  practice text, then use native Normal-mode `w` to move to the next word.
+- Curriculum 4.1 remains unchecked until every motion group is practiced and
+  confirmed.
+
+### Safe Motion Scratch
+
+- Hamel pressed `Space n` and confirmed that a blank unnamed buffer opened.
+- Next: insert `alpha beta gamma` and return to Normal mode so word motions have
+  predictable targets.
+
+### Word-Motion Fixture
+
+- Hamel inserted `alpha beta gamma` and returned to Normal mode.
+- Next: press `0` to move to the first character of the line before testing
+  forward word motion with `w`.
+
+### Start-of-Line Motion Confirmed
+
+- Hamel pressed `0` and confirmed that the cursor moved to the first `a` in
+  `alpha`.
+- `0` moves to column zero, the literal first character of the current line.
+- Next: press `w` once to move to the start of `beta`.
+
+### Forward Word Motion Confirmed
+
+- Hamel pressed `w` and advanced to the start of `beta`.
+- `w` moves forward to the start of the next word; it changes only the cursor,
+  not the text.
+- Next: press `e` to move from the start to the end of `beta`.
+
+### End-of-Word Motion Confirmed
+
+- Hamel pressed `e` and advanced to the final `a` in `beta`.
+- `e` moves forward to the end of the current or next word.
+- Next: press `b` to move backward to the start of `beta`.
+
+### Backward Word Motion Confirmed
+
+- Hamel pressed `b` and returned to the first `b` in `beta`.
+- `b` moves backward to a word start; `w`, `e`, and `b` now cover next start,
+  next end, and previous start.
+- Next: press `$` to jump to the final character of the current line.
+
+### End-of-Line Motion Confirmed
+
+- Hamel pressed `$` and advanced to the final `a` in `gamma`.
+- `$` jumps to the final character of the current line.
+- Next: add two more practice lines so `gg` and `G` can demonstrate whole-file
+  movement.
+
+### File-Motion Fixture
+
+- Hamel added `second line` and `third line`, producing a three-line unnamed
+  scratch buffer, then returned to Normal mode.
+- Next: press `gg` to jump from the third line to the first line.
+
+### Top-of-File Motion Confirmed
+
+- Hamel pressed `gg` and confirmed the cursor jumped to line 1.
+- `gg` moves to the first line of the file.
+- Next: press `G` to jump back to the last line.
+
+### Bottom-of-File Motion Confirmed
+
+- Hamel pressed `G` and confirmed the cursor jumped to the last line.
+- `G` moves to the final line of the file.
+- Next: add a pair of parentheses for matching-pair motion practice.
+
+### Matching-Pair Fixture
+
+- Hamel used `o` to add `call(alpha, beta)` below the current line, then
+  returned to Normal mode.
+- Next: press `%` from the closing parenthesis to jump to its opening match.
+
+### Matching-Pair Motion Explained
+
+- `%` jumps between matching delimiters such as `()`, `[]`, and `{}`.
+- Coding use case: quickly move between the opening and closing edges of a
+  function call, array, or code block, especially when nesting is deep.
+- Pressing `%` again jumps back to the other side of the pair.
+
+### Matching-Pair Motion Confirmed
+
+- Hamel used `%` to jump from the closing `)` to its opening `(`, then pressed
+  `%` again and confirmed the cursor returned to the closing `)`.
+- Curriculum 4.1 is complete: Hamel practiced word, line, whole-file, and
+  matching-pair motions.
+- Next: begin Curriculum 4.2 by combining operators with those motions.
+
+## 2026-07-20 — Session 017: Operators and Motions
+
+### Operator-Motion Setup
+
+- Hamel pressed `gg` and returned to the first line, `alpha beta gamma`.
+- Vim editing follows an operator-plus-motion grammar: choose an action, then
+  describe the text that action should cover.
+- First combination: `dw` means delete (`d`) through the next-word motion
+  (`w`), removing `alpha ` and leaving `beta gamma`.

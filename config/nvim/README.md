@@ -153,6 +153,9 @@ Every agent teaching Neovim must read and update both files.
 | `Space w` / `Space x` | Save / save and quit |
 | `Space R` | Replace the word under the cursor in the current file |
 | `u` / `Ctrl-r` / `.` | Undo / redo / repeat the last change |
+| `w` / `e` / `b` | Next word start / word end / previous word start |
+| `0` / `$` / `gg` / `G` | Line start / line end / file top / file bottom |
+| `%` | Jump between matching `()`, `[]`, or `{}` |
 | `yy` / `p` | Yank the current line / paste after |
 | `Space v` / `Space s` | Split right / down |
 | `Ctrl-h/j/k/l` | Focus window left / down / up / right |

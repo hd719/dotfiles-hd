@@ -21,10 +21,9 @@ unexplained magic.
 ## Current Checkpoint
 
 - **Lesson:** 4 — Motions, Operators, and Text Objects
-- **Next core sub-lesson:** 4.1 — navigate with word, line, file, and
-  matching-pair motions.
-- **Why Lesson 4 remains open:** its core motion, operator, count, text-object,
-  search, selection, indentation, movement, and commenting drills remain.
+- **Next core sub-lesson:** 4.2 — combine `d`, `c`, and `y` with motions.
+- **Why Lesson 4 remains open:** its core operator, count, text-object, search,
+  selection, indentation, movement, and commenting drills remain.
 
 ## Lesson 1 — Editor Foundations
 
@@ -128,7 +127,8 @@ unexplained magic.
 
 ### Core Sub-Lessons
 
-- [ ] **4.1** Navigate with word, line, file, and matching-pair motions.
+- [x] **4.1** Navigate with word, line, file, and matching-pair motions. —
+  Session 016
 - [ ] **4.2** Combine `d`, `c`, and `y` with motions instead of memorized edits.
 - [ ] **4.3** Use counts to scale motions and operators.
 - [ ] **4.4** Edit with inside and around text objects for words, quotes, and
