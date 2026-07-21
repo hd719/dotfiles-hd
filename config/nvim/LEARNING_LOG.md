@@ -2116,3 +2116,527 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   describe the text that action should cover.
 - First combination: `dw` means delete (`d`) through the next-word motion
   (`w`), removing `alpha ` and leaving `beta gamma`.
+
+## 2026-07-21 — Session 018: Operator-Motion Practice
+
+### Delete With a Motion Confirmed
+
+- Hamel pressed `dw` on `alpha beta gamma` and confirmed that `alpha ` was
+  deleted, leaving `beta gamma`.
+- Mental model: `d` chooses the delete operator and `w` supplies its range.
+- Next: use `cw` on `beta` to change that word while preserving its trailing
+  space.
+
+### Change With a Motion Confirmed
+
+- Hamel pressed `cw`, typed `delta`, and returned to Normal mode; `beta gamma`
+  became `delta gamma`.
+- `c{motion}` deletes the motion's range and immediately starts Insert mode.
+- `cw` is a useful special case: it changes the current word without consuming
+  its trailing space.
+- Next: combine `y` with `w`, then paste the yanked range to verify it.
+
+### Yank With a Motion Confirmed
+
+- Hamel pressed `0`, `yw`, and `P`; the yanked `delta ` was pasted before the
+  cursor, producing `delta delta gamma`.
+- `y{motion}` copies the motion's range without deleting it; `P` pastes before
+  the cursor, while lowercase `p` pastes after it.
+- Curriculum 4.2 is complete: Hamel combined `d`, `c`, and `y` with `w` rather
+  than treating each edit as an unrelated command.
+- Next: begin Curriculum 4.3 by adding a count before a motion.
+
+### Counted Motion Confirmed
+
+- Hamel pressed `0`, then `2w`, and confirmed the cursor moved two word starts
+  from the first `delta` to `gamma`.
+- A count scales the motion that follows it: `2w` performs `w` twice.
+- Next: combine the same count with `dw` to delete two words in one command.
+
+### Counted Operator Confirmed
+
+- Hamel pressed `0`, then `2dw`, and confirmed that both `delta ` words were
+  deleted in one command, leaving `gamma`.
+- Counts scale operator-motion commands as well as standalone motions.
+- Curriculum 4.3 is complete: Hamel practiced both `2w` and `2dw`.
+- Next: begin Curriculum 4.4 with the `iw` inner-word text object.
+
+### Inner-Word Text Object Confirmed
+
+- Hamel moved to the end of `gamma`, pressed `ciw`, typed `omega`, and returned
+  to Normal mode; the whole word changed even though the cursor was not at its
+  start.
+- `ciw` reads as change inside word. In this operator-pending command, `i`
+  means inner; it is unrelated to Hamel's reversed Normal-mode Insert mapping.
+- Next: compare `iw` with `aw`, which includes surrounding whitespace.
+
+### Around-Word Text Object Confirmed
+
+- Hamel moved to `second line` and pressed `daw`; Neovim deleted `second` plus
+  its adjacent space, leaving `line` without extra whitespace.
+- `iw` targets only the word; `aw` targets the word and nearby whitespace.
+- Coding use case: on `async function run()`, put the cursor anywhere in
+  `async` and press `daw` to leave `function run()` cleanly. Use `ciw` when a
+  local variable or argument needs replacing from anywhere inside its name.
+
+### Parentheses Text-Object Setup
+
+- Next target: the existing `call(alpha, beta)` line.
+- `ci(` reads as change inside parentheses: it replaces the contents while
+  preserving the surrounding `(` and `)`.
+- Navigation clarification: `G` and `w` are separate commands. `G` jumps to
+  the last line; `w` then moves from `call` to the word inside its parentheses
+  so the cursor is within the text object.
+
+### Inner-Parentheses Text Object Confirmed
+
+- Hamel pressed `ci(` from inside `call(alpha, beta)`, typed `omega`, and
+  returned to Normal mode; the result was `call(omega)`.
+- `i(` excluded the delimiters, so `c` replaced only the argument contents and
+  preserved both parentheses.
+- Coding use case: replace an entire function argument list from anywhere
+  inside it without manually selecting the arguments.
+- Next: use `a(` to include the parentheses themselves.
+
+### Around-Parentheses Text Object Confirmed
+
+- Hamel pressed `da(` inside `call(omega)` and confirmed that Neovim removed
+  `(omega)`, leaving `call`.
+- `i(` targets only the contents; `a(` includes both parentheses.
+- Coding use case: remove an entire parenthesized wrapper while refactoring,
+  including its delimiters, without selecting it by hand.
+- Next: create a quoted-string fixture for `i"` and `a"` practice.
+
+### Quoted-String Fixture
+
+- Hamel used `o` to add `const mode = "dark"`, then returned to Normal mode
+  with the cursor on the closing quote.
+- Next: use `ci"` to change only the text inside the quotes while preserving
+  both quote characters.
+
+### Inner-Quote Text Object Confirmed
+
+- Hamel pressed `ci"`, typed `light`, and returned to Normal mode; the result
+  was `const mode = "light"`.
+- `i"` excludes the quote delimiters, just as `i(` excludes parentheses.
+- Coding use case: replace a configuration value or string argument without
+  manually selecting its contents or disturbing its quotes.
+- Next: use `a"` to include the quotes themselves.
+
+### Around-Quote Text Object Confirmed
+
+- Hamel pressed `da"` inside `const mode = "light"` and confirmed that Neovim
+  removed the quoted string, both quote delimiters, and the adjacent space,
+  leaving `const mode =`.
+- Curriculum 4.4 is complete: Hamel practiced inside and around text objects
+  for words, parentheses, and quotes.
+- Next: begin Curriculum 4.5 with a forward search for `line` in the scratch
+  buffer, which contains two matches.
+
+### Forward-Search Prompt Explained
+
+- Hamel pressed `/` and saw the command/search prompt appear at the bottom.
+- This is expected: `/` opens Neovim's search command line rather than Insert
+  mode. Type the search text directly after `/`, then press `Enter`.
+
+### Forward Search Confirmed
+
+- Hamel entered `/line` and pressed `Enter`; Neovim jumped to a `line` match in
+  the current buffer.
+- `/` searches the current file, unlike `Space /`, which opens project-wide
+  grep.
+- Next: press `n` to repeat the search in the same direction.
+
+### Next Search Match Confirmed
+
+- Hamel pressed `n` and confirmed that Neovim advanced to the next `line`
+  match, inside `third line`.
+- `n` repeats the latest search in its original direction.
+- Next: press uppercase `N` to repeat that search in the opposite direction.
+
+### Previous Search Match Confirmed
+
+- Hamel pressed uppercase `N` and confirmed that Neovim returned to the
+  previous `line` match.
+- `N` repeats the latest search in the opposite direction.
+- Curriculum 4.5 is complete: Hamel practiced `/`, `n`, and `N` and can
+  distinguish current-file search from project grep with `Space /`.
+- Next: begin Curriculum 4.6 with the custom `Ctrl-a` full-buffer selection.
+
+### Full-Buffer Selection Exit Explained
+
+- After `Ctrl-a` highlighted the whole buffer in Visual Line mode, Hamel asked
+  how to clear the selection.
+- Press `Escape` to leave Visual mode without changing the selected text.
+
+### Search Highlight Clarification
+
+- Hamel clarified that the remaining highlight came from a search such as
+  `/beta`, not from Visual mode.
+- Type `:noh` and press `Enter` to hide current search highlighting. This does
+  not forget the search pattern; `n` and `N` can still navigate its matches.
+- Distinction: `Escape` exits a Visual selection, while `:noh` clears search
+  highlighting.
+
+### Search Highlight Clearing Confirmed
+
+- Hamel typed `:noh`, pressed `Enter`, and confirmed that the `/beta` search
+  highlight disappeared.
+- The earlier question referred to search highlighting, so Curriculum 4.6 is
+  still pending an explicit `Ctrl-a` full-buffer selection confirmation.
+
+### Full-Buffer Selection Confirmed
+
+- Hamel pressed `Ctrl-a` and confirmed that the whole buffer entered Visual
+  Line selection, then pressed `Escape` and confirmed the selection cleared
+  without changing text.
+- Curriculum 4.6 is complete.
+- Next: begin Curriculum 4.7 by selecting two full lines and indenting them
+  while keeping the selection active.
+
+### Visual Indent Confirmed
+
+- Hamel pressed `gg`, `V`, `j`, then `>`; the first two lines indented and
+  remained selected.
+- The custom Visual-mode `>` mapping reapplies the selection after indenting,
+  which makes repeated alignment edits possible without selecting again.
+- Next: press `<` while the same lines remain selected to outdent them.
+
+### Visual Outdent Confirmed
+
+- Hamel pressed `<`; the same two lines outdented and remained selected.
+- The custom Visual-mode `<` mapping also reapplies the selection.
+- Next: press uppercase `J` to move the selected two-line block down one line.
+
+### Visual Block Move Down Confirmed
+
+- Hamel pressed uppercase `J`; the selected two-line block moved down one line
+  and remained selected.
+- Coding use case: reorder adjacent statements or configuration entries as a
+  block without cutting, pasting, or rebuilding the selection.
+- Next: press uppercase `K` to move the selected block back up one line.
+
+### Normal-Mode `K` Correction
+
+- Pressing uppercase `K` opened a manual page, proving Neovim was in Normal
+  mode rather than Visual mode at that moment.
+- Native Normal-mode `K` looks up documentation for the word under the cursor;
+  the custom block-move `K` mapping applies only while text is visually
+  selected.
+- Recovery plan: close the manual, return to the scratch buffer, press `gv` to
+  reselect the previous Visual area, then retry uppercase `K`.
+
+### Manual Recovery Confirmed
+
+- Hamel pressed `q`, closed the manual, and returned to the scratch buffer.
+- Next: press `gv` in Normal mode to restore the most recent Visual selection.
+
+### Previous Visual Selection Restored
+
+- Hamel pressed `gv` and confirmed that the previous two-line Visual selection
+  was highlighted again.
+- `gv` is the recovery command when a Visual selection is lost or exited.
+- Next: retry uppercase `K` while the block is visibly selected.
+
+### `gv` Mode-State Clarification
+
+- Hamel reported that `gv` appeared to stop working after the retry.
+- A headless reproduction with the real config confirmed that Visual-mode `K`
+  leaves Neovim in Visual Line mode; the mapping itself is working.
+- Root cause: `gv` is meant to restore a prior selection from Normal mode. If
+  the block is already selected, `gv` exchanges Visual areas and can appear to
+  do nothing.
+- Deterministic reset: press `Escape` to enter Normal mode, then press `gv`
+  once to restore the last selection.
+
+### Visual-Move Top-Boundary Diagnosis
+
+- Retrying uppercase `K` produced `E16: Invalid range`.
+- A headless reproduction with the real config confirmed the root cause: the
+  selected block was already at line 1, so there was no valid line above it.
+  The mapping was active; this was a boundary error, not the manual-page
+  behavior from Normal-mode `K`.
+- The error exits Visual mode. The verified recovery sequence is `gv`, `J`,
+  then `K`: reselect the block, move it down once, then move it back up.
+
+### Visual Block Move Up Confirmed
+
+- Hamel ran the recovery sequence `gv`, `J`, then `K`; the selected block moved
+  down and back up successfully.
+- Visual-mode `J` and `K` are now confirmed. `K` only fails at the top boundary
+  because no earlier line exists.
+- The unnamed scratch buffer has no filetype or `commentstring`, so the next
+  drill first assigns the Lua filetype before testing `Space c`.
+- Config verification showed that `Space c` comments the active selection and
+  then returns to Normal mode; unlike `<`, `>`, `J`, and `K`, it does not keep
+  the selection active afterward.
+
+### Comment-Drill Selection Diagnosis
+
+- The `Escape`, `:setfiletype lua`, `gv` setup did not restore the expected
+  two-line selection.
+- Live Neovim state confirmed that `:setfiletype lua` succeeded and the buffer
+  was in Normal mode, but its remembered Visual range had become a one-character
+  selection on line 1. Therefore `gv` could not recreate the earlier two-line
+  block.
+- Recovery: build the intended selection explicitly with `gg`, `V`, `j`
+  instead of relying on stale Visual-selection history.
+
+### Lesson Value Reset
+
+- Hamel stopped the drill and asked what practical goal it served.
+- Goal: test `Space c` on an active multi-line code selection. The exercise
+  drifted into artificial filetype and stale-selection setup because the
+  unnamed scratch buffer was not real code.
+- Decision: stop this scratch-buffer detour. Practice `Space c` later in a real
+  Lua or Go file where comments are naturally useful.
+- Confirmed Curriculum 4.7 skills so far: visual indent/outdent with `>` and
+  `<`, and visual block movement with `J` and `K`. Multi-line commenting remains
+  pending.
+
+### Comment Drill Retained
+
+- Hamel clarified that multi-line commenting is useful; only the artificial
+  setup detour was not.
+- Live Neovim state confirmed that the current buffer is now Lua, has
+  `commentstring=-- %s`, and is in Normal mode.
+- Simplified drill: use `Ctrl-a` for a fresh full-buffer selection, then press
+  `Space c` to toggle comments on the selected nonblank lines.
+
+### Visual Comment Confirmed
+
+- Hamel pressed `Ctrl-a`, then `Space c`, and confirmed that the selected
+  nonblank Lua lines received `--` comments before Neovim returned to Normal
+  mode.
+- Curriculum 4.7 is complete: Hamel practiced visual indent/outdent, block
+  movement, selection recovery, boundary behavior, and multi-line commenting.
+- Lesson 4 core is complete. Next: Curriculum 5.1, real Go and Lua buffers with
+  verified LSP attachment through `:LspInfo`.
+
+## 2026-07-21 — Session 019: Lesson 5 Go Practice Module
+
+### Safe LSP Fixture Prepared
+
+- Hamel chose a purpose-built fake Go module for Lesson 5 instead of practicing
+  navigation and completion in production code.
+- Created the persistent local module at
+  `~/Developer/nvim-warrior-practice/lesson-05-go` with a small `main` package,
+  a documented `greeting` package, repeated `Greet` call sites, and a test.
+- The symbols intentionally support every Lesson 5 drill: `gh` hover, `gd`
+  definition jumps, `grr` references, `Space S` workspace symbols, and method
+  completion after `greeter.`.
+- Verified `gofmt`, `go test ./...`, `go vet ./...`, and `gopls check`.
+- Verified headlessly with the real Neovim config that `gopls` attaches to
+  `main.go`.
+- Curriculum 5.1 remains unchecked until Hamel personally verifies attachment
+  in both this Go module and a real Lua config buffer.
+- Next: open the Go fixture's `main.go`, run `:LspInfo`, and describe the
+  attached client.
+
+### Fixture Moved Into Dotfiles
+
+- Hamel decided that this curriculum-owned fixture should travel with the
+  dotfiles rather than remain a separate local project.
+- Moved it to
+  `~/Developer/dotfiles-hd/config/nvim/practice/lesson-05-go`; the live Neovim
+  symlink also exposes it at `~/.config/nvim/practice/lesson-05-go`.
+- This keeps the practice code, curriculum, and learning log versioned together.
+
+### Practice Project Opened
+
+- Hamel launched Neovim in the Lesson 5 Go practice directory and continued
+  from its file listing.
+- Next: open `main.go`, then inspect its attached language server.
+
+### Go Buffer Opened
+
+- Hamel opened `main.go` from the practice project's file listing.
+- Next: run `:LspInfo` and inspect whether `gopls` is attached.
+
+### Neovim 0.12 LSP Command Correction
+
+- Hamel correctly reported that `:LspInfo` is not an available command.
+- Reproduced with the live Neovim 0.12.4 config: `gopls` attached successfully,
+  while `exists(':LspInfo')` returned `0`.
+- Root cause: Neovim 0.12 supplies the built-in `:lsp` command, so the current
+  `nvim-lspconfig` plugin exits before creating its legacy `:LspInfo` alias.
+- The supported status command is `:checkhealth vim.lsp`; earlier `:LspInfo`
+  instructions in this append-only log are superseded by this correction.
+- Updated the curriculum, config README, and practice README.
+- Next: run `:checkhealth vim.lsp` from `main.go` and look for `gopls`.
+
+### Go LSP Attachment Confirmed
+
+- Hamel ran `:checkhealth vim.lsp` from `main.go` and confirmed that `gopls`
+  appeared in the report.
+- `:checkhealth` runs Neovim diagnostics; the `vim.lsp` argument limits the
+  report to language-server configuration and active clients.
+- Seeing `gopls` means the Go buffer has semantic code intelligence for hover,
+  definitions, references, workspace symbols, diagnostics, and completion.
+- Curriculum 5.1 remains open until Lua attachment is also confirmed.
+- Next: close the health report, open a real Lua config file, and check for
+  `lua_ls`.
+
+### LSP Health Report Closed and Documented
+
+- Hamel pressed `q` and closed the LSP health report.
+- Added the `:checkhealth vim.lsp` mental model and the meaning of an attached
+  `gopls` client to both the main Neovim README and the Lesson 5 practice README
+  so future agents and machines retain the correction.
+
+### Herdr Pane Versus Neovim Split
+
+- Hamel already opened the Lua side of the exercise through a Herdr pane.
+- A Herdr pane contains a separate terminal or Neovim process; `:vsplit` creates
+  two windows inside one Neovim process. Either layout works for this attachment
+  check.
+- Next: run `:checkhealth vim.lsp` in the Neovim instance showing `lsp.lua` and
+  look for `lua_ls`.
+
+### Lua LSP Attachment Confirmed
+
+- Hamel ran the LSP health report from the real `lsp.lua` config buffer and
+  found the attached `lua_ls` client.
+- Together with the confirmed `gopls` client in `main.go`, this completes
+  Curriculum 5.1 for both Go and Lua.
+- Next: close the health report and practice `gh` hover on a documented Go
+  symbol for Curriculum 5.2.
+
+### Go Hover Confirmed
+
+- Hamel returned to `main.go`, placed the cursor on `Greet`, pressed `gh`, and
+  saw its type definition in the LSP hover window.
+- `gh` answers “what is this symbol?” without leaving the current location.
+- Coding use case: check a function's parameters, return type, and documentation
+  before calling it instead of jumping into another file.
+- Curriculum 5.2 is complete. Curriculum 5.3 was completed earlier, so the next
+  core checkpoint is 5.4: find every reference with `grr`.
+
+### Go References Confirmed
+
+- Hamel placed the cursor on `Greet`, pressed Neovim's native `grr`, and saw a
+  small bottom window listing files that reference the method.
+- That bottom window is the quickfix references list. Each row is one matching
+  usage; move with `j` and `k`, then press `Enter` to jump to a selected usage.
+- Coding use case: inspect a function's impact before changing or renaming it.
+- Curriculum 5.4 is complete. Next: workspace-symbol search with `Space S`.
+
+### Reference Jump Confirmed
+
+- From the focused references list, Hamel pressed `j`, then `Enter`, and landed
+  on another line where `greeter.Greet(...)` is called.
+- This confirms the full `grr` workflow: collect usages, select one, and jump to
+  its exact file and line.
+- Added `grr` to the main Neovim README quick-reference row.
+
+### Quickfix Close Mapping Added
+
+- Hamel chose `Space c q` as an easier replacement for typing `:cclose` after
+  navigating LSP references.
+- Added `Space c q` to close only the quickfix/references list.
+- `Space c q` is targeted: it runs `:cclose` and preserves the code window.
+  `Space q` is general: it runs `:quit` and closes whichever Neovim window is
+  currently focused.
+- Documented the mapping in both Neovim READMEs. It remains unconfirmed until
+  Hamel reloads the config and successfully closes the visible references list.
+
+### Quickfix Close Mapping Confirmed
+
+- Hamel restarted the Go Neovim session, reopened the references list with
+  `grr`, and confirmed that `Space c q` closed the list while preserving the Go
+  code window.
+- The new mapping is now taught, documented, and live-verified.
+- Next: Curriculum 5.5, workspace-symbol search with `Space S`.
+
+### Search-Scope Mental Model
+
+- Hamel opened the LSP workspace-symbol picker with `Space S` and asked how it
+  differs from `/` and `Space f` before continuing.
+- `/` searches ordinary text only inside the current file.
+- `Space /` searches ordinary text across project files.
+- `Space f` fuzzy-searches project filenames and paths.
+- `Space S` asks the attached LSP for named code definitions across the project,
+  such as functions, methods, types, and variables.
+- Concrete example: `Space S`, then `Goodbye`, finds the `Goodbye` method as a
+  Go symbol even though the method is never called.
+- Added this four-scope search mental model to the main Neovim README.
+- Curriculum 5.5 remains open until Hamel searches for and opens a workspace
+  symbol.
+
+### Search Scopes Marked for Reinforcement
+
+- Hamel said distinguishing `/`, `Space /`, `Space f`, and `Space S` is a
+  recurring difficulty and asked that it be preserved explicitly.
+- Added optional Curriculum 5.D6 so future teaching sessions revisit the four
+  search scopes until Hamel can identify them from memory.
+- The optional review does not block completion of Lesson 5's core track.
+
+### Workspace-Symbol Search Confirmed
+
+- In the `Space S` LSP workspace-symbol picker, Hamel searched for `Goodbye`,
+  saw the method result, and pressed `Enter` to open its definition in
+  `greeting/greeter.go`.
+- This differs from plain-text grep: `gopls` identified `Goodbye` as a Go method
+  even though nothing calls it.
+- Curriculum 5.5 is complete. Next: Curriculum 5.6, deliberate completion and
+  acceptance of the intended item.
+
+### Jump-History Mental Model Revisited
+
+- Before returning from `greeter.go`, Hamel asked what `Ctrl-o` does.
+- Mental model: the jump list behaves like browser history. `Ctrl-o` goes Back
+  to an older meaningful code location; `Ctrl-i` goes Forward again.
+- In this drill, `Space S` jumped from `main.go` to the `Goodbye` definition, so
+  `Ctrl-o` should return to `main.go` without closing either file or buffer.
+- Added the Back/Forward reminder to the main Neovim quick-reference table.
+
+### Jump Back Confirmed
+
+- Hamel pressed `Ctrl-o` and confirmed that Neovim returned from the `Goodbye`
+  definition in `greeter.go` to the earlier location in `main.go`.
+- This reinforced `Ctrl-o` as code-location Back, not a close or buffer-delete
+  command.
+- Next: add one harmless call in `main.go` and deliberately accept the intended
+  LSP completion item for Curriculum 5.6.
+
+### Open Line Above Confirmed
+
+- From the final `}` in `main.go`, Hamel pressed uppercase `O` and confirmed
+  that Neovim created a blank line above it and entered Insert mode.
+- Mental model: lowercase `o` opens below; uppercase `O` opens above. Both start
+  Insert mode immediately.
+- Coding use case: from a closing brace, use `O` to add one more statement
+  inside the block without manually creating or repositioning a line.
+- Added the `o` / `O` pair to the main Neovim quick-reference table.
+
+### Working Directory Versus Current File
+
+- During completion-drill recovery, Hamel asked why
+  `:echo expand('%:t')` was needed instead of `:pwd`.
+- `:pwd` answers “which folder is Neovim working from?” Both `main.go` and
+  `greeter.go` can share that same directory.
+- `:echo expand('%:t')` answers “which file is this buffer showing?” `%` is the
+  current file and `:t` selects only its tail filename.
+- Memory aid: **PWD = place; `%:t` = current file's tail name.**
+- Added both commands and the mnemonic to the main Neovim troubleshooting notes.
+
+### Completion Wrong-File Recovery
+
+- Hamel deliberately selected and accepted the `Goodbye` LSP completion item,
+  but the call was first inserted into `greeter.go` because the earlier
+  `Ctrl-o` jump was assumed to have returned to `main.go` without verifying the
+  status-line filename.
+- The resulting `fmt` undefined, `greeter` undefined, unreachable-code, and
+  missing-return diagnostics were consequences of the correct call being placed
+  after `Goodbye`'s `return`, not missing imports or a need for another return.
+- `Space w` only saves the current buffer; it never adds missing code or fixes a
+  diagnostic automatically.
+- Recovery: identify the current buffer with `:echo expand('%:t')`, explicitly
+  open `greeting/greeter.go`, delete only the accidental line with `dd`, and save
+  with `Space w`.
+- The intended completion-created call is now correctly saved in `main.go` as
+  `fmt.Println(greeter.Goodbye("Grace"))`.
+- Verified the recovered fixture with `go test ./...` and `gopls check`; both
+  pass with no Go diagnostics.
+- Curriculum 5.6 and all Lesson 5 core checkpoints are complete. Next: Lesson
+  6.1, reading diagnostics deliberately in this safe practice module.

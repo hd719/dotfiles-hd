@@ -121,6 +121,7 @@ map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Quit" })
 map("n", "<leader>x", "<cmd>x<cr>", { desc = "Save and quit" })
 
 map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
+map("n", "<leader>cq", "<cmd>cclose<cr>", { desc = "Close quickfix" })
 map("n", "gh", function()
   vim.lsp.buf.hover({ border = "rounded" })
 end, { desc = "Hover" })

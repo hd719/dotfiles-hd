@@ -107,7 +107,12 @@ Configuration map:
 - `:Lazy` shows installed plugins and their status.
 - `:checkhealth` runs Neovim's diagnostics.
 - `:checkhealth snacks` verifies image tools and terminal graphics support.
-- `:LspInfo` shows language-server status.
+- `:checkhealth vim.lsp` runs Neovim's LSP diagnostics on Neovim 0.12+.
+  Seeing a client such as `gopls` confirms that language intelligence is
+  attached to the current buffer. Use this instead of the legacy `:LspInfo`.
+- `:pwd` shows Neovim's current working directory; remember **PWD = place**.
+- `:echo expand('%:t')` shows the current buffer's filename only; `%` means the
+  current file and `:t` asks for its tail name.
 - `:ConformInfo` shows formatter status.
 - `:TSStatus` shows Tree-sitter parsers.
 - `[+]` beside a buffer name means it has unsaved changes. Normal `Space q`
@@ -124,6 +129,8 @@ press `Space` and pause to see the available commands.
 - [CURRICULUM.md](CURRICULUM.md) tracks core sub-lessons and optional deep dives
   with checkboxes.
 - [LEARNING_LOG.md](LEARNING_LOG.md) is the required append-only session record.
+- Lesson 5 uses the harmless Go module at
+  `~/Developer/dotfiles-hd/config/nvim/practice/lesson-05-go` for LSP drills.
 
 Every agent teaching Neovim must read and update both files.
 
@@ -146,6 +153,7 @@ Every agent teaching Neovim must read and update both files.
 | --- | --- |
 | `Space f` | Find files |
 | `Space /` | Search text |
+| `Space S` | Search named code symbols with the attached LSP |
 | `Space h` | Open Oil file browser |
 | `Space e` | Open the file-explorer sidebar (Snacks) |
 | `Space b` | Pick a buffer |
@@ -153,17 +161,29 @@ Every agent teaching Neovim must read and update both files.
 | `Space w` / `Space x` | Save / save and quit |
 | `Space R` | Replace the word under the cursor in the current file |
 | `u` / `Ctrl-r` / `.` | Undo / redo / repeat the last change |
+| `o` / `O` | Open a new line below / above and enter Insert mode |
 | `w` / `e` / `b` | Next word start / word end / previous word start |
+| `2w` / `2dw` | Move two words / delete two words |
 | `0` / `$` / `gg` / `G` | Line start / line end / file top / file bottom |
 | `%` | Jump between matching `()`, `[]`, or `{}` |
-| `yy` / `p` | Yank the current line / paste after |
+| `d{motion}` / `c{motion}` / `y{motion}` | Delete / change / yank a motion's range |
+| `ciw` / `daw` | Change inner word / delete a word plus adjacent space |
+| `ci(` / `da(` | Change inside / delete around parentheses |
+| `ci"` / `da"` | Change inside / delete around quotes |
+| `/`, then `n` / `N` | Search current file, then next / previous match |
+| `:noh` | Clear current search highlighting |
+| `Ctrl-a` | Select the whole buffer |
+| `yy` / `p` / `P` | Yank current line / paste after / paste before |
+| Visual `<` / `>` / `J` / `K` / `Space c` | Outdent / indent / move down / move up / comment |
 | `Space v` / `Space s` | Split right / down |
 | `Ctrl-h/j/k/l` | Focus window left / down / up / right |
+| `Ctrl-o` / `Ctrl-i` | Jump-history Back / Forward |
 | `Space q` | Close the current window |
 | `Space t` / `Space T` | Bottom / floating terminal |
 | `Space g` | Open LazyGit |
 | `Space p` | Format |
 | `Space c a` | LSP code action |
+| `Space c q` | Close only the quickfix/references list |
 | `Space c d` / `Space c D` | Diagnostics list (buffer / project) |
 | `]d` / `[d` | Next / previous diagnostic |
 | `Space y p/d/f` | Copy file path / working dir / file folder |
@@ -171,14 +191,23 @@ Every agent teaching Neovim must read and update both files.
 | `Space o` | Open the current file in its macOS app |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
 | `Space z a/o/c` | Fold: toggle / open all / close all |
-| `gd` / `gh` | Definition / hover |
+| `gd` / `gh` / `grr` | Definition / hover / references |
 | `gsa` / `gsd` / `gsr` | Surround add / delete / replace |
 | `H` / `L` | Previous / next buffer |
+
+The four search scopes are different: `/` searches text in the current file,
+`Space /` searches text across the project, `Space f` searches project
+filenames, and `Space S` asks the LSP for named code symbols such as functions,
+methods, types, and variables.
 
 Use `.` for repeated mechanical code edits. For example, if several lines have
 the same extra comma, delete the first comma with `x`, move to the next one, and
 press `.` to repeat that deletion. Use LSP rename for project-wide symbol
 renames instead of repeating manual edits.
+
+`Space c q` runs `:cclose`, so it closes the quickfix list created by commands
+such as `grr` while keeping the code window open. `Space q` runs `:quit` and
+closes whichever Neovim window is currently focused.
 
 This config sets `clipboard=unnamedplus`, so regular yanks such as `yy` also
 copy to the macOS clipboard for `Cmd-v` in other applications.

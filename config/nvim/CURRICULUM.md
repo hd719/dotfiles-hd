@@ -20,10 +20,13 @@ unexplained magic.
 
 ## Current Checkpoint
 
-- **Lesson:** 4 — Motions, Operators, and Text Objects
-- **Next core sub-lesson:** 4.2 — combine `d`, `c`, and `y` with motions.
-- **Why Lesson 4 remains open:** its core operator, count, text-object, search,
-  selection, indentation, movement, and commenting drills remain.
+- **Lesson:** 6 — Diagnostics, Code Actions, and Formatting
+- **Next core sub-lesson:** 6.1 — read diagnostic signs, highlights, and
+  messages.
+- **Go practice module:**
+  `~/Developer/dotfiles-hd/config/nvim/practice/lesson-05-go`.
+- **Why Lesson 6 remains open:** its core diagnostics, code-action, formatting,
+  formatter-health, and tool-coverage drills remain.
 
 ## Lesson 1 — Editor Foundations
 
@@ -123,20 +126,23 @@ unexplained magic.
 
 ## Lesson 4 — Motions, Operators, and Text Objects
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 018
 
 ### Core Sub-Lessons
 
 - [x] **4.1** Navigate with word, line, file, and matching-pair motions. —
   Session 016
-- [ ] **4.2** Combine `d`, `c`, and `y` with motions instead of memorized edits.
-- [ ] **4.3** Use counts to scale motions and operators.
-- [ ] **4.4** Edit with inside and around text objects for words, quotes, and
-  brackets.
-- [ ] **4.5** Search within a file with `/`, `n`, and `N`.
-- [ ] **4.6** Select the full buffer with the custom `Ctrl-a` mapping.
-- [ ] **4.7** Indent with `<` and `>`, move with `J` and `K`, and comment with
-  `Space c` while a visual selection stays active.
+- [x] **4.2** Combine `d`, `c`, and `y` with motions instead of memorized edits.
+  — Session 018
+- [x] **4.3** Use counts to scale motions and operators. — Session 018
+- [x] **4.4** Edit with inside and around text objects for words, quotes, and
+  brackets. — Session 018
+- [x] **4.5** Search within a file with `/`, `n`, and `N`. — Session 018
+- [x] **4.6** Select the full buffer with the custom `Ctrl-a` mapping. —
+  Session 018
+- [x] **4.7** Indent with `<` and `>`, move with `J` and `K` while the selection
+  stays active, and comment with `Space c` from an active visual selection. —
+  Session 018
 
 ### Optional Deep Dives
 
@@ -152,17 +158,18 @@ unexplained magic.
 
 ## Lesson 5 — Code Navigation with LSP
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 019
 
 ### Core Sub-Lessons
 
-- [ ] **5.1** Open real Go and Lua projects and verify attachment with
-  `:LspInfo`.
-- [ ] **5.2** Read symbol information with `gh` hover.
+- [x] **5.1** Open the isolated Go practice module and a real Lua config file,
+  then verify attachment with `:checkhealth vim.lsp`. — Session 019
+- [x] **5.2** Read symbol information with `gh` hover. — Session 019
 - [x] **5.3** Jump to definitions with `gd` and return with `Ctrl-o`. — Session 008
-- [ ] **5.4** Find references with Neovim's native `grr` mapping.
-- [ ] **5.5** Search workspace symbols with `Space S`.
-- [ ] **5.6** Use completion deliberately and accept the intended item.
+- [x] **5.4** Find references with Neovim's native `grr` mapping. — Session 019
+- [x] **5.5** Search workspace symbols with `Space S`. — Session 019
+- [x] **5.6** Use completion deliberately and accept the intended item. —
+  Session 019
 
 ### Optional Deep Dives
 
@@ -174,6 +181,8 @@ unexplained magic.
 - [x] **5.D5** Add and use the GraphQL language server (`graphql-lsp`) for
   `.graphql` files, with schema-aware features from the project's
   `graphql-config`. — Session 008
+- [ ] **5.D6** Contrast `/`, `Space /`, `Space f`, and `Space S` from memory in
+  one project.
 
 ## Lesson 6 — Diagnostics, Code Actions, and Formatting
 
@@ -302,8 +311,8 @@ unexplained magic.
   mini.surround, bufferline, lualine, render-markdown, SchemaStore, LSPConfig,
   Conform, and Gitsigns.
 - [ ] **10.6** Make and verify one intentional keymap or option change.
-- [ ] **10.7** Use `:Lazy`, `:checkhealth`, `:LspInfo`, `:ConformInfo`, and
-  `:TSStatus` to troubleshoot independently.
+- [ ] **10.7** Use `:Lazy`, `:checkhealth`, `:checkhealth vim.lsp`,
+  `:ConformInfo`, and `:TSStatus` to troubleshoot independently.
 - [ ] **10.8** Complete a real coding task primarily in Neovim and record the
   workflow improvements still needed.
 
