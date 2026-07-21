@@ -249,6 +249,14 @@ Use `]d` / `[d` to jump between them, `Ctrl-w d` for the detail float, and
 `Space c d` / `Space c D` for a searchable list of the current buffer's or the
 project's diagnostics.
 
+Diagnostic-navigation mnemonic: `]d` moves forward to the next diagnostic,
+`[d` moves backward to the previous one, and `d` means diagnostic. This is the
+fast everyday loop for stepping through errors without opening a list.
+
+Read an inline diagnostic in three parts: the gutter letter such as `E` gives
+its severity, the underline/highlight marks the exact broken code, and the
+virtual text explains the problem.
+
 The statusline (lualine) keeps its center transparent while showing the current
 mode, Git branch and diff, filename, diagnostics, attached LSP client(s),
 filetype, and compact cursor location/progress.

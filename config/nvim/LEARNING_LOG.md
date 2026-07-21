@@ -2640,3 +2640,69 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   pass with no Go diagnostics.
 - Curriculum 5.6 and all Lesson 5 core checkpoints are complete. Next: Lesson
   6.1, reading diagnostics deliberately in this safe practice module.
+
+### Diagnostic Typo Setup and Cursor Recovery
+
+- To create a safe diagnostic, Hamel searched `main.go` for `Goodbye` and used
+  `r` with lowercase `g`.
+- On the first attempt, the cursor was actually on the final `)`, so `rg`
+  changed the line ending to `Goodbye("Grace")g` and produced the syntax error
+  `missing ',' in argument list`.
+- Hamel pressed `u` once and confirmed that the clean line and zero-diagnostic
+  state returned without saving the mistake.
+- On the retry, the live cursor position was verified on the capital `G` before
+  applying `rg`.
+
+### Diagnostic Signals Confirmed
+
+- The intentional `Goodbye` to `goodbye` typo produced
+  `greeter.goodbye undefined`.
+- Hamel identified the three diagnostic surfaces: `E` in the gutter for error
+  severity, the highlight/underline on the exact broken symbol, and inline text
+  explaining the problem.
+- Go identifiers are case-sensitive, so `goodbye` and `Goodbye` are different
+  method names.
+- Added the three-part diagnostic mental model to the main Neovim README.
+- Curriculum 6.1 is complete. The typo remains intentionally unsaved for the
+  diagnostic-navigation drills in Curriculum 6.2 and 6.3.
+
+### Next Diagnostic Confirmed
+
+- A second intentional typo changed `Greet` to `greet`, producing two active
+  Go errors on lines 12 and 14.
+- Hamel pressed `]d` from the first error and confirmed that Neovim jumped
+  forward to the lowercase `goodbye` diagnostic.
+- Memory aid: `]` moves forward, `[` moves backward, and `d` means diagnostic.
+- Hamel identified this as a high-use coding workflow, so the mnemonic and use
+  case were added to the main Neovim README.
+- Curriculum 6.2 remains open until `[d` is also practiced and confirmed.
+
+### Previous Diagnostic Confirmed
+
+- Hamel pressed `[d` from the lowercase `goodbye` error and confirmed that
+  Neovim returned backward to the lowercase `greet` error.
+- Curriculum 6.2 is complete: `]d` moves to the next diagnostic and `[d` moves
+  to the previous diagnostic.
+- The two unsaved practice errors remain available for Curriculum 6.3.
+
+### Diagnostic Detail Float Confirmed
+
+- With the cursor on lowercase `greet`, Hamel pressed `Ctrl-w d` and saw the
+  full Go diagnostic in a small floating window.
+- `Ctrl-w d` is the focused “show me the full error” workflow when inline text
+  is truncated or more context is needed; it does not change the code.
+- Curriculum 6.3 is complete. Next: inspect LSP code actions with `Space c a`.
+
+### Break Checkpoint
+
+- Hamel paused after completing Curriculum 6.1 through 6.3.
+- Next unconfirmed action: press `Space c a` on one intentional diagnostic and
+  inspect the available LSP code actions without selecting blindly.
+- The saved Go fixture remains clean and passes `go test ./...` plus
+  `gopls check`.
+- The live `main.go` buffer intentionally remains modified but unsaved with
+  `greet` and `goodbye` lowercase so the two diagnostics are ready for Lesson
+  6.4. Do not press `Space w` on that buffer unless the typos are fixed first.
+- Safe cleanup if the diagnostic fixture is no longer wanted: press `u` twice
+  and verify both errors disappear before saving, or reload only after
+  confirming there are no other wanted unsaved edits.

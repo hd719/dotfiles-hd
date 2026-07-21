@@ -21,12 +21,12 @@ unexplained magic.
 ## Current Checkpoint
 
 - **Lesson:** 6 — Diagnostics, Code Actions, and Formatting
-- **Next core sub-lesson:** 6.1 — read diagnostic signs, highlights, and
-  messages.
+- **Next core sub-lesson:** 6.4 — inspect and choose LSP actions with
+  `Space c a`.
 - **Go practice module:**
   `~/Developer/dotfiles-hd/config/nvim/practice/lesson-05-go`.
-- **Why Lesson 6 remains open:** its core diagnostics, code-action, formatting,
-  formatter-health, and tool-coverage drills remain.
+- **Why Lesson 6 remains open:** its code-action, formatting, formatter-health,
+  and tool-coverage drills remain.
 
 ## Lesson 1 — Editor Foundations
 
@@ -190,10 +190,10 @@ unexplained magic.
 
 ### Core Sub-Lessons
 
-- [ ] **6.1** Read diagnostic signs, highlights, and messages.
-- [ ] **6.2** Move between diagnostics with `[d` and `]d`.
-- [ ] **6.3** Open a diagnostic detail float with `Ctrl-w d` without changing
-  code.
+- [x] **6.1** Read diagnostic signs, highlights, and messages. — Session 019
+- [x] **6.2** Move between diagnostics with `[d` and `]d`. — Session 019
+- [x] **6.3** Open a diagnostic detail float with `Ctrl-w d` without changing
+  code. — Session 019
 - [ ] **6.4** Inspect and choose LSP actions with `Space c a`.
 - [ ] **6.5** Format Go and Lua manually with `Space p` and review the diff.
 - [ ] **6.6** Diagnose formatter availability with `:ConformInfo`.
