@@ -36,25 +36,26 @@ return {
       bigfile = { enabled = true },
       words = { enabled = true },
       indent = { enabled = true },
-      -- Render images and PDFs directly in supported terminals such as Ghostty.
-      -- Keep PDF frames small enough to pass through Herdr's graphics transport.
+      -- Render image files in supported terminals such as Ghostty. PDFs are
+      -- intentionally excluded and opened in the full Bookokrat reader instead.
       image = {
         enabled = true,
-        convert = {
-          magick = {
-            pdf = {
-              "-density",
-              120,
-              "{src}[{page}]",
-              "-background",
-              "white",
-              "-alpha",
-              "remove",
-              "-trim",
-              "-scale",
-              "1920x1080>",
-            },
-          },
+        formats = {
+          "png",
+          "jpg",
+          "jpeg",
+          "gif",
+          "bmp",
+          "webp",
+          "tiff",
+          "heic",
+          "avif",
+          "mp4",
+          "mov",
+          "avi",
+          "mkv",
+          "webm",
+          "icns",
         },
       },
       -- On-demand sidebar tree (Space e). Keep replace_netrw false so Oil stays

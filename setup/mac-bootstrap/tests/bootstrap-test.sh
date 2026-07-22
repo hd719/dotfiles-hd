@@ -780,6 +780,7 @@ test_full_bootstrap() {
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
 
   assert_eq "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" "$(readlink "$home_dir/.zshrc")" "MacBook zshrc target"
+  assert_eq "$REPO_DIR/config/bookokrat" "$(readlink "$home_dir/.config/bookokrat")" "Bookokrat config target"
   assert_eq "$REPO_DIR/config/ghostty/config" "$(readlink "$home_dir/Library/Application Support/com.mitchellh.ghostty/config")" "Ghostty path with spaces"
   assert_eq "$REPO_DIR/config/hunk/config.toml" "$(readlink "$home_dir/.config/hunk/config.toml")" "Hunk config target"
   assert_eq "$REPO_DIR/config/karabiner" "$(readlink "$home_dir/.config/karabiner")" "MacBook profile link"
@@ -984,6 +985,7 @@ test_mac_mini_apply() {
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-mini --apply >/dev/null
 
   assert_eq "$REPO_DIR/setup/mac-mini/.zshrc" "$(readlink "$home_dir/.zshrc")" "Mac mini zshrc target"
+  assert_eq "$REPO_DIR/config/bookokrat" "$(readlink "$home_dir/.config/bookokrat")" "Mac mini Bookokrat config target"
   assert_no_path "$home_dir/.config/karabiner"
   assert_no_path "$home_dir/.config/aerospace/aerospace.toml"
   assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-mini/Brewfile"

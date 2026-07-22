@@ -1,10 +1,11 @@
-# Ghostty, Herdr, Hunk, and Neovim dependencies for the Resilience work Mac.
+# Ghostty, Herdr, Hunk, Neovim, and Bookokrat dependencies for the Resilience
+# work Mac.
 # Work-repo runtimes and company-managed applications intentionally stay out.
 
 brew "bash-language-server"
+brew "bookokrat"
 brew "fd"
 brew "fzf"
-brew "ghostscript"
 brew "gopls"
 brew "herdr"
 brew "hunk"

@@ -41,6 +41,7 @@ work machines.
 Whole directory links:
 
 - `~/.config/btop` -> `config/btop`
+- `~/.config/bookokrat` -> `config/bookokrat`
 - `~/.config/fastfetch` -> `config/fastfetch`
 - `~/.config/karabiner` -> `config/karabiner` on the MacBook only
 - `~/.config/mise` -> `config/mise`
@@ -77,10 +78,10 @@ manual link and is not installed or linked by this bootstrap.
 When Hamel asks to set up the work laptop:
 
 1. Read `setup/mac-resilience/README.md` and follow it as the runbook.
-2. Default to only Ghostty, Herdr, Hunk, and Neovim. Do not apply the full personal
-   Mac symlink list.
+2. Default to only Ghostty, Herdr, Hunk, Neovim, and Bookokrat. Do not apply the
+   full personal Mac symlink list.
 3. Use `setup/mac-resilience/Brewfile` for the terminal/editor dependencies and
-   `setup/mac-resilience/link-terminal-editor-config.sh` for the four links.
+   `setup/mac-resilience/link-terminal-editor-config.sh` for the five links.
    Never run `setup/mac-mini/Brewfile` or `setup/mac-vm/setup-vm.sh` on the
    work laptop.
 4. Inspect and timestamp-backup every existing destination before replacing it.

@@ -2706,3 +2706,229 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Safe cleanup if the diagnostic fixture is no longer wanted: press `u` twice
   and verify both errors disappear before saving, or reload only after
   confirming there are no other wanted unsaved edits.
+
+## 2026-07-22 — Session 020: PDF Preview Limits
+
+### Inline Preview Versus PDF Reader
+
+- A real three-page Letter PDF rendered as one large white image inside
+  Neovim. The source PDF is healthy; the awkward view comes from Snacks
+  rasterizing only a page for a quick terminal preview.
+- Snacks automatically fits that image to the available Neovim window, but it
+  does not provide the normal multi-page navigation, text search, or zoom of a
+  PDF reader.
+- The existing `Space o` mapping opens the current PDF in its default macOS
+  application (normally Preview). This is the intended workflow for reading;
+  keep the inline view for a quick visual check.
+- Pending confirmation: Hamel should press `Space o` from the PDF buffer and
+  confirm that Preview opens the same file.
+- The first `Space o` attempt happened while focus was still in the Snacks
+  Explorer. The `[No Name]` filename and `snacks_picker_list` filetype in the
+  status line proved that the current buffer was the Explorer list, not the
+  PDF.
+- Recovery checkpoint: press `Space l` from Explorer to focus the PDF window,
+  verify that the PDF filename appears in the status line, and only then use
+  `Space o`.
+- Clarification: `Space l` only changes which Neovim window receives the next
+  key. After focus reaches the PDF, `Space o` opens macOS Preview as a separate
+  application; the readable PDF will not remain inside the terminal.
+
+### Full Terminal PDF Viewer Research
+
+- Correction: Ghostty can host a full terminal PDF viewer because it supports
+  the Kitty graphics protocol. The limitation belongs to Snacks' lightweight
+  image preview, not to the terminal itself.
+- `fancy-cat` is the best current fit to evaluate: Homebrew packages it, its
+  documentation names Ghostty as supported, and it provides page navigation,
+  zoom, panning, fit-width, a status bar, dark recoloring, and Vim-like keys.
+- It is a standalone terminal application rather than a Neovim image plugin.
+  The safest integration is to run it directly in a Ghostty/Herdr terminal
+  surface and only wire Neovim to launch it after a real compatibility test.
+- No viewer was installed and no keymap was changed yet; Hamel's approval and
+  a Ghostty/Herdr smoke test are the next steps.
+
+### fancy-cat Installed and Snacks PDF Preview Disabled
+
+- Hamel approved installing `fancy-cat` and explicitly asked to remove the
+  annoying Snacks PDF preview.
+- Installed Homebrew's bottled `fancy-cat` `0.6.0_1`; recorded it in both the
+  shared personal-Mac and Resilience editor Brewfiles.
+- A direct Herdr smoke test opened the real three-page PDF in a new tab. The
+  viewer status line reported page `1:3`, proving that the full document loaded
+  through Herdr's enabled Kitty-graphics path.
+- Snacks remains enabled for ordinary image and video formats, but `pdf` was
+  removed from its configured format list. It will no longer rasterize PDFs in
+  a Neovim buffer.
+- Added a PDF `BufReadCmd`: opening a PDF launches `fancy-cat` in a focused
+  Herdr tab, or in a new Ghostty window when Neovim is outside Herdr. Neovim
+  keeps only a small instruction buffer rather than the former white preview.
+- `Space o` now reopens a PDF in `fancy-cat`; non-PDF files still open in their
+  normal macOS application.
+- Viewer keys: `n` / `p` change pages, `i` / `o` zoom, `j` / `k` pan, `w` fits
+  width, `z` toggles dark recoloring, and `:q` quits. These mappings belong to
+  `fancy-cat`, not Neovim.
+- Scroll clarification: lowercase `j` / `k` move down / up; uppercase `J` / `K`
+  make the same moves in larger steps. Confirmation remains pending.
+- Pending visual confirmation: restart Neovim, open a PDF from Explorer, and
+  confirm that no Snacks raster preview appears and the new Herdr PDF tab
+  opens automatically.
+- Headless verification confirmed that Snacks' effective format list excludes
+  `pdf` and that opening the real PDF produces the `pdf_launcher` instruction
+  buffer without starting a GUI during automated checks.
+- StyLua, both Brewfile parse checks, whitespace validation, and the Mac
+  bootstrap test suite pass. The Resilience Brewfile is fully satisfied on this
+  Mac; the shared personal Brewfile still reports only the unrelated missing
+  Zed cask.
+
+### fancy-cat Status Bar Transparency
+
+- Hamel asked to remove the opaque black strip without losing `VIS`, the PDF
+  filename, or the current and total page numbers.
+- fancy-cat defaults that row to explicit black. Its managed config now sets
+  only the status-bar background to libvaxis' terminal-default color, so
+  Ghostty's existing opacity shows through while all status text remains.
+- Pending visual confirmation: quit and reopen the PDF viewer, then confirm the
+  row blends into the surrounding Ghostty background.
+
+### Terminal PDF Viewer Comparison
+
+- Researched fancy-cat, Bookokrat, tdf, MeowPDF, termpdf.py, Sioyek, and
+  Zathura against Hamel's Ghostty, Herdr, macOS, and Vim-key workflow.
+- **Bookokrat is the strongest modern terminal-reader candidate:** it explicitly
+  supports Ghostty, installs from Homebrew, and adds PDF search, links, table of
+  contents, bookmarks, jump history, app-side annotations, Markdown export,
+  Vim normal mode, and SyncTeX integration.
+- **fancy-cat remains the cleaner quick viewer:** it launches one PDF directly,
+  hot-reloads, has simple modal controls, and is easy to theme, but it lacks
+  text search, links, bookmarks, and annotations.
+- tdf is an active middle option with asynchronous rendering and search, but
+  it lacks Bookokrat's richer reading features and fancy-cat's configurability.
+- MeowPDF is modern but officially targets Kitty and has no Homebrew formula;
+  termpdf.py is legacy alpha software with an aging Python stack.
+- Sioyek and Zathura are separate GUI applications rather than Herdr-native
+  viewers. Sioyek is the stronger optional research-paper app; neither replaces
+  an in-terminal viewer for this workflow.
+- Decision pending: keep fancy-cat as the default unless Hamel approves a
+  side-by-side Bookokrat smoke test. No package or keymap changed during this
+  research pass.
+
+### Bookokrat Selected, Tested, and Themed
+
+- Hamel chose Bookokrat as the full terminal reader after comparing it with
+  fancy-cat and tdf. Homebrew's `bookokrat` `0.3.12` is now installed, and
+  `fancy-cat` plus its no-longer-needed Homebrew dependencies were removed.
+- The real three-page course PDF opened successfully in a focused Herdr tab.
+  Hamel visually confirmed the result looked good; Bookokrat reported all three
+  pages and rendered through Herdr's enabled Kitty-graphics transport.
+- Added a managed `Hamel Nord` Base16 theme using the same core colors as
+  Ghostty and Zed. Bookokrat's startup log confirmed that it loaded and applied
+  `Hamel Nord`, inherited a transparent background, detected Ghostty truecolor,
+  and enabled PDF scrolling and comments.
+- Durability correction: Bookokrat atomically replaces `config.yaml` when it
+  saves settings, so a single-file symlink does not survive. The bootstrap now
+  links the whole `~/.config/bookokrat` directory; Bookokrat can safely rewrite
+  its settings while the tracked Nord theme remains the source of truth.
+- Neovim's PDF launcher now calls Bookokrat inside Herdr or a new Ghostty
+  window. Snacks PDF raster previews remain disabled, and `Space o` reopens the
+  current PDF in Bookokrat.
+- Everyday Bookokrat keys: `j` / `k` scroll, `h` / `l` change pages, `+` / `-`
+  zoom, `z` / `Z` fit height / width, `/` searches, `?` opens help, and `q`
+  quits. If `NORMAL` is visible, press `n` to leave Bookokrat's Vim normal mode
+  before `q`.
+- The personal and Resilience Brewfiles, link scripts, bootstrap tests, setup
+  inventories, Neovim guide, and optional curriculum checkpoint now reproduce
+  Bookokrat and its managed theme instead of fancy-cat.
+- Optional checkpoint `10.D8` remains open until Hamel personally practices the
+  core navigation, search, zoom, and quit flow from Neovim.
+
+### Bookokrat Background Adjustment
+
+- Hamel found the first Nord document canvas slightly too dark. Kept
+  `transparent_background: true` so Bookokrat's interface continues to inherit
+  Ghostty's opacity and blur.
+- Lightened only the custom theme's `base00` document surface from `#3B4252`
+  to `#434C5E`, one restrained Nord step brighter. This preserves the terminal's
+  transparent feel without making the PDF text area washed out.
+
+### Bookokrat Canvas Blend
+
+- Hamel later preferred the PDF canvas to disappear into the surrounding
+  Ghostty window. Bookokrat cannot make the rasterized PDF image truly
+  transparent, so the managed theme now matches both `base00` and `base01` to
+  Ghostty's exact Nord background, `#3B4252`.
+- The PDF remains an opaque image, but its canvas should visually blend with
+  Ghostty instead of appearing as a separate lighter rectangle.
+- Visual verification showed that matching Ghostty's configured base color was
+  insufficient: the opaque PDF stayed at `#3B4252`, while Ghostty's 90% opacity
+  composited the surrounding area to approximately `#4F5462`. Screenshot pixel
+  sampling confirmed that difference, so `base00` and `base01` now use the
+  visible composite color `#4F5462` instead.
+- A second screenshot proved why that approach cannot hold: the Bookokrat page
+  correctly changed to `#4F5462`, but Ghostty's transparent surroundings had
+  shifted to approximately `#3C4251` because the content behind the window was
+  different. An opaque PDF raster cannot track a dynamic translucent terminal
+  background. Restored the last readable canvas color, `#434C5E`, and stopped
+  treating color matching as true transparency.
+
+### Bookokrat Mouse-Selection Lag
+
+- Hamel confirmed that dragging across PDF text in Bookokrat feels severely
+  delayed inside Herdr. The live logs confirmed this is real rather than a
+  trackpad or Ghostty problem.
+- Bookokrat `0.3.12` sends an update for every mouse-drag event. Its Kitty
+  graphics path then rebuilds and uploads the full PDF page instead of only the
+  small selection overlay. One captured drag caused 29 page invalidations, 151
+  stale renders, and 26 fresh image uploads.
+- Herdr `0.7.4` amplifies the problem: the same drag exceeded its fixed 32 MiB
+  graphics-frame limit 70 times and saturated its input queue, dropping 1,447
+  mouse events. Herdr `0.7.5` keeps the same 32 MiB limit, so upgrading alone
+  does not fix this workflow.
+- Practical workaround: avoid long mouse drags. Press `n` for Bookokrat normal
+  mode, then use `v` or `V` plus Vim motions to select; press `H` to highlight,
+  `d` to add a note, or `c` to copy. Double-clicking a word or triple-clicking a
+  paragraph also produces a single selection update instead of a render storm.
+- Hamel tested zooming out twice before dragging. It did not improve the lag,
+  so reducing `pdf_scale` is not a viable workaround for this PDF and setup.
+- For less laggy mouse dragging, open Bookokrat directly in Ghostty outside
+  Herdr. This removes Herdr's graphics-frame and input-queue bottlenecks,
+  although the upstream Bookokrat full-page rerender behavior still exists.
+
+### tdf Side-by-Side PDF Trial
+
+- Hamel asked to test `itsjunetime/tdf` after Bookokrat's mouse-selection lag.
+  Installed Homebrew's stable `tdf` `0.5.0` bottle and opened the same course
+  PDF directly in a separate Ghostty window. Bookokrat remains installed and
+  the Neovim launcher has not changed while the comparison is pending.
+- `tdf` is designed as a responsive image-based reader with asynchronous
+  rendering, search, hot reload, Vim-like navigation, and Kitty zoom/pan.
+- Important limitation: `tdf` does not implement selectable PDF text, copying,
+  annotations, or persistent highlights. Its mouse code handles scrolling and
+  zooming only. `/` can search extracted text and paint search matches, but a
+  mouse drag cannot create the kind of highlight Bookokrat supports.
+- Hamel launched the real PDF in `tdf` and confirmed that mouse dragging cannot
+  select or highlight its text. This is expected behavior, not a configuration
+  problem, and makes `tdf` unsuitable as the annotation-focused replacement.
+- Final decision: keep Bookokrat and remove `tdf`. Homebrew's `tdf` `0.5.0`
+  bottle was uninstalled; it was never added to the Brewfiles or Neovim PDF
+  launcher, so no persistent setup rollback was needed.
+- Trial keys: `h` / `l` move one page, `j` / `k` move a screenful, `/` searches,
+  `n` / `N` move between matches, `z` toggles fit/fill, `?` opens help, and `q`
+  quits. Keep `tdf` only if its reading and search speed is valuable enough to
+  use alongside Bookokrat.
+
+### Bookokrat Final Persisted Defaults
+
+- Closed the temporary test viewers before the final dotfiles commit so their
+  in-memory settings could not overwrite the managed configuration.
+- Restored `pdf_scale: 1` and `pdf_render_mode: scroll`. The temporary 78% zoom
+  and page mode came from lag and canvas experiments; neither was chosen as a
+  permanent preference.
+- Final appearance: Bookokrat's interface inherits Ghostty transparency, while
+  the PDF page stays an opaque, readable Nord `#434C5E` canvas.
+- Bookokrat is the sole managed PDF viewer. `fancy-cat` and `tdf` are removed;
+  their earlier entries and key lists remain historical test notes only.
+- Direct Ghostty removes Herdr's measured graphics-frame and input-queue
+  bottlenecks, but Hamel has not yet confirmed how much it improves mouse
+  selection. Bookokrat's full-page rerender still occurs either way.
+- Removed `ghostscript` from both Mac Brewfiles and the current Mac because it
+  was only used by the retired Snacks PDF renderer; Bookokrat does not need it.

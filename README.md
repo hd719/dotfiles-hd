@@ -14,9 +14,10 @@ behavior remain profile-owned.
 ## Resilience Work Mac
 
 Use [`setup/mac-resilience/README.md`](setup/mac-resilience/README.md) to install
-and link the Ghostty, Herdr, Hunk, and Neovim setup on the work laptop. That
-runbook is intentionally narrower than the personal Mac inventory below so it
-does not replace work-specific shell, runtime, credential, or certificate state.
+and link the Ghostty, Herdr, Hunk, Neovim, and Bookokrat setup on the work
+laptop. That runbook is intentionally narrower than the personal Mac inventory
+below so it does not replace work-specific shell, runtime, credential, or
+certificate state.
 
 ## Personal Mac Config Inventory
 
@@ -35,6 +36,7 @@ both a physical personal MacBook and a MacBook VM.
 | AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Existing manual link | Not installed or linked by the new-Mac bootstrap because the app is not in its reviewed Brewfiles. |
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
+| Bookokrat | `~/.config/bookokrat` | `config/bookokrat` | Linked dir | Uses the custom `Hamel Nord` theme: transparent interface, opaque Nord PDF canvas. |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Matches Zed's Maple Mono NF and Hamel Nord Blur appearance. |
 | Hunk | `~/.config/hunk/config.toml` | `config/hunk/config.toml` | Linked file | Uses Catppuccin Mocha; Hunk runtime state stays local. |
 | Karabiner | `~/.config/karabiner` | `config/karabiner` | MacBook-only linked dir | The Mac mini profile does not link it. |

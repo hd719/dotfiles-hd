@@ -1,4 +1,4 @@
-# Resilience Work Mac: Ghostty, Herdr, Hunk, and Neovim
+# Resilience Work Mac: Ghostty, Herdr, Hunk, Neovim, and Bookokrat
 
 This is the agent runbook for reproducing Hamel's terminal/editor setup on the
 Resilience work laptop without replacing work-specific state.
@@ -11,6 +11,8 @@ Set up only:
 - Herdr with `Ctrl-b` as the prefix.
 - Hunk with the shared Catppuccin Mocha review theme.
 - Neovim with the committed plugins, keymaps, LSPs, formatters, and curriculum.
+- Bookokrat with the custom `Hamel Nord` theme: transparent interface and an
+  opaque Nord PDF canvas.
 
 Do not replace `.zshrc`, `config/mise`, Git identity, credentials, certificates,
 Docker state, Zed, Karabiner, or company-managed applications unless Hamel asks.
@@ -82,6 +84,7 @@ fi
 git pull --ff-only
 
 for path in \
+  "$HOME/.config/bookokrat" \
   "$HOME/.config/nvim" \
   "$HOME/.config/herdr/config.toml" \
   "$HOME/.config/hunk/config.toml" \
@@ -158,6 +161,7 @@ replacing a non-matching destination. It links only these paths:
 
 | Tool | Live path | Source |
 | --- | --- | --- |
+| Bookokrat | `~/.config/bookokrat` | `config/bookokrat` |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` |
 | Herdr | `~/.config/herdr/config.toml` | `config/herdr/config.toml` |
 | Hunk | `~/.config/hunk/config.toml` | `config/hunk/config.toml` |
@@ -181,7 +185,7 @@ brew bundle check --verbose \
   --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
 
 for cmd in \
-  bash-language-server fd fzf gopls gs herdr hunk lazygit lua-language-server \
+  bash-language-server bookokrat fd fzf gopls herdr hunk lazygit lua-language-server \
   magick nvim rg stylua tree-sitter uv vscode-eslint-language-server \
   vscode-json-language-server vtsls mdformat ruff
 do
@@ -191,6 +195,8 @@ done
 # graphql-lsp is installed at a fixed prefix (not on PATH); check it directly.
 test -x "$HOME/.local/graphql-lsp/bin/graphql-lsp" && echo "graphql-lsp ok"
 
+test "$(readlink "$HOME/.config/bookokrat")" = \
+  "$HOME/Developer/dotfiles-hd/config/bookokrat"
 test "$(readlink "$HOME/.config/nvim")" = \
   "$HOME/Developer/dotfiles-hd/config/nvim"
 test "$(readlink "$HOME/.config/herdr/config.toml")" = \
@@ -215,9 +221,10 @@ herdr status
 ```
 
 Inside Neovim, check `:checkhealth`, `:checkhealth snacks`, `:LspInfo`,
-`:ConformInfo`, and `:TSStatus`. Open a PDF in Ghostty and confirm that it
-renders. Open a work TypeScript file and confirm highlighting, completion,
-ESLint diagnostics, `Space p` formatting, and `Space g` LazyGit. From the same
+`:ConformInfo`, and `:TSStatus`. Open a PDF and confirm that Bookokrat starts
+in a Herdr tab with the `Hamel Nord` theme, search, page navigation, and zoom.
+Open a work TypeScript file and confirm highlighting, completion, ESLint
+diagnostics, `Space p` formatting, and `Space g` LazyGit. From the same
 worktree, run `hwatch` in Ghostty and confirm Hunk refreshes while Cursor edits.
 
 Report every backup and validation result. Do not commit or push from the work

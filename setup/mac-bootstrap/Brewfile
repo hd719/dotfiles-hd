@@ -2,12 +2,12 @@
 
 brew "bash-language-server"
 brew "bat"
+brew "bookokrat"
 brew "btop"
 brew "fastfetch"
 brew "fd"
 brew "fzf"
 brew "gh"
-brew "ghostscript"
 brew "gopls"
 brew "herdr"
 brew "hunk"

@@ -21,8 +21,10 @@ Hamel's existing Zed muscle memory.
   `vscode-langservers-extracted` (already installed for ESLint); JSON schemas
   come from `SchemaStore.nvim`.
 - Shell: `bash-language-server` for shell-script diagnostics and completion.
-- Images and PDFs: ImageMagick (`magick`) converts supported files and
-  Ghostscript (`gs`) renders PDF pages through Snacks inside Ghostty.
+- Images: ImageMagick (`magick`) converts supported files for Snacks previews.
+- PDFs: `bookokrat` provides search, page navigation, zoom, table-of-contents
+  browsing, bookmarks, annotations, and Vim-style reading inside Ghostty or a
+  dedicated Herdr tab.
 - Editing: `mini.pairs` auto-closes brackets and quotes; `mini.surround` adds,
   changes, and deletes surrounding pairs with a `gs` prefix.
 
@@ -81,7 +83,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `nvim-treesitter` | Structure-aware highlighting and folding | Every startup: `lazy = false` |
 | `oil.nvim` | Editable directory browser and file manager | Every startup: `lazy = false` |
 | `schemastore.nvim` | JSON schemas for files such as `package.json` and `tsconfig.json` | Immediately before LSPConfig as its dependency |
-| `snacks.nvim` | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and media previews | Early every startup: `lazy = false`, priority `1000` |
+| `snacks.nvim` | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and image previews | Early every startup: `lazy = false`, priority `1000` |
 | `treesitter-parser-registry` | Catalog that tells Tree-sitter where language parsers and queries live | Immediately before Tree-sitter as its dependency |
 | `which-key.nvim` | Shows available mappings after a key prefix | Just after startup: `VeryLazy` event |
 | `conform.nvim` | Runs gofmt, StyLua, Prettier, mdformat, and Ruff | First file read/new file, `Space p`, or `:ConformInfo` |
@@ -188,7 +190,7 @@ Every agent teaching Neovim must read and update both files.
 | `]d` / `[d` | Next / previous diagnostic |
 | `Space y p/d/f` | Copy file path / working dir / file folder |
 | `Space r` | Reload files changed on disk |
-| `Space o` | Open the current file in its macOS app |
+| `Space o` | Open the current file externally; PDFs use Bookokrat |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
 | `Space z a/o/c` | Fold: toggle / open all / close all |
 | `gd` / `gh` / `grr` | Definition / hover / references |
@@ -270,11 +272,18 @@ Snacks also provides indent guides with scope highlighting, highlights other
 uses of the symbol under the cursor, and disables heavy features on very large
 files for performance.
 
-Opening an image or PDF renders it in Neovim through Snacks when the terminal
-supports the Kitty graphics protocol. Ghostty is supported; ImageMagick and
-Ghostscript provide the conversion tools. This is a quick, read-only preview,
-not a full PDF reader. Use `Space o` to open the current file in its default
-macOS app; PDFs normally open in Preview for zoom, search, and page navigation.
+Opening an image renders it in Neovim through Snacks when the terminal supports
+the Kitty graphics protocol. PDFs are deliberately excluded from Snacks: opening
+one launches Bookokrat in a focused Herdr tab and leaves a small instruction
+buffer in Neovim instead of a raster preview. Outside Herdr on macOS, it opens a
+new Ghostty window. Use `j` / `k` to scroll, `h` / `l` for pages, `+` / `-` to
+zoom, `z` / `Z` to fit height / width, `/` to search, and `?` for full help.
+Press `q` to quit; if `NORMAL` is shown, press `n` first. `Space o` reopens the
+current PDF, while non-PDF files still use their default macOS app. The managed
+`Hamel Nord` theme lets Bookokrat's interface inherit Ghostty's transparency.
+The rendered PDF page remains an opaque `#434C5E` canvas because Kitty images
+cannot inherit terminal transparency. Long mouse drags can lag, especially in
+Herdr; use `n`, then `v` / `V` plus motions and `H` for keyboard highlighting.
 
 Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
 open all / close all) or the native `za` / `zR` / `zM`.

@@ -1,8 +1,8 @@
 # Mac Bootstrap
 
 This is the supported setup path for an Apple Silicon personal Mac. It covers
-the shell, Ghostty, Zed, Herdr, Hunk, Neovim, shared configuration, and pinned
-development runtimes.
+the shell, Ghostty, Zed, Herdr, Hunk, Neovim, Bookokrat, shared configuration,
+and pinned development runtimes.
 
 It does not restore credentials, SSH keys, application databases, Docker
 state, or the Mac mini's Cortana/Hermes production runtime.
@@ -60,7 +60,9 @@ setup/mac-bootstrap/doctor.sh --profile mac-vm
 Run the apply command a second time. It must complete without creating another
 backup or changing an already-correct link.
 
-Then open Ghostty, Zed, Herdr, and Hunk once and confirm they use the linked config.
+Then open Ghostty, Zed, Herdr, Hunk, and Bookokrat once and confirm they use the
+linked config. Open one PDF in Bookokrat and verify that `Hamel Nord` loads with
+a transparent interface around the opaque Nord document canvas.
 Open Karabiner-Elements and complete macOS's required driver and Input
 Monitoring permission prompts. Credentials and application sign-ins remain
 manual.

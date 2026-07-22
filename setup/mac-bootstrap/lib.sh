@@ -318,6 +318,7 @@ load_profile() {
   LINK_SPECS=(
     "$dotfiles_dir/config/btop|$home_dir/.config/btop"
     "$dotfiles_dir/config/fastfetch|$home_dir/.config/fastfetch"
+    "$dotfiles_dir/config/bookokrat|$home_dir/.config/bookokrat"
     "$dotfiles_dir/config/ghostty/config|$home_dir/Library/Application Support/com.mitchellh.ghostty/config"
     "$dotfiles_dir/config/herdr/config.toml|$home_dir/.config/herdr/config.toml"
     "$dotfiles_dir/config/hunk/config.toml|$home_dir/.config/hunk/config.toml"

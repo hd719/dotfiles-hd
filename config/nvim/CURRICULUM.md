@@ -324,7 +324,10 @@ unexplained magic.
 - [ ] **10.D4** Explore Tree-sitter queries and custom captures.
 - [ ] **10.D5** Design a personal speed-and-retention practice routine.
 - [x] **10.D6** Open an image or PDF inside Ghostty with Snacks and distinguish
-  the rendered view from editing the original file. — Session 008
+  the rendered view from editing the original file. — Session 008 (historical;
+  the Snacks PDF preview was retired in Session 020)
 - [ ] **10.D7** Add IDE-style debugging with DAP, configure one real language
   adapter, and practice breakpoints, continue, step over/into/out, variables,
   call stacks, watches, and the debug console in a safe project.
+- [ ] **10.D8** Open a PDF from Neovim in the full Bookokrat Herdr reader and
+  verify scrolling, search, page navigation, zoom, and clean return to Neovim.

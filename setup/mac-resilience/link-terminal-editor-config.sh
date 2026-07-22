@@ -31,6 +31,7 @@ backup_and_link() {
 }
 
 for source in \
+  "$DOTFILES_DIR/config/bookokrat" \
   "$DOTFILES_DIR/config/ghostty/config" \
   "$DOTFILES_DIR/config/herdr/config.toml" \
   "$DOTFILES_DIR/config/hunk/config.toml" \
@@ -42,6 +43,9 @@ do
   fi
 done
 
+backup_and_link \
+  "$DOTFILES_DIR/config/bookokrat" \
+  "$HOME/.config/bookokrat"
 backup_and_link \
   "$DOTFILES_DIR/config/ghostty/config" \
   "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
