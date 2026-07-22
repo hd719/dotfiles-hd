@@ -96,3 +96,7 @@ diff before enabling any mutation feature.
   the optional `ob` sync CLI; sync is intentionally disabled.
 - Human checkpoint: restart Neovim, open a Markdown note in the `HD` vault,
   press `Space o`, then try `q` for quick switch or `s` for search.
+- Added one explicit creation action after Hamel requested it: `Space o d`
+  opens or creates today's note under `Knowledge/_private/daily`. A dedicated
+  obsidian.nvim template preserves the existing private-daily structure without
+  leaving raw Templater expressions in files created from Neovim.

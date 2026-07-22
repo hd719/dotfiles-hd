@@ -3104,3 +3104,17 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   Hunk itself remains configured separately with `catppuccin-mocha`; this
   change does not alter `hdiff` or Neovim's global Nord theme.
 - Human verification of the revised `Space f g` preview remains pending.
+
+## 2026-07-22 — Session 027: Obsidian Daily Note
+
+- Hamel expected `Space o d` to open a new daily note. It did nothing because
+  the initial Obsidian integration intentionally exposed navigation actions
+  only.
+- Added `Space o d` for `:Obsidian today`, targeting the vault's existing
+  `Knowledge/_private/daily` folder with `YYYY-MM-DD` filenames.
+- Added an obsidian.nvim-compatible private-daily template that preserves the
+  existing frontmatter, adjacent-day links, and reflection sections without
+  copying raw Templater expressions into the new note.
+- A dry-run verified today's target path, every template substitution, and the
+  mapping without creating a real daily note. Human verification remains
+  pending after restarting Neovim and pressing `Space o d`.

@@ -101,7 +101,7 @@ Configuration map:
 - `lua/plugins/editor.lua`: WhichKey and Tree-sitter.
 - `lua/plugins/navigation.lua`: Snacks, Oil, and icons.
 - `lua/plugins/lsp.lua`: completion, LSP, schemas, and formatting.
-- `lua/plugins/obsidian.lua`: safe, navigation-first access to the `HD` vault.
+- `lua/plugins/obsidian.lua`: safe vault navigation and explicit daily notes.
 - `lua/plugins/git.lua`, `bufferline.lua`, `statusline.lua`,
   `markdown.lua`, and `editing.lua`: their matching focused features.
 
@@ -200,6 +200,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space r` | Reload files changed on disk |
 | `Space o` | Open the Obsidian menu |
 | `Space o q/s/b/l` | Quick switch / search / backlinks / links from this note |
+| `Space o d` | Open or create today's private daily note |
 | `Space o o/t/c` | Open in Obsidian / tags / table of contents |
 | `Space o e` | Open the current file externally; PDFs use Bookokrat |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
@@ -241,10 +242,12 @@ does not match the word inside a larger word.
 from the directory being viewed, so it does not depend on Neovim's `:pwd`.
 
 `Space o` is the Obsidian menu for the vault at `~/Developer/hd`. The initial
-setup is navigation-first: automatic frontmatter changes, missing-note
-creation, link renames, checkbox creation, and sync are disabled. Private work
-under `Knowledge/_private`, `Knowledge/raw/_work`, and
-`Knowledge/raw/_drawings` is excluded from Obsidian pickers.
+setup is navigation-first: automatic frontmatter changes, completion-based note
+creation, link renames, checkbox creation, and sync are disabled. `Space o d`
+is the explicit exception: it creates today's note in
+`Knowledge/_private/daily` from the matching private-daily template. Private
+work under `Knowledge/_private`, `Knowledge/raw/_work`, and
+`Knowledge/raw/_drawings` remains excluded from Obsidian pickers.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves
@@ -303,9 +306,10 @@ buffer in Neovim instead of a raster preview. Outside Herdr on macOS, it opens
 a new tab in the current Ghostty window. Use `j` / `k` to scroll, `h` / `l` for
 pages, `+` / `-` to zoom, `z` / `Z` to fit height / width, `/` to search, and
 `?` for full help.
-Press `q` to quit; if `NORMAL` is shown, press `n` first. `Space o` reopens the
-current PDF, while non-PDF files still use their default macOS app. The managed
-`Hamel Nord` theme lets Bookokrat's interface inherit Ghostty's transparency.
+Press `q` to quit; if `NORMAL` is shown, press `n` first. `Space o e` reopens
+the current PDF, while non-PDF files still use their default macOS app. The
+managed `Hamel Nord` theme lets Bookokrat's interface inherit Ghostty's
+transparency.
 The rendered PDF page remains an opaque `#434C5E` canvas because Kitty images
 cannot inherit terminal transparency. Long mouse drags can lag, especially in
 Herdr; use `n`, then `v` / `V` plus motions and `H` for keyboard highlighting.
