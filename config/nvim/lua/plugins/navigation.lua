@@ -181,11 +181,54 @@ return {
     end,
     keys = {
       {
-        "<leader>f",
+        "<leader>ff",
         function()
           Snacks.picker.files()
         end,
         desc = "Find files",
+      },
+      {
+        "<leader>fr",
+        function()
+          Snacks.picker.recent()
+        end,
+        desc = "Recent files",
+      },
+      {
+        "<leader>fl",
+        function()
+          Snacks.picker.lines()
+        end,
+        desc = "Current file lines",
+      },
+      {
+        "<leader>fw",
+        function()
+          Snacks.picker.grep_word()
+        end,
+        mode = { "n", "x" },
+        desc = "Word under cursor",
+      },
+      {
+        "<leader>fg",
+        function()
+          Snacks.picker.git_status()
+        end,
+        desc = "Git changed files",
+      },
+      {
+        "<leader>fd",
+        function()
+          Snacks.picker.files({ cwd = vim.fn.expand("~/Developer/dotfiles-hd") })
+        end,
+        desc = "Dotfiles",
+      },
+      {
+        "<leader>ft",
+        function()
+          Snacks.picker.grep({ search = "TODO|FIXME", regex = true, live = false })
+        end,
+        desc = "TODO and FIXME",
       },
       {
         "<leader>e",

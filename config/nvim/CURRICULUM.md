@@ -38,8 +38,8 @@ unexplained magic.
   Session 001
 - [x] **1.2** Use `Space` and WhichKey to discover leader commands. — Session
   001
-- [x] **1.3** Find and open a file with `Space f` and fuzzy filtering. — Session
-  001
+- [x] **1.3** Find and open a file with `Space f f` and fuzzy filtering. —
+  Session 001; mapping moved in Session 025
 - [x] **1.4** Explain file, buffer, and window as separate concepts. — Session
   001
 - [x] **1.5** Switch to the previous buffer with `H`. — Session 001
@@ -84,8 +84,8 @@ unexplained magic.
   001
 - [x] **2.5** Return through jump history with `Ctrl-o` and `Ctrl-i`. — Session
   001
-- [x] **2.6** Explain when to use `Space f`, `Space /`, and `Space b`. — Session
-  001
+- [x] **2.6** Explain when to use `Space f f`, `Space /`, and `Space b`. —
+  Session 001; mapping moved in Session 025
 
 ### Optional Deep Dives
 
@@ -181,7 +181,7 @@ unexplained magic.
 - [x] **5.D5** Add and use the GraphQL language server (`graphql-lsp`) for
   `.graphql` files, with schema-aware features from the project's
   `graphql-config`. — Session 008
-- [ ] **5.D6** Contrast `/`, `Space /`, `Space f`, and `Space S` from memory in
+- [ ] **5.D6** Contrast `/`, `Space /`, `Space f f`, and `Space S` from memory in
   one project.
 
 ## Lesson 6 — Diagnostics, Code Actions, and Formatting

@@ -197,7 +197,7 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
       "?           open Bookokrat help",
       "q           quit (press n first if NORMAL is shown)",
       "",
-      "Space o     reopen the PDF",
+      "Space o e   reopen the PDF",
       "Space d     close this placeholder buffer",
     })
     vim.bo[args.buf].filetype = "pdf_launcher"
@@ -211,7 +211,7 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
   end,
 })
 
-map("n", "<leader>o", function()
+map("n", "<leader>oe", function()
   local path = vim.api.nvim_buf_get_name(0)
   if path == "" then
     vim.notify("Current buffer has no file", vim.log.levels.WARN)

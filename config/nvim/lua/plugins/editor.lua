@@ -51,6 +51,10 @@ return {
     event = "VeryLazy",
     opts = {
       preset = "modern",
+      spec = {
+        { "<leader>f", group = "Find" },
+        { "<leader>o", group = "Obsidian" },
+      },
     },
   },
   {

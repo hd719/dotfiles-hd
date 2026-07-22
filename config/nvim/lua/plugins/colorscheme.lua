@@ -175,6 +175,49 @@ return {
           bg = colors.polar_night.brighter,
           bold = true,
         }
+
+        -- Match Hunk's Dracula diff treatment in the Snacks Git picker:
+        -- subtle semantic row tints with unchanged context left transparent.
+        highlights.SnacksDiffAdd = { bg = "#305444" }
+        highlights.SnacksDiffDelete = { bg = "#53333C" }
+        highlights.SnacksDiffContext = {
+          fg = "#F8F8F2",
+          bg = colors.none,
+        }
+        highlights.SnacksDiffAddLineNr = {
+          fg = "#50FA7B",
+          bg = "#305444",
+        }
+        highlights.SnacksDiffDeleteLineNr = {
+          fg = "#FF5555",
+          bg = "#53333C",
+        }
+        highlights.SnacksDiffContextLineNr = {
+          fg = "#9C9D9F",
+          bg = colors.none,
+        }
+
+        -- Keep the Git-status list on the same Dracula semantic palette.
+        for _, group in ipairs({
+          "SnacksPickerGitStatusAdded",
+          "SnacksPickerGitStatusStaged",
+          "SnacksPickerGitStatusUntracked",
+        }) do
+          highlights[group] = { fg = "#50FA7B" }
+        end
+        for _, group in ipairs({
+          "SnacksPickerGitStatusModified",
+          "SnacksPickerGitStatusRenamed",
+          "SnacksPickerGitStatusCopied",
+        }) do
+          highlights[group] = { fg = "#8BE9FD" }
+        end
+        for _, group in ipairs({
+          "SnacksPickerGitStatusDeleted",
+          "SnacksPickerGitStatusUnmerged",
+        }) do
+          highlights[group] = { fg = "#FF5555" }
+        end
       end,
     },
     config = function(_, opts)

@@ -59,7 +59,7 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-All 20 plugins below are installed. In `:Lazy`, **Loaded** means a plugin's
+All 21 plugins below are installed. In `:Lazy`, **Loaded** means a plugin's
 trigger has happened in this session; **Not Loaded** means it is installed and
 waiting for that trigger. `lazy-lock.json` pins exact versions, while the Lua
 files under `lua/plugins/` define their behavior.
@@ -81,6 +81,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `nord.nvim` | Transparent Nord colors and custom highlights | Early every startup: `lazy = false`, priority `1000` |
 | `nvim-lspconfig` | Connects installed language servers to matching files | Every startup: `lazy = false` |
 | `nvim-treesitter` | Structure-aware highlighting and folding | Every startup: `lazy = false` |
+| `obsidian.nvim` | Vault-aware note search, backlinks, links, tags, and Obsidian app integration | First Markdown buffer, `Space o …`, or `:Obsidian` |
 | `oil.nvim` | Editable directory browser and file manager | Every startup: `lazy = false` |
 | `schemastore.nvim` | JSON schemas for files such as `package.json` and `tsconfig.json` | Immediately before LSPConfig as its dependency |
 | `snacks.nvim` | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and image previews | Early every startup: `lazy = false`, priority `1000` |
@@ -100,6 +101,7 @@ Configuration map:
 - `lua/plugins/editor.lua`: WhichKey and Tree-sitter.
 - `lua/plugins/navigation.lua`: Snacks, Oil, and icons.
 - `lua/plugins/lsp.lua`: completion, LSP, schemas, and formatting.
+- `lua/plugins/obsidian.lua`: safe, navigation-first access to the `HD` vault.
 - `lua/plugins/git.lua`, `bufferline.lua`, `statusline.lua`,
   `markdown.lua`, and `editing.lua`: their matching focused features.
 
@@ -109,6 +111,8 @@ Configuration map:
 - `:Lazy` shows installed plugins and their status.
 - `:checkhealth` runs Neovim's diagnostics.
 - `:checkhealth snacks` verifies image tools and terminal graphics support.
+- `:checkhealth obsidian` verifies the vault, picker, and required tools.
+- `:Obsidian check` runs obsidian.nvim's configuration check.
 - `:checkhealth vim.lsp` runs Neovim's LSP diagnostics on Neovim 0.12+.
   Seeing a client such as `gopls` confirms that language intelligence is
   attached to the current buffer. Use this instead of the legacy `:LspInfo`.
@@ -156,7 +160,8 @@ Every agent teaching Neovim must read and update both files.
 
 | Key | Action |
 | --- | --- |
-| `Space f` | Find files |
+| `Space f` | Open the Find menu |
+| `Space f f/r/l/w/g/d/t` | Files / recent / current lines / cursor word / Git changes / dotfiles / TODOs |
 | `Space /` | Search text |
 | `Space S` | Search named code symbols with the attached LSP |
 | `Space h` | Open Oil file browser |
@@ -193,7 +198,10 @@ Every agent teaching Neovim must read and update both files.
 | `]d` / `[d` | Next / previous diagnostic |
 | `Space y p/d/f` | Copy file path / working dir / file folder |
 | `Space r` | Reload files changed on disk |
-| `Space o` | Open the current file externally; PDFs use Bookokrat |
+| `Space o` | Open the Obsidian menu |
+| `Space o q/s/b/l` | Quick switch / search / backlinks / links from this note |
+| `Space o o/t/c` | Open in Obsidian / tags / table of contents |
+| `Space o e` | Open the current file externally; PDFs use Bookokrat |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
 | `Space z a/o/c` | Fold: toggle / open all / close all |
 | `gd` / `gh` / `grr` | Definition / hover / references |
@@ -201,9 +209,16 @@ Every agent teaching Neovim must read and update both files.
 | `H` / `L` | Previous / next buffer |
 
 The four search scopes are different: `/` searches text in the current file,
-`Space /` searches text across the project, `Space f` searches project
+`Space /` searches text across the project, `Space f f` searches project
 filenames, and `Space S` asks the LSP for named code symbols such as functions,
-methods, types, and variables.
+methods, types, and variables. `Space f` is a discoverable Find menu: pause
+after it to see file, recent, current-line, cursor-word, Git-change, dotfiles,
+and TODO pickers.
+
+The `Space f g` Git picker keeps unchanged diff context transparent and uses
+Hunk's Dracula semantic palette: green additions, red deletions, and cyan
+modified-file markers. This styling is scoped to the Snacks Git picker; the
+rest of the editor remains Nord.
 
 Use `.` for repeated mechanical code edits. For example, if several lines have
 the same extra comma, delete the first comma with `x`, move to the next one, and
@@ -224,6 +239,12 @@ does not match the word inside a larger word.
 
 `Space g` resolves the repository from the current file. In Oil, it resolves
 from the directory being viewed, so it does not depend on Neovim's `:pwd`.
+
+`Space o` is the Obsidian menu for the vault at `~/Developer/hd`. The initial
+setup is navigation-first: automatic frontmatter changes, missing-note
+creation, link renames, checkbox creation, and sync are disabled. Private work
+under `Knowledge/_private`, `Knowledge/raw/_work`, and
+`Knowledge/raw/_drawings` is excluded from Obsidian pickers.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves

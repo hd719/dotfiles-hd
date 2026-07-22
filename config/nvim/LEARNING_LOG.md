@@ -3062,3 +3062,45 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Hamel rejected the clear-glass trial because it did not improve the tab
   appearance. Restored the accepted `background-blur = 20`; integrated tabs
   remain enabled because they still remove the extra titlebar row.
+
+## 2026-07-22 — Session 025: Find Picker Namespace
+
+- Hamel chose to turn `Space f` from one immediate action into a discoverable
+  WhichKey **Find** menu.
+- The original project-file picker moved to `Space f f`.
+- Added `Space f r` for recent files, `Space f l` for fuzzy current-file lines,
+  `Space f w` for the word under the cursor or visual selection, `Space f g`
+  for Git-changed files, `Space f d` for the dotfiles repo, and `Space f t` for
+  project `TODO` / `FIXME` markers.
+- Mental model: the first `f` chooses the Find family; the second key chooses
+  the search source.
+- Hamel confirmed the namespace loaded by opening the Git-status picker with
+  `Space f g`; the other individual Find sources remain available for later
+  practice.
+
+## 2026-07-22 — Session 026: Obsidian Navigation Integration
+
+- Hamel asked to adapt Salar Alo's obsidian.nvim configuration into this
+  Neovim setup.
+- The linked plugin recipe was not self-contained: it delegated its options to
+  a separate private helper module and used legacy command names. The local
+  setup uses the maintained fork's modern `:Obsidian <command>` interface.
+- Installed stable `obsidian.nvim` `v3.16.5` with the real vault root at
+  `~/Developer/hd` and the existing Snacks picker.
+- At Hamel's request, `Space o` is now the Obsidian menu. `Space o q` quick
+  switches notes, `Space o s` searches notes, and the previous external/PDF
+  opener moved to `Space o e`.
+- Started navigation-first: default plugin mappings, frontmatter rewrites,
+  missing-note creation, link auto-updates, checkbox creation, and sync are
+  disabled. Private and work-only paths are excluded from pickers.
+- Automated startup, health, workspace, mapping, and save-without-mutation
+  checks passed. Human practice remains pending; no curriculum box was marked.
+- The first `Space f g` visual check exposed Nord's bright yellow
+  `DiffChange` background across unchanged context lines, which made the
+  preview difficult to read.
+- Replaced only the Snacks Git picker highlights with Hunk's built-in Dracula
+  semantics: subtle dark-green added rows, dark-red deleted rows, transparent
+  unchanged context, green/red line markers, and cyan modified-file markers.
+  Hunk itself remains configured separately with `catppuccin-mocha`; this
+  change does not alter `hdiff` or Neovim's global Nord theme.
+- Human verification of the revised `Space f g` preview remains pending.

@@ -78,3 +78,21 @@ frontmatter management off, completion note creation off, link auto-update off,
 sync off, and private/raw paths excluded from suggestions. Test it with
 `:Obsidian check` and confirm a normal edit/save produces only the intended Git
 diff before enabling any mutation feature.
+
+## Implemented 2026-07-22
+
+- Installed the maintained `obsidian-nvim/obsidian.nvim` fork at stable release
+  `v3.16.5`; `lazy-lock.json` pins its exact commit.
+- Adapted Salar's configuration instead of copying it verbatim because the
+  linked plugin file delegates its options to a separate private helper module.
+- Configured the actual vault root, `~/Developer/hd`, with the existing Snacks
+  picker.
+- Made `Space o` the discoverable Obsidian menu. The old external/PDF opener is
+  preserved at `Space o e`.
+- Disabled default plugin mappings and automatic mutation features. Private
+  and work-only vault paths are excluded from pickers.
+- `:checkhealth obsidian`, headless startup, workspace/mapping assertions, and
+  a checksum-before-and-after save test passed. The only health warning is for
+  the optional `ob` sync CLI; sync is intentionally disabled.
+- Human checkpoint: restart Neovim, open a Markdown note in the `HD` vault,
+  press `Space o`, then try `q` for quick switch or `s` for search.
