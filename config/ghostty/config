@@ -44,7 +44,8 @@ cursor-style = bar
 cursor-style-blink = true
 shell-integration-features = no-cursor
 
-macos-titlebar-style = transparent
+# Merge tabs into one compact titlebar that matches the terminal background.
+macos-titlebar-style = tabs
 macos-titlebar-proxy-icon = hidden
 
 # Nord icon from https://github.com/jasonlong/ghostty-theme-icons.

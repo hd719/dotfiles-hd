@@ -2991,3 +2991,74 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Remaining human check: restart the open Neovim, use `Space f`, press `Tab`
   once, then press `Enter` on the PDF and visually confirm there is no security
   prompt.
+
+## 2026-07-22 — Session 022: Duplicate PDF Autocmd Match
+
+- Hamel confirmed that running `bookokrat "<pdf-path>"` directly created one
+  viewer, while opening the same PDF from Oil created multiple viewers.
+- An isolated Neovim UI test intercepted the Ghostty command without opening
+  real windows. One `Enter` in Oil produced two identical launcher calls even
+  though only one PDF `BufReadCmd` autocmd was defined.
+- Root cause: macOS Neovim sets `fileignorecase=true`. The autocmd registered
+  both `*.pdf` and `*.PDF`, so the lowercase PDF matched both patterns and ran
+  the same callback twice.
+- Fixed the source of the duplicate by replacing the two-pattern list with one
+  portable mixed-case pattern: `*.[pP][dD][fF]`.
+- Put the launcher autocmd in a named group that clears on config reload, so
+  sourcing the keymap file cannot stack additional PDF callbacks.
+- The exact Oil UI regression test now reports one matching pattern and one
+  launcher call from one `Enter`.
+- Mental model: Oil and the Snacks file picker hand the selected path to a
+  Neovim buffer; Tree-sitter parses code and is not part of PDF navigation.
+- Human checkpoint: restart Neovim, open the PDF once from Oil, and confirm
+  that exactly one Bookokrat viewer appears.
+
+## 2026-07-22 — Session 023: Bookokrat in a Ghostty Tab
+
+- Hamel chose to keep Neovim open and launch Bookokrat in a new tab of the
+  current Ghostty window instead of a separate macOS window.
+- The previous direct launcher used `open -na Ghostty.app`; `-n` starts a new
+  Ghostty application instance, so a separate window was expected behavior.
+- Ghostty 1.3.1 exposes a native AppleScript API for creating a tab with its
+  own command and working directory. Neovim now uses that API and targets
+  Ghostty's front window; no simulated keyboard input or focus timing is used.
+- Bookokrat's executable, PDF path, and directory are passed as separate
+  `osascript` arguments. AppleScript quotes the command values, so paths with
+  spaces remain one argument.
+- First correction: Ghostty's CLI-only `shell:` prefix does not belong in the
+  AppleScript `command` property. It made Bash search for a program named
+  `shell:exec`. The launcher now passes the executable and PDF directly.
+- A short `/usr/bin/touch` smoke test did execute successfully, but Ghostty
+  showed its quick-exit screen because that test command ended immediately.
+  The exact test tab was closed afterward; it was not a Bookokrat failure.
+- Automated checks confirm one launcher request, preserved paths with spaces,
+  valid AppleScript syntax, clean Lua formatting, and clean Neovim startup.
+- Human checkpoint: restart Neovim, open one PDF from Oil, and confirm
+  Bookokrat opens once in a new tab beside the Neovim tab.
+
+## 2026-07-22 — Session 024: Integrated Ghostty Tabs
+
+- Hamel confirmed the Bookokrat launcher now opens in a tab beside Neovim.
+- The native macOS tab strip looked like a large opaque gray second bar even
+  though Ghostty used `macos-titlebar-style = transparent`. That option makes
+  the titlebar transparent but does not style the separate native tab strip.
+- Switched to `macos-titlebar-style = tabs`, Ghostty's custom titlebar that
+  integrates the tabs into one compact row and matches the terminal background.
+- Kept the accepted `background-opacity = 0.90` and `background-blur = 20`.
+  No macOS glass effect was added yet, so this test changes only the tab layout.
+- Ghostty's config validator passed, and its effective configuration reports
+  `macos-titlebar-style = tabs`.
+- Ghostty applies titlebar-style changes only to new windows. Open a new window
+  or restart Ghostty to judge the result.
+- Hamel's visual check confirmed the integrated style removed the separate
+  titlebar row, but the selected tab still looked like the same gray pill.
+  Ghostty 1.3.1 has no separate tab-pill color or opacity setting.
+- Started an uncommitted macOS 26 trial with
+  `background-blur = macos-glass-clear`. The existing `0.90` opacity remains;
+  this makes the whole Ghostty window glassier, not only the selected tab.
+- Human checkpoint: fully restart Ghostty, compare terminal readability and
+  the active tab against the previous screenshot, then keep or revert the
+  glass trial.
+- Hamel rejected the clear-glass trial because it did not improve the tab
+  appearance. Restored the accepted `background-blur = 20`; integrated tabs
+  remain enabled because they still remove the extra titlebar row.

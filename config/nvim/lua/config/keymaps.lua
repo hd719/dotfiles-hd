@@ -136,15 +136,34 @@ local function open_pdf(path)
   end
 
   if vim.fn.has("mac") == 1 and vim.fn.isdirectory("/Applications/Ghostty.app") == 1 then
-    vim.system({
-      "open",
-      "-na",
-      "Ghostty.app",
-      "--args",
-      "--working-directory=" .. directory,
-      "--initial-command=shell:" .. command,
-      "--quit-after-last-window-closed=true",
-    }, { detach = true })
+    local ghostty_tab_script = [[
+on run argv
+  set bookokratPath to item 1 of argv
+  set pdfPath to item 2 of argv
+  set workingDirectory to item 3 of argv
+
+  tell application "Ghostty"
+    set configuration to new surface configuration from {initial working directory:workingDirectory, command:(quoted form of bookokratPath & " " & quoted form of pdfPath), wait after command:false}
+    set createdTab to new tab in front window with configuration configuration
+    select tab createdTab
+  end tell
+end run
+]]
+
+    vim.system(
+      { "/usr/bin/osascript", "-e", ghostty_tab_script, bookokrat, path, directory },
+      { text = true },
+      function(result)
+        if result.code ~= 0 then
+          vim.schedule(function()
+            vim.notify(
+              "Could not create the Ghostty PDF tab: " .. vim.trim(result.stderr or ""),
+              vim.log.levels.ERROR
+            )
+          end)
+        end
+      end
+    )
     return
   end
 
@@ -154,8 +173,12 @@ local function open_pdf(path)
   )
 end
 
+local pdf_launcher_group = vim.api.nvim_create_augroup("BookokratPdfLauncher", { clear = true })
+
 vim.api.nvim_create_autocmd("BufReadCmd", {
-  pattern = { "*.pdf", "*.PDF" },
+  group = pdf_launcher_group,
+  -- One mixed-case pattern avoids two matches when macOS sets fileignorecase.
+  pattern = "*.[pP][dD][fF]",
   desc = "Open PDFs in Bookokrat instead of rendering them with Snacks",
   callback = function(args)
     local path = vim.api.nvim_buf_get_name(args.buf)

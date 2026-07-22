@@ -278,9 +278,10 @@ files for performance.
 Opening an image renders it in Neovim through Snacks when the terminal supports
 the Kitty graphics protocol. PDFs are deliberately excluded from Snacks: opening
 one launches Bookokrat in a focused Herdr tab and leaves a small instruction
-buffer in Neovim instead of a raster preview. Outside Herdr on macOS, it opens a
-new Ghostty window. Use `j` / `k` to scroll, `h` / `l` for pages, `+` / `-` to
-zoom, `z` / `Z` to fit height / width, `/` to search, and `?` for full help.
+buffer in Neovim instead of a raster preview. Outside Herdr on macOS, it opens
+a new tab in the current Ghostty window. Use `j` / `k` to scroll, `h` / `l` for
+pages, `+` / `-` to zoom, `z` / `Z` to fit height / width, `/` to search, and
+`?` for full help.
 Press `q` to quit; if `NORMAL` is shown, press `n` first. `Space o` reopens the
 current PDF, while non-PDF files still use their default macOS app. The managed
 `Hamel Nord` theme lets Bookokrat's interface inherit Ghostty's transparency.
