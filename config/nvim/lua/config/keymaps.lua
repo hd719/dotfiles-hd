@@ -142,9 +142,8 @@ local function open_pdf(path)
       "Ghostty.app",
       "--args",
       "--working-directory=" .. directory,
-      "-e",
-      bookokrat,
-      path,
+      "--initial-command=shell:" .. command,
+      "--quit-after-last-window-closed=true",
     }, { detach = true })
     return
   end

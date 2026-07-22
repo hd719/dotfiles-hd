@@ -2932,3 +2932,62 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   selection. Bookokrat's full-page rerender still occurs either way.
 - Removed `ghostscript` from both Mac Brewfiles and the current Mac because it
   was only used by the retired Snacks PDF renderer; Bookokrat does not need it.
+
+## 2026-07-22 — Session 021: Snacks Picker Tab Selection Gotcha
+
+- While searching the full home directory with `Space f`, Hamel pressed `Tab`
+  expecting shell-style path completion. The picker showed `(5)`, meaning five
+  results were selected.
+- Before the fix, Snacks mapped `Tab` to **select this result and move down**;
+  it did not complete directory names. Pressing `Enter` then created buffers
+  for every selected result, and each PDF could request its own
+  Ghostty/Bookokrat launch when its buffer was visited.
+- The live preview was not the cause. Snacks reads ordinary file previews
+  without opening them as editor buffers; the repeated launches came from the
+  five confirmed selections.
+- Recovery: cancel the pending Ghostty prompts, close the picker, reopen it with
+  `Space f`, type fuzzy fragments such as `stevens submission`, and press
+  `Enter` on one result without using `Tab`.
+- Original mental model before remapping `Tab`: **typing narrows; `Ctrl-j` /
+  `Ctrl-k` moves; `Enter` opens; `Tab` builds a multi-file selection.**
+- The next checkpoint at that stage was confirming that a fuzzy-fragment retry
+  opened only the intended PDF once.
+- A second launcher issue amplified the five selections outside Herdr. Neovim
+  currently passes `-e`, the Bookokrat executable, and the PDF as separate
+  arguments through macOS `open`; Ghostty 1.3.1 can receive those absolute
+  paths as open-file events, prompt before executing each one, and use its
+  default `macos-dock-drop-behavior = new-tab` behavior.
+- At the diagnosis checkpoint, the planned fix was to pass Bookokrat and the
+  PDF as one Ghostty `initial-command` configuration argument. No launcher code
+  had changed yet; the implementation and checks are recorded below.
+- Precision: `Enter` creates buffers for all selected results but immediately
+  loads only the first; the others can launch when later visited. The paired
+  Bookokrat-path and PDF-path prompts from one load come from the Ghostty
+  argument bug, not five simultaneous Bookokrat processes.
+- Hamel clarified the acceptance rule: pressing `Enter` on one PDF must create
+  exactly one Bookokrat viewer, never five.
+- Fixed `Space f` specifically: `Tab` now moves down and `Shift-Tab` moves up in
+  both the input and result list without selecting files. Other Snacks pickers
+  keep their defaults, so this change is limited to the reported workflow.
+- Fixed the direct Ghostty launcher by replacing the separate `-e`, executable,
+  and PDF arguments with one shell-quoted `--initial-command=...` argument.
+  Ghostty therefore receives no bare executable or PDF path to interpret as a
+  macOS file-open event.
+- Headless regression checks confirmed the effective file-picker mapping,
+  preserved the unrelated grep-picker default, captured exactly one `open`
+  call, and verified that a PDF path containing spaces remains inside the one
+  initial-command argument. Ghostty 1.3.1 also accepts that argument format.
+- Human verification remains pending. Restart Neovim so the loaded Snacks
+  configuration resets, search with fuzzy fragments, optionally press `Tab`,
+  and press `Enter` once on the PDF; expect one viewer and no execution prompt.
+- Computer Use could not control Ghostty because terminal apps are blocked by
+  its safety policy. Chronicle's latest frame was stale, so no visual prompt
+  result was claimed.
+- A real patched `Space o` launch created exactly one new Ghostty process and
+  one Bookokrat child for the PDF. Its process arguments contained one
+  `--initial-command=...` and no separate executable or PDF file-open arguments.
+- The test Bookokrat process was stopped afterward, which closed only its
+  dedicated Ghostty window. Hamel's existing viewer was left untouched.
+- Remaining human check: restart the open Neovim, use `Space f`, press `Tab`
+  once, then press `Enter` on the PDF and visually confirm there is no security
+  prompt.

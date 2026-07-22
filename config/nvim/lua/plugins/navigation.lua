@@ -25,6 +25,24 @@ return {
       picker = {
         enabled = true,
         sources = {
+          files = {
+            win = {
+              input = {
+                keys = {
+                  -- Safe navigation instead of silently building a multi-file
+                  -- selection when Tab is pressed like shell completion.
+                  ["<Tab>"] = { "list_down", mode = { "i", "n" } },
+                  ["<S-Tab>"] = { "list_up", mode = { "i", "n" } },
+                },
+              },
+              list = {
+                keys = {
+                  ["<Tab>"] = "list_down",
+                  ["<S-Tab>"] = "list_up",
+                },
+              },
+            },
+          },
           -- Show dotfiles (e.g. .zshrc, .config) in the explorer sidebar so it
           -- matches Oil. Gitignored files stay hidden; press I in the tree to
           -- reveal them, or H to toggle dotfiles back off.
