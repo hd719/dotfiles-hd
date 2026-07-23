@@ -32,4 +32,3 @@ brew "zsh-syntax-highlighting"
 
 cask "font-maple-mono-nf"
 cask "ghostty"
-cask "zed"
