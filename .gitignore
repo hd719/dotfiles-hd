@@ -1,3 +1,8 @@
 .alias
 .secrets
 .DS_Store
+
+# Karabiner creates dated snapshots automatically. Keep only the reviewed
+# baseline tracked below.
+config/karabiner/automatic_backups/*
+!config/karabiner/automatic_backups/karabiner_20250217.json
