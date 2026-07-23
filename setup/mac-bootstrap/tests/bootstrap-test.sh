@@ -1247,6 +1247,7 @@ test_shared_zsh_interface() {
 
   for zsh_file in \
     "$module" \
+    "$REPO_DIR/config/zsh/aliases.zsh" \
     "$shared_dir/init.zsh" \
     "$shared_dir/prompt.zsh" \
     "$shared_dir/tooling.zsh" \

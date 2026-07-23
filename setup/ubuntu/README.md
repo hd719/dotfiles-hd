@@ -36,7 +36,7 @@ repairs missing packages and links without creating duplicate backups.
 - `~/.zshrc` -> `setup/ubuntu/.zshrc`
 - `~/.config/ghostty/config` -> `setup/ubuntu/ghostty.conf` ->
   `config/ghostty/config`
-- `~/.config/zsh/lsd-aliases.zsh` -> `config/zsh/lsd-aliases.zsh`
+- `~/.config/zsh/aliases.zsh` -> `config/zsh/aliases.zsh`
 - `~/.config/starship.toml` -> `config/starship/starship.toml`
 - `~/.gitignore_global` -> `config/git/.gitignore_global`
 - `~/.config/mise/config.toml` -> `setup/ubuntu/mise.toml`

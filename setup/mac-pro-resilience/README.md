@@ -56,7 +56,7 @@ nvim "$HOME/.zshrc"
 ```
 
 ```zsh
-source "$HOME/Developer/dotfiles-hd/config/zsh/hunk-aliases.zsh"
+source "$HOME/Developer/dotfiles-hd/config/zsh/aliases.zsh"
 ```
 
 Save the file, then run `exec zsh` and `alias hwatch` again. Do not replace the
@@ -66,7 +66,7 @@ For daily Cursor reviews, open Ghostty in the same repo or worktree and run
 `hwatch`. It includes new files and refreshes while Cursor edits. See the
 [Hunk documentation](https://www.hunk.dev/), the
 [shared theme](../../config/hunk/config.toml), and the
-[shared aliases](../../config/zsh/hunk-aliases.zsh).
+[shared aliases](../../config/zsh/aliases.zsh).
 
 ## Agent Workflow
 
