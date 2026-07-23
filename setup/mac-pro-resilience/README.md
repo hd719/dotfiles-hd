@@ -25,8 +25,8 @@ Run these commands only from a clean work-laptop clone:
 cd ~/Developer/dotfiles-hd
 git status --short --branch
 git pull --ff-only
-brew bundle install --no-upgrade --file=setup/mac-resilience/Brewfile
-./setup/mac-resilience/link-terminal-editor-config.sh
+brew bundle install --no-upgrade --file=setup/mac-pro-resilience/Brewfile
+./setup/mac-pro-resilience/link-terminal-editor-config.sh
 exec zsh
 hunk --version
 alias hwatch
@@ -103,12 +103,12 @@ report them before replacing anything.
 
 ### 2. Install the scoped dependencies
 
-Do not run `setup/mac-mini/Brewfile` or `setup/mac-vm/setup-vm.sh` on this
+Do not run `setup/mac-mini/Brewfile` or `setup/mac-pro/setup.sh` on this
 laptop.
 
 ```bash
 brew bundle install --no-upgrade \
-  --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
+  --file="$HOME/Developer/dotfiles-hd/setup/mac-pro-resilience/Brewfile"
 
 uv tool install 'mdformat==1.0.0' \
   --with mdformat-gfm \
@@ -155,7 +155,7 @@ bypass device management or security controls.
 ### 3. Link the portable configs
 
 ```bash
-~/Developer/dotfiles-hd/setup/mac-resilience/link-terminal-editor-config.sh
+~/Developer/dotfiles-hd/setup/mac-pro-resilience/link-terminal-editor-config.sh
 ```
 
 The script is idempotent and creates timestamped sibling backups before
@@ -184,7 +184,7 @@ project's own ESLint configuration.
 
 ```bash
 brew bundle check --verbose \
-  --file="$HOME/Developer/dotfiles-hd/setup/mac-resilience/Brewfile"
+  --file="$HOME/Developer/dotfiles-hd/setup/mac-pro-resilience/Brewfile"
 
 for cmd in \
   bash-language-server bookokrat fd fzf gopls herdr hunk lazygit lua-language-server \
@@ -236,8 +236,8 @@ laptop unless Hamel asks.
 
 ```text
 Open ~/Developer/dotfiles-hd and read AGENTS.md, README.md,
-setup/mac-resilience/README.md, and config/nvim/README.md. Follow the
-mac-resilience runbook to set up only Ghostty, Herdr, Hunk, and Neovim. Inspect the
+setup/mac-pro-resilience/README.md, and config/nvim/README.md. Follow the
+mac-pro-resilience runbook to set up only Ghostty, Herdr, Hunk, and Neovim. Inspect the
 repo and every live destination first, preserve all work-specific state, and
 timestamp-backup any non-matching destination before linking. Never touch
 Git/SSH/GitHub auth, Git identity, AWS/Doppler/1Password state, company

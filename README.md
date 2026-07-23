@@ -11,14 +11,13 @@ Shared Mac shell mechanics live behind `config/zsh/mac/init.zsh`. Each machine
 keeps its own `.zshrc` entry point so plugin timing, runtimes, credentials, and
 work-specific behavior remain profile-owned.
 
-The MacBook profile adapter now lives at `setup/mac-vm/.zshrc`. Existing
-bootstrap-managed links continue through the temporary
-`setup/mac-vm/zsh-config/.zshrc` compatibility entry point until the later
-profile-naming migration.
+The MacBook profile adapter now lives at `setup/mac-pro/.zshrc`. Existing
+bootstrap-managed links through `setup/mac-vm/zsh-config/.zshrc` remain valid
+because `setup/mac-vm` is a compatibility symlink to `setup/mac-pro`.
 
 ## Resilience Work Mac
 
-Use [`setup/mac-resilience/README.md`](setup/mac-resilience/README.md) to install
+Use [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) to install
 and link the Ghostty, Herdr, Hunk, Neovim, and Bookokrat setup on the work
 laptop. That runbook is intentionally narrower than the personal Mac inventory
 below so it does not replace work-specific shell, runtime, credential, or
@@ -30,12 +29,12 @@ This is the bootstrap target plus the explicitly noted existing manual link.
 
 For a new personal Mac, use the backed-up, idempotent
 [`Mac bootstrap runbook`](setup/mac-bootstrap/README.md) instead of copying the
-link commands below by hand. The legacy `mac-vm` profile name is correct for
-both a physical personal MacBook and a MacBook VM.
+link commands below by hand. The canonical personal MacBook profile is
+`mac-pro`; `mac-vm` remains a temporary compatibility alias.
 
 | Tool | Live path | Dotfiles source | Status | Notes |
 | --- | --- | --- | --- | --- |
-| Shell (MacBook) | `~/.zshrc` | `setup/mac-vm/zsh-config/.zshrc` | Bootstrap-managed link | Temporary compatibility entry point for the MacBook profile adapter. |
+| Shell (MacBook) | `~/.zshrc` | `setup/mac-pro/.zshrc` | Bootstrap-managed link | Existing links through `setup/mac-vm` remain valid during migration. |
 | Shell (Mac mini) | `~/.zshrc` | `setup/mac-mini/.zshrc` | Bootstrap-managed link | Mac mini shell entry point. |
 | Login PATH | marker-owned block in `~/.zprofile` | `setup/mac-bootstrap/mise-shims.zsh` | Bootstrap-managed block | The rest of `.zprofile` remains user-owned. |
 | AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Existing manual link | Not installed or linked by the new-Mac bootstrap because the app is not in its reviewed Brewfiles. |
@@ -92,9 +91,9 @@ backup_and_link "$DOTFILES/config/nvim" "$HOME/.config/nvim"
 Personal Apple Silicon Mac:
 
 ```bash
-setup/mac-bootstrap/bootstrap.sh --profile mac-vm --dry-run
-setup/mac-bootstrap/bootstrap.sh --profile mac-vm --apply
-setup/mac-bootstrap/doctor.sh --profile mac-vm
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --apply
+setup/mac-bootstrap/doctor.sh --profile mac-pro
 ```
 
 The Mac mini uses `--profile mac-mini`. Read the

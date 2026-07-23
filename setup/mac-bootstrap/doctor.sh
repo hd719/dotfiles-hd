@@ -12,7 +12,8 @@ MISE_RUNTIME_FAILURES=0
 source "$SCRIPT_DIR/lib.sh"
 
 usage() {
-  printf 'Usage: doctor.sh --profile mac-vm|mac-mini\n'
+  printf 'Usage: doctor.sh --profile mac-pro|mac-mini\n'
+  printf 'Compatibility: mac-vm remains a deprecated alias for mac-pro.\n'
 }
 
 pass() {
@@ -44,6 +45,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "$PROFILE" ]] || { usage >&2; exit 2; }
+PROFILE="$(canonical_profile "$PROFILE")" || exit 2
 load_profile "$PROFILE" "$DOTFILES_DIR" "$HOME" || exit 2
 load_mise_specs "$MISE_CONFIG" || exit 2
 export MISE_AUTO_INSTALL=0
@@ -79,6 +81,8 @@ for spec in "${LINK_SPECS[@]}"; do
   destination="${spec#*|}"
   if link_matches "$source_path" "$destination"; then
     pass "$destination -> $source_path"
+  elif legacy_source="$(legacy_link_source_for_destination "$destination")"; then
+    pass "$destination -> $legacy_source (compatibility)"
   else
     fail "link mismatch: $destination"
   fi

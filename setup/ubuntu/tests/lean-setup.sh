@@ -413,7 +413,7 @@ alias la='lsd -a'
 EOF
   assert_file_contains "$MAC_ALIASES" "source \"\$ZSH_CONFIG_DIR/../lsd-aliases.zsh\""
 
-  for forbidden in mac-vm linuxbrew rbenv 'code --wait' kubectl terraform; do
+  for forbidden in mac-pro mac-vm mac-pro-resilience mac-resilience linuxbrew rbenv 'code --wait' kubectl terraform; do
     if grep -Fq -- "$forbidden" "$ZSH_CONFIG"; then
       fail "Ubuntu zsh config still references: $forbidden"
     fi

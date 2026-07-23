@@ -34,27 +34,26 @@ git clone https://github.com/hd719/dotfiles-hd.git \
 cd "$HOME/Developer/dotfiles-hd"
 ```
 
-The legacy `mac-vm` name means the personal MacBook profile; it is correct for
-a new physical MacBook too. Preview it first. Dry-run invokes no package
-manager and writes nothing:
+`mac-pro` is the canonical personal MacBook profile. Preview it first. Dry-run
+invokes no package manager and writes nothing:
 
 ```bash
-setup/mac-bootstrap/bootstrap.sh --profile mac-vm --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run
 ```
 
 Then audit installed dependencies. This can return nonzero while packages are
 missing; Homebrew or mise may populate their own caches during the audit.
 
 ```bash
-setup/mac-bootstrap/bootstrap.sh --profile mac-vm --check
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --check
 ```
 
 Apply only from a clean checkout:
 
 ```bash
-setup/mac-bootstrap/bootstrap.sh --profile mac-vm --apply
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --apply
 exec zsh -l
-setup/mac-bootstrap/doctor.sh --profile mac-vm
+setup/mac-bootstrap/doctor.sh --profile mac-pro
 ```
 
 Run the apply command a second time. It must complete without creating another
@@ -67,14 +66,17 @@ Open Karabiner-Elements and complete macOS's required driver and Input
 Monitoring permission prompts. Credentials and application sign-ins remain
 manual.
 
-The legacy entry point is now a safe wrapper around the same MacBook profile:
+The canonical convenience wrapper uses the same profile:
 
 ```bash
-setup/mac-vm/setup-vm.sh --dry-run
-setup/mac-vm/setup-vm.sh --apply
+setup/mac-pro/setup.sh --dry-run
+setup/mac-pro/setup.sh --apply
 ```
 
-It no longer accepts a GitHub token or manages SSH, Nix, nvm, or rbenv.
+For compatibility, `--profile mac-vm` and
+`setup/mac-vm/setup-vm.sh` still resolve to `mac-pro`. They can be removed after
+existing machines and external automation callers have migrated. Neither
+wrapper accepts a GitHub token or manages SSH, Nix, nvm, or rbenv.
 
 ## Mac mini boundary
 

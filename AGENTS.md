@@ -8,7 +8,7 @@ work machines.
 - `config/` contains portable app and tool configuration.
 - `setup/` contains machine bootstrap scripts and machine-specific setup files.
 - The current personal Mac symlink inventory lives in `README.md`.
-- The Resilience work Mac instructions live in `setup/mac-resilience/README.md`.
+- The Resilience work Mac instructions live in `setup/mac-pro-resilience/README.md`.
 - The shared Apple Silicon Mac bootstrap and safety boundary live in
   `setup/mac-bootstrap/README.md`.
 
@@ -49,7 +49,7 @@ Whole directory links:
 
 Single file or subdirectory links:
 
-- `~/.zshrc` -> `setup/mac-vm/zsh-config/.zshrc` on the MacBook
+- `~/.zshrc` -> `setup/mac-pro/.zshrc` on the MacBook
 - `~/.zshrc` -> `setup/mac-mini/.zshrc` on the Mac mini
 - `~/Library/Application Support/com.mitchellh.ghostty/config` -> `config/ghostty/config`
 - `~/.config/herdr/config.toml` -> `config/herdr/config.toml`
@@ -62,9 +62,10 @@ The bootstrap also owns one marked mise-shims block inside `~/.zprofile`; it
 does not replace or symlink the whole file. AeroSpace remains an existing
 manual link and is not installed or linked by this bootstrap.
 
-`setup/mac-vm/zsh-config/.zshrc` is a temporary compatibility entry point that
-forwards existing MacBook links to the profile adapter at
-`setup/mac-vm/.zshrc`.
+The tracked `setup/mac-vm -> mac-pro` compatibility symlink keeps existing
+MacBook links valid until the bootstrap relinks `~/.zshrc` to the canonical
+target. `setup/mac-resilience -> mac-pro-resilience` similarly protects
+machine-owned work-shell paths during migration.
 
 ## Do Not Blindly Symlink
 
@@ -81,15 +82,15 @@ forwards existing MacBook links to the profile adapter at
 
 When Hamel asks to set up the work laptop:
 
-1. Read `setup/mac-resilience/README.md` and follow it as the runbook.
+1. Read `setup/mac-pro-resilience/README.md` and follow it as the runbook.
 2. Default to only Ghostty, Herdr, Hunk, Neovim, and Bookokrat. Do not apply the
    full personal Mac symlink list.
-3. Use `setup/mac-resilience/Brewfile` for the terminal/editor dependencies and
-   `setup/mac-resilience/link-terminal-editor-config.sh` for the five links.
-   Never run `setup/mac-mini/Brewfile` or `setup/mac-vm/setup-vm.sh` on the
+3. Use `setup/mac-pro-resilience/Brewfile` for the terminal/editor dependencies and
+   `setup/mac-pro-resilience/link-terminal-editor-config.sh` for the five links.
+   Never run `setup/mac-mini/Brewfile` or `setup/mac-pro/setup.sh` on the
    work laptop.
 4. Inspect and timestamp-backup every existing destination before replacing it.
-5. Do not link `config/mise`, replace `setup/mac-resilience/.zshrc`, or change
+5. Do not link `config/mise`, replace `setup/mac-pro-resilience/.zshrc`, or change
    work-repo runtimes unless Hamel explicitly asks. Resilience repos own their
    Node and package-manager versions.
 6. Never copy or replace Git/SSH/GitHub auth, AWS/Doppler/1Password state,
@@ -102,14 +103,15 @@ When Hamel asks to set up the work laptop:
 - `setup/mac-bootstrap/bootstrap.sh` and `doctor.sh` for managed Macs
 - `config/zed/link-zed-config.sh`
 - `config/herdr/link-herdr-config.sh`
-- `setup/mac-resilience/link-terminal-editor-config.sh`
+- `setup/mac-pro-resilience/link-terminal-editor-config.sh`
 
 Prefer these scripts when they match the task.
 
 For a brand-new personal Mac, run the bootstrap in `--dry-run` mode first and
-then `--apply` only from a clean canonical clone. The legacy `mac-vm` profile
-name is correct for a physical personal MacBook too. Never use the personal
-bootstrap on the Resilience work Mac. On the existing Mac mini, apply requires
+then `--apply` only from a clean canonical clone. `mac-pro` is the canonical
+personal MacBook profile; `mac-vm` is accepted only as a temporary compatibility
+alias. Never use the personal bootstrap on the Resilience work Mac. On the
+existing Mac mini, apply requires
 the reviewed change to be merged, a green MacBook rollback/reboot canary, a
 green post-merge Mac mini preflight, and Hamel's explicit approval. PR #9's
 unavailable clean-VM gate is explicitly waived, not passed. Service restart

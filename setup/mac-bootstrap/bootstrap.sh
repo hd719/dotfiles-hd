@@ -13,7 +13,9 @@ source "$SCRIPT_DIR/lib.sh"
 
 usage() {
   cat <<'EOF'
-Usage: bootstrap.sh --profile mac-vm|mac-mini [--dry-run|--check|--apply]
+Usage: bootstrap.sh --profile mac-pro|mac-mini [--dry-run|--check|--apply]
+
+Compatibility: mac-vm remains a deprecated alias for mac-pro.
 
 Modes:
   --dry-run  Show planned commands and filesystem changes without invoking
@@ -61,6 +63,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "$PROFILE" ]] || { usage >&2; exit 2; }
+PROFILE="$(canonical_profile "$PROFILE")" || exit 2
 load_profile "$PROFILE" "$DOTFILES_DIR" "$HOME"
 
 [[ "$(uname -s)" == "Darwin" ]] || die "personal-Mac bootstrap requires macOS"

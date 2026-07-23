@@ -107,6 +107,40 @@ link_matches() {
     && "$(readlink "$destination")" == "$source_path" ]]
 }
 
+legacy_link_source_for_destination() {
+  local destination="$1"
+  local spec
+  local source_path
+  local legacy_destination
+
+  for spec in "${LEGACY_LINK_SPECS[@]}"; do
+    source_path="${spec%%|*}"
+    legacy_destination="${spec#*|}"
+    if [[ "$legacy_destination" == "$destination" ]] \
+      && link_matches "$source_path" "$destination"; then
+      printf '%s\n' "$source_path"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+canonical_profile() {
+  case "$1" in
+    mac-pro|mac-mini)
+      printf '%s\n' "$1"
+      ;;
+    mac-vm)
+      printf '%s\n' "mac-pro"
+      ;;
+    *)
+      die "unknown profile '$1' (expected mac-pro or mac-mini)"
+      return 1
+      ;;
+  esac
+}
+
 zprofile_block_matches() {
   local profile_path="$1"
   local fragment_path="$2"
@@ -306,10 +340,11 @@ write_zprofile_block() {
 }
 
 load_profile() {
-  local profile="$1"
+  local profile
   local dotfiles_dir="$2"
   local home_dir="$3"
 
+  profile="$(canonical_profile "$1")" || return 1
   COMMON_BREWFILE="$dotfiles_dir/setup/mac-bootstrap/Brewfile"
   PROFILE_BREWFILE="$dotfiles_dir/setup/$profile/Brewfile"
   MISE_CONFIG="${DOTFILES_MISE_CONFIG:-$dotfiles_dir/config/mise/config.toml}"
@@ -328,22 +363,22 @@ load_profile() {
     "$dotfiles_dir/config/zed/settings.json|$home_dir/.config/zed/settings.json"
     "$dotfiles_dir/config/zed/themes|$home_dir/.config/zed/themes"
   )
+  LEGACY_LINK_SPECS=()
 
   case "$profile" in
-    mac-vm)
+    mac-pro)
       LINK_SPECS+=(
-        "$dotfiles_dir/setup/mac-vm/zsh-config/.zshrc|$home_dir/.zshrc"
+        "$dotfiles_dir/setup/mac-pro/.zshrc|$home_dir/.zshrc"
         "$dotfiles_dir/config/karabiner|$home_dir/.config/karabiner"
+      )
+      LEGACY_LINK_SPECS+=(
+        "$dotfiles_dir/setup/mac-vm/zsh-config/.zshrc|$home_dir/.zshrc"
       )
       ;;
     mac-mini)
       LINK_SPECS+=(
         "$dotfiles_dir/setup/mac-mini/.zshrc|$home_dir/.zshrc"
       )
-      ;;
-    *)
-      die "unknown profile '$profile' (expected mac-vm or mac-mini)"
-      return 1
       ;;
   esac
 }

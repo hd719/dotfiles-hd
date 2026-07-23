@@ -719,6 +719,53 @@ seed_protected_state() {
   printf 'plugin\n' > "$home_dir/.config/tmux/plugins/sentinel"
 }
 
+test_profile_name_compatibility() {
+  local root="$TMP_ROOT/profile-name-compatibility"
+  local home_dir="$root/home"
+  local spec
+  local zsh_spec=""
+  local legacy_zsh_spec=""
+  local helper_path
+
+  mkdir -p "$home_dir"
+
+  assert_eq mac-pro "$(canonical_profile mac-pro)" "mac-pro remains canonical"
+  assert_eq mac-pro "$(canonical_profile mac-vm)" "mac-vm maps to mac-pro"
+  assert_eq mac-mini "$(canonical_profile mac-mini)" "mac-mini remains canonical"
+
+  assert_eq mac-pro "$(readlink "$REPO_DIR/setup/mac-vm")" "mac-vm directory compatibility target"
+  assert_eq mac-pro-resilience "$(readlink "$REPO_DIR/setup/mac-resilience")" "Resilience directory compatibility target"
+  assert_file "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc"
+  assert_file "$REPO_DIR/setup/mac-resilience/herdr/hd-stop.sh"
+
+  [[ -x "$REPO_DIR/setup/mac-pro/setup.sh" ]] \
+    || fail "canonical Mac Pro wrapper should be executable"
+  TESTS=$((TESTS + 1))
+  [[ -x "$REPO_DIR/setup/mac-vm/setup-vm.sh" ]] \
+    || fail "legacy Mac VM wrapper should remain executable"
+  TESTS=$((TESTS + 1))
+
+  load_profile mac-vm "$REPO_DIR" "$home_dir"
+  assert_eq "$REPO_DIR/setup/mac-pro/Brewfile" "$PROFILE_BREWFILE" "legacy profile uses canonical Brewfile"
+  for spec in "${LINK_SPECS[@]}"; do
+    [[ "${spec#*|}" == "$home_dir/.zshrc" ]] && zsh_spec="$spec"
+  done
+  for spec in "${LEGACY_LINK_SPECS[@]}"; do
+    [[ "${spec#*|}" == "$home_dir/.zshrc" ]] && legacy_zsh_spec="$spec"
+  done
+  assert_eq "$REPO_DIR/setup/mac-pro/.zshrc|$home_dir/.zshrc" "$zsh_spec" "canonical zsh link target"
+  assert_eq "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc|$home_dir/.zshrc" "$legacy_zsh_spec" "legacy zsh link target"
+
+  while IFS= read -r helper_path; do
+    [[ -f "$REPO_DIR/$helper_path" ]] \
+      || fail "missing Mac Pro Resilience helper: $helper_path"
+    TESTS=$((TESTS + 1))
+  done < <(
+    grep -Eo 'setup/mac-pro-resilience/[^"]+\.sh' \
+      "$REPO_DIR/setup/mac-pro-resilience/.zshrc" | LC_ALL=C sort -u
+  )
+}
+
 test_full_bootstrap() {
   local root="$TMP_ROOT/full-bootstrap"
   local home_dir="$root/home"
@@ -746,7 +793,7 @@ test_full_bootstrap() {
   snapshot_home "$home_dir" "$before"
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-140000 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --dry-run >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --dry-run >/dev/null
   snapshot_home "$home_dir" "$after"
   assert_eq "$(cat "$before")" "$(cat "$after")" "dry-run writes nothing under HOME"
   assert_eq '' "$(cat "$log")" "dry-run invokes no package manager"
@@ -763,10 +810,10 @@ test_full_bootstrap() {
     > "$home_dir/.local/graphql-lsp/lib/node_modules/graphql-language-service-cli/package.json"
   mkdir -p "$home_dir/.config/btop"
   printf 'old-btop\n' > "$home_dir/.config/btop/sentinel"
-  snapshot_managed_paths mac-vm "$home_dir" "$managed_before"
+  snapshot_managed_paths mac-pro "$home_dir" "$managed_before"
   snapshot_protected_state "$home_dir" "$protected_before"
   : > "$missing_destinations"
-  load_profile mac-vm "$REPO_DIR" "$home_dir"
+  load_profile mac-pro "$REPO_DIR" "$home_dir"
   for spec in "${LINK_SPECS[@]}"; do
     destination="${spec#*|}"
     if [[ ! -e "$destination" && ! -L "$destination" ]]; then
@@ -777,9 +824,9 @@ test_full_bootstrap() {
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-140000 \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null
 
-  assert_eq "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" "$(readlink "$home_dir/.zshrc")" "MacBook zshrc target"
+  assert_eq "$REPO_DIR/setup/mac-pro/.zshrc" "$(readlink "$home_dir/.zshrc")" "MacBook zshrc target"
   assert_eq "$REPO_DIR/config/bookokrat" "$(readlink "$home_dir/.config/bookokrat")" "Bookokrat config target"
   assert_eq "$REPO_DIR/config/ghostty/config" "$(readlink "$home_dir/Library/Application Support/com.mitchellh.ghostty/config")" "Ghostty path with spaces"
   assert_eq "$REPO_DIR/config/hunk/config.toml" "$(readlink "$home_dir/.config/hunk/config.toml")" "Hunk config target"
@@ -788,7 +835,7 @@ test_full_bootstrap() {
   assert_file "$home_dir/.config/btop.backup-20260715-140000/sentinel"
   assert_contains "$home_dir/.zprofile" 'export KEEP_ME=yes'
   assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-bootstrap/Brewfile"
-  assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-vm/Brewfile"
+  assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-pro/Brewfile"
   assert_contains "$log" "mise exec node@24.18.0 pnpm@11.2.2 -- pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0"
   assert_contains "$log" "pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0"
   assert_contains "$home_dir/.local/graphql-lsp/.pnpm-managed-version" \
@@ -803,7 +850,7 @@ test_full_bootstrap() {
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-150000 \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null
   backup_count_after="$(find "$home_dir" -name '*.backup-*' | wc -l | tr -d ' ')"
   assert_eq "$backup_count_before" "$backup_count_after" "second bootstrap creates no backup"
   assert_eq 1 "$(grep -Fxc "pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0" "$log")" \
@@ -824,14 +871,14 @@ test_full_bootstrap() {
   assert_contains "$home_dir/.zshrc" old-zshrc
   assert_contains "$home_dir/.config/btop/sentinel" old-btop
   assert_eq 'export KEEP_ME=yes' "$(cat "$home_dir/.zprofile")" "rollback restores zprofile byte-for-byte"
-  snapshot_managed_paths mac-vm "$home_dir" "$managed_after"
+  snapshot_managed_paths mac-pro "$home_dir" "$managed_after"
   assert_eq "$(cat "$managed_before")" "$(cat "$managed_after")" "rollback restores the complete managed-path inventory"
 
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_STAMP=20260715-160000 \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null
-  assert_eq "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" "$(readlink "$home_dir/.zshrc")" "bootstrap works after rollback"
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null
+  assert_eq "$REPO_DIR/setup/mac-pro/.zshrc" "$(readlink "$home_dir/.zshrc")" "bootstrap works after rollback"
 
   assert_not_contains "$log" 'brew upgrade'
   assert_not_contains "$log" 'brew cleanup'
@@ -841,14 +888,23 @@ test_full_bootstrap() {
 
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAIL_ON_MISE_AUTO_INSTALL=1 \
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null
+  TESTS=$((TESTS + 1))
+
+  rm "$home_dir/.zshrc"
+  ln -s "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" "$home_dir/.zshrc"
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" FAIL_ON_MISE_AUTO_INSTALL=1 \
     "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null
   TESTS=$((TESTS + 1))
+  rm "$home_dir/.zshrc"
+  ln -s "$REPO_DIR/setup/mac-pro/.zshrc" "$home_dir/.zshrc"
 
   mv "$home_dir/.local/graphql-lsp/.pnpm-managed-version" \
     "$root/graphql-marker"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject an npm-layout GraphQL LSP without the pnpm marker"
   fi
   TESTS=$((TESTS + 1))
@@ -862,7 +918,7 @@ test_full_bootstrap() {
     '# END dotfiles-hd mac-bootstrap mise shims' > "$home_dir/.zprofile"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject a stale managed zprofile block"
   fi
   TESTS=$((TESTS + 1))
@@ -870,28 +926,28 @@ test_full_bootstrap() {
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" MISE_WHERE_MISSING='node@24.18.0' \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject a matching PATH fallback when mise Node is missing"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAKE_ACTIVE_NODE_VERSION=v24.18.10 \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject a wrong active shell version"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAKE_NVIM_VERSION=0.11.9 \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject Neovim older than 0.12"
   fi
   TESTS=$((TESTS + 1))
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAKE_MDFORMAT_GFM_VERSION=1.0.01 \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject an mdformat plugin prefix-collision version"
   fi
   TESTS=$((TESTS + 1))
@@ -899,7 +955,7 @@ test_full_bootstrap() {
   rm -rf "$empty_mise"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" MISE_DATA_DIR="$empty_mise" MISE_WHERE_MISSING=1 \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should fail when pinned runtimes are missing"
   fi
   TESTS=$((TESTS + 1))
@@ -908,7 +964,7 @@ test_full_bootstrap() {
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" FAKE_NVIM_MISSING_PLUGIN=1 \
     NVIM_NORMAL_START_MARKER="$root/nvim-normal-started" \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject a missing locked Neovim plugin"
   fi
   TESTS=$((TESTS + 1))
@@ -917,7 +973,7 @@ test_full_bootstrap() {
   rm "$home_dir/.local/share/nvim/site/parser/bash.so"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject a missing required Tree-sitter parser"
   fi
   TESTS=$((TESTS + 1))
@@ -926,7 +982,7 @@ test_full_bootstrap() {
   rm -rf "$home_dir/.local/share/nvim/site/queries/ecma"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null 2>&1; then
     fail "doctor should reject missing query-only Tree-sitter state"
   fi
   TESTS=$((TESTS + 1))
@@ -989,7 +1045,7 @@ test_mac_mini_apply() {
   assert_no_path "$home_dir/.config/karabiner"
   assert_no_path "$home_dir/.config/aerospace/aerospace.toml"
   assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-mini/Brewfile"
-  assert_not_contains "$log" 'setup/mac-vm/Brewfile'
+  assert_not_contains "$log" 'setup/mac-pro/Brewfile'
   assert_not_contains "$log" 'launchctl'
   assert_not_contains "$log" 'brew services'
   assert_not_contains "$log" 'pkill'
@@ -1019,6 +1075,7 @@ test_xdg_bin_home() {
   assert_eq "$custom_bin/ruff" "$resolved" "XDG_BIN_HOME is present in login shim PATH"
 
   for zshrc in \
+    "$REPO_DIR/setup/mac-pro/.zshrc" \
     "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc"; do
     resolved="$(HOME="$home_dir" XDG_BIN_HOME="$custom_bin" PATH=/usr/bin:/bin \
@@ -1035,6 +1092,7 @@ test_profile_and_failure_guards() {
   local log="$root/commands.log"
   local profile_target="$root/profile-target"
   local drift_config="$root/drift-config.toml"
+  local output
 
   mkdir -p "$home_dir/Developer"
   ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
@@ -1053,16 +1111,25 @@ test_profile_and_failure_guards() {
   fi
   TESTS=$((TESTS + 1))
 
+  output="$(
+    HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
+      "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --dry-run
+  )"
+  [[ "$output" == *"profile: mac-pro"* ]] \
+    || fail "deprecated mac-vm CLI alias should report the canonical profile"
+  TESTS=$((TESTS + 1))
+  assert_eq '' "$(cat "$log")" "deprecated profile dry-run invokes no package manager"
+
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-mini --check >/dev/null
   assert_contains "$log" "bundle check --no-upgrade --file $REPO_DIR/setup/mac-mini/Brewfile"
   assert_contains "$log" 'mise install --dry-run-code'
-  assert_not_contains "$log" 'setup/mac-vm/Brewfile'
+  assert_not_contains "$log" 'setup/mac-pro/Brewfile'
 
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     MISE_DRY_RUN_CODE_STATUS=42 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --check >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --check >/dev/null 2>&1; then
     fail "check should fail when mise runtimes are missing"
   fi
   TESTS=$((TESTS + 1))
@@ -1070,7 +1137,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
     fail "noncanonical apply should fail"
   fi
   TESTS=$((TESTS + 1))
@@ -1081,7 +1148,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
     fail "apply should reject a symlinked zprofile before installers"
   fi
   TESTS=$((TESTS + 1))
@@ -1094,7 +1161,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
     fail "apply should reject a malformed zprofile before installers"
   fi
   TESTS=$((TESTS + 1))
@@ -1108,7 +1175,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
     fail "apply should reject an unreadable zprofile before installers"
   fi
   TESTS=$((TESTS + 1))
@@ -1124,7 +1191,7 @@ test_profile_and_failure_guards() {
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_MISE_CONFIG="$drift_config" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
     fail "apply should reject unapproved runtime pins before installers"
   fi
   TESTS=$((TESTS + 1))
@@ -1133,16 +1200,25 @@ test_profile_and_failure_guards() {
 
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
-    "$REPO_DIR/setup/mac-vm/setup-vm.sh" --profile mac-mini --dry-run >/dev/null 2>&1; then
-    fail "legacy MacBook wrapper should reject profile overrides"
+    "$REPO_DIR/setup/mac-pro/setup.sh" --profile mac-mini --dry-run >/dev/null 2>&1; then
+    fail "Mac Pro wrapper should reject profile overrides"
   fi
   TESTS=$((TESTS + 1))
   assert_eq '' "$(cat "$log")" "profile override stops in the wrapper"
 
+  output="$(
+    HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
+      "$REPO_DIR/setup/mac-vm/setup-vm.sh" --dry-run 2>&1
+  )"
+  [[ "$output" == *"setup-vm.sh is deprecated"* && "$output" == *"profile: mac-pro"* ]] \
+    || fail "legacy setup-vm.sh should delegate to the canonical Mac Pro wrapper"
+  TESTS=$((TESTS + 1))
+  assert_eq '' "$(cat "$log")" "legacy wrapper dry-run invokes no package manager"
+
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 FAIL_BREW_INSTALL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
     fail "Homebrew failure should stop bootstrap"
   fi
   TESTS=$((TESTS + 1))
@@ -1152,7 +1228,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 FAIL_MISE_INSTALL=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
     fail "mise failure should stop bootstrap"
   fi
   TESTS=$((TESTS + 1))
@@ -1162,7 +1238,7 @@ test_profile_and_failure_guards() {
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 FAIL_PNPM_ADD=1 \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --apply >/dev/null 2>&1; then
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
     fail "pnpm failure should stop bootstrap"
   fi
   TESTS=$((TESTS + 1))
@@ -1200,9 +1276,11 @@ test_shared_zsh_interface() {
     "$shared_dir/functions.zsh" \
     "$shared_dir/alias.zsh" \
     "$shared_dir/k8s.zsh" \
-    "$REPO_DIR/setup/mac-vm/.zshrc" \
+    "$REPO_DIR/setup/mac-pro/.zshrc" \
+    "$REPO_DIR/setup/mac-pro/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
+    "$REPO_DIR/setup/mac-pro-resilience/.zshrc" \
     "$REPO_DIR/setup/mac-resilience/.zshrc" \
     "$REPO_DIR/setup/fedora/.zshrc"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
@@ -1210,12 +1288,12 @@ test_shared_zsh_interface() {
   done
 
   for zsh_file in \
-    "$REPO_DIR/setup/mac-vm/.zshrc" \
+    "$REPO_DIR/setup/mac-pro/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
-    "$REPO_DIR/setup/mac-resilience/.zshrc"; do
+    "$REPO_DIR/setup/mac-pro-resilience/.zshrc"; do
     assert_contains "$zsh_file" 'config/zsh/mac/init.zsh'
   done
-  assert_contains "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" 'setup/mac-vm/.zshrc'
+  assert_contains "$REPO_DIR/setup/mac-pro/zsh-config/.zshrc" 'setup/mac-pro/.zshrc'
   assert_contains "$shared_init" '../completions.zsh'
 
   actual="$(
@@ -1231,9 +1309,11 @@ test_shared_zsh_interface() {
   assert_eq interface-ok "$actual" "shared Mac zsh interface loads functions and aliases"
 
   for zsh_file in \
-    "$REPO_DIR/setup/mac-vm/.zshrc" \
+    "$REPO_DIR/setup/mac-pro/.zshrc" \
+    "$REPO_DIR/setup/mac-pro/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
+    "$REPO_DIR/setup/mac-pro-resilience/.zshrc" \
     "$REPO_DIR/setup/mac-resilience/.zshrc"; do
     actual="$(
       HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
@@ -1300,7 +1380,7 @@ test_shared_zsh_interface() {
   chmod +x "$fake_bin/uname"
   actual="$(
     HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
-      source "$HOME/Developer/dotfiles-hd/setup/mac-resilience/.zshrc"
+      source "$HOME/Developer/dotfiles-hd/setup/mac-pro-resilience/.zshrc"
       whence -w _zsh_load_common_tool_completions _zsh_cache_and_source
       alias v
     ' 2>/dev/null
@@ -1350,7 +1430,7 @@ test_goodmorning_timeout_helper() {
 
 test_goodmorning_dotfiles_sync() {
   local functions_file="$REPO_DIR/config/zsh/mac/functions.zsh"
-  local resilience_file="$REPO_DIR/setup/mac-resilience/.zshrc"
+  local resilience_file="$REPO_DIR/setup/mac-pro-resilience/.zshrc"
   local root="$TMP_ROOT/goodmorning-dotfiles-sync"
   local home_dir="$root/home"
   local fake_bin="$root/bin"
@@ -1400,6 +1480,7 @@ test_zprofile_helper
 test_neovim_lock_guard
 test_neovim_plugin_checkout_integrity
 test_neovim_parser_manifest
+test_profile_name_compatibility
 test_full_bootstrap
 test_mac_mini_apply
 test_xdg_bin_home
