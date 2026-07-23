@@ -134,7 +134,8 @@ install_tools() {
 
 restore_plugins() {
   log "Restoring locked Neovim plugins"
-  "$MISE_BIN" exec -- nvim --headless "+Lazy! restore" +qa
+  DOTFILES_NVIM_RESTORE_ALL=1 \
+    "$MISE_BIN" exec -- nvim --headless "+Lazy! restore" +qa
 }
 
 locked_plugin_commit() {

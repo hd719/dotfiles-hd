@@ -627,6 +627,7 @@ EOF
 printf 'nvim %s\n' "\$*" >> "$case_dir/commands.log"
 data_dir="\${XDG_DATA_HOME:-\$HOME/.local/share}/\${NVIM_APPNAME:-nvim}"
 if [[ "\$*" == *"Lazy! restore"* ]]; then
+  printf 'restore-all=%s\n' "\${DOTFILES_NVIM_RESTORE_ALL:-}" >> "$case_dir/commands.log"
   mkdir -p "\$data_dir/lazy"
   while IFS=\$'\t' read -r plugin commit; do
     mkdir -p "\$data_dir/lazy/\$plugin"
@@ -719,6 +720,7 @@ EOF
   [[ -n "$lazy_commit" ]] || fail "test could not read the locked lazy.nvim commit"
   assert_file_contains "$case_dir/commands.log" "checkout --detach $lazy_commit"
   assert_file_contains "$case_dir/commands.log" "nvim --headless +Lazy! restore +qa"
+  assert_file_contains "$case_dir/commands.log" "restore-all=1"
   [[ -f "$case_dir/parsers-complete" ]] || fail "fresh Neovim setup returned before Tree-sitter parsers completed"
 
   : > "$case_dir/commands.log"
