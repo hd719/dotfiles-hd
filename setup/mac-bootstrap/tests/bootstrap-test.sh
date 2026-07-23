@@ -1247,6 +1247,7 @@ test_shared_zsh_interface() {
 
   for zsh_file in \
     "$module" \
+    "$REPO_DIR/config/zsh/aliases.zsh" \
     "$shared_dir/init.zsh" \
     "$shared_dir/prompt.zsh" \
     "$shared_dir/tooling.zsh" \
@@ -1258,6 +1259,7 @@ test_shared_zsh_interface() {
     "$shared_dir/personal-aliases.zsh" \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
+    "$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh" \
     "$REPO_DIR/setup/mac-pro-resilience/.zshrc" \
     "$REPO_DIR/setup/fedora/.zshrc"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
@@ -1444,7 +1446,8 @@ test_goodmorning_timeout_helper() {
 
 test_goodmorning_dotfiles_sync() {
   local functions_file="$REPO_DIR/config/zsh/mac/functions.zsh"
-  local resilience_file="$REPO_DIR/setup/mac-pro-resilience/.zshrc"
+  local resilience_module="$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh"
+  local resilience_profile="$REPO_DIR/setup/mac-pro-resilience/.zshrc"
   local root="$TMP_ROOT/goodmorning-dotfiles-sync"
   local home_dir="$root/home"
   local fake_bin="$root/bin"
@@ -1486,7 +1489,158 @@ EOF
     || fail "unexpected dotfiles origin should be rejected"
   TESTS=$((TESTS + 1))
   assert_no_path "$git_log"
-  assert_contains "$resilience_file" "_goodmorning_sync_dotfiles"
+  assert_contains "$resilience_module" "_goodmorning_sync_dotfiles"
+  assert_contains "$resilience_profile" "goodmorning.zsh"
+}
+
+test_resilience_goodmorning_guards() {
+  local functions_file="$REPO_DIR/config/zsh/mac/functions.zsh"
+  local resilience_module="$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh"
+  local root="$TMP_ROOT/resilience-goodmorning"
+  local home_dir="$root/home"
+  local fake_bin="$root/bin"
+  local repo_dir="$home_dir/Developer/Resilience/resilience-platform"
+  local git_log="$root/git.log"
+  local brew_log="$root/brew.log"
+  local marker_file="$root/resilience-homebrew-upgrade"
+  local output
+  local actual
+
+  mkdir -p "$repo_dir/.git" "$fake_bin"
+  cat > "$fake_bin/git" <<'EOF'
+#!/bin/sh
+printf '%s\n' "$*" >> "$FAKE_GIT_LOG"
+if [ "$3" = "status" ] && [ -n "${FAKE_GIT_STATUS:-}" ]; then
+  printf '%s\n' "$FAKE_GIT_STATUS"
+fi
+exit 0
+EOF
+  cat > "$fake_bin/brew" <<'EOF'
+#!/bin/sh
+printf '%s\n' "$*" >> "$FAKE_BREW_LOG"
+if [ "${FAKE_BREW_FAIL:-}" = "$1" ]; then
+  exit 1
+fi
+if [ "$1" = "outdated" ]; then
+  printf '%s\n' "${FAKE_BREW_OUTDATED:-}"
+fi
+exit 0
+EOF
+  chmod +x "$fake_bin/git" "$fake_bin/brew"
+
+  output="$(
+    HOME="$home_dir" \
+      PATH="$fake_bin:/usr/bin:/bin" \
+      FAKE_GIT_LOG="$git_log" \
+      FAKE_GIT_STATUS=' M tracked-file' \
+      /bin/zsh -dfc \
+      'source "$1"; _resilience_update_repo "$2" "Test Repo"' \
+      zsh "$resilience_module" "$repo_dir" 2>&1 \
+      || true
+  )"
+  [[ "$output" == *"working tree is not clean"* ]] \
+    || fail "dirty Resilience repo should be rejected"
+  TESTS=$((TESTS + 1))
+  assert_contains "$git_log" "status --porcelain"
+  assert_not_contains "$git_log" "checkout"
+  assert_not_contains "$git_log" "pull"
+
+  : > "$git_log"
+  HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    FAKE_GIT_LOG="$git_log" \
+    FAKE_GIT_STATUS='' \
+    /bin/zsh -dfc \
+    'source "$1"; _resilience_update_repo "$2" "Test Repo"' \
+    zsh "$resilience_module" "$repo_dir" >/dev/null
+  assert_contains "$git_log" "checkout dev"
+  assert_contains "$git_log" "pull --ff-only origin dev"
+
+  assert_eq 259200 "$(
+    /bin/zsh -dfc \
+      'source "$1"; _resilience_brew_cooldown_seconds' \
+      zsh "$resilience_module"
+  )" "Resilience Homebrew cooldown is 72 hours"
+
+  printf '1000000\n' > "$marker_file"
+  actual="$(
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      _now_epoch_ms() { print -r -- 4600000 }
+      _resilience_brew_cooldown_remaining_seconds "$3" 7200
+    ' zsh "$functions_file" "$resilience_module" "$marker_file"
+  )"
+  assert_eq 3600 "$actual" "Homebrew cooldown reports remaining seconds"
+
+  HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    FAKE_BREW_LOG="$brew_log" \
+    FAKE_BREW_OUTDATED='formula' \
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      _now_epoch_ms() { print -r -- 5000000 }
+      _resilience_run_homebrew_upgrade "$3"
+    ' zsh "$functions_file" "$resilience_module" "$marker_file" >/dev/null
+  assert_contains "$brew_log" "update"
+  assert_contains "$brew_log" "outdated --greedy"
+  assert_contains "$brew_log" "upgrade --greedy"
+  assert_contains "$brew_log" "cleanup"
+  assert_contains "$brew_log" "autoremove"
+  assert_contains "$marker_file" "5000000"
+
+  rm -f "$marker_file"
+  : > "$brew_log"
+  if HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    FAKE_BREW_LOG="$brew_log" \
+    FAKE_BREW_FAIL='update' \
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      _resilience_run_homebrew_upgrade "$3"
+    ' zsh "$functions_file" "$resilience_module" "$marker_file" >/dev/null 2>&1; then
+    fail "failed Homebrew update should return nonzero"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_no_path "$marker_file"
+
+  output="$(
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      shift 2
+      _goodmorning_sync_dotfiles() { return 0 }
+      _resilience_host_is_virtual() { return 1 }
+      _resilience_brew_cooldown_remaining_seconds() { print -r -- 60 }
+      _resilience_run_homebrew_upgrade() { print -r -- brew-run }
+      gda() { return 0 }
+      goodMorning "$@"
+    ' zsh "$functions_file" "$resilience_module"
+  )"
+  [[ "$output" == *"60s remain in the 72-hour cooldown"* ]] \
+    || fail "default goodMorning should respect the Homebrew cooldown"
+  [[ "$output" != *"brew-run"* ]] \
+    || fail "default goodMorning should not bypass the Homebrew cooldown"
+  TESTS=$((TESTS + 2))
+
+  output="$(
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      shift 2
+      _goodmorning_sync_dotfiles() { return 0 }
+      _resilience_host_is_virtual() { return 1 }
+      _resilience_brew_cooldown_remaining_seconds() { print -r -- 60 }
+      _resilience_run_homebrew_upgrade() { print -r -- brew-run }
+      gda() { return 0 }
+      goodMorning "$@"
+    ' zsh "$functions_file" "$resilience_module" --force-brew
+  )"
+  [[ "$output" == *"brew-run"* ]] \
+    || fail "--force-brew should bypass the Homebrew cooldown"
+  TESTS=$((TESTS + 1))
 }
 
 test_link_helper
@@ -1502,5 +1656,6 @@ test_profile_and_failure_guards
 test_shared_zsh_interface
 test_goodmorning_timeout_helper
 test_goodmorning_dotfiles_sync
+test_resilience_goodmorning_guards
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"

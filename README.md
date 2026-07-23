@@ -156,7 +156,7 @@ as Cursor or another agent edits. The shared aliases are:
 
 See the [Hunk documentation](https://www.hunk.dev/), the
 [shared Hunk theme](config/hunk/config.toml), and the
-[shared aliases](config/zsh/hunk-aliases.zsh).
+[shared aliases](config/zsh/aliases.zsh).
 
 ### Use Codex CLI
 

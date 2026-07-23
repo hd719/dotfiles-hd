@@ -10,7 +10,7 @@ MISE_CONFIG="$ROOT_DIR/setup/ubuntu/mise.toml"
 ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
-LSD_ALIASES="$ROOT_DIR/config/zsh/lsd-aliases.zsh"
+SHARED_ALIASES="$ROOT_DIR/config/zsh/aliases.zsh"
 MAC_ALIASES="$ROOT_DIR/config/zsh/mac/alias.zsh"
 NVIM_EDITOR_CONFIG="$ROOT_DIR/config/nvim/lua/plugins/editor.lua"
 TEST_ROOT="$(mktemp -d)"
@@ -398,11 +398,11 @@ eval "$(zoxide init --cmd cd zsh)"
 /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 alias gs='git status --short --branch'
 alias dc='docker compose'
-source_if_exists "$HOME/.config/zsh/lsd-aliases.zsh"
+source_if_exists "$HOME/.config/zsh/aliases.zsh"
 EOF
 
   while IFS= read -r expected; do
-    [[ -n "$expected" ]] && assert_file_contains "$LSD_ALIASES" "$expected"
+    [[ -n "$expected" ]] && assert_file_contains "$SHARED_ALIASES" "$expected"
   done <<'EOF'
 alias ls='lsd --tree --depth 1'
 alias lss='lsd --tree --depth 2'
@@ -410,8 +410,12 @@ alias lsss='lsd --tree --depth 3'
 alias ll='lsd -la --tree --depth 1'
 alias l='lsd -l'
 alias la='lsd -a'
+alias hwatch='hunk diff --watch'
+alias hdiff='hunk diff'
+alias hstaged='hunk diff --staged'
+alias hshow='hunk show'
 EOF
-  assert_file_contains "$MAC_ALIASES" "source \"\$ZSH_CONFIG_DIR/../lsd-aliases.zsh\""
+  assert_file_contains "$MAC_ALIASES" "source \"\$ZSH_CONFIG_DIR/../aliases.zsh\""
 
   for forbidden in mac-pro mac-vm mac-pro-resilience mac-resilience linuxbrew rbenv 'code --wait' kubectl terraform; do
     if grep -Fq -- "$forbidden" "$ZSH_CONFIG"; then
@@ -427,9 +431,9 @@ EOF
   )"
   [[ "$output" == "nvim|xterm-test|$TEST_ROOT/zsh-home/.local/bin" ]] || fail "Ubuntu zsh config did not load cleanly in isolation"
 
-  case_dir="$TEST_ROOT/zsh-lsd-aliases"
+  case_dir="$TEST_ROOT/zsh-shared-aliases"
   mkdir -p "$case_dir/home/.config/zsh" "$case_dir/bin"
-  ln -s "$LSD_ALIASES" "$case_dir/home/.config/zsh/lsd-aliases.zsh"
+  ln -s "$SHARED_ALIASES" "$case_dir/home/.config/zsh/aliases.zsh"
   cat > "$case_dir/bin/lsd" <<EOF
 #!/usr/bin/env bash
 printf '%s\n' "\$*" >> "$case_dir/lsd.log"
@@ -447,12 +451,13 @@ test_setup_is_lean_and_rerunnable() {
   local case_dir="$TEST_ROOT/lean-setup"
   local output backup_count forbidden
 
-  mkdir -p "$case_dir/home/.config" "$case_dir/home/.local/share/fonts/Hasklig" "$case_dir/bin" "$case_dir/legacy-ghostty"
+  mkdir -p "$case_dir/home/.config/zsh" "$case_dir/home/.local/share/fonts/Hasklig" "$case_dir/bin" "$case_dir/legacy-ghostty"
   printf 'ID=ubuntu\nVERSION_ID=26.04\n' > "$case_dir/os-release"
   printf 'legacy zsh config\n' > "$case_dir/home/.zshrc"
   printf '3.4.0\n' > "$case_dir/home/.local/share/fonts/Hasklig/.nerd-font-version"
   printf 'legacy shared Ghostty config\n' > "$case_dir/legacy-ghostty/config"
   ln -s "$case_dir/legacy-ghostty" "$case_dir/home/.config/ghostty"
+  ln -s "$ROOT_DIR/config/zsh/lsd-aliases.zsh" "$case_dir/home/.config/zsh/lsd-aliases.zsh"
 
   cat > "$case_dir/bin/sudo" <<EOF
 #!/usr/bin/env bash
@@ -486,8 +491,9 @@ EOF
   [[ "$(find "$case_dir/home/.config" -maxdepth 1 -name 'ghostty.backup.*' | wc -l | tr -d ' ')" == "1" ]] || fail "setup did not preserve the whole-directory Ghostty link"
   assert_file_contains "$case_dir/legacy-ghostty/config" "legacy shared Ghostty config"
   [[ -L "$case_dir/home/.config/starship.toml" ]] || fail "setup did not link Starship config"
-  [[ -L "$case_dir/home/.config/zsh/lsd-aliases.zsh" ]] || fail "setup did not link shared lsd aliases"
-  [[ "$(readlink "$case_dir/home/.config/zsh/lsd-aliases.zsh")" == "$LSD_ALIASES" ]] || fail "shared lsd aliases point to the wrong source"
+  [[ -L "$case_dir/home/.config/zsh/aliases.zsh" ]] || fail "setup did not link shared aliases"
+  [[ "$(readlink "$case_dir/home/.config/zsh/aliases.zsh")" == "$SHARED_ALIASES" ]] || fail "shared aliases point to the wrong source"
+  [[ ! -L "$case_dir/home/.config/zsh/lsd-aliases.zsh" ]] || fail "setup did not remove the legacy lsd alias link"
 
   assert_file_contains "$case_dir/mutations.log" "apt-get update"
   assert_file_contains "$case_dir/mutations.log" "docker.io"

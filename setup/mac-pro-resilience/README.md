@@ -36,7 +36,15 @@ The bundle command installs missing tools without upgrading existing packages.
 The linker creates timestamped backups before replacing a non-matching config.
 Stop before pulling if `git status` shows local changes you do not recognize.
 The Resilience `goodMorning` flow performs the same guarded
-`hd719/dotfiles-hd` fast-forward before its existing update steps.
+`hd719/dotfiles-hd` fast-forward before its other update steps. It refuses to
+switch or pull either Resilience repo when that working tree is dirty, and all
+repo pulls use `--ff-only`.
+
+Homebrew upgrades run at most once every 72 hours. A successful run records
+`~/.cache/goodmorning/resilience-homebrew-upgrade`; failures do not advance the
+cooldown. Use `goodMorning --no-brew` to skip Homebrew or
+`goodMorning --force-brew` to explicitly bypass the cooldown. Virtual hosts
+always skip Homebrew.
 
 If `alias hwatch` prints the alias, the existing work shell already loads the
 shared Mac aliases and no `.zshrc` edit is needed. If it reports that `hwatch`
@@ -48,7 +56,7 @@ nvim "$HOME/.zshrc"
 ```
 
 ```zsh
-source "$HOME/Developer/dotfiles-hd/config/zsh/hunk-aliases.zsh"
+source "$HOME/Developer/dotfiles-hd/config/zsh/aliases.zsh"
 ```
 
 Save the file, then run `exec zsh` and `alias hwatch` again. Do not replace the
@@ -58,7 +66,7 @@ For daily Cursor reviews, open Ghostty in the same repo or worktree and run
 `hwatch`. It includes new files and refreshes while Cursor edits. See the
 [Hunk documentation](https://www.hunk.dev/), the
 [shared theme](../../config/hunk/config.toml), and the
-[shared aliases](../../config/zsh/hunk-aliases.zsh).
+[shared aliases](../../config/zsh/aliases.zsh).
 
 ## Agent Workflow
 
