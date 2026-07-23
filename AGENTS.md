@@ -62,11 +62,6 @@ The bootstrap also owns one marked mise-shims block inside `~/.zprofile`; it
 does not replace or symlink the whole file. AeroSpace remains an existing
 manual link and is not installed or linked by this bootstrap.
 
-The tracked `setup/mac-vm -> mac-pro` compatibility symlink keeps existing
-MacBook links valid until the bootstrap relinks `~/.zshrc` to the canonical
-target. `setup/mac-resilience -> mac-pro-resilience` similarly protects
-machine-owned work-shell paths during migration.
-
 ## Do Not Blindly Symlink
 
 - `~/.config/tmux` because live plugins live there. Review/link `tmux.conf` separately.
@@ -108,10 +103,9 @@ When Hamel asks to set up the work laptop:
 Prefer these scripts when they match the task.
 
 For a brand-new personal Mac, run the bootstrap in `--dry-run` mode first and
-then `--apply` only from a clean canonical clone. `mac-pro` is the canonical
-personal MacBook profile; `mac-vm` is accepted only as a temporary compatibility
-alias. Never use the personal bootstrap on the Resilience work Mac. On the
-existing Mac mini, apply requires
+then `--apply` only from a clean canonical clone. `mac-pro` is the personal
+MacBook profile. Never use the personal bootstrap on the Resilience work Mac.
+On the existing Mac mini, apply requires
 the reviewed change to be merged, a green MacBook rollback/reboot canary, a
 green post-merge Mac mini preflight, and Hamel's explicit approval. PR #9's
 unavailable clean-VM gate is explicitly waived, not passed. Service restart

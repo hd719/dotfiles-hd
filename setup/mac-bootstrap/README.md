@@ -73,10 +73,7 @@ setup/mac-pro/setup.sh --dry-run
 setup/mac-pro/setup.sh --apply
 ```
 
-For compatibility, `--profile mac-vm` and
-`setup/mac-vm/setup-vm.sh` still resolve to `mac-pro`. They can be removed after
-existing machines and external automation callers have migrated. Neither
-wrapper accepts a GitHub token or manages SSH, Nix, nvm, or rbenv.
+The wrapper does not accept a GitHub token or manage SSH, Nix, nvm, or rbenv.
 
 ## Mac mini boundary
 
@@ -108,7 +105,8 @@ runtime status and doctor checks.
 - Installs exact mise versions for Node, pnpm, Go, Python, and Bun.
 - Installs pinned Ruff and mdformat versions plus a pnpm-managed GraphQL LSP.
 - Restores the exact Neovim plugin lock and required Tree-sitter parsers without
-  rewriting `lazy-lock.json`.
+  rewriting `lazy-lock.json`. Restore temporarily includes the vault-gated
+  `obsidian.nvim` plugin; normal Neovim startup conditions remain unchanged.
 - Runs the verification doctor before reporting success. Its package and
   Neovim checks may refresh tool-owned caches, but it does not change managed
   links or install packages.

@@ -513,6 +513,7 @@ fi
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/lazy.nvim"
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/lazy.nvim/.git"
 if [[ "$*" == *"Lazy! restore"* ]]; then
+  [[ "${DOTFILES_NVIM_RESTORE_ALL:-}" == "1" ]] || exit 36
   lockfile="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/lazy-lock.json"
   while IFS= read -r plugin; do
     mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/$plugin/.git"
@@ -599,6 +600,8 @@ EOF
   assert_contains "$log" \
     'git -C '"$root/data/nvim/lazy/lazy.nvim"' checkout --quiet --detach 1111111111111111111111111111111111111111'
   assert_contains "$log" 'nvim --headless +Lazy! restore +qa'
+  assert_contains "$REPO_DIR/config/nvim/lua/plugins/obsidian.lua" \
+    'vim.env.DOTFILES_NVIM_RESTORE_ALL == "1"'
   assert_eq "$(cat "$original")" "$(cat "$lockfile")" "Neovim restore preserves the lockfile"
 
   if PATH="$fake_bin:$PATH" XDG_DATA_HOME="$root/failed-data" \
@@ -719,42 +722,37 @@ seed_protected_state() {
   printf 'plugin\n' > "$home_dir/.config/tmux/plugins/sentinel"
 }
 
-test_profile_name_compatibility() {
-  local root="$TMP_ROOT/profile-name-compatibility"
+test_profile_names_and_paths() {
+  local root="$TMP_ROOT/profile-names-and-paths"
   local home_dir="$root/home"
   local spec
   local zsh_spec=""
-  local legacy_zsh_spec=""
   local helper_path
 
   mkdir -p "$home_dir"
 
   assert_eq mac-pro "$(canonical_profile mac-pro)" "mac-pro remains canonical"
-  assert_eq mac-pro "$(canonical_profile mac-vm)" "mac-vm maps to mac-pro"
   assert_eq mac-mini "$(canonical_profile mac-mini)" "mac-mini remains canonical"
+  if canonical_profile mac-vm >/dev/null 2>&1; then
+    fail "removed mac-vm profile should be rejected"
+  fi
+  TESTS=$((TESTS + 1))
 
-  assert_eq mac-pro "$(readlink "$REPO_DIR/setup/mac-vm")" "mac-vm directory compatibility target"
-  assert_eq mac-pro-resilience "$(readlink "$REPO_DIR/setup/mac-resilience")" "Resilience directory compatibility target"
-  assert_file "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc"
-  assert_file "$REPO_DIR/setup/mac-resilience/herdr/hd-stop.sh"
+  assert_no_path "$REPO_DIR/setup/mac-vm"
+  assert_no_path "$REPO_DIR/setup/mac-resilience"
+  assert_no_path "$REPO_DIR/setup/mac-pro/setup-vm.sh"
+  assert_no_path "$REPO_DIR/setup/mac-pro/zsh-config"
 
   [[ -x "$REPO_DIR/setup/mac-pro/setup.sh" ]] \
     || fail "canonical Mac Pro wrapper should be executable"
   TESTS=$((TESTS + 1))
-  [[ -x "$REPO_DIR/setup/mac-vm/setup-vm.sh" ]] \
-    || fail "legacy Mac VM wrapper should remain executable"
-  TESTS=$((TESTS + 1))
 
-  load_profile mac-vm "$REPO_DIR" "$home_dir"
-  assert_eq "$REPO_DIR/setup/mac-pro/Brewfile" "$PROFILE_BREWFILE" "legacy profile uses canonical Brewfile"
+  load_profile mac-pro "$REPO_DIR" "$home_dir"
+  assert_eq "$REPO_DIR/setup/mac-pro/Brewfile" "$PROFILE_BREWFILE" "Mac Pro profile uses its Brewfile"
   for spec in "${LINK_SPECS[@]}"; do
     [[ "${spec#*|}" == "$home_dir/.zshrc" ]] && zsh_spec="$spec"
   done
-  for spec in "${LEGACY_LINK_SPECS[@]}"; do
-    [[ "${spec#*|}" == "$home_dir/.zshrc" ]] && legacy_zsh_spec="$spec"
-  done
   assert_eq "$REPO_DIR/setup/mac-pro/.zshrc|$home_dir/.zshrc" "$zsh_spec" "canonical zsh link target"
-  assert_eq "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc|$home_dir/.zshrc" "$legacy_zsh_spec" "legacy zsh link target"
 
   while IFS= read -r helper_path; do
     [[ -f "$REPO_DIR/$helper_path" ]] \
@@ -890,15 +888,6 @@ test_full_bootstrap() {
     DOTFILES_DIR="$REPO_DIR" FAIL_ON_MISE_AUTO_INSTALL=1 \
     "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-pro >/dev/null
   TESTS=$((TESTS + 1))
-
-  rm "$home_dir/.zshrc"
-  ln -s "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" "$home_dir/.zshrc"
-  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
-    DOTFILES_DIR="$REPO_DIR" FAIL_ON_MISE_AUTO_INSTALL=1 \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-vm >/dev/null
-  TESTS=$((TESTS + 1))
-  rm "$home_dir/.zshrc"
-  ln -s "$REPO_DIR/setup/mac-pro/.zshrc" "$home_dir/.zshrc"
 
   mv "$home_dir/.local/graphql-lsp/.pnpm-managed-version" \
     "$root/graphql-marker"
@@ -1076,7 +1065,6 @@ test_xdg_bin_home() {
 
   for zshrc in \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
-    "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc"; do
     resolved="$(HOME="$home_dir" XDG_BIN_HOME="$custom_bin" PATH=/usr/bin:/bin \
       zsh -dfc "source '$MAC_BOOTSTRAP_DIR/mise-shims.zsh'; source '$zshrc'; command -v ruff" \
@@ -1092,7 +1080,6 @@ test_profile_and_failure_guards() {
   local log="$root/commands.log"
   local profile_target="$root/profile-target"
   local drift_config="$root/drift-config.toml"
-  local output
 
   mkdir -p "$home_dir/Developer"
   ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
@@ -1111,14 +1098,12 @@ test_profile_and_failure_guards() {
   fi
   TESTS=$((TESTS + 1))
 
-  output="$(
-    HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
-      "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --dry-run
-  )"
-  [[ "$output" == *"profile: mac-pro"* ]] \
-    || fail "deprecated mac-vm CLI alias should report the canonical profile"
+  if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-vm --dry-run >/dev/null 2>&1; then
+    fail "removed mac-vm profile should fail"
+  fi
   TESTS=$((TESTS + 1))
-  assert_eq '' "$(cat "$log")" "deprecated profile dry-run invokes no package manager"
+  assert_eq '' "$(cat "$log")" "removed profile stops before package managers"
 
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-mini --check >/dev/null
@@ -1206,15 +1191,6 @@ test_profile_and_failure_guards() {
   TESTS=$((TESTS + 1))
   assert_eq '' "$(cat "$log")" "profile override stops in the wrapper"
 
-  output="$(
-    HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
-      "$REPO_DIR/setup/mac-vm/setup-vm.sh" --dry-run 2>&1
-  )"
-  [[ "$output" == *"setup-vm.sh is deprecated"* && "$output" == *"profile: mac-pro"* ]] \
-    || fail "legacy setup-vm.sh should delegate to the canonical Mac Pro wrapper"
-  TESTS=$((TESTS + 1))
-  assert_eq '' "$(cat "$log")" "legacy wrapper dry-run invokes no package manager"
-
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 FAIL_BREW_INSTALL=1 \
@@ -1277,11 +1253,8 @@ test_shared_zsh_interface() {
     "$shared_dir/alias.zsh" \
     "$shared_dir/k8s.zsh" \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
-    "$REPO_DIR/setup/mac-pro/zsh-config/.zshrc" \
-    "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
     "$REPO_DIR/setup/mac-pro-resilience/.zshrc" \
-    "$REPO_DIR/setup/mac-resilience/.zshrc" \
     "$REPO_DIR/setup/fedora/.zshrc"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
     TESTS=$((TESTS + 1))
@@ -1293,7 +1266,6 @@ test_shared_zsh_interface() {
     "$REPO_DIR/setup/mac-pro-resilience/.zshrc"; do
     assert_contains "$zsh_file" 'config/zsh/mac/init.zsh'
   done
-  assert_contains "$REPO_DIR/setup/mac-pro/zsh-config/.zshrc" 'setup/mac-pro/.zshrc'
   assert_contains "$shared_init" '../completions.zsh'
 
   actual="$(
@@ -1310,11 +1282,8 @@ test_shared_zsh_interface() {
 
   for zsh_file in \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
-    "$REPO_DIR/setup/mac-pro/zsh-config/.zshrc" \
-    "$REPO_DIR/setup/mac-vm/zsh-config/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
-    "$REPO_DIR/setup/mac-pro-resilience/.zshrc" \
-    "$REPO_DIR/setup/mac-resilience/.zshrc"; do
+    "$REPO_DIR/setup/mac-pro-resilience/.zshrc"; do
     actual="$(
       HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
         source "$1"
@@ -1480,7 +1449,7 @@ test_zprofile_helper
 test_neovim_lock_guard
 test_neovim_plugin_checkout_integrity
 test_neovim_parser_manifest
-test_profile_name_compatibility
+test_profile_names_and_paths
 test_full_bootstrap
 test_mac_mini_apply
 test_xdg_bin_home

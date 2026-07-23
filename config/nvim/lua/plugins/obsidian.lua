@@ -21,7 +21,8 @@ return {
     "obsidian-nvim/obsidian.nvim",
     version = "*",
     cond = function()
-      return vim.fn.isdirectory(vault .. "/.obsidian") == 1
+      return vim.env.DOTFILES_NVIM_RESTORE_ALL == "1"
+        or vim.fn.isdirectory(vault .. "/.obsidian") == 1
     end,
     event = { "BufReadPre *.md", "BufNewFile *.md" },
     cmd = { "Obsidian" },
