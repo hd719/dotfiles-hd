@@ -54,9 +54,6 @@ Single file or subdirectory links:
 - `~/Library/Application Support/com.mitchellh.ghostty/config` -> `config/ghostty/config`
 - `~/.config/herdr/config.toml` -> `config/herdr/config.toml`
 - `~/.config/hunk/config.toml` -> `config/hunk/config.toml`
-- `~/.config/zed/settings.json` -> `config/zed/settings.json`
-- `~/.config/zed/keymap.json` -> `config/zed/keymap.json`
-- `~/.config/zed/themes` -> `config/zed/themes`
 
 The bootstrap also owns one marked mise-shims block inside `~/.zprofile`; it
 does not replace or symlink the whole file. AeroSpace remains an existing
@@ -96,7 +93,7 @@ When Hamel asks to set up the work laptop:
 ## Existing Helpers
 
 - `setup/mac-bootstrap/bootstrap.sh` and `doctor.sh` for managed Macs
-- `config/zed/link-zed-config.sh`
+- `config/zed/link-zed-config.sh` for manually restoring the preserved Zed config
 - `config/herdr/link-herdr-config.sh`
 - `setup/mac-pro-resilience/link-terminal-editor-config.sh`
 
@@ -111,13 +108,16 @@ green post-merge Mac mini preflight, and Hamel's explicit approval. PR #9's
 unavailable clean-VM gate is explicitly waived, not passed. Service restart
 remains forbidden without a separate maintenance-window approval.
 
-## Zed Theme Profiles
+## Preserved Zed Configuration
 
+- Zed is not installed or managed by the personal Mac bootstrap.
+- Keep `config/zed` intact so the settings, keymap, linker, and themes are ready
+  if Hamel returns to Zed.
+- Run `config/zed/link-zed-config.sh` only when Hamel explicitly re-enables Zed.
 - `Hamel Nord` pairs with `config/zed/themes/hamel-nord.json`.
 - `Hamel Nord Blur` pairs with `config/zed/themes/hamel-nord-blur.json`.
-- Keep both profiles in `config/zed/settings.json` and preserve their matching sidebar and scrollbar settings.
-- Switch profiles in Zed with `settings profile selector: toggle` from the command palette.
-- Blur colors use `#RRGGBBAA`; `ed` is 92.9% opacity. For opacity changes, keep `background`, `status_bar.background`, `title_bar.background`, and `title_bar.inactive_background` identical in the blur theme file and its `theme_overrides` entry.
+- Keep both profiles in `config/zed/settings.json` and preserve their matching
+  sidebar and scrollbar settings.
 
 ## Neovim Teaching Continuity
 

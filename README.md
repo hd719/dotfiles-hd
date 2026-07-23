@@ -39,15 +39,12 @@ link commands below by hand. The canonical personal MacBook profile is
 | btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
 | fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
 | Bookokrat | `~/.config/bookokrat` | `config/bookokrat` | Linked dir | Uses the custom `Hamel Nord` theme: transparent interface, opaque Nord PDF canvas. |
-| Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Matches Zed's Maple Mono NF and Hamel Nord Blur appearance. |
+| Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Uses Maple Mono NF and the Hamel Nord Blur appearance. |
 | Hunk | `~/.config/hunk/config.toml` | `config/hunk/config.toml` | Linked file | Uses Catppuccin Mocha; Hunk runtime state stays local. |
 | Karabiner | `~/.config/karabiner` | `config/karabiner` | MacBook-only linked dir | The Mac mini profile does not link it. |
 | mise | `~/.config/mise` | `config/mise` | Linked dir | Global toolchain config. |
 | Neovim | `~/.config/nvim` | `config/nvim` | Linked dir | Lua config, plugins, keymaps, LSP, and Hamel Nord. |
 | Herdr | `~/.config/herdr/config.toml` | `config/herdr/config.toml` | Linked file | Only config is linked; runtime state stays local. |
-| Zed settings | `~/.config/zed/settings.json` | `config/zed/settings.json` | Linked file | User-owned Zed settings. |
-| Zed keymap | `~/.config/zed/keymap.json` | `config/zed/keymap.json` | Linked file | User-owned Zed keybindings. |
-| Zed themes | `~/.config/zed/themes` | `config/zed/themes` | Linked dir | Custom Zed themes. |
 
 ## Repair an Individual Link
 
@@ -99,30 +96,35 @@ The Mac mini uses `--profile mac-mini`. Read the
 mini has a production-runtime boundary and must not be restarted by bootstrap
 work.
 
-Zed:
+### Preserved Zed Configuration
+
+Zed is not installed or managed by the personal Mac bootstrap. Its settings,
+keymap, themes, and linker remain under `config/zed` so they are easy to restore
+if Zed becomes useful again.
+
+To re-enable the preserved links:
 
 ```bash
 ~/Developer/dotfiles-hd/config/zed/link-zed-config.sh
 ```
 
-This links Zed settings, keymap, themes, and exposes Codex skills to Zed through `~/.agents/skills`.
+The script links settings, keymap, and themes while leaving Zed runtime state
+local.
 
-### Switch Zed Themes
+#### Switch Zed Themes
 
 1. Open the command palette with `Cmd+Shift+P`.
 2. Run `settings profile selector: toggle`.
-3. Select `Hamel Nord` for the opaque theme or `Hamel Nord Blur` for the blurred theme.
+3. Select `Hamel Nord` or `Hamel Nord Blur`.
 
-The profiles also apply their matching sidebar and scrollbar settings.
+#### Change Zed Blur Opacity
 
-### Change Zed Blur Opacity
-
-Zed colors use `#RRGGBBAA`; the final two digits control opacity. The current value is `#3b4252ed`, where `ed` is 237/255, or 92.9%.
-
-To choose another opacity, calculate `round((percentage / 100) × 255)` and convert the result to two-digit hexadecimal. Update `background`, `status_bar.background`, `title_bar.background`, and `title_bar.inactive_background` in both:
+Zed colors use `#RRGGBBAA`; the final two digits control opacity. Update
+`background`, `status_bar.background`, `title_bar.background`, and
+`title_bar.inactive_background` in both:
 
 - `config/zed/themes/hamel-nord-blur.json`
-- The `Hamel Nord Blur` theme override in `config/zed/settings.json`
+- The `Hamel Nord Blur` override in `config/zed/settings.json`
 
 Herdr:
 
@@ -188,7 +190,7 @@ app, lets `fzf` filter the list, and asks for confirmation before running
 | `~/.config/herdr` | Contains logs, sockets, release notes, and session state. Link only `config.toml`. |
 | `~/.config/hunk` | Contains runtime state. Link only `config.toml`. |
 | `~/.config/raycast` | Raycast has extension/runtime state. Treat `config/raycast` as exports, not a live symlink target. |
-| `~/.config/zed` | Contains prompt database state. Link settings, keymap, and themes only. |
+| `~/.config/zed` | Preserved for a possible return to Zed; the Mac bootstrap does not manage it. |
 | `~/.config/zed/prompts` | Zed runtime database state, not portable config. |
 | `~/Library/Application Support/Zed` | App runtime state, not portable config. |
 | `~/.config/1Password`, `~/.config/op`, `~/.config/gh`, `~/.config/cagent` | Credential, auth, or app-managed state. Do not link without a specific reason. |
