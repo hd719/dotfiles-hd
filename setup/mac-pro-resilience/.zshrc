@@ -225,57 +225,8 @@ alias hd-parg="~/Developer/dotfiles-hd/setup/mac-pro-resilience/herdr/pargasite/
 # Stop Herdr + free dev-server ports, but leave Docker containers running.
 alias hd-stop="~/Developer/dotfiles-hd/setup/mac-pro-resilience/herdr/hd-stop.sh"
 
-# [Pull all repos on dev branch]
-gda() {
-  startdir=$(pwd)
-
-  # Function to update a single repo
-  update_repo() {
-    local repo_path="$1"
-    local repo_name="$2"
-    echo "****** Pulling $repo_name ******"
-    cd "$repo_path" && git checkout dev && git pull origin dev
-  }
-
-  # Run all updates sequentially (no background processes)
-  update_repo ~/Developer/Resilience/resilience-platform "Resilience Platform"
-  update_repo ~/Developer/Resilience/resilience-pargasite "Resilience Pargasite"
-
-  cd "$startdir"
-}
-
-goodMorning() {
-  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
-
-  echo "Syncing hd719 dotfiles..."
-  if _goodmorning_sync_dotfiles; then
-    echo "Dotfiles are current."
-  else
-    echo "Dotfiles sync failed; continuing without resetting local changes."
-  fi
-
-  # Skip Homebrew updates if hostname contains 'virtual' (case insensitive)
-  if [[ ! "$(hostname)" =~ [Vv]irtual ]]; then
-    # Optional flag for Homebrew updates
-    if [[ "$1" != "--no-brew" ]]; then
-      echo "Updating Homebrew..."
-      brew update
-      if brew outdated | grep -q .; then
-        brew upgrade --greedy
-        brew cleanup
-        brew autoremove
-      else
-        echo "No Homebrew packages to upgrade"
-      fi
-    fi
-  else
-    echo "Skipping Homebrew update (virtual environment detected)"
-  fi
-
-  echo "Updating Git repositories..."
-  gda
-  echo "🙏 Om Shree Ganeshaya Namaha 🙏"
-}
+# [Morning maintenance]
+source "$HOME/Developer/dotfiles-hd/setup/mac-pro-resilience/goodmorning.zsh"
 
 # Create a CA Bundle with the ZScaler root CA
 #   Similar process to exporting via GUI from /System/Library/CoreServices/Applications/Keychain\ Access.app
