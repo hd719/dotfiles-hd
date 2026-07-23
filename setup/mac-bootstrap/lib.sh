@@ -522,7 +522,8 @@ restore_neovim_plugins() {
 
   if provision_lazy_manager "$lazy_dir"; then
     if pin_lazy_manager "$lazy_dir" "$lazy_commit"; then
-      if nvim --headless '+Lazy! restore' '+qa'; then
+      if DOTFILES_NVIM_RESTORE_ALL=1 \
+        nvim --headless '+Lazy! restore' '+qa'; then
         if nvim --headless \
           "+lua local ok=require('nvim-treesitter').install({$parser_list}):wait(); if not ok then vim.cmd('cquit 1') end" \
           '+qa'; then

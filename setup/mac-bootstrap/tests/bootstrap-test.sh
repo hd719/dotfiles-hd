@@ -513,6 +513,7 @@ fi
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/lazy.nvim"
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/lazy.nvim/.git"
 if [[ "$*" == *"Lazy! restore"* ]]; then
+  [[ "${DOTFILES_NVIM_RESTORE_ALL:-}" == "1" ]] || exit 36
   lockfile="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/lazy-lock.json"
   while IFS= read -r plugin; do
     mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/$plugin/.git"
@@ -599,6 +600,8 @@ EOF
   assert_contains "$log" \
     'git -C '"$root/data/nvim/lazy/lazy.nvim"' checkout --quiet --detach 1111111111111111111111111111111111111111'
   assert_contains "$log" 'nvim --headless +Lazy! restore +qa'
+  assert_contains "$REPO_DIR/config/nvim/lua/plugins/obsidian.lua" \
+    'vim.env.DOTFILES_NVIM_RESTORE_ALL == "1"'
   assert_eq "$(cat "$original")" "$(cat "$lockfile")" "Neovim restore preserves the lockfile"
 
   if PATH="$fake_bin:$PATH" XDG_DATA_HOME="$root/failed-data" \
