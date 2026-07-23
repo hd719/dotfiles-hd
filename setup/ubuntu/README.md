@@ -96,6 +96,3 @@ kubectl, Redis, Ulauncher, VS Code, fastfetch PPA, APT Go, development snaps,
 rbenv, direct Starship install, and superseded user editor toolchains. It
 preserves projects, Docker data, AWS and Kubernetes credentials, Firefox,
 Ubuntu system snaps, and the snap service.
-
-Read [`FONTS.md`](FONTS.md) for font details and
-[`VM-OPTIMIZATION.md`](VM-OPTIMIZATION.md) for optional VM tuning.

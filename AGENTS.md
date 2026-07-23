@@ -135,7 +135,6 @@ bash setup/mac-bootstrap/tests/bootstrap-test.sh
 bash setup/ubuntu/tests/lean-setup.sh
 ```
 
-Run `mdformat --check` on changed Markdown files that already follow mdformat.
-Do not bulk-reformat historical plan or evidence files during an unrelated
-change. For shell changes, run `bash -n` or `zsh -n` on edited scripts and
-verify behavior in a fresh login shell with `zsh -lic '<check>'`.
+Run `mdformat --check` on changed Markdown files. For shell changes, run
+`bash -n` or `zsh -n` on edited scripts and verify behavior in a fresh login
+shell with `zsh -lic '<check>'`.

@@ -20,9 +20,6 @@ machine-owned. Never use the personal Mac bootstrap or Mac mini Brewfile here.
 work-specific behavior, but not `config/zsh/mac/personal.zsh`. This runbook
 repairs an existing work shell; it never replaces or links `~/.zshrc`.
 
-Zed is archived under `config/zed` but is not installed or linked by this
-profile. The retired `setup/mac-resilience` and `setup/mac-vm` paths are invalid.
-
 ## 1. Preflight
 
 Work only from the canonical clean clone:
@@ -130,17 +127,8 @@ zsh -lic \
   'alias hwatch && alias hdiff && alias hstaged && alias hshow && whence -w goodMorning _resilience_update_repo _resilience_brew_cooldown_seconds'
 ```
 
-If only the Hunk aliases are missing, back up `~/.zshrc` and add these lines:
-
-```zsh
-alias hwatch='hunk diff --watch'
-alias hdiff='hunk diff'
-alias hstaged='hunk diff --staged'
-alias hshow='hunk show'
-```
-
-Do not load broader shell code automatically. If any Resilience function is
-missing, report the stale shell instead of replacing `~/.zshrc`.
+If an alias or Resilience function is missing, report the stale shell instead
+of editing `~/.zshrc`.
 
 Normal daily maintenance is:
 
@@ -197,10 +185,6 @@ Never reset local changes or repeatedly retry a failed stage.
   hunk --version
   nvim --headless +qa!
 
-  test ! -e "$HOME/Developer/dotfiles-hd/setup/mac-resilience"
-  test ! -L "$HOME/Developer/dotfiles-hd/setup/mac-resilience"
-  test ! -e "$HOME/Developer/dotfiles-hd/setup/mac-vm"
-  test ! -L "$HOME/Developer/dotfiles-hd/setup/mac-vm"
   test "$(readlink "$HOME/.zshrc" 2>/dev/null || true)" != \
     "$HOME/Developer/dotfiles-hd/setup/mac-pro-resilience/.zshrc"
 )
@@ -222,8 +206,7 @@ In exactly one fresh Ghostty window, confirm:
 - a TypeScript file has completion, ESLint, `Space p`, and `Space g`
 - `hwatch` refreshes while the worktree changes
 
-If GUI control is unavailable, report the UI checks as unverified. If Zed is
-installed, report it without deleting the preserved archive.
+If GUI control is unavailable, report the UI checks as unverified.
 
 ## Agent Prompt
 
