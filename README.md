@@ -7,9 +7,11 @@ This repo is the source of truth for rebuilding my personal and work machines.
 - `config/` - portable app and tool config. This is where personal settings, themes, keymaps, terminal config, and app exports live.
 - `setup/` - machine setup scripts and machine-specific bootstrap files for macOS, Linux, VMs, and servers.
 
-Shared Mac shell mechanics live behind `config/zsh/mac/init.zsh`. Each machine
-keeps its own `.zshrc` entry point so plugin timing, runtimes, credentials, and
-work-specific behavior remain profile-owned.
+Shared Mac shell mechanics live behind `config/zsh/mac/init.zsh`. Personal
+Codex, OpenClaw, project, `goodMorning`, and Mission Control workflows load
+separately through `config/zsh/mac/personal.zsh`. Each machine keeps its own
+`.zshrc` entry point so plugin timing, runtimes, credentials, and work-specific
+behavior remain profile-owned.
 
 The MacBook profile adapter lives at `setup/mac-pro/.zshrc`.
 

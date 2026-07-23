@@ -11,6 +11,7 @@ _source_zsh_config() {
 # Core Configuration
 # -----------------------------------------------------------------------------
 _source_zsh_config "$HOME/Developer/dotfiles-hd/config/zsh/mac/init.zsh"
+_source_zsh_config "$HOME/Developer/dotfiles-hd/config/zsh/mac/personal.zsh"
 
 # -----------------------------------------------------------------------------
 # Plugins

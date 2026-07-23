@@ -1,7 +1,8 @@
 # Shared Mac Zsh interface.
 #
-# Machine profiles source this file, then apply their own plugin timing,
-# completion policy, PATH entries, credentials, and work-specific behavior.
+# Every Mac profile sources this file, then applies its own plugin timing,
+# completion policy, PATH entries, credentials, and machine-specific behavior.
+# Personal-only workflows load separately through personal.zsh.
 
 ZSH_CONFIG_DIR="$HOME/Developer/dotfiles-hd/config/zsh/mac"
 

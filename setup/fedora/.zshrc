@@ -1,19 +1,8 @@
-# [ZSH Config Directory]
-# Transitional: Fedora still consumes the shared aliases, functions, and
-# Kubernetes helpers directly. A portable split is separate follow-up work.
-ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/config/zsh/mac
-
-# [ZSH/System Aliases]
+# [Portable ZSH Aliases]
 # --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/alias.zsh
-
-# [ZSH/System Functions]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/functions.zsh
-
-# [Kubernetes Config]
-# --------------------------------------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/k8s.zsh
+ZSH_CONFIG_ROOT=~/Developer/dotfiles-hd/config/zsh
+[[ -r "$ZSH_CONFIG_ROOT/lsd-aliases.zsh" ]] && source "$ZSH_CONFIG_ROOT/lsd-aliases.zsh"
+[[ -r "$ZSH_CONFIG_ROOT/hunk-aliases.zsh" ]] && source "$ZSH_CONFIG_ROOT/hunk-aliases.zsh"
 
 # [Environment Variables]
 # --------------------------------------------------------------------------------------------------------
@@ -61,10 +50,5 @@ alias cursor-app="~/Applications/Cursor-1.2.1-aarch64.AppImage"
 alias font="gsettings set org.gnome.mutter experimental-features \"['scale-monitor-framebuffer']\" && gsettings set org.gnome.desktop.interface text-scaling-factor 1.75"
 PATH=~/.console-ninja/.bin:$PATH
 
-# Blaze
-alias tmfe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-fe.sh"
-alias tmed="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-ed.sh"
-alias tmbe="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-be.sh"
-alias tmbl="~/Developer/dotfiles-hd/setup/mac-blaze/zsh-config/scripts/tmux/tm-all.sh"
 export GIT_EDITOR="code --wait"
 export EDITOR="code --wait"

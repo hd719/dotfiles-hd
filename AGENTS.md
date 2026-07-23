@@ -7,6 +7,8 @@ work machines.
 
 - `config/` contains portable app and tool configuration.
 - `setup/` contains machine bootstrap scripts and machine-specific setup files.
+- `config/zsh/mac/init.zsh` is the shared Mac interface;
+  `config/zsh/mac/personal.zsh` adds personal-only workflows.
 - The current personal Mac symlink inventory lives in `README.md`.
 - The Resilience work Mac instructions live in `setup/mac-pro-resilience/README.md`.
 - The shared Apple Silicon Mac bootstrap and safety boundary live in

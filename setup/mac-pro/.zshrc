@@ -5,6 +5,7 @@
 # Shared Mac shell behavior lives behind one interface. This file keeps the
 # MacBook-specific plugin timing, completion policy, and PATH setup local.
 source "$HOME/Developer/dotfiles-hd/config/zsh/mac/init.zsh"
+source "$HOME/Developer/dotfiles-hd/config/zsh/mac/personal.zsh"
 
 # -----------------------------------------------------------------------------
 # Plugins - Load immediately for better UX
