@@ -1,4 +1,4 @@
-# ZSH Prompt Optimization Guide
+# Shared Mac ZSH Prompt Optimization Guide
 
 Optimizations to reduce zsh shell startup time from ~500ms → ~82ms → **~40ms** (consistent, prioritizing UX).
 

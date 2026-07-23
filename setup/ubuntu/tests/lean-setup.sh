@@ -11,7 +11,7 @@ ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
 LSD_ALIASES="$ROOT_DIR/config/zsh/lsd-aliases.zsh"
-MAC_ALIASES="$ROOT_DIR/setup/mac-vm/zsh-config/alias.zsh"
+MAC_ALIASES="$ROOT_DIR/config/zsh/mac/alias.zsh"
 NVIM_EDITOR_CONFIG="$ROOT_DIR/config/nvim/lua/plugins/editor.lua"
 TEST_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TEST_ROOT"' EXIT
@@ -411,7 +411,7 @@ alias ll='lsd -la --tree --depth 1'
 alias l='lsd -l'
 alias la='lsd -a'
 EOF
-  assert_file_contains "$MAC_ALIASES" "source \"\$ZSH_CONFIG_DIR/../../../config/zsh/lsd-aliases.zsh\""
+  assert_file_contains "$MAC_ALIASES" "source \"\$ZSH_CONFIG_DIR/../lsd-aliases.zsh\""
 
   for forbidden in mac-vm linuxbrew rbenv 'code --wait' kubectl terraform; do
     if grep -Fq -- "$forbidden" "$ZSH_CONFIG"; then

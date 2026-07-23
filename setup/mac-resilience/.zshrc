@@ -2,17 +2,10 @@
 # ZSH Configuration (Work - Resilience)
 # =============================================================================
 
-ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-vm/zsh-config
-
 # -----------------------------------------------------------------------------
 # Core Configuration (order matters)
 # -----------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/prompt.zsh      # Prompt, starship, zoxide
-source $ZSH_CONFIG_DIR/tooling.zsh     # Dev tools config
-source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
-source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
-source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
-source "$ZSH_CONFIG_DIR/../../../config/zsh/completions.zsh"
+source "$HOME/Developer/dotfiles-hd/config/zsh/mac/init.zsh"
 
 # Work-owned shortcut so this profile can stay independent of shared aliases.
 alias v='nvim'

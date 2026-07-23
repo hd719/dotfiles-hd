@@ -1,4 +1,4 @@
-# [Aliases]
+# [Shared Mac Aliases]
 # --------------------------------------------------------------------------------------------------------
 
 ## Mac defaults
@@ -93,10 +93,10 @@ alias coverage='go test -coverprofile=coverage.out ./... && go tool cover -html=
 alias code-restart="killall electron && killall node && killall code"
 
 ## LSD - Modern ls replacement with colors and icons
-source "$ZSH_CONFIG_DIR/../../../config/zsh/lsd-aliases.zsh"
+source "$ZSH_CONFIG_DIR/../lsd-aliases.zsh"
 
 ## Hunk - Review-first Git diff viewer
-source "$ZSH_CONFIG_DIR/../../../config/zsh/hunk-aliases.zsh"
+source "$ZSH_CONFIG_DIR/../hunk-aliases.zsh"
 
 ## Bat
 alias cat="bat --paging never --theme Nord"

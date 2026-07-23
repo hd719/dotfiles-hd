@@ -1,5 +1,7 @@
 # [ZSH Config Directory]
-ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/setup/mac-vm/zsh-config
+# Transitional: Fedora still consumes the shared aliases, functions, and
+# Kubernetes helpers directly. A portable split is separate follow-up work.
+ZSH_CONFIG_DIR=~/Developer/dotfiles-hd/config/zsh/mac
 
 # [ZSH/System Aliases]
 # --------------------------------------------------------------------------------------------------------

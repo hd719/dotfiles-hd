@@ -7,9 +7,14 @@ This repo is the source of truth for rebuilding my personal and work machines.
 - `config/` - portable app and tool config. This is where personal settings, themes, keymaps, terminal config, and app exports live.
 - `setup/` - machine setup scripts and machine-specific bootstrap files for macOS, Linux, VMs, and servers.
 
-Shared shell mechanics live in `config/zsh/`. Each machine keeps its own
-`.zshrc` entry point so plugin timing, runtimes, credentials, and work-specific
-behavior remain profile-owned.
+Shared Mac shell mechanics live behind `config/zsh/mac/init.zsh`. Each machine
+keeps its own `.zshrc` entry point so plugin timing, runtimes, credentials, and
+work-specific behavior remain profile-owned.
+
+The MacBook profile adapter now lives at `setup/mac-vm/.zshrc`. Existing
+bootstrap-managed links continue through the temporary
+`setup/mac-vm/zsh-config/.zshrc` compatibility entry point until the later
+profile-naming migration.
 
 ## Resilience Work Mac
 
@@ -30,7 +35,7 @@ both a physical personal MacBook and a MacBook VM.
 
 | Tool | Live path | Dotfiles source | Status | Notes |
 | --- | --- | --- | --- | --- |
-| Shell (MacBook) | `~/.zshrc` | `setup/mac-vm/zsh-config/.zshrc` | Bootstrap-managed link | Personal MacBook shell entry point. |
+| Shell (MacBook) | `~/.zshrc` | `setup/mac-vm/zsh-config/.zshrc` | Bootstrap-managed link | Temporary compatibility entry point for the MacBook profile adapter. |
 | Shell (Mac mini) | `~/.zshrc` | `setup/mac-mini/.zshrc` | Bootstrap-managed link | Mac mini shell entry point. |
 | Login PATH | marker-owned block in `~/.zprofile` | `setup/mac-bootstrap/mise-shims.zsh` | Bootstrap-managed block | The rest of `.zprofile` remains user-owned. |
 | AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Existing manual link | Not installed or linked by the new-Mac bootstrap because the app is not in its reviewed Brewfiles. |

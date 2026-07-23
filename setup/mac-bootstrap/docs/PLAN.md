@@ -174,6 +174,10 @@ setup/mac-vm/zsh-config/            shared shell behavior
 This shape is implemented in this PR. Removing already-installed Homebrew
 fallbacks remains deferred; Brewfile reorganization does not uninstall them.
 
+> Current layout note (July 2026): the shared Mac shell implementation later
+> moved to `config/zsh/mac/`, with the MacBook profile adapter at
+> `setup/mac-vm/.zshrc` and a compatibility entry point at the original path.
+
 ## Implementation Sequence
 
 Implementation and isolated QA may proceed in parallel. Live activation gates

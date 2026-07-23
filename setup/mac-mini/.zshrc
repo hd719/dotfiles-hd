@@ -2,8 +2,6 @@
 # ZSH Configuration (Mac mini - Hermes)
 # =============================================================================
 
-ZSH_CONFIG_DIR="$HOME/Developer/dotfiles-hd/setup/mac-vm/zsh-config"
-
 _source_zsh_config() {
   local file="$1"
   [[ -r "$file" ]] && source "$file"
@@ -12,12 +10,7 @@ _source_zsh_config() {
 # -----------------------------------------------------------------------------
 # Core Configuration
 # -----------------------------------------------------------------------------
-_source_zsh_config "$ZSH_CONFIG_DIR/prompt.zsh"
-_source_zsh_config "$ZSH_CONFIG_DIR/tooling.zsh"
-_source_zsh_config "$ZSH_CONFIG_DIR/functions.zsh"
-_source_zsh_config "$ZSH_CONFIG_DIR/alias.zsh"
-_source_zsh_config "$ZSH_CONFIG_DIR/k8s.zsh"
-_source_zsh_config "$ZSH_CONFIG_DIR/../../../config/zsh/completions.zsh"
+_source_zsh_config "$HOME/Developer/dotfiles-hd/config/zsh/mac/init.zsh"
 
 # -----------------------------------------------------------------------------
 # Plugins

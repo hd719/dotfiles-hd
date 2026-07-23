@@ -62,6 +62,10 @@ The bootstrap also owns one marked mise-shims block inside `~/.zprofile`; it
 does not replace or symlink the whole file. AeroSpace remains an existing
 manual link and is not installed or linked by this bootstrap.
 
+`setup/mac-vm/zsh-config/.zshrc` is a temporary compatibility entry point that
+forwards existing MacBook links to the profile adapter at
+`setup/mac-vm/.zshrc`.
+
 ## Do Not Blindly Symlink
 
 - `~/.config/tmux` because live plugins live there. Review/link `tmux.conf` separately.

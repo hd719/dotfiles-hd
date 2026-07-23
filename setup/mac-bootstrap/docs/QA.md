@@ -100,13 +100,17 @@ bash -n \
   setup/mac-bootstrap/tests/bootstrap-test.sh \
   setup/mac-vm/setup-vm.sh
 
-zsh -n \
+for zsh_file in \
   config/zsh/completions.zsh \
+  config/zsh/mac/*.zsh \
   setup/mac-bootstrap/mise-shims.zsh \
+  setup/mac-vm/.zshrc \
   setup/mac-vm/zsh-config/.zshrc \
   setup/mac-mini/.zshrc \
   setup/mac-resilience/.zshrc \
-  setup/mac-vm/zsh-config/functions.zsh
+  setup/fedora/.zshrc; do
+  zsh -n "$zsh_file"
+done
 
 setup/mac-bootstrap/tests/bootstrap-test.sh
 git diff --check
