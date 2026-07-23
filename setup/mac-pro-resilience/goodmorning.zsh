@@ -30,14 +30,14 @@ _resilience_update_repo() {
 gda() {
   emulate -L zsh
 
-  local status=0
+  local result=0
   _resilience_update_repo \
     "$HOME/Developer/Resilience/resilience-platform" \
-    "Resilience Platform" || status=1
+    "Resilience Platform" || result=1
   _resilience_update_repo \
     "$HOME/Developer/Resilience/resilience-pargasite" \
-    "Resilience Pargasite" || status=1
-  return "$status"
+    "Resilience Pargasite" || result=1
+  return "$result"
 }
 
 _resilience_brew_cooldown_seconds() {
@@ -105,7 +105,7 @@ goodMorning() {
 
   local skip_brew=0
   local force_brew=0
-  local status=0
+  local result=0
   local argument
   local marker_file
   local -i remaining_seconds
@@ -136,7 +136,7 @@ goodMorning() {
     echo "Dotfiles are current."
   else
     echo "Dotfiles sync failed; continuing without resetting local changes."
-    status=1
+    result=1
   fi
 
   marker_file="$(_resilience_brew_marker)"
@@ -151,7 +151,7 @@ goodMorning() {
     if (( force_brew || remaining_seconds == 0 )); then
       _resilience_run_homebrew_upgrade "$marker_file" || {
         echo "Homebrew update failed; the cooldown was not advanced."
-        status=1
+        result=1
       }
     else
       echo "Skipping Homebrew update (${remaining_seconds}s remain in the 72-hour cooldown)."
@@ -161,9 +161,9 @@ goodMorning() {
   echo "Updating Git repositories..."
   if ! gda; then
     echo "One or more Resilience repositories were not updated."
-    status=1
+    result=1
   fi
 
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
-  return "$status"
+  return "$result"
 }
