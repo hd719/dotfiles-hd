@@ -104,14 +104,3 @@ echo "   - Move window: Super+Shift+1..6"
 echo "   - Dock apps: Ctrl+1..9"
 echo "   - Space Bar extension enabled for numbered workspaces"
 echo "   * Log out/in (Wayland) to ensure all bindings and extensions take effect."
-
-
-# - **What:** Updated “Omakub-style” GNOME setup script that: fixes 6 workspaces, maps `Super+1..6` to switch and `Shift+Super+1..6` to move, **moves dock app switching to `Ctrl+1..9`**, disables Dash-to-Dock hotkeys, and **installs & enables the Space Bar extension** (`space-bar@luchrioh`) for numbered workspace UI. Tiling Assistant stays optional.
-# - **How:** Uses `gsettings` for keybindings/settings and `extension-manager` CLI to install/enable extensions when available.
-# - **Why:** Matches Omakub’s fast, keyboard-first workflow on Ubuntu in a VMware (Mac M3) VM.
-
-# ---
-
-# ### Updated script
-# Save as `omakub-gnome-setup.sh`, then run:
-# `chmod +x omakub-gnome-setup.sh && ./omakub-gnome-setup.sh`

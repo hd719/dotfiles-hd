@@ -1,171 +1,140 @@
 # AGENTS.md
 
-Be concise. This repo is Hamel's source of truth for rebuilding personal and
-work machines.
+Be concise. This repository rebuilds real personal and work machines; inspect
+before changing state.
 
-## Mental Model
-
-- `config/` contains portable app and tool configuration.
-- `setup/` contains machine bootstrap scripts and machine-specific setup files.
-- `config/zsh/mac/init.zsh` is the shared Mac interface;
-  `config/zsh/mac/personal.zsh` adds personal-only workflows.
-- The current personal Mac symlink inventory lives in `README.md`.
-- The Resilience work Mac instructions live in `setup/mac-pro-resilience/README.md`.
-- The shared Apple Silicon Mac bootstrap and safety boundary live in
-  `setup/mac-bootstrap/README.md`.
-
-## Before Editing
+## Start Every Task
 
 1. Run `git status --short --branch`.
-2. Inspect the live path and the dotfiles source before changing anything.
-3. Use `readlink`, `cmp`, `diff`, or `find` to understand whether a path is already linked, equal, different, or app-managed runtime state.
+1. Read the runbook for the target profile.
+1. Inspect both the tracked source and live destination with `readlink`, `cmp`,
+   `diff`, or `find`.
+1. Preserve unrelated changes and machine-owned state.
 
-## Node Package Manager
+## Profile Routing
 
-- Use pnpm for dotfiles-managed global Node tools. Do not add new `npm install`
-  commands for those tools.
-- Inside a project, follow its declared `packageManager` and existing lockfile;
-  never convert a pnpm, Bun, npm, or Yarn project implicitly.
-- Keep npm and npx available because Node and third-party tooling may expect
-  them, but they are compatibility tools rather than the default installer.
+| Target                                     | Source of truth                      |
+| ------------------------------------------ | ------------------------------------ |
+| Personal MacBook (`mac-pro`)               | `setup/mac-bootstrap/README.md`      |
+| Personal Mac mini (`mac-mini`)             | `setup/mac-bootstrap/README.md`      |
+| Resilience work Mac (`mac-pro-resilience`) | `setup/mac-pro-resilience/README.md` |
+| Ubuntu workstation                         | `setup/ubuntu/README.md`             |
 
-## Symlink Rules
+`config/` holds portable configuration. `setup/` holds platform installers and
+machine policy. The personal link inventory is in `README.md`.
 
-- If Hamel explicitly asks to symlink a tool, do it.
-- Always back up an existing live file or directory before replacing it.
-- Use timestamped backups beside the live path, like `path.backup-YYYYMMDD-HHMMSS`.
-- Verify the link after creating it with `readlink` and basic `test -f` or `test -d` checks.
-- Update the matching machine inventory whenever symlink state changes. Do not
-  overwrite the personal Mac inventory with work Mac state.
+## Change Safety
 
-## Bootstrap-managed Personal Mac State
+- Change only the requested profile and files.
+- Back up every replaced file, directory, or dangling link beside the original
+  using that profile's timestamped backup convention.
+- Verify each link with `readlink` plus `test -e` and `test -L`.
+- Update the matching inventory when link ownership changes.
+- Never copy or replace credentials, Git/SSH/GitHub auth, certificates,
+  1Password/Doppler/AWS state, Docker data, or application databases.
+- Never bypass company policy or device management.
+- Never start, stop, restart, reload, or migrate production services without
+  explicit approval.
+- Do not commit or push unless Hamel asks.
 
-Whole directory links:
+If Hamel explicitly asks for one link, create it safely. Do not expand that
+request into a full-machine migration.
 
-- `~/.config/btop` -> `config/btop`
-- `~/.config/bookokrat` -> `config/bookokrat`
-- `~/.config/fastfetch` -> `config/fastfetch`
-- `~/.config/karabiner` -> `config/karabiner` on the MacBook only
-- `~/.config/mise` -> `config/mise`
-- `~/.config/nvim` -> `config/nvim`
+## Package Ownership
 
-Single file or subdirectory links:
+- Use pnpm for dotfiles-managed global Node tools unless a profile runbook
+  documents a fixed-prefix exception that preserves work-owned runtimes.
+- Follow each project's declared package manager and lockfile.
+- Keep npm and npx for compatibility; do not convert project package managers.
+- Do not add broad upgrades, cleanup, or removals to a bootstrap repair.
 
-- `~/.zshrc` -> `setup/mac-pro/.zshrc` on the MacBook
-- `~/.zshrc` -> `setup/mac-mini/.zshrc` on the Mac mini
-- `~/Library/Application Support/com.mitchellh.ghostty/config` -> `config/ghostty/config`
-- `~/.config/herdr/config.toml` -> `config/herdr/config.toml`
-- `~/.config/hunk/config.toml` -> `config/hunk/config.toml`
+## Mac Shell Ownership
 
-The bootstrap also owns one marked mise-shims block inside `~/.zprofile`; it
-does not replace or symlink the whole file. AeroSpace remains an existing
-manual link and is not installed or linked by this bootstrap.
+- `config/zsh/mac/init.zsh` is the shared Mac interface.
+- `config/zsh/mac/personal.zsh` adds personal-only workflows.
+- MacBook and Mac mini profiles load both.
+- Resilience loads the shared interface plus work-owned behavior, never the
+  personal layer.
+- Each profile owns plugin timing, runtimes, credentials, and its `.zshrc`
+  entry point.
 
-## Do Not Blindly Symlink
+## Personal Macs
 
-- `~/.config/tmux` because live plugins live there. Review/link `tmux.conf` separately.
-- `~/.gitconfig` because live config can differ by machine.
-- `~/.config/raycast` because it contains extension/runtime state.
-- `~/.config/1Password`, `~/.config/op`, `~/.config/gh`, or `~/.config/cagent` without a specific request because they contain credential, auth, or app-managed state.
-- `~/.config/zed/prompts` because it is Zed runtime database state.
-- `~/Library/Application Support/Zed` because it is app runtime state.
-- Herdr logs, sockets, sessions, and release notes under `~/.config/herdr`.
-- Hunk runtime state under `~/.config/hunk`; link only `config.toml`.
+Use only:
+
+```bash
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --check
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --apply
+setup/mac-bootstrap/doctor.sh --profile mac-pro
+```
+
+Substitute `mac-mini` for a new mini. Apply only from a clean canonical clone.
+The bootstrap may manage links and one marked `~/.zprofile` block; it must not
+replace the rest of `.zprofile`.
+
+For the existing production Mac mini, `--apply` requires:
+
+1. The reviewed change is merged.
+1. The MacBook rollback and reboot canary is green.
+1. The post-merge Mac mini preflight is green.
+1. Hamel explicitly approves the interactive apply.
+
+Service lifecycle changes require separate approval.
 
 ## Resilience Work Mac
 
-When Hamel asks to set up the work laptop:
+- Manage only Ghostty, Herdr, Hunk, Neovim, and Bookokrat.
+- Use `setup/mac-pro-resilience/Brewfile` and
+  `setup/mac-pro-resilience/link-terminal-editor-config.sh`.
+- Never run the personal Mac bootstrap or the Mac mini Brewfile.
+- Keep the live work `~/.zshrc`, `config/mise`, Git identity, work runtimes,
+  credentials, certificates, and Docker state machine-owned.
+- Use the runbook's pinned tools and exact five-link inventory.
+- Report every backup and policy blocker.
 
-1. Read `setup/mac-pro-resilience/README.md` and follow it as the runbook.
-2. Default to only Ghostty, Herdr, Hunk, Neovim, and Bookokrat. Do not apply the
-   full personal Mac symlink list.
-3. Use `setup/mac-pro-resilience/Brewfile` for the terminal/editor dependencies and
-   `setup/mac-pro-resilience/link-terminal-editor-config.sh` for the five links.
-   Never run `setup/mac-mini/Brewfile` or `setup/mac-pro/setup.sh` on the
-   work laptop.
-4. Inspect and timestamp-backup every existing destination before replacing it.
-5. Do not link `config/mise`, replace `setup/mac-pro-resilience/.zshrc`, or change
-   work-repo runtimes unless Hamel explicitly asks. Resilience repos own their
-   Node and package-manager versions.
-6. Never copy or replace Git/SSH/GitHub auth, AWS/Doppler/1Password state,
-   company certificates, Docker state, or other work credentials.
-7. Report every backup and any company-policy blocker. Never bypass device
-   management or security policy.
+The Resilience linker is intentional: it is the scoped, backup-safe installer
+for those five links. Do not replace it with ad hoc `ln -s` commands.
 
-## Existing Helpers
+## Ubuntu
 
-- `setup/mac-bootstrap/bootstrap.sh` and `doctor.sh` for managed Macs
-- `config/zed/link-zed-config.sh` for manually restoring the preserved Zed config
-- `config/herdr/link-herdr-config.sh`
-- `setup/mac-pro-resilience/link-terminal-editor-config.sh`
-
-Prefer these scripts when they match the task.
-
-For a brand-new personal Mac, run the bootstrap in `--dry-run` mode first and
-then `--apply` only from a clean canonical clone. `mac-pro` is the personal
-MacBook profile. Never use the personal bootstrap on the Resilience work Mac.
-On the existing Mac mini, apply requires
-the reviewed change to be merged, a green MacBook rollback/reboot canary, a
-green post-merge Mac mini preflight, and Hamel's explicit approval. PR #9's
-unavailable clean-VM gate is explicitly waived, not passed. Service restart
-remains forbidden without a separate maintenance-window approval.
+Follow `setup/ubuntu/README.md`. `setup.sh` installs packages, changes the login
+shell, enables Docker, and links the documented inventory. The destructive
+`cleanup-legacy.sh --yes` migration is separate and must never run implicitly.
 
 ## Preserved Zed Configuration
 
-- Zed is not installed or managed by the personal Mac bootstrap.
-- Keep `config/zed` intact so the settings, keymap, linker, and themes are ready
-  if Hamel returns to Zed.
-- Run `config/zed/link-zed-config.sh` only when Hamel explicitly re-enables Zed.
-- `Hamel Nord` pairs with `config/zed/themes/hamel-nord.json`.
-- `Hamel Nord Blur` pairs with `config/zed/themes/hamel-nord-blur.json`.
-- Keep both profiles in `config/zed/settings.json` and preserve their matching
-  sidebar and scrollbar settings.
+Zed is not installed or bootstrap-managed. Keep `config/zed` intact. Run
+`config/zed/link-zed-config.sh` only when Hamel explicitly re-enables Zed.
+Never link Zed prompts or application runtime state.
 
 ## Neovim Teaching Continuity
 
-- The goal is to make Hamel a deadly Vim/Neovim warrior: fast, confident, and
-  able to reason about the editor instead of memorizing unexplained magic.
-- Before teaching Neovim, read `config/nvim/README.md`,
-  `config/nvim/CURRICULUM.md`, and `config/nvim/LEARNING_LOG.md` so lessons
-  resume from the last checkpoint.
-- `CURRICULUM.md` is the checkable skill-progress source of truth;
-  `LEARNING_LOG.md` is the append-only evidence of what happened in each
-  session. Keep both current.
-- Teach interactively in small steps. Give one concrete action, wait for Hamel
-  to try it, explain what happened, and then continue.
-- Check a curriculum sub-lesson only after Hamel practices it and confirms the
-  result. Add the supporting session number beside the completed checkbox.
-- Keep checkboxes atomic. Never group several keys or behaviors into one checked
-  item when Hamel practiced only part of the group.
-- A lesson is complete when every core sub-lesson is checked. Optional deep
-  dives never block progress and may remain unchecked permanently.
-- If Hamel wants to go deeper, add the new topic under that lesson's Optional
-  Deep Dives before teaching it. Do not silently expand the core track.
-- Default to the first unchecked core item in the earliest incomplete lesson,
-  unless Hamel explicitly chooses another topic.
-- Keep the curriculum's `Current Checkpoint` synchronized whenever progress
-  changes.
-- Every Neovim concept, key, workflow, conflict, or correction taught must be
-  documented in `config/nvim/LEARNING_LOG.md` during that session. Do not rely
-  on chat history as the record.
-- Keep the learning log append-only. Start each new teaching session with the
-  next numbered, dated entry and preserve older entries.
-- Each session entry must include what was practiced, the useful mental model,
-  any unresolved confusion or key conflict, and the best next lesson.
-- If a chat or agent handoff loses context, resume from the curriculum's first
-  unchecked core item, confirm it against the latest log entry, and begin with
-  one short recall checkpoint.
+- Read `config/nvim/README.md`, `config/nvim/CURRICULUM.md`, and
+  `config/nvim/LEARNING_LOG.md` first.
+- Resume the first unchecked core item unless Hamel chooses another topic.
+- Teach one action at a time and wait for confirmation.
+- Mark only practiced, confirmed sub-lessons; keep checkboxes atomic.
+- Optional deep dives never block a lesson. Add requested deep dives before
+  teaching them.
+- Keep the curriculum checkpoint current.
+- Append every taught concept, correction, conflict, and result to the next
+  numbered learning-log session. Include the mental model, unresolved issue,
+  and best next lesson.
+- Never rewrite old learning-log entries or claim unperformed practice.
+
+The goal is confident Neovim reasoning, not unexplained key memorization.
 
 ## Verification
 
-After symlink or config changes:
+Run checks that match the changed surface:
 
 ```bash
-git status --short --branch
-readlink <live-path>
-test -e <live-path>
+git diff --check
+bash setup/mac-bootstrap/tests/bootstrap-test.sh
+bash setup/ubuntu/tests/lean-setup.sh
 ```
 
-For shell config changes, start a fresh shell with `zsh -lic '<check>'`.
-
-Do not commit or push unless Hamel asks.
+Run `mdformat --check` on changed Markdown files. For shell changes, run
+`bash -n` or `zsh -n` on edited scripts and verify behavior in a fresh login
+shell with `zsh -lic '<check>'`.
