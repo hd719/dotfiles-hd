@@ -1,5 +1,8 @@
 # Personal Mac Toolchain Standardization Plan
 
+> Historical record: `mac-vm` and its old file paths below describe PR #9.
+> Current setup uses `mac-pro`; follow `../README.md` for live commands.
+
 - Status: PR #9 is merged. MacBook live/reboot QA and immediate, one-hour, and
   next-day no-restart observation passed on both personal Macs; Hamel's final
   next-day normal-use confirmation remains open

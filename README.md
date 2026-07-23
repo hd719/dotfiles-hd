@@ -1,199 +1,132 @@
-# Dotfiles
+# dotfiles-hd
 
-This repo is the source of truth for rebuilding my personal and work machines.
+Source of truth for Hamel's supported personal, work, and VM setups.
 
-## Repo Map
+## Choose a Profile
 
-- `config/` - portable app and tool config. This is where personal settings, themes, keymaps, terminal config, and app exports live.
-- `setup/` - machine setup scripts and machine-specific bootstrap files for macOS, Linux, VMs, and servers.
+Clone once at the canonical path:
 
-Shared Mac shell mechanics live behind `config/zsh/mac/init.zsh`. Personal
-Codex, OpenClaw, project, `goodMorning`, and Mission Control workflows load
-separately through `config/zsh/mac/personal.zsh`. Each machine keeps its own
-`.zshrc` entry point so plugin timing, runtimes, credentials, and work-specific
-behavior remain profile-owned.
-
-The MacBook profile adapter lives at `setup/mac-pro/.zshrc`.
-
-## Resilience Work Mac
-
-Use [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) to install
-and link the Ghostty, Herdr, Hunk, Neovim, and Bookokrat setup on the work
-laptop. That runbook is intentionally narrower than the personal Mac inventory
-below so it does not replace work-specific shell, runtime, credential, or
-certificate state.
-
-## Personal Mac Config Inventory
-
-This is the bootstrap target plus the explicitly noted existing manual link.
-
-For a new personal Mac, use the backed-up, idempotent
-[`Mac bootstrap runbook`](setup/mac-bootstrap/README.md) instead of copying the
-link commands below by hand. The canonical personal MacBook profile is
-`mac-pro`.
-
-| Tool | Live path | Dotfiles source | Status | Notes |
-| --- | --- | --- | --- | --- |
-| Shell (MacBook) | `~/.zshrc` | `setup/mac-pro/.zshrc` | Bootstrap-managed link | MacBook shell entry point. |
-| Shell (Mac mini) | `~/.zshrc` | `setup/mac-mini/.zshrc` | Bootstrap-managed link | Mac mini shell entry point. |
-| Login PATH | marker-owned block in `~/.zprofile` | `setup/mac-bootstrap/mise-shims.zsh` | Bootstrap-managed block | The rest of `.zprofile` remains user-owned. |
-| AeroSpace | `~/.config/aerospace/aerospace.toml` | `config/aerospace/aerospace.toml` | Existing manual link | Not installed or linked by the new-Mac bootstrap because the app is not in its reviewed Brewfiles. |
-| btop | `~/.config/btop` | `config/btop` | Linked dir | Uses custom Nord theme `hamel-nord.theme`. |
-| fastfetch | `~/.config/fastfetch` | `config/fastfetch` | Linked dir | Uses the anon logo config. |
-| Bookokrat | `~/.config/bookokrat` | `config/bookokrat` | Linked dir | Uses the custom `Hamel Nord` theme: transparent interface, opaque Nord PDF canvas. |
-| Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` | Linked file | Uses Maple Mono NF and the Hamel Nord Blur appearance. |
-| Hunk | `~/.config/hunk/config.toml` | `config/hunk/config.toml` | Linked file | Uses Catppuccin Mocha; Hunk runtime state stays local. |
-| Karabiner | `~/.config/karabiner` | `config/karabiner` | MacBook-only linked dir | The Mac mini profile does not link it. |
-| mise | `~/.config/mise` | `config/mise` | Linked dir | Global toolchain config. |
-| Neovim | `~/.config/nvim` | `config/nvim` | Linked dir | Lua config, plugins, keymaps, LSP, and Hamel Nord. |
-| Herdr | `~/.config/herdr/config.toml` | `config/herdr/config.toml` | Linked file | Only config is linked; runtime state stays local. |
-
-## Repair an Individual Link
-
-Use this only to repair one existing link. New Macs use the personal-Mac
-bootstrap above. Choose a source listed for the target machine; MacBook-only
-sources such as Karabiner do not belong on the Mac mini. This example repairs
-only the shared Neovim link and backs up anything already at the live path.
+GitHub SSH access is required because automated updates verify the exact
+canonical remote.
 
 ```bash
-backup_and_link() {
-  local src="$1"
-  local dest="$2"
-  local backup
-
-  mkdir -p "$(dirname "$dest")"
-
-  if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
-    echo "already linked: $dest -> $src"
-    return 0
-  fi
-
-  if [ -e "$dest" ] || [ -L "$dest" ]; then
-    backup="$dest.backup-$(date +%Y%m%d-%H%M%S)"
-    mv "$dest" "$backup"
-    echo "backup: $backup"
-  fi
-
-  ln -s "$src" "$dest"
-  echo "linked: $dest -> $src"
-}
-
-DOTFILES="$HOME/Developer/dotfiles-hd"
-
-backup_and_link "$DOTFILES/config/nvim" "$HOME/.config/nvim"
+mkdir -p "$HOME/Developer"
+git clone git@github.com:hd719/dotfiles-hd.git \
+  "$HOME/Developer/dotfiles-hd"
+cd "$HOME/Developer/dotfiles-hd"
 ```
 
-## Existing Bootstrap Scripts
+| Device                          | Profile or command           | Runbook                                                                    |
+| ------------------------------- | ---------------------------- | -------------------------------------------------------------------------- |
+| Personal Apple Silicon MacBook  | `--profile mac-pro`          | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
+| Personal Apple Silicon Mac mini | `--profile mac-mini`         | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
+| Resilience work Mac             | `setup/mac-pro-resilience`   | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
+| Ubuntu workstation              | `bash setup/ubuntu/setup.sh` | [`setup/ubuntu/README.md`](setup/ubuntu/README.md)                         |
 
-Personal Apple Silicon Mac:
+Scripts under `setup/fedora` are legacy helpers, not a supported one-command
+bootstrap.
+
+## Personal Mac Quick Start
+
+Install Xcode Command Line Tools and Homebrew first, then run:
 
 ```bash
 setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --check
 setup/mac-bootstrap/bootstrap.sh --profile mac-pro --apply
-setup/mac-bootstrap/doctor.sh --profile mac-pro
+zsh -lic \
+  '"$HOME/Developer/dotfiles-hd/setup/mac-bootstrap/doctor.sh" --profile mac-pro'
+exec zsh -l
 ```
 
-The Mac mini uses `--profile mac-mini`. Read the
-[`Mac bootstrap runbook`](setup/mac-bootstrap/README.md) first; the current Mac
-mini has a production-runtime boundary and must not be restarted by bootstrap
-work.
+Use `mac-mini` for a new Mac mini. The existing production Mac mini requires
+the approval gate in the Mac bootstrap runbook before `--apply`.
 
-### Preserved Zed Configuration
+## Repository Layout
 
-Zed is not installed or managed by the personal Mac bootstrap. Its settings,
-keymap, themes, and linker remain under `config/zed` so they are easy to restore
-if Zed becomes useful again.
+- `config/` contains portable application and tool configuration.
+- `setup/` contains platform installers, machine overlays, tests, and runbooks.
+- `config/zsh/mac/init.zsh` is the shared Mac shell interface.
+- `config/zsh/mac/personal.zsh` adds personal-only workflows.
+- Each Mac profile owns its `.zshrc`, plugin timing, runtimes, credentials, and
+  machine-specific behavior.
 
-To re-enable the preserved links:
+## Personal Mac Link Inventory
+
+The personal Mac bootstrap owns every row below except the explicitly manual
+AeroSpace link. It backs up non-matching destinations and leaves other state
+alone.
+
+| Tool       | Live path                                                    | Source                                            | Scope                          |
+| ---------- | ------------------------------------------------------------ | ------------------------------------------------- | ------------------------------ |
+| Shell      | `~/.zshrc`                                                   | `setup/mac-pro/.zshrc` or `setup/mac-mini/.zshrc` | Profile-specific               |
+| Login PATH | Managed block in `~/.zprofile`                               | `setup/mac-bootstrap/mise-shims.zsh`              | Preserves the rest of the file |
+| Bookokrat  | `~/.config/bookokrat`                                        | `config/bookokrat`                                | Shared                         |
+| btop       | `~/.config/btop`                                             | `config/btop`                                     | Shared                         |
+| fastfetch  | `~/.config/fastfetch`                                        | `config/fastfetch`                                | Shared                         |
+| Ghostty    | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config`                           | Shared                         |
+| Herdr      | `~/.config/herdr/config.toml`                                | `config/herdr/config.toml`                        | Config only                    |
+| Hunk       | `~/.config/hunk/config.toml`                                 | `config/hunk/config.toml`                         | Config only                    |
+| Karabiner  | `~/.config/karabiner`                                        | `config/karabiner`                                | MacBook only                   |
+| mise       | `~/.config/mise`                                             | `config/mise`                                     | Shared                         |
+| Neovim     | `~/.config/nvim`                                             | `config/nvim`                                     | Shared                         |
+| AeroSpace  | `~/.config/aerospace/aerospace.toml`                         | `config/aerospace/aerospace.toml`                 | Existing manual link           |
+
+Use the profile bootstrap or work-Mac linker to repair links. Do not recreate
+them by hand unless the matching runbook explicitly says to.
+
+## Safety Boundaries
+
+Never copy or link credentials, authentication state, certificates, application
+databases, or company-managed state. In particular:
+
+- Keep `~/.gitconfig` machine-owned.
+- Keep tmux plugins inside the live `~/.config/tmux`; review `tmux.conf`
+  separately.
+- Link only `config.toml` for Herdr and Hunk. Their runtime directories stay
+  local.
+- Treat Raycast exports as backups, not live configuration.
+- Do not link `~/.config/1Password`, `~/.config/op`, `~/.config/gh`, or
+  `~/.config/cagent`.
+- Do not link Zed prompts or `~/Library/Application Support/Zed`; both contain
+  runtime state.
+- Link terminal configuration only on profiles that actively use that terminal.
+
+The Mac bootstrap never restores credentials, removes packages, cleans
+Homebrew, or starts and restarts services.
+
+## Preserved Optional Configuration
+
+Zed is not installed or bootstrap-managed. Its settings, keymap, and both Hamel
+Nord themes remain under `config/zed` for a future return:
 
 ```bash
-~/Developer/dotfiles-hd/config/zed/link-zed-config.sh
+config/zed/link-zed-config.sh
 ```
 
-The script links settings, keymap, and themes while leaving Zed runtime state
-local.
+Run that linker only after explicitly choosing to use Zed again. Theme opacity
+uses the final alpha byte in `#RRGGBBAA`.
 
-#### Switch Zed Themes
-
-1. Open the command palette with `Cmd+Shift+P`.
-2. Run `settings profile selector: toggle`.
-3. Select `Hamel Nord` or `Hamel Nord Blur`.
-
-#### Change Zed Blur Opacity
-
-Zed colors use `#RRGGBBAA`; the final two digits control opacity. Update
-`background`, `status_bar.background`, `title_bar.background`, and
-`title_bar.inactive_background` in both:
-
-- `config/zed/themes/hamel-nord-blur.json`
-- The `Hamel Nord Blur` override in `config/zed/settings.json`
-
-Herdr:
+To repair only Herdr's config link:
 
 ```bash
-~/Developer/dotfiles-hd/config/herdr/link-herdr-config.sh
+config/herdr/link-herdr-config.sh
 ```
 
-This links only `~/.config/herdr/config.toml`.
+## Daily Review Commands
 
-### Review Changes With Hunk
+The shared Hunk aliases work from any repository:
 
-Run Hunk from the same repo or worktree that your coding agent is editing:
+| Alias     | Action                                                |
+| --------- | ----------------------------------------------------- |
+| `hwatch`  | Watch working-tree changes, including untracked files |
+| `hdiff`   | Show the current working-tree diff                    |
+| `hstaged` | Show only staged changes                              |
+| `hshow`   | Show the latest commit                                |
 
-```bash
-hwatch
-```
+Common Codex aliases are `cod`, `codr`, `codrl`, `codx`, `codrv`, `coda`,
+`codd`, and `codu`. `coda` uses `fzf` and confirmation before archiving a task;
+cancel with `Esc`. Restore one with `codex unarchive "<name-or-UUID>"`.
 
-`hwatch` opens `hunk diff --watch`, including new untracked files, and refreshes
-as Cursor or another agent edits. The shared aliases are:
-
-| Alias | Command | Purpose |
-| --- | --- | --- |
-| `hwatch` | `hunk diff --watch` | Live working-tree review. |
-| `hdiff` | `hunk diff` | One-time working-tree review. |
-| `hstaged` | `hunk diff --staged` | Review only staged changes. |
-| `hshow` | `hunk show` | Review the latest commit. |
-
-See the [Hunk documentation](https://www.hunk.dev/), the
-[shared Hunk theme](config/hunk/config.toml), and the
-[shared aliases](config/zsh/aliases.zsh).
-
-### Use Codex CLI
-
-Reload the MacBook shell, then use the `cod`-prefixed aliases:
-
-```bash
-reload
-cod
-```
-
-| Alias | Command | Purpose |
-| --- | --- | --- |
-| `cod` | `codex` | Start an interactive CLI session. |
-| `codr` | `codex resume` | Pick a session to resume. |
-| `codrl` | `codex resume --last` | Resume the latest session in this directory. |
-| `codx` | `codex exec` | Run a non-interactive task. |
-| `codrv` | `codex review --uncommitted` | Review local uncommitted changes. |
-| `coda` | `carchive` | Pick and archive an active Codex app chat. |
-| `codd` | `codex doctor` | Diagnose the local Codex installation. |
-| `codu` | `brew upgrade --cask codex` | Update the Homebrew-managed Codex CLI. |
-
-`coda` shows active Codex app chats with the same renamed titles used by the
-app, lets `fzf` filter the list, and asks for confirmation before running
-`codex archive`. Press `Esc` to cancel. Restore a chat with
-`codex unarchive "<session name or UUID>"`.
-
-## Not Linked By Default
-
-| Area | Why |
-| --- | --- |
-| `~/.config/tmux` | The live directory contains plugins. Link/review `tmux.conf`, not the whole folder. |
-| `~/.gitconfig` | Live config differs from repo. Review before linking. |
-| `~/.config/herdr` | Contains logs, sockets, release notes, and session state. Link only `config.toml`. |
-| `~/.config/hunk` | Contains runtime state. Link only `config.toml`. |
-| `~/.config/raycast` | Raycast has extension/runtime state. Treat `config/raycast` as exports, not a live symlink target. |
-| `~/.config/zed` | Preserved for a possible return to Zed; the Mac bootstrap does not manage it. |
-| `~/.config/zed/prompts` | Zed runtime database state, not portable config. |
-| `~/Library/Application Support/Zed` | App runtime state, not portable config. |
-| `~/.config/1Password`, `~/.config/op`, `~/.config/gh`, `~/.config/cagent` | Credential, auth, or app-managed state. Do not link without a specific reason. |
-| Terminal configs | Link only for tools actively used on the current machine. |
+See [`config/nvim/README.md`](config/nvim/README.md) for the editor contract and
+[`AGENTS.md`](AGENTS.md) for automation rules.

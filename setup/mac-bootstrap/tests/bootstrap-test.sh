@@ -742,10 +742,7 @@ test_profile_names_and_paths() {
   assert_no_path "$REPO_DIR/setup/mac-resilience"
   assert_no_path "$REPO_DIR/setup/mac-pro/setup-vm.sh"
   assert_no_path "$REPO_DIR/setup/mac-pro/zsh-config"
-
-  [[ -x "$REPO_DIR/setup/mac-pro/setup.sh" ]] \
-    || fail "canonical Mac Pro wrapper should be executable"
-  TESTS=$((TESTS + 1))
+  assert_no_path "$REPO_DIR/setup/mac-pro/setup.sh"
 
   load_profile mac-pro "$REPO_DIR" "$home_dir"
   assert_eq "$REPO_DIR/setup/mac-pro/Brewfile" "$PROFILE_BREWFILE" "Mac Pro profile uses its Brewfile"
@@ -1182,14 +1179,6 @@ test_profile_and_failure_guards() {
   TESTS=$((TESTS + 1))
   assert_eq '' "$(cat "$log")" "unapproved pin stops before package managers"
   assert_no_path "$home_dir/.zshrc"
-
-  : > "$log"
-  if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
-    "$REPO_DIR/setup/mac-pro/setup.sh" --profile mac-mini --dry-run >/dev/null 2>&1; then
-    fail "Mac Pro wrapper should reject profile overrides"
-  fi
-  TESTS=$((TESTS + 1))
-  assert_eq '' "$(cat "$log")" "profile override stops in the wrapper"
 
   : > "$log"
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \

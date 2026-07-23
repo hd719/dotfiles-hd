@@ -97,8 +97,7 @@ bash -n \
   setup/mac-bootstrap/bootstrap.sh \
   setup/mac-bootstrap/doctor.sh \
   setup/mac-bootstrap/lib.sh \
-  setup/mac-bootstrap/tests/bootstrap-test.sh \
-  setup/mac-pro/setup.sh
+  setup/mac-bootstrap/tests/bootstrap-test.sh
 
 for zsh_file in \
   config/zsh/completions.zsh \
