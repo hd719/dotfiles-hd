@@ -2,17 +2,9 @@
 # ZSH Configuration - Optimized for Speed (~35-45ms target)
 # =============================================================================
 
-ZSH_CONFIG_DIR="$HOME/Developer/dotfiles-hd/setup/mac-vm/zsh-config"
-
-# -----------------------------------------------------------------------------
-# Core Configuration (order matters)
-# -----------------------------------------------------------------------------
-source $ZSH_CONFIG_DIR/prompt.zsh      # Prompt, starship, zoxide (loads zsh/datetime, zsh/stat)
-source $ZSH_CONFIG_DIR/tooling.zsh     # Dev tools config
-source $ZSH_CONFIG_DIR/functions.zsh   # Helper functions & caching
-source $ZSH_CONFIG_DIR/alias.zsh       # Aliases
-source $ZSH_CONFIG_DIR/k8s.zsh         # Kubernetes config
-source "$ZSH_CONFIG_DIR/../../../config/zsh/completions.zsh"
+# Shared Mac shell behavior lives behind one interface. This file keeps the
+# MacBook-specific plugin timing, completion policy, and PATH setup local.
+source "$HOME/Developer/dotfiles-hd/config/zsh/mac/init.zsh"
 
 # -----------------------------------------------------------------------------
 # Plugins - Load immediately for better UX

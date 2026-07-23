@@ -98,15 +98,20 @@ bash -n \
   setup/mac-bootstrap/doctor.sh \
   setup/mac-bootstrap/lib.sh \
   setup/mac-bootstrap/tests/bootstrap-test.sh \
-  setup/mac-vm/setup-vm.sh
+  setup/mac-pro/setup.sh \
+  setup/mac-pro/setup-vm.sh
 
-zsh -n \
+for zsh_file in \
   config/zsh/completions.zsh \
+  config/zsh/mac/*.zsh \
   setup/mac-bootstrap/mise-shims.zsh \
-  setup/mac-vm/zsh-config/.zshrc \
+  setup/mac-pro/.zshrc \
+  setup/mac-pro/zsh-config/.zshrc \
   setup/mac-mini/.zshrc \
-  setup/mac-resilience/.zshrc \
-  setup/mac-vm/zsh-config/functions.zsh
+  setup/mac-pro-resilience/.zshrc \
+  setup/fedora/.zshrc; do
+  zsh -n "$zsh_file"
+done
 
 setup/mac-bootstrap/tests/bootstrap-test.sh
 git diff --check
@@ -117,7 +122,7 @@ Parse every Brewfile without updating Homebrew:
 ```bash
 for brewfile in \
   setup/mac-bootstrap/Brewfile \
-  setup/mac-vm/Brewfile \
+  setup/mac-pro/Brewfile \
   setup/mac-mini/Brewfile
 do
   HOMEBREW_NO_AUTO_UPDATE=1 brew bundle list --all --file "$brewfile"
@@ -148,8 +153,8 @@ installation.
    shell `Next steps`, then clone the exact PR commit over HTTPS to
    `~/Developer/dotfiles-hd`.
 4. Seed sentinel `.zshrc`, `.zprofile`, btop, Ghostty, Herdr, and Zed paths.
-5. Run `--profile mac-vm --dry-run`; confirm zero filesystem change.
-6. Run `--profile mac-vm --apply`, reboot, then run the doctor.
+5. Run `--profile mac-pro --dry-run`; confirm zero filesystem change.
+6. Run `--profile mac-pro --apply`, reboot, then run the doctor.
 7. Verify exact mise versions, both shell modes, Neovim restore/startup, and a
    clean Git worktree.
 8. Open Ghostty, Zed, Herdr, and Karabiner-Elements. Confirm linked settings are
@@ -164,7 +169,7 @@ Required post-install commands:
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade \
   --file setup/mac-bootstrap/Brewfile
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade \
-  --file setup/mac-vm/Brewfile
+  --file setup/mac-pro/Brewfile
 mise install --dry-run-code
 zsh -lic 'command -v node npm npx pnpm go python bun nvim'
 zsh -lc  'command -v node npm npx pnpm go python bun nvim'
@@ -401,13 +406,13 @@ test "$(git rev-parse "$ROLLBACK_REF")" = "$GOOD_COMMIT"
 printf '%s\n' "$REVIEWED_COMMIT" > "$EVIDENCE/reviewed-commit.txt"
 
 git switch --detach "$REVIEWED_COMMIT"
-setup/mac-bootstrap/bootstrap.sh --profile mac-vm --dry-run
-setup/mac-bootstrap/bootstrap.sh --profile mac-vm --apply
-setup/mac-bootstrap/bootstrap.sh --profile mac-vm --apply
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --apply
+setup/mac-bootstrap/bootstrap.sh --profile mac-pro --apply
 
 zsh -lic 'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
 zsh -lc  'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
-setup/mac-bootstrap/doctor.sh --profile mac-vm
+setup/mac-bootstrap/doctor.sh --profile mac-pro
 test -z "$(git status --porcelain)"
 )
 ```
@@ -504,7 +509,7 @@ test "$EVIDENCE" != "<MacBook evidence directory from the QA record>"
 test -d "$EVIDENCE"
 cd "$HOME/Developer/dotfiles-hd"
 test "$(git rev-parse HEAD)" = "$(cat "$EVIDENCE/reviewed-commit.txt")"
-setup/mac-bootstrap/doctor.sh --profile mac-vm
+setup/mac-bootstrap/doctor.sh --profile mac-pro
 zsh -lic 'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
 zsh -lc  'node --version; pnpm --version; go version; python --version; bun --version; nvim --version | head -n 1'
 nvim --headless '+qa!'

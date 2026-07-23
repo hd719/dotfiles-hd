@@ -174,6 +174,12 @@ setup/mac-vm/zsh-config/            shared shell behavior
 This shape is implemented in this PR. Removing already-installed Homebrew
 fallbacks remains deferred; Brewfile reorganization does not uninstall them.
 
+> Current layout note (July 2026): the shared Mac shell implementation later
+> moved to `config/zsh/mac/`. The canonical machine profiles are now
+> `setup/mac-pro/`, `setup/mac-mini/`, and `setup/mac-pro-resilience/`;
+> compatibility symlinks preserve the former `mac-vm` and `mac-resilience`
+> paths during migration.
+
 ## Implementation Sequence
 
 Implementation and isolated QA may proceed in parallel. Live activation gates
