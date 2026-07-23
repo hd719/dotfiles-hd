@@ -95,38 +95,5 @@ databases, or company-managed state. In particular:
 The Mac bootstrap never restores credentials, removes packages, cleans
 Homebrew, or starts and restarts services.
 
-## Preserved Optional Configuration
-
-Zed is not installed or bootstrap-managed. Its settings, keymap, and both Hamel
-Nord themes remain under `config/zed` for a future return:
-
-```bash
-config/zed/link-zed-config.sh
-```
-
-Run that linker only after explicitly choosing to use Zed again. Theme opacity
-uses the final alpha byte in `#RRGGBBAA`.
-
-To repair only Herdr's config link:
-
-```bash
-config/herdr/link-herdr-config.sh
-```
-
-## Daily Review Commands
-
-The shared Hunk aliases work from any repository:
-
-| Alias     | Action                                                |
-| --------- | ----------------------------------------------------- |
-| `hwatch`  | Watch working-tree changes, including untracked files |
-| `hdiff`   | Show the current working-tree diff                    |
-| `hstaged` | Show only staged changes                              |
-| `hshow`   | Show the latest commit                                |
-
-Common Codex aliases are `cod`, `codr`, `codrl`, `codx`, `codrv`, `coda`,
-`codd`, and `codu`. `coda` uses `fzf` and confirmation before archiving a task;
-cancel with `Esc`. Restore one with `codex unarchive "<name-or-UUID>"`.
-
 See [`config/nvim/README.md`](config/nvim/README.md) for the editor contract and
 [`AGENTS.md`](AGENTS.md) for automation rules.
