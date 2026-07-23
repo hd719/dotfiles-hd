@@ -134,7 +134,7 @@ Pass criteria:
 - Files, directories, wrong links, and broken links receive timestamped
   backups; correct links are no-ops.
 - Rerunning bootstrap creates no additional backup.
-- Herdr sessions, Zed prompts, tmux plugins, SSH, and credentials are untouched.
+- Herdr sessions, tmux plugins, SSH, and credentials are untouched.
 - No command log contains upgrade, cleanup, autoremove, uninstall, SSH-key,
   restart, or credential operations.
 
@@ -150,12 +150,12 @@ installation.
 3. Install Xcode Command Line Tools and Homebrew, complete Homebrew's printed
    shell `Next steps`, then clone the exact PR commit over HTTPS to
    `~/Developer/dotfiles-hd`.
-4. Seed sentinel `.zshrc`, `.zprofile`, btop, Ghostty, Herdr, and Zed paths.
+4. Seed sentinel `.zshrc`, `.zprofile`, btop, Ghostty, and Herdr paths.
 5. Run `--profile mac-pro --dry-run`; confirm zero filesystem change.
 6. Run `--profile mac-pro --apply`, reboot, then run the doctor.
 7. Verify exact mise versions, both shell modes, Neovim restore/startup, and a
    clean Git worktree.
-8. Open Ghostty, Zed, Herdr, and Karabiner-Elements. Confirm linked settings are
+8. Open Ghostty, Herdr, and Karabiner-Elements. Confirm linked settings are
    active and complete Karabiner's required macOS permissions.
 9. Run apply again and prove it is a no-op.
 10. Restore every seeded backup byte-for-byte, remove every managed link that
@@ -478,7 +478,6 @@ Pass criteria:
 - [x] Fresh Ghostty window works.
 - N/A: an IDE terminal is outside the approved Ghostty and Neovim daily-driver
   workflow.
-- [x] Zed opens with the linked settings, keymap, and theme.
 - [x] Herdr opens with the linked config.
 - [x] Karabiner-Elements opens after required macOS permissions are granted.
 - [x] One normal coding session completes.

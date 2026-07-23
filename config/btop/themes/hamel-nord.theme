@@ -1,5 +1,5 @@
 # Hamel Nord theme for btop
-# Palette aligned with Codex/Zed Hamel Nord.
+# Palette aligned with Hamel Nord.
 
 # Main background, empty for terminal default, leave empty for transparency.
 theme[main_bg]="#3b4252"

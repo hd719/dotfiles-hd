@@ -119,7 +119,7 @@ test_link_helper() {
   local destination="$root/live/config"
   local wrong_target="$root/missing-target"
   local source_tree="$root/source-tree"
-  local linked_parent="$root/linked-zed"
+  local linked_parent="$root/linked-app"
 
   mkdir -p "$root/live"
   printf 'source\n' > "$source_file"
@@ -147,18 +147,18 @@ test_link_helper() {
   assert_contains "$destination" dry-run
   assert_no_path "$destination.backup-20260715-130000"
 
-  mkdir -p "$source_tree/zed"
-  printf 'tracked-settings\n' > "$source_tree/zed/settings.json"
-  ln -s "$source_tree/zed" "$linked_parent"
+  mkdir -p "$source_tree/app"
+  printf 'tracked-settings\n' > "$source_tree/app/settings.json"
+  ln -s "$source_tree/app" "$linked_parent"
   if backup_and_link \
-    "$source_tree/zed/settings.json" \
+    "$source_tree/app/settings.json" \
     "$linked_parent/settings.json" \
     20260715-140000 0 >/dev/null 2>&1; then
-    fail "destination reached through a whole-Zed parent link should fail"
+    fail "destination reached through a linked parent should fail"
   fi
   TESTS=$((TESTS + 1))
-  assert_eq "$source_tree/zed" "$(readlink "$linked_parent")" "whole-Zed parent link is preserved"
-  assert_eq 'tracked-settings' "$(cat "$source_tree/zed/settings.json")" "tracked Zed source is unchanged"
+  assert_eq "$source_tree/app" "$(readlink "$linked_parent")" "linked parent is preserved"
+  assert_eq 'tracked-settings' "$(cat "$source_tree/app/settings.json")" "tracked app source is unchanged"
   assert_no_path "$linked_parent/settings.json.backup-20260715-140000"
 
   ln -s "$source_file" "$root/dangling-check"
