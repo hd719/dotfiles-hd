@@ -64,7 +64,9 @@ use the shared `config/nvim` setup; no Linux-only Lua fork is required.
 bash setup/ubuntu/update-system.sh
 ```
 
-This updates APT and mise, then restores the pinned Neovim tools and plugins.
+This first attempts a guarded fast-forward of the canonical
+`hd719/dotfiles-hd` `master` branch, then updates APT and mise and restores the
+pinned Neovim tools and plugins.
 
 ## One-Time Cleanup For The Existing VM
 

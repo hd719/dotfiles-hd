@@ -261,6 +261,36 @@ check_ports() {
   fi
 }
 
+_goodmorning_sync_dotfiles() {
+  emulate -L zsh
+
+  local dotfiles_dir="$HOME/Developer/dotfiles-hd"
+  local expected_origin="git@github.com:hd719/dotfiles-hd.git"
+  local origin_url
+
+  if ! command -v git &>/dev/null; then
+    echo "Git not found; skipping dotfiles sync."
+    return 1
+  fi
+
+  if [[ ! -d "$dotfiles_dir/.git" ]]; then
+    echo "Dotfiles checkout not found at: $dotfiles_dir"
+    return 1
+  fi
+
+  origin_url="$(git -C "$dotfiles_dir" remote get-url origin 2>/dev/null)" || {
+    echo "Dotfiles origin is unavailable; skipping sync."
+    return 1
+  }
+
+  if [[ "$origin_url" != "$expected_origin" ]]; then
+    echo "Dotfiles origin is not hd719/dotfiles-hd; skipping sync: $origin_url"
+    return 1
+  fi
+
+  git -C "$dotfiles_dir" pull --ff-only origin master
+}
+
 goodMorning() {
   emulate -L zsh
   set +x 2>/dev/null
@@ -268,6 +298,14 @@ goodMorning() {
 
   echo ""
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
+  echo ""
+
+  echo "Syncing hd719 dotfiles..."
+  if _goodmorning_sync_dotfiles; then
+    echo "Dotfiles are current."
+  else
+    echo "Dotfiles sync failed; continuing without resetting local changes."
+  fi
   echo ""
 
   echo "Refreshing Homebrew metadata..."

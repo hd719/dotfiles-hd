@@ -1305,6 +1305,53 @@ test_goodmorning_timeout_helper() {
   (( elapsed < 5 )) || fail "timeout helper took ${elapsed}s to stop an overlong command"
 }
 
+test_goodmorning_dotfiles_sync() {
+  local functions_file="$REPO_DIR/setup/mac-vm/zsh-config/functions.zsh"
+  local resilience_file="$REPO_DIR/setup/mac-resilience/.zshrc"
+  local root="$TMP_ROOT/goodmorning-dotfiles-sync"
+  local home_dir="$root/home"
+  local fake_bin="$root/bin"
+  local git_log="$root/git.log"
+  local output
+
+  mkdir -p "$home_dir/Developer/dotfiles-hd/.git" "$fake_bin"
+  cat > "$fake_bin/git" <<'EOF'
+#!/bin/sh
+if [ "$3" = "remote" ]; then
+  printf '%s\n' "$FAKE_GIT_ORIGIN"
+  exit 0
+fi
+if [ "$3" = "pull" ]; then
+  printf '%s\n' "$*" > "$FAKE_GIT_LOG"
+  exit 0
+fi
+exit 1
+EOF
+  chmod +x "$fake_bin/git"
+
+  HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    FAKE_GIT_ORIGIN="git@github.com:hd719/dotfiles-hd.git" \
+    FAKE_GIT_LOG="$git_log" \
+    /bin/zsh -dfc 'source "$1"; _goodmorning_sync_dotfiles' zsh "$functions_file"
+  assert_contains "$git_log" "pull --ff-only origin master"
+
+  rm -f "$git_log"
+  output="$(
+    HOME="$home_dir" \
+      PATH="$fake_bin:/usr/bin:/bin" \
+      FAKE_GIT_ORIGIN="git@github.com:someone-else/dotfiles-hd.git" \
+      FAKE_GIT_LOG="$git_log" \
+      /bin/zsh -dfc 'source "$1"; _goodmorning_sync_dotfiles' zsh "$functions_file" 2>&1 \
+      || true
+  )"
+  [[ "$output" == *"not hd719/dotfiles-hd"* ]] \
+    || fail "unexpected dotfiles origin should be rejected"
+  TESTS=$((TESTS + 1))
+  assert_no_path "$git_log"
+  assert_contains "$resilience_file" "_goodmorning_sync_dotfiles"
+}
+
 test_link_helper
 test_zprofile_helper
 test_neovim_lock_guard
@@ -1316,5 +1363,6 @@ test_xdg_bin_home
 test_profile_and_failure_guards
 test_shared_zsh_completions
 test_goodmorning_timeout_helper
+test_goodmorning_dotfiles_sync
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"

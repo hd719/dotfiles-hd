@@ -869,9 +869,21 @@ test_update_system_stays_lean() {
   local case_dir="$TEST_ROOT/update-system"
   local output forbidden self_update_count
 
-  mkdir -p "$case_dir/home" "$case_dir/bin"
+  mkdir -p "$case_dir/home" "$case_dir/bin" "$case_dir/dotfiles/.git"
   printf 'ID=ubuntu\nVERSION_ID=26.04\n' > "$case_dir/os-release"
 
+  cat > "$case_dir/bin/git" <<EOF
+#!/usr/bin/env bash
+if [[ "\$3" == "remote" ]]; then
+  printf '%s\n' 'git@github.com:hd719/dotfiles-hd.git'
+  exit 0
+fi
+if [[ "\$3" == "pull" ]]; then
+  printf 'git %s\n' "\$*" >> "$case_dir/commands.log"
+  exit 0
+fi
+exit 1
+EOF
   cat > "$case_dir/bin/sudo" <<EOF
 #!/usr/bin/env bash
 printf 'sudo %s\n' "\$*" >> "$case_dir/commands.log"
@@ -885,17 +897,23 @@ EOF
 printf 'neovim %s\n' "\$*" >> "$case_dir/commands.log"
 "$case_dir/bin/mise" self-update -y
 EOF
-  chmod +x "$case_dir/bin/sudo" "$case_dir/bin/mise" "$case_dir/fake-neovim-setup.sh"
+  chmod +x \
+    "$case_dir/bin/git" \
+    "$case_dir/bin/sudo" \
+    "$case_dir/bin/mise" \
+    "$case_dir/fake-neovim-setup.sh"
 
   output="$({
     HOME="$case_dir/home" \
       PATH="$case_dir/bin:/usr/bin:/bin" \
+      DOTFILES_DIR="$case_dir/dotfiles" \
       DOTFILES_OS_RELEASE_FILE="$case_dir/os-release" \
       DOTFILES_MISE_BIN="$case_dir/bin/mise" \
       DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/fake-neovim-setup.sh" \
       bash "$UPDATE_SCRIPT"
   } 2>&1)"
   assert_contains "$output" "Ubuntu update complete"
+  assert_file_contains "$case_dir/commands.log" "pull --ff-only origin master"
   assert_file_contains "$case_dir/commands.log" "apt-get update"
   assert_file_contains "$case_dir/commands.log" "apt-get full-upgrade -y"
   assert_file_contains "$case_dir/commands.log" "apt-get autoremove -y"

@@ -254,6 +254,13 @@ gda() {
 goodMorning() {
   echo "🙏 Om Shree Ganeshaya Namaha 🙏"
 
+  echo "Syncing hd719 dotfiles..."
+  if _goodmorning_sync_dotfiles; then
+    echo "Dotfiles are current."
+  else
+    echo "Dotfiles sync failed; continuing without resetting local changes."
+  fi
+
   # Skip Homebrew updates if hostname contains 'virtual' (case insensitive)
   if [[ ! "$(hostname)" =~ [Vv]irtual ]]; then
     # Optional flag for Homebrew updates

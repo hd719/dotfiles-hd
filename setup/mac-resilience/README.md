@@ -35,6 +35,8 @@ alias hwatch
 The bundle command installs missing tools without upgrading existing packages.
 The linker creates timestamped backups before replacing a non-matching config.
 Stop before pulling if `git status` shows local changes you do not recognize.
+The Resilience `goodMorning` flow performs the same guarded
+`hd719/dotfiles-hd` fast-forward before its existing update steps.
 
 If `alias hwatch` prints the alias, the existing work shell already loads the
 shared Mac aliases and no `.zshrc` edit is needed. If it reports that `hwatch`

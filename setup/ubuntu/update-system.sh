@@ -2,8 +2,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
 OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
 NEOVIM_SETUP_SCRIPT="${DOTFILES_NEOVIM_SETUP_SCRIPT:-$SCRIPT_DIR/setup-neovim.sh}"
+EXPECTED_DOTFILES_ORIGIN="git@github.com:hd719/dotfiles-hd.git"
 
 print_usage() {
   cat <<'EOF'
@@ -32,6 +34,32 @@ require_ubuntu() {
   fi
 }
 
+sync_dotfiles() {
+  local origin_url
+
+  if ! command -v git >/dev/null 2>&1; then
+    printf 'Git not found; skipping dotfiles sync.\n' >&2
+    return 1
+  fi
+
+  if [[ ! -d "$DOTFILES_DIR/.git" ]]; then
+    printf 'Dotfiles checkout not found at: %s\n' "$DOTFILES_DIR" >&2
+    return 1
+  fi
+
+  origin_url="$(git -C "$DOTFILES_DIR" remote get-url origin 2>/dev/null)" || {
+    printf 'Dotfiles origin is unavailable; skipping sync.\n' >&2
+    return 1
+  }
+
+  if [[ "$origin_url" != "$EXPECTED_DOTFILES_ORIGIN" ]]; then
+    printf 'Dotfiles origin is not hd719/dotfiles-hd; skipping sync: %s\n' "$origin_url" >&2
+    return 1
+  fi
+
+  git -C "$DOTFILES_DIR" pull --ff-only origin master
+}
+
 main() {
   if (($# > 1)); then
     print_usage >&2
@@ -52,6 +80,14 @@ main() {
   fi
 
   require_ubuntu
+
+  log "Syncing hd719 dotfiles"
+  if sync_dotfiles; then
+    printf 'Dotfiles are current.\n'
+  else
+    printf 'Dotfiles sync failed; continuing without resetting local changes.\n' >&2
+  fi
+
   sudo -v
 
   log "Updating Ubuntu packages"
