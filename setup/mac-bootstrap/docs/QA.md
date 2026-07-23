@@ -98,15 +98,13 @@ bash -n \
   setup/mac-bootstrap/doctor.sh \
   setup/mac-bootstrap/lib.sh \
   setup/mac-bootstrap/tests/bootstrap-test.sh \
-  setup/mac-pro/setup.sh \
-  setup/mac-pro/setup-vm.sh
+  setup/mac-pro/setup.sh
 
 for zsh_file in \
   config/zsh/completions.zsh \
   config/zsh/mac/*.zsh \
   setup/mac-bootstrap/mise-shims.zsh \
   setup/mac-pro/.zshrc \
-  setup/mac-pro/zsh-config/.zshrc \
   setup/mac-mini/.zshrc \
   setup/mac-pro-resilience/.zshrc \
   setup/fedora/.zshrc; do

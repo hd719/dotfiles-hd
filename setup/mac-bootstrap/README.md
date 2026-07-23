@@ -73,10 +73,7 @@ setup/mac-pro/setup.sh --dry-run
 setup/mac-pro/setup.sh --apply
 ```
 
-For compatibility, `--profile mac-vm` and
-`setup/mac-vm/setup-vm.sh` still resolve to `mac-pro`. They can be removed after
-existing machines and external automation callers have migrated. Neither
-wrapper accepts a GitHub token or manages SSH, Nix, nvm, or rbenv.
+The wrapper does not accept a GitHub token or manage SSH, Nix, nvm, or rbenv.
 
 ## Mac mini boundary
 

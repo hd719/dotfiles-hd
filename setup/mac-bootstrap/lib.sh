@@ -107,32 +107,10 @@ link_matches() {
     && "$(readlink "$destination")" == "$source_path" ]]
 }
 
-legacy_link_source_for_destination() {
-  local destination="$1"
-  local spec
-  local source_path
-  local legacy_destination
-
-  for spec in "${LEGACY_LINK_SPECS[@]}"; do
-    source_path="${spec%%|*}"
-    legacy_destination="${spec#*|}"
-    if [[ "$legacy_destination" == "$destination" ]] \
-      && link_matches "$source_path" "$destination"; then
-      printf '%s\n' "$source_path"
-      return 0
-    fi
-  done
-
-  return 1
-}
-
 canonical_profile() {
   case "$1" in
     mac-pro|mac-mini)
       printf '%s\n' "$1"
-      ;;
-    mac-vm)
-      printf '%s\n' "mac-pro"
       ;;
     *)
       die "unknown profile '$1' (expected mac-pro or mac-mini)"
@@ -363,16 +341,11 @@ load_profile() {
     "$dotfiles_dir/config/zed/settings.json|$home_dir/.config/zed/settings.json"
     "$dotfiles_dir/config/zed/themes|$home_dir/.config/zed/themes"
   )
-  LEGACY_LINK_SPECS=()
-
   case "$profile" in
     mac-pro)
       LINK_SPECS+=(
         "$dotfiles_dir/setup/mac-pro/.zshrc|$home_dir/.zshrc"
         "$dotfiles_dir/config/karabiner|$home_dir/.config/karabiner"
-      )
-      LEGACY_LINK_SPECS+=(
-        "$dotfiles_dir/setup/mac-vm/zsh-config/.zshrc|$home_dir/.zshrc"
       )
       ;;
     mac-mini)

@@ -13,7 +13,6 @@ source "$SCRIPT_DIR/lib.sh"
 
 usage() {
   printf 'Usage: doctor.sh --profile mac-pro|mac-mini\n'
-  printf 'Compatibility: mac-vm remains a deprecated alias for mac-pro.\n'
 }
 
 pass() {
@@ -81,8 +80,6 @@ for spec in "${LINK_SPECS[@]}"; do
   destination="${spec#*|}"
   if link_matches "$source_path" "$destination"; then
     pass "$destination -> $source_path"
-  elif legacy_source="$(legacy_link_source_for_destination "$destination")"; then
-    pass "$destination -> $legacy_source (compatibility)"
   else
     fail "link mismatch: $destination"
   fi

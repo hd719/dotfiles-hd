@@ -15,8 +15,6 @@ usage() {
   cat <<'EOF'
 Usage: bootstrap.sh --profile mac-pro|mac-mini [--dry-run|--check|--apply]
 
-Compatibility: mac-vm remains a deprecated alias for mac-pro.
-
 Modes:
   --dry-run  Show planned commands and filesystem changes without invoking
              package managers or writing files. This is the default.
