@@ -1226,6 +1226,7 @@ test_shared_zsh_interface() {
   local module="$REPO_DIR/config/zsh/completions.zsh"
   local shared_dir="$REPO_DIR/config/zsh/mac"
   local shared_init="$shared_dir/init.zsh"
+  local personal_init="$shared_dir/personal.zsh"
   local root="$TMP_ROOT/shared-zsh-completions"
   local home_dir="$root/home"
   local completion_dir="$root/docker-completions"
@@ -1252,6 +1253,9 @@ test_shared_zsh_interface() {
     "$shared_dir/functions.zsh" \
     "$shared_dir/alias.zsh" \
     "$shared_dir/k8s.zsh" \
+    "$shared_dir/personal.zsh" \
+    "$shared_dir/personal-functions.zsh" \
+    "$shared_dir/personal-aliases.zsh" \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
     "$REPO_DIR/setup/mac-pro-resilience/.zshrc" \
@@ -1266,34 +1270,75 @@ test_shared_zsh_interface() {
     "$REPO_DIR/setup/mac-pro-resilience/.zshrc"; do
     assert_contains "$zsh_file" 'config/zsh/mac/init.zsh'
   done
+  assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal.zsh'
+  assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal.zsh'
+  assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal.zsh'
+  assert_not_contains "$REPO_DIR/setup/fedora/.zshrc" 'config/zsh/mac'
+  assert_not_contains "$REPO_DIR/setup/fedora/.zshrc" 'setup/mac-blaze'
   assert_contains "$shared_init" '../completions.zsh'
 
   actual="$(
     HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
       source "$1"
-      (( $+functions[goodMorning] )) || exit 1
+      (( $+functions[goodMorning] )) && exit 1
+      (( $+functions[carchive] )) && exit 1
+      (( $+functions[opmission] )) && exit 1
       (( $+functions[reload] )) || exit 1
+      (( $+functions[_goodmorning_sync_dotfiles] )) || exit 1
       alias ll >/dev/null || exit 1
       alias hwatch >/dev/null || exit 1
+      alias cod >/dev/null 2>&1 && exit 1
       print -r -- interface-ok
     ' zsh "$shared_init" 2>/dev/null
   )"
-  assert_eq interface-ok "$actual" "shared Mac zsh interface loads functions and aliases"
+  assert_eq interface-ok "$actual" "shared Mac zsh interface excludes personal workflows"
+
+  actual="$(
+    HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      (( $+functions[goodMorning] )) || exit 1
+      (( $+functions[carchive] )) || exit 1
+      (( $+functions[opmission] )) || exit 1
+      alias cod >/dev/null || exit 1
+      alias opdash >/dev/null || exit 1
+      alias hm-dev >/dev/null || exit 1
+      print -r -- personal-ok
+    ' zsh "$shared_init" "$personal_init" 2>/dev/null
+  )"
+  assert_eq personal-ok "$actual" "personal Mac zsh interface adds personal workflows"
 
   for zsh_file in \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
-    "$REPO_DIR/setup/mac-mini/.zshrc" \
-    "$REPO_DIR/setup/mac-pro-resilience/.zshrc"; do
+    "$REPO_DIR/setup/mac-mini/.zshrc"; do
     actual="$(
       HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
         source "$1"
         (( $+functions[goodMorning] )) || exit 1
+        (( $+functions[carchive] )) || exit 1
+        alias cod >/dev/null || exit 1
         alias hwatch >/dev/null || exit 1
         print -r -- profile-ok
       ' zsh "$zsh_file" 2>/dev/null
     )"
-    assert_eq profile-ok "$actual" "$(basename "$(dirname "$zsh_file")") profile loads shared Mac zsh interface"
+    assert_eq profile-ok "$actual" "$(basename "$(dirname "$zsh_file")") profile loads personal Mac zsh interface"
   done
+
+  actual="$(
+    HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
+      source "$1"
+      (( $+functions[goodMorning] )) || exit 1
+      (( $+functions[carchive] )) && exit 1
+      (( $+functions[opmission] )) && exit 1
+      alias v >/dev/null || exit 1
+      alias hwatch >/dev/null || exit 1
+      alias cod >/dev/null 2>&1 && exit 1
+      alias opdash >/dev/null 2>&1 && exit 1
+      alias hm-dev >/dev/null 2>&1 && exit 1
+      print -r -- resilience-ok
+    ' zsh "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 2>/dev/null
+  )"
+  assert_eq resilience-ok "$actual" "Resilience profile keeps work behavior without personal workflows"
 
   actual="$(
     HOME="$home_dir" /bin/zsh -dfc '

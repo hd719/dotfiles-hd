@@ -346,9 +346,13 @@ Deferred (loads after first prompt):
 |------|---------|
 | `.zprofile` | Brew shellenv (cached) |
 | `.zshrc` | Main config, immediate plugin loading, devbox cache, compinit |
+| `init.zsh` | Shared Mac shell interface |
+| `personal.zsh` | Personal Mac workflow interface |
 | `prompt.zsh` | Starship, zoxide, zsh modules, cached init scripts, deferred `you-should-use` |
-| `functions.zsh` | Cache functions, `reload()`, `refresh_zsh_cache()` (eager rebuild), `goodMorning()` |
-| `alias.zsh` | Aliases including `refresh-global` |
+| `functions.zsh` | Shared helpers including `reload()` and guarded dotfiles sync |
+| `personal-functions.zsh` | Personal Codex, `goodMorning()`, and Mission Control workflows |
+| `alias.zsh` | Shared aliases including `refresh-global` |
+| `personal-aliases.zsh` | Personal Codex, OpenClaw, SSH, and project aliases |
 | `tooling.zsh` | Dev tool configs |
 | `k8s.zsh` | Kubernetes config |
 
