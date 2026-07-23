@@ -94,7 +94,7 @@ Stale LaunchAgent paths, service restarts, and runtime migrations require a
 separate approved maintenance window with runtime status and doctor checks.
 
 Never remove the Mac mini's Homebrew Node or pnpm fallback during bootstrap.
-See [`docs/QA.md`](docs/QA.md) for the full gate.
+Use the preflight, dry-run, doctor, and runtime checks above as the full gate.
 
 ## What `--apply` Owns
 
@@ -124,8 +124,7 @@ Backups sit beside their original paths as
 1. Restore the previous `~/.zprofile`; if none existed, move the
    bootstrap-created file aside. Preserve all user-owned content outside the
    marked block.
-1. Start a fresh login shell and rerun the baseline and doctor checks from
-   [`docs/QA.md`](docs/QA.md).
+1. Start a fresh login shell and rerun the preflight and doctor checks above.
 
 Rollback leaves installed packages, runtimes, and tool caches in place.
 Uninstall and cleanup are separate, explicitly approved work.
