@@ -521,7 +521,9 @@ routes use the same SSH key and forward the Mac agent.
 Ubuntu's existing personal key is pinned to plain `github.com`, which
 authenticates as `hd719`. The Arbiter and Forgejo private keys remain on the
 Mac. An SSH session opened through `ubuntu-vm` forwards a live agent socket for
-those additional identities.
+those additional identities. Codex desktop uses the managed
+`~/.local/bin/codex` launcher to keep that forwarded socket at a stable path
+when separate Mac terminal sessions open or close.
 
 ```bash
 ssh-add -l

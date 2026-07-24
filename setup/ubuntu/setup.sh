@@ -204,6 +204,7 @@ link_configs() {
   ensure_directory "$HOME/.config/hunk"
   safe_link "$ROOT_DIR/config/hunk/config.toml" "$HOME/.config/hunk/config.toml"
   safe_link "$ROOT_DIR/config/tmux" "$HOME/.config/tmux"
+  safe_link "$SCRIPT_DIR/bin/codex" "$HOME/.local/bin/codex"
 
   git config --global core.editor nvim
   git config --global core.excludesfile "$HOME/.gitignore_global"

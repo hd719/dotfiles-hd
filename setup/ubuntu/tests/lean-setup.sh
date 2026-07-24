@@ -13,6 +13,7 @@ MISE_CONFIG="$ROOT_DIR/setup/ubuntu/mise.toml"
 ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
+CODEX_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/codex"
 FASTFETCH_CONFIG="$ROOT_DIR/config/fastfetch/config.jsonc"
 BTOP_CONFIG="$ROOT_DIR/config/btop/btop.conf"
 SHARED_ALIASES="$ROOT_DIR/config/zsh/shared/aliases.zsh"
@@ -95,6 +96,36 @@ test_neovim_help_is_read_only() {
   assert_contains "$output" "--check"
 }
 
+test_codex_wrapper_stabilizes_forwarded_agent() {
+  local case_dir="$TEST_ROOT/codex-forwarded-agent"
+  local agent_pid output socket stable_socket
+
+  socket="$case_dir/forwarded.sock"
+  stable_socket="$case_dir/home/.ssh/agent/codex-forwarded"
+  mkdir -p "$case_dir/home/.local/share/mise/shims"
+  cat > "$case_dir/home/.local/share/mise/shims/codex" <<'EOF'
+#!/bin/sh
+printf 'socket=%s\n' "$SSH_AUTH_SOCK"
+printf 'args=%s\n' "$*"
+EOF
+  chmod +x "$case_dir/home/.local/share/mise/shims/codex"
+
+  eval "$(ssh-agent -a "$socket" -s)" >/dev/null
+  agent_pid="$SSH_AGENT_PID"
+  output="$(
+    HOME="$case_dir/home" \
+      SSH_AUTH_SOCK="$socket" \
+      "$CODEX_WRAPPER" app-server proxy
+  )"
+  kill "$agent_pid"
+
+  assert_contains "$output" "socket=$stable_socket"
+  assert_contains "$output" "args=app-server proxy"
+  [[ -L "$stable_socket" ]] || fail "Codex wrapper did not create a stable agent socket"
+  [[ "$(readlink "$stable_socket")" == "$socket" ]] \
+    || fail "Codex wrapper pointed at the wrong forwarded agent socket"
+}
+
 test_doctor_is_read_only_and_complete() {
   local case_dir="$TEST_ROOT/doctor"
   local output source status target
@@ -111,6 +142,7 @@ test_doctor_is_read_only_and_complete() {
     "setup/ubuntu/mise.toml|.config/mise/config.toml"
     "config/nvim|.config/nvim"
     "config/tmux|.config/tmux"
+    "setup/ubuntu/bin/codex|.local/bin/codex"
     "setup/ubuntu/bin/graphql-lsp|.local/graphql-lsp/bin/graphql-lsp"
   )
 
@@ -128,7 +160,7 @@ test_doctor_is_read_only_and_complete() {
     target="$case_dir/home/${spec#*|}"
     assert_file_contains "$UBUNTU_README" "\`~/${spec#*|}\`"
     assert_file_contains "$UBUNTU_README" "\`${spec%%|*}\`"
-    if [[ "${source##*.}" == "toml" || "$source" == */.zshrc || "$source" == */config || "$source" == */graphql-lsp ]]; then
+    if [[ "${source##*.}" == "toml" || "$source" == */.zshrc || "$source" == */config || "$source" == */codex || "$source" == */graphql-lsp ]]; then
       mkdir -p "$(dirname "$source")"
       printf 'tracked\n' > "$source"
     else
@@ -709,6 +741,8 @@ EOF
   [[ "$(find "$case_dir/home/.config" -maxdepth 1 -name 'ghostty.backup.*' | wc -l | tr -d ' ')" == "1" ]] || fail "setup did not preserve the whole-directory Ghostty link"
   assert_file_contains "$case_dir/legacy-ghostty/config" "legacy shared Ghostty config"
   [[ -L "$case_dir/home/.config/starship.toml" ]] || fail "setup did not link Starship config"
+  [[ "$(readlink "$case_dir/home/.local/bin/codex")" == "$CODEX_WRAPPER" ]] \
+    || fail "setup did not link the Codex wrapper"
   for name in bookokrat btop fastfetch tmux; do
     [[ -L "$case_dir/home/.config/$name" ]] || fail "setup did not link $name config"
     [[ "$(readlink "$case_dir/home/.config/$name")" == "$ROOT_DIR/config/$name" ]] || fail "$name config points to the wrong source"
@@ -1365,6 +1399,7 @@ EOF
 test_wrong_os_stops_before_mutation
 test_help_is_read_only
 test_neovim_help_is_read_only
+test_codex_wrapper_stabilizes_forwarded_agent
 test_doctor_is_read_only_and_complete
 test_cleanup_requires_explicit_confirmation
 test_cleanup_wrong_os_stops_before_mutation

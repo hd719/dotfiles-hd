@@ -142,6 +142,7 @@ LINK_SPECS=(
   "$REPO_DIR/setup/ubuntu/mise.toml|$HOME/.config/mise/config.toml"
   "$REPO_DIR/config/nvim|$HOME/.config/nvim"
   "$REPO_DIR/config/tmux|$HOME/.config/tmux"
+  "$REPO_DIR/setup/ubuntu/bin/codex|$HOME/.local/bin/codex"
   "$REPO_DIR/setup/ubuntu/bin/graphql-lsp|$HOME/.local/graphql-lsp/bin/graphql-lsp"
 )
 for spec in "${LINK_SPECS[@]}"; do

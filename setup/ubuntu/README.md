@@ -71,6 +71,7 @@ are never linked.
 | `~/.config/mise/config.toml`           | `setup/ubuntu/mise.toml`        |
 | `~/.config/nvim`                       | `config/nvim`                   |
 | `~/.config/tmux`                       | `config/tmux`                   |
+| `~/.local/bin/codex`                   | `setup/ubuntu/bin/codex`        |
 | `~/.local/graphql-lsp/bin/graphql-lsp` | `setup/ubuntu/bin/graphql-lsp`  |
 
 Ghostty uses the shared Hamel Nord profile. Neovim uses the shared
@@ -101,7 +102,9 @@ codex --version
 ```
 
 Codex desktop starts the remote app server through the Ubuntu login shell, so
-`codex` must remain in that shell's `PATH`.
+`codex` must remain in that shell's `PATH`. The managed Codex launcher gives
+the remote app server a stable path to the current forwarded agent socket, so
+closing a separate Mac terminal session cannot strand Codex on a dead socket.
 
 ## Verify
 
