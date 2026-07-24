@@ -3118,3 +3118,13 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - A dry-run verified today's target path, every template substitution, and the
   mapping without creating a real daily note. Human verification remains
   pending after restarting Neovim and pressing `Space o d`.
+
+## 2026-07-23 — Session 028: LSP Code Actions
+
+- Hamel reopened the Go practice module and added a temporary
+  `strings.ToUpper` call without importing `strings`.
+- With the cursor on `strings`, Hamel opened the gopls action menu with
+  `Space c a` and applied the suggested missing-import fix.
+- Hamel confirmed that gopls added `"strings"` to the import block
+  automatically.
+- The exercise remained unsaved, so the tracked Go fixture stayed unchanged.
