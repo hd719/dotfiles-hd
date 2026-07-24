@@ -139,6 +139,8 @@ for those five links. Do not replace it with ad hoc `ln -s` commands.
 Follow `setup/ubuntu/README.md`. `setup.sh` installs packages, changes the login
 shell, enables Docker, and links the documented inventory. The destructive
 `cleanup-legacy.sh --yes` migration is separate and must never run implicitly.
+Use `setup/ubuntu/GUIDE.md` for Mac-to-Ubuntu teaching and keep its commands
+aligned with the supported workstation.
 
 - Keep `~/.gitconfig` machine-owned. Ubuntu's `.zshrc` must provide a plain
   `less` fallback when the mise-owned `diff-so-fancy` is unavailable.

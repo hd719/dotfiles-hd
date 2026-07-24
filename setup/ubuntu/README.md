@@ -3,6 +3,9 @@
 Lean daily-driver setup tested on Ubuntu 26.04 ARM64. The installer rejects
 non-Ubuntu hosts.
 
+New to Linux administration? Start with the
+[Ubuntu Field Guide for a Mac User](GUIDE.md).
+
 ## Install
 
 Prerequisites: network access, `sudo`, Git, and GitHub SSH access.

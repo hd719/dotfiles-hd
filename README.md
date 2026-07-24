@@ -27,6 +27,9 @@ cd "$HOME/Developer/dotfiles-hd"
 Scripts under `setup/fedora` are legacy helpers, not a supported one-command
 bootstrap.
 
+For Mac-to-Linux learning, use the
+[Ubuntu Field Guide](setup/ubuntu/GUIDE.md).
+
 ## Thin Mac Quick Start
 
 For the restored MacBook control plane:
