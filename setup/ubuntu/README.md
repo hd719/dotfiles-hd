@@ -112,6 +112,28 @@ with `--ff-only`, then runs APT full-upgrade and refreshes pinned mise and
 Neovim state. A failed repository sync never resets local changes; package
 maintenance continues and any reboot requirement is reported.
 
+## Arbiter and Forgejo Access
+
+Private keys stay on the thin Mac and reach Ubuntu only through the forwarded
+SSH agent. Ubuntu stores the matching public keys and machine-owned host aliases:
+
+```text
+github.com-arbiter       GitHub as arbiter-hd
+forgejo-truenas-lan      Forgejo over the home LAN
+forgejo-truenas-ts       Forgejo over Tailscale
+```
+
+Use `git@github.com-arbiter:arbiter-hd/<repository>.git` for Arbiter remotes and
+`git@forgejo-truenas-lan:hd719/<repository>.git` for Forgejo remotes. Verify
+from an SSH session opened through `ubuntu-vm`:
+
+```bash
+ssh -T github.com-arbiter
+ssh -T forgejo-truenas-lan
+```
+
+Never copy the Arbiter or Forgejo private keys into the VM.
+
 ## One-Time Legacy Migration
 
 This is destructive and never runs from normal setup:

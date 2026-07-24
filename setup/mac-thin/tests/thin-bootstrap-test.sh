@@ -7,11 +7,20 @@ TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-mac-thin-test.XXXXXX")"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 
 mkdir -p "$TEST_ROOT/bin" "$TEST_ROOT/home/.ssh" "$TEST_ROOT/apps"
-cat > "$TEST_ROOT/home/.ssh/config" <<'EOF'
+cat > "$TEST_ROOT/home/.ssh/config" <<EOF
 Host ubuntu-vm
   HostName ubuntu-vm.local
   AddressFamily inet
+  ForwardAgent yes
+  PermitLocalCommand yes
+  LocalCommand /usr/bin/ssh-add $TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd $TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas >/dev/null 2>&1
 EOF
+touch \
+  "$TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd" \
+  "$TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas"
+chmod 600 \
+  "$TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd" \
+  "$TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas"
 
 for app_name in \
   "1Password.app" \

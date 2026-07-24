@@ -145,6 +145,8 @@ shell, enables Docker, and links the documented inventory. The destructive
 - Set `ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE` before sourcing zsh-autosuggestions.
   Ghostty's Nord palette color 8 is too close to its background; preserve the
   tracked higher-contrast color unless the shared terminal palette changes.
+- Arbiter GitHub and Forgejo access in Ubuntu must use the Mac's forwarded SSH
+  agent. Keep only public-key selectors in the VM; never copy the private keys.
 
 ## Preserved Zed Configuration
 

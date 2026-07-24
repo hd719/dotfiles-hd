@@ -106,6 +106,13 @@ Keep `AddressFamily inet` in the `ubuntu-vm` SSH block. VMware mDNS can publish
 the guest on multiple IPv6 link-local interfaces, making SSH choose the wrong
 route intermittently.
 
+Arbiter GitHub and Forgejo access use agent forwarding from the thin Mac.
+Private keys remain in `~/.ssh` on macOS; Ubuntu stores only their public keys
+as identity selectors. The `ubuntu-vm` block must set `ForwardAgent yes` and
+use `LocalCommand` with `ssh-add` so a fresh Mac agent loads
+`id_ed25519_arbiter_hd` and `id_ed25519_forgejo_truenas` before the Ubuntu
+shell starts.
+
 This is an explicit allowlist. Neovim, Node/Bun/Go, Docker, Kubernetes, project,
 VS Code, tmux, and other development aliases remain inside the Linux VMs.
 

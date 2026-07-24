@@ -6,6 +6,9 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
 APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
 BREWFILE="$DOTFILES_DIR/setup/mac-thin/Brewfile"
+SSH_CONFIG="$HOME/.ssh/config"
+ARBITER_SSH_KEY="$HOME/.ssh/id_ed25519_arbiter_hd"
+FORGEJO_SSH_KEY="$HOME/.ssh/id_ed25519_forgejo_truenas"
 FAILURES=0
 
 # shellcheck source=../mac-bootstrap/lib.sh
@@ -67,18 +70,44 @@ for app_name in \
   fi
 done
 
-if [[ -r "$HOME/.ssh/config" ]]; then
+if [[ -r "$SSH_CONFIG" ]]; then
   pass "SSH config readable"
 else
   fail "SSH config missing or unreadable"
 fi
 
-if ssh -G -F "$HOME/.ssh/config" ubuntu-vm 2>/dev/null \
+SSH_EFFECTIVE="$(ssh -G -F "$SSH_CONFIG" ubuntu-vm 2>/dev/null || true)"
+
+if printf '%s\n' "$SSH_EFFECTIVE" \
   | /usr/bin/awk '$1 == "addressfamily" && $2 == "inet" { found = 1 } END { exit !found }'; then
   pass "Ubuntu SSH alias prefers IPv4"
 else
   fail "Ubuntu SSH alias must set AddressFamily inet"
 fi
+
+if printf '%s\n' "$SSH_EFFECTIVE" \
+  | /usr/bin/awk '$1 == "forwardagent" && $2 == "yes" { found = 1 } END { exit !found }'; then
+  pass "Ubuntu SSH alias forwards the Mac agent"
+else
+  fail "Ubuntu SSH alias must set ForwardAgent yes"
+fi
+
+if printf '%s\n' "$SSH_EFFECTIVE" \
+  | /usr/bin/awk '$1 == "permitlocalcommand" && $2 == "yes" { found = 1 } END { exit !found }' \
+  && printf '%s\n' "$SSH_EFFECTIVE" | /usr/bin/grep -Fq "$ARBITER_SSH_KEY" \
+  && printf '%s\n' "$SSH_EFFECTIVE" | /usr/bin/grep -Fq "$FORGEJO_SSH_KEY"; then
+  pass "Ubuntu SSH alias loads Arbiter and Forgejo keys"
+else
+  fail "Ubuntu SSH alias must load Arbiter and Forgejo keys before forwarding"
+fi
+
+for ssh_key in "$ARBITER_SSH_KEY" "$FORGEJO_SSH_KEY"; do
+  if [[ -f "$ssh_key" && "$(stat -f '%Lp' "$ssh_key" 2>/dev/null)" == "600" ]]; then
+    pass "$(basename "$ssh_key") present with mode 600"
+  else
+    fail "$(basename "$ssh_key") missing or not mode 600"
+  fi
+done
 
 if /bin/zsh -dfc "
   source '$DOTFILES_DIR/setup/mac-thin/.zshrc'
