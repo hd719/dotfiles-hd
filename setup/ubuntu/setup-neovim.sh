@@ -285,6 +285,34 @@ require_system_command() {
   }
 }
 
+require_mdformat_state() {
+  local components
+  local output
+  local expected
+
+  output="$(mdformat --version 2>/dev/null)" || {
+    printf 'Cannot read the installed mdformat version.\n' >&2
+    return 1
+  }
+  components="$(
+    printf '%s\n' "$output" \
+      | tr '(),' '\n' \
+      | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//'
+  )"
+  for expected in \
+    'mdformat 1.0.0' \
+    'mdformat_footnote 0.1.3' \
+    'mdformat_frontmatter 2.1.2' \
+    'mdformat-gfm 1.0.0' \
+    'mdformat_wikilink 0.3.0' \
+    'mdformat_gfm_alerts 2.0.0'; do
+    grep -Fqx "$expected" <<<"$components" || {
+      printf 'Missing or wrong mdformat component: %s\n' "$expected" >&2
+      return 1
+    }
+  done
+}
+
 check_daily_driver() {
   local command_name
   local nvim_data
@@ -341,6 +369,7 @@ check_daily_driver() {
   for command_name in "${system_commands[@]}"; do
     require_system_command "$command_name"
   done
+  require_mdformat_state
 
   [[ -x "$GRAPHQL_TARGET" ]] || {
     printf 'GraphQL language-server wrapper is not executable.\n' >&2

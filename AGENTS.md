@@ -140,7 +140,9 @@ Follow `setup/ubuntu/README.md`. `setup.sh` installs packages, changes the login
 shell, enables Docker, and links the documented inventory. The destructive
 `cleanup-legacy.sh --yes` migration is separate and must never run implicitly.
 Use `setup/ubuntu/GUIDE.md` for Mac-to-Ubuntu teaching and keep its commands
-aligned with the supported workstation.
+aligned with the supported workstation. Run `setup/ubuntu/doctor.sh` from an
+SSH session opened through `ubuntu-vm`; use `--offline` only when remote
+identity checks are intentionally unavailable.
 
 - Keep `~/.gitconfig` machine-owned. Ubuntu's `.zshrc` must provide a plain
   `less` fallback when the mise-owned `diff-so-fancy` is unavailable.
@@ -151,6 +153,12 @@ aligned with the supported workstation.
   agent. Keep only public-key selectors in the VM; never copy the private keys.
 - Keep plain `github.com` pinned to Ubuntu's local `hd719` key and reserve
   `github.com-arbiter` for the forwarded Arbiter identity.
+- Use `ubuntu-vm-ts` as the primary Codex route to Tailscale node `ubuntu-dev`.
+  Keep `ubuntu-vm` as the local VMware fallback; both must forward the Mac
+  agent and load the Arbiter and Forgejo keys.
+- Keep the pinned Codex CLI installed and authenticated in Ubuntu. Codex
+  desktop starts it through the remote login shell, where `codex` must be on
+  `PATH`.
 
 ## Preserved Zed Configuration
 
@@ -183,6 +191,7 @@ Run checks that match the changed surface:
 git diff --check
 bash setup/mac-bootstrap/tests/bootstrap-test.sh
 bash setup/ubuntu/tests/lean-setup.sh
+bash setup/ubuntu/doctor.sh
 ```
 
 Run `mdformat --check` on changed Markdown files. For shell changes, run

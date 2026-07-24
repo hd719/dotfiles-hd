@@ -48,7 +48,7 @@ launchers, or extra package managers.
 | Owner      | State                                                                                      |
 | ---------- | ------------------------------------------------------------------------------------------ |
 | APT        | System packages, Ghostty, Docker, `lsd`, build libraries, clipboard tools, and Zsh plugins |
-| mise       | Pinned Neovim, runtimes, language servers, formatters, and editor CLIs                     |
+| mise       | Pinned Codex CLI, Neovim, runtimes, language servers, formatters, and editor CLIs          |
 | User files | Verified Nerd Font and backed-up configuration links                                       |
 
 Existing files, directories, and dangling links are timestamp-backed up beside
@@ -79,30 +79,45 @@ configuration files so runtime state remains machine-owned. The linked btop
 configuration disables save-on-exit so btop cannot rewrite the Git checkout;
 edit the tracked config directly when changing btop settings.
 
-## Verify
+## Tailscale Remote Access
+
+Tailscale is a one-time authenticated install, separate from normal setup:
 
 ```bash
-bash setup/ubuntu/setup-neovim.sh --check
-for path in \
-  "$HOME/.config/bookokrat" \
-  "$HOME/.config/btop" \
-  "$HOME/.config/fastfetch" \
-  "$HOME/.config/herdr/config.toml" \
-  "$HOME/.config/hunk/config.toml" \
-  "$HOME/.config/mise/config.toml" \
-  "$HOME/.config/nvim" \
-  "$HOME/.config/tmux"; do
-  test -L "$path" && test -e "$path" || {
-    printf 'Missing configuration link: %s\n' "$path" >&2
-    exit 1
-  }
-done
-zsh -lic \
-  'command -v herdr && command -v hunk && command -v bookokrat && command -v fastfetch && command -v diff-so-fancy && command -v nvim && command -v mise && command -v docker && command -v ghostty && alias hwatch'
-zsh -lic \
-  'test "$GIT_PAGER" = "diff-so-fancy | less --tabs=4 -RFX" && test "$ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE" = "fg=#9399b2"'
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up --hostname=ubuntu-dev
+tailscale ip -4
+```
+
+The thin Mac uses `ubuntu-vm-ts` as the primary Codex route and keeps
+`ubuntu-vm` as the local VMware fallback. Both aliases use the Ubuntu SSH key
+and forward the Mac agent.
+
+Authenticate the pinned Codex CLI once from Ubuntu:
+
+```bash
+codex login --device-auth
+codex --version
+```
+
+Codex desktop starts the remote app server through the Ubuntu login shell, so
+`codex` must remain in that shell's `PATH`.
+
+## Verify
+
+Open Ubuntu through the Mac's `u` alias so SSH agent forwarding is active, then
+run the one-command doctor:
+
+```bash
+cd "$HOME/Developer/dotfiles-hd"
+bash setup/ubuntu/doctor.sh
 nvim ~/.config/nvim/README.md
 ```
+
+The doctor is read-only. It checks the canonical clean checkout, every managed
+link, the Nerd Font, Zsh and development aliases, Codex CLI, Docker, Tailscale,
+the pinned Neovim setup, and all four GitHub/Forgejo routes. Use `--offline` to
+skip only the remote identity checks when the VM has no network.
 
 ## Update
 
@@ -134,8 +149,10 @@ Use `git@github.com-arbiter:arbiter-hd/<repository>.git` for Arbiter remotes and
 from an SSH session opened through `ubuntu-vm`:
 
 ```bash
+ssh -T github.com
 ssh -T github.com-arbiter
 ssh -T forgejo-truenas-lan
+ssh -T forgejo-truenas-ts
 ```
 
 The SSH hostname selects the account; the path after `:` selects the repository

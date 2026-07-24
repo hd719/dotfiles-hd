@@ -41,6 +41,26 @@ Use this document two ways:
 - Want mastery: read one section, run its read-only commands, then complete one
   practice drill.
 
+## One-Command Health Check
+
+Enter Ubuntu through the Mac's `u` alias so forwarded SSH identities are
+available:
+
+```bash
+cd ~/Developer/dotfiles-hd
+bash setup/ubuntu/doctor.sh
+```
+
+It checks the clean canonical checkout, every managed link, Zsh and aliases,
+Docker, Neovim, personal GitHub, Arbiter GitHub, and both Forgejo routes without
+changing the machine. With no network, run:
+
+```bash
+bash setup/ubuntu/doctor.sh --offline
+```
+
+Offline mode skips only the four remote identity checks.
+
 ## Quick Command Card
 
 | Goal                    | Command                                        |
@@ -58,6 +78,7 @@ Use this document two ways:
 | Read service logs       | `journalctl -u SERVICE -n 100 --no-pager`      |
 | Check containers        | `docker compose ps`                            |
 | Check a repository      | `gs`                                           |
+| Check the workstation   | `bash setup/ubuntu/doctor.sh`                  |
 | Inspect installed tools | `mise current`, `apt-cache policy PACKAGE`     |
 | Preserve a remote shell | `tmux new -s work`, then `tmux attach -t work` |
 | Return to the Mac       | `exit` or `Ctrl-D`                             |
@@ -323,13 +344,14 @@ Think in this order:
 
 Do not mix package managers casually. On this VM:
 
-| Owner          | What it manages                                                  |
-| -------------- | ---------------------------------------------------------------- |
-| APT            | Docker, Ghostty, Zsh, system libraries, and OS-integrated tools  |
-| mise           | Node, Go, Python, Bun, Neovim, language servers, and editor CLIs |
-| pnpm/npm/bun   | Dependencies declared by a JavaScript project                    |
-| Go modules     | Dependencies declared by a Go project                            |
-| Docker/Compose | Container images and containerized services                      |
+| Owner          | What it manages                                                             |
+| -------------- | --------------------------------------------------------------------------- |
+| APT            | Docker, Ghostty, Zsh, system libraries, and OS-integrated tools             |
+| Snap           | Self-contained apps managed independently by `snapd`                        |
+| mise           | Codex CLI, Node, Go, Python, Bun, Neovim, language servers, and editor CLIs |
+| pnpm/npm/bun   | Dependencies declared by a JavaScript project                               |
+| Go modules     | Dependencies declared by a Go project                                       |
+| Docker/Compose | Container images and containerized services                                 |
 
 ### APT
 
@@ -364,6 +386,31 @@ bash setup/ubuntu/update-system.sh
 
 `apt update` refreshes package metadata; it does not upgrade packages.
 
+### APT vs Snap
+
+| APT                             | Snap                                           |
+| ------------------------------- | ---------------------------------------------- |
+| Installs Ubuntu `.deb` packages | Installs self-contained app bundles            |
+| Shares system libraries         | Bundles most dependencies                      |
+| Integrates closely with Ubuntu  | Usually runs with sandbox confinement          |
+| Updates during `apt upgrade`    | Auto-refreshes independently through `snapd`   |
+| Uses Ubuntu repository versions | Offers channels such as stable, beta, and edge |
+| Inspect with `apt` and `dpkg`   | Inspect with `snap`                            |
+
+Useful Snap checks:
+
+```bash
+snap list
+snap info PACKAGE
+snap connections PACKAGE
+snap refresh --list
+```
+
+This workstation keeps Ubuntu's system snaps and the `snapd` service, but the
+dotfiles setup installs no development tools through Snap. Prefer APT for
+system-integrated packages and mise for development tools. Do not install the
+same application through both APT and Snap.
+
 ### mise
 
 The tracked manifest is `setup/ubuntu/mise.toml`, linked to
@@ -381,6 +428,16 @@ mise exec -- COMMAND
 
 Do not install a second Homebrew/Linuxbrew toolchain on this VM. Add a pinned
 tool to the mise manifest or use APT when the tool is system-integrated.
+
+Codex CLI is pinned in the manifest. Authenticate it once after setup:
+
+```bash
+codex login --device-auth
+codex --version
+```
+
+The desktop app uses Ubuntu's login shell over SSH, so `codex` must be visible
+from `zsh -lic 'command -v codex'`.
 
 ## Storage and Memory
 
@@ -438,6 +495,26 @@ Common failure meanings:
 Local Docker containers, databases, and services can run without internet.
 Internet is needed only for remote APIs, Git operations, package downloads,
 image pulls, and other external dependencies.
+
+### Tailscale route from the Mac
+
+Ubuntu joins the tailnet as `ubuntu-dev`. The thin Mac has two SSH routes:
+
+```text
+ubuntu-vm       Local VMware mDNS route
+ubuntu-vm-ts    Tailscale 100.82.171.116 for Codex and remote access
+```
+
+Check the Tailscale route:
+
+```bash
+tailscale status --self
+tailscale ip -4
+systemctl status tailscaled --no-pager
+```
+
+Use `ut` or `ubuntu-ts` on the Mac to connect through Tailscale. Both Ubuntu
+routes use the same SSH key and forward the Mac agent.
 
 ## SSH and Git Identities
 
@@ -500,7 +577,13 @@ git config extensions.worktreeConfig true
 git remote add arbiter git@github.com-arbiter:OWNER/PROJECT.git
 git worktree add ../PROJECT-agent -b agent/TASK origin/main
 git -C ../PROJECT-agent config --worktree user.name "arbiter-hd"
-git -C ../PROJECT-agent config --worktree user.email "ARBITER-VERIFIED-EMAIL"
+read -r 'ARBITER_EMAIL?Arbiter verified GitHub email: '
+[[ "$ARBITER_EMAIL" == *"@"* ]] || {
+  print -u2 "A verified Arbiter email is required."
+  return 1
+}
+git -C ../PROJECT-agent config --worktree user.email "$ARBITER_EMAIL"
+unset ARBITER_EMAIL
 ```
 
 The human keeps using the original checkout and personal remote:

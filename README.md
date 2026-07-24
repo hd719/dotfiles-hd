@@ -30,6 +30,25 @@ bootstrap.
 For Mac-to-Linux learning, use the
 [Ubuntu Field Guide](setup/ubuntu/GUIDE.md).
 
+## Ubuntu Quick Start
+
+```bash
+bash setup/ubuntu/setup.sh
+# One-time remote access:
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up --hostname=ubuntu-dev
+# Log out and back in once, then reconnect with the Mac's `ut` alias.
+bash setup/ubuntu/doctor.sh
+```
+
+Use `bash setup/ubuntu/doctor.sh --offline` when remote identity checks are
+intentionally unavailable.
+
+For Codex remote development, connect Ubuntu to Tailscale as `ubuntu-dev` and
+add the Mac SSH alias `ubuntu-vm-ts`. Keep `ubuntu-vm` as the local fallback.
+The Ubuntu setup pins Codex CLI through mise; run `codex login --device-auth`
+once inside Ubuntu before enabling either SSH connection in Codex desktop.
+
 ## Thin Mac Quick Start
 
 For the restored MacBook control plane:

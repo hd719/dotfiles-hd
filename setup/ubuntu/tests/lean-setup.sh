@@ -6,6 +6,9 @@ SETUP_SCRIPT="$ROOT_DIR/setup/ubuntu/setup.sh"
 NEOVIM_SCRIPT="$ROOT_DIR/setup/ubuntu/setup-neovim.sh"
 UPDATE_SCRIPT="$ROOT_DIR/setup/ubuntu/update-system.sh"
 CLEANUP_SCRIPT="$ROOT_DIR/setup/ubuntu/cleanup-legacy.sh"
+DOCTOR_SCRIPT="$ROOT_DIR/setup/ubuntu/doctor.sh"
+UBUNTU_README="$ROOT_DIR/setup/ubuntu/README.md"
+UBUNTU_GUIDE="$ROOT_DIR/setup/ubuntu/GUIDE.md"
 MISE_CONFIG="$ROOT_DIR/setup/ubuntu/mise.toml"
 ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
@@ -90,6 +93,146 @@ test_neovim_help_is_read_only() {
   output="$(bash "$NEOVIM_SCRIPT" --help)"
   assert_contains "$output" "Usage:"
   assert_contains "$output" "--check"
+}
+
+test_doctor_is_read_only_and_complete() {
+  local case_dir="$TEST_ROOT/doctor"
+  local output source status target
+  local link_specs=(
+    "setup/ubuntu/.zshrc|.zshrc"
+    "setup/ubuntu/ghostty.conf|.config/ghostty/config"
+    "config/starship/starship.toml|.config/starship.toml"
+    "config/git/.gitignore_global|.gitignore_global"
+    "config/bookokrat|.config/bookokrat"
+    "config/btop|.config/btop"
+    "config/fastfetch|.config/fastfetch"
+    "config/herdr/config.toml|.config/herdr/config.toml"
+    "config/hunk/config.toml|.config/hunk/config.toml"
+    "setup/ubuntu/mise.toml|.config/mise/config.toml"
+    "config/nvim|.config/nvim"
+    "config/tmux|.config/tmux"
+    "setup/ubuntu/bin/graphql-lsp|.local/graphql-lsp/bin/graphql-lsp"
+  )
+
+  output="$(bash "$DOCTOR_SCRIPT" --help)"
+  assert_contains "$output" "Usage:"
+  assert_contains "$output" "--offline"
+
+  mkdir -p "$case_dir/home/Developer/dotfiles-hd/.git" "$case_dir/bin"
+  printf 'ID=ubuntu\nVERSION_ID=26.04\n' > "$case_dir/os-release"
+  mkdir -p "$case_dir/home/.local/share/fonts/Hasklig"
+  printf '3.4.0\n' > "$case_dir/home/.local/share/fonts/Hasklig/.nerd-font-version"
+
+  for spec in "${link_specs[@]}"; do
+    source="$case_dir/home/Developer/dotfiles-hd/${spec%%|*}"
+    target="$case_dir/home/${spec#*|}"
+    assert_file_contains "$UBUNTU_README" "\`~/${spec#*|}\`"
+    assert_file_contains "$UBUNTU_README" "\`${spec%%|*}\`"
+    if [[ "${source##*.}" == "toml" || "$source" == */.zshrc || "$source" == */config || "$source" == */graphql-lsp ]]; then
+      mkdir -p "$(dirname "$source")"
+      printf 'tracked\n' > "$source"
+    else
+      mkdir -p "$source"
+    fi
+    mkdir -p "$(dirname "$target")"
+    ln -s "$source" "$target"
+  done
+  assert_file_contains "$UBUNTU_README" 'bash setup/ubuntu/doctor.sh'
+  assert_file_contains "$UBUNTU_GUIDE" 'bash setup/ubuntu/doctor.sh'
+  assert_file_contains "$UBUNTU_GUIDE" 'bash setup/ubuntu/doctor.sh --offline'
+
+  cat > "$case_dir/bin/uname" <<'EOF'
+#!/usr/bin/env bash
+printf 'aarch64\n'
+EOF
+  cat > "$case_dir/bin/git" <<'EOF'
+#!/usr/bin/env bash
+case "$*" in
+  *"remote get-url origin"*) printf 'git@github.com:hd719/dotfiles-hd.git\n' ;;
+  *"branch --show-current"*) printf 'master\n' ;;
+  *"rev-parse HEAD"*) printf 'doctor-test-commit\n' ;;
+  *"rev-parse refs/remotes/origin/master"*) printf 'doctor-test-commit\n' ;;
+  *"status --porcelain"*) ;;
+  *"config --global core.editor"*) printf 'nvim\n' ;;
+  *"config --global core.excludesfile"*) printf '%s/.gitignore_global\n' "$HOME" ;;
+  *) exit 1 ;;
+esac
+EOF
+  cat > "$case_dir/bin/id" <<'EOF'
+#!/usr/bin/env bash
+case "${1:-}" in
+  -un) printf 'hamel\n' ;;
+  -nG) printf 'hamel docker\n' ;;
+  *) printf 'uid=1000(hamel) gid=1000(hamel) groups=1000(hamel),999(docker)\n' ;;
+esac
+EOF
+  cat > "$case_dir/bin/getent" <<'EOF'
+#!/usr/bin/env bash
+printf 'hamel:x:1000:1000:Hamel:/home/hamel:/usr/bin/zsh\n'
+EOF
+  cat > "$case_dir/bin/systemctl" <<'EOF'
+#!/usr/bin/env bash
+[[ "${1:-}" == "is-enabled" || "${1:-}" == "is-active" ]]
+EOF
+  cat > "$case_dir/bin/docker" <<'EOF'
+#!/usr/bin/env bash
+[[ "${1:-}" == "info" ]]
+EOF
+  cat > "$case_dir/bin/tailscale" <<'EOF'
+#!/usr/bin/env bash
+[[ "${1:-}" == "ip" && "${2:-}" == "-4" ]] && printf '100.64.0.1\n'
+EOF
+  cat > "$case_dir/bin/zsh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+  cat > "$case_dir/bin/fc-list" <<'EOF'
+#!/usr/bin/env bash
+printf 'Hasklug Nerd Font\n'
+EOF
+  cat > "$case_dir/bin/ssh" <<'EOF'
+#!/usr/bin/env bash
+case "${!#}" in
+  github.com) printf 'Hi hd719!\n' ;;
+  github.com-arbiter) printf 'Hi arbiter-hd!\n' ;;
+  forgejo-truenas-lan|forgejo-truenas-ts) printf 'Hi there, hd719!\n' ;;
+  *) exit 1 ;;
+esac
+EOF
+  cat > "$case_dir/neovim-check.sh" <<'EOF'
+#!/usr/bin/env bash
+[[ "${1:-}" == "--check" ]]
+EOF
+  chmod +x "$case_dir/bin/"* "$case_dir/neovim-check.sh"
+
+  output="$({
+    HOME="$case_dir/home" \
+      PATH="$case_dir/bin:/usr/bin:/bin" \
+      DOTFILES_DIR="$case_dir/home/Developer/dotfiles-hd" \
+      DOTFILES_OS_RELEASE_FILE="$case_dir/os-release" \
+      DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/neovim-check.sh" \
+      bash "$DOCTOR_SCRIPT"
+  } 2>&1)"
+  assert_contains "$output" "Doctor passed for Ubuntu."
+  assert_contains "$output" "github.com authenticates as Hi hd719!"
+  assert_contains "$output" "github.com-arbiter authenticates as Hi arbiter-hd!"
+  assert_contains "$output" "forgejo-truenas-lan authenticates as Hi there, hd719!"
+
+  rm "$case_dir/home/.config/hunk/config.toml"
+  set +e
+  output="$({
+    HOME="$case_dir/home" \
+      PATH="$case_dir/bin:/usr/bin:/bin" \
+      DOTFILES_DIR="$case_dir/home/Developer/dotfiles-hd" \
+      DOTFILES_OS_RELEASE_FILE="$case_dir/os-release" \
+      DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/neovim-check.sh" \
+      bash "$DOCTOR_SCRIPT" --offline
+  } 2>&1)"
+  status=$?
+  set -e
+  ((status != 0)) || fail "doctor ignored a missing managed link"
+  assert_contains "$output" "link mismatch: $case_dir/home/.config/hunk/config.toml"
+  assert_contains "$output" "SKIP  remote GitHub and Forgejo identities (--offline)"
 }
 
 test_cleanup_requires_explicit_confirmation() {
@@ -190,6 +333,7 @@ bun = "1.3.14"
 "go:golang.org/x/tools/gopls" = { version = "0.23.0", depends = ["go"] }
 "npm:diff-so-fancy" = { version = "1.4.12", depends = ["node"] }
 "npm:hunkdiff" = { version = "0.17.3", depends = ["node"] }
+"npm:@openai/codex" = { version = "0.145.0", depends = ["node"] }
 "npm:@vtsls/language-server" = { version = "0.3.0", depends = ["node"] }
 "npm:vscode-langservers-extracted" = { version = "4.10.0", depends = ["node"] }
 "npm:bash-language-server" = { version = "5.6.0", depends = ["node"] }
@@ -710,6 +854,14 @@ exit 0
 EOF
     chmod +x "$case_dir/bin/$tool"
   done
+  cat > "$case_dir/bin/mdformat" <<EOF
+#!/usr/bin/env bash
+printf 'mdformat %s\n' "\$*" >> "$case_dir/commands.log"
+if [[ "\${1:-}" == "--version" ]]; then
+  printf 'mdformat 1.0.0 (mdformat_footnote 0.1.3, mdformat_frontmatter 2.1.2, mdformat-gfm 1.0.0, mdformat_wikilink 0.3.0, mdformat_gfm_alerts 2.0.0)\n'
+fi
+EOF
+  chmod +x "$case_dir/bin/mdformat"
   cat > "$case_dir/bin/nvim" <<EOF
 #!/usr/bin/env bash
 printf 'nvim %s\n' "\$*" >> "$case_dir/commands.log"
@@ -1213,6 +1365,7 @@ EOF
 test_wrong_os_stops_before_mutation
 test_help_is_read_only
 test_neovim_help_is_read_only
+test_doctor_is_read_only_and_complete
 test_cleanup_requires_explicit_confirmation
 test_cleanup_wrong_os_stops_before_mutation
 test_ubuntu_mise_toolchain_is_exact
