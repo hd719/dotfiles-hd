@@ -24,8 +24,8 @@ replacing an already-correct link.
 - Installs the lean APT package set, Ghostty, Docker, Zsh, ImageMagick,
   Ghostscript, clipboard tools, and Zsh plugins.
 - Installs Hasklug Nerd Font `3.4.0` from a checksum-verified archive.
-- Installs exact runtimes, editor tools, Herdr, Hunk, Bookokrat, and fastfetch
-  from `setup/ubuntu/mise.toml`.
+- Installs exact runtimes, editor tools, Herdr, Hunk, Bookokrat, fastfetch, and
+  diff-so-fancy from `setup/ubuntu/mise.toml`.
 - Loads the portable full-development alias set, including Hunk, pnpm, Git, Go,
   Neovim, fastfetch, and tmux shortcuts.
 - Restores locked Neovim plugins and required Tree-sitter parsers.
@@ -92,7 +92,7 @@ for path in \
   }
 done
 zsh -lic \
-  'command -v herdr && command -v hunk && command -v bookokrat && command -v fastfetch && command -v nvim && command -v mise && command -v docker && command -v ghostty && alias hwatch'
+  'command -v herdr && command -v hunk && command -v bookokrat && command -v fastfetch && command -v diff-so-fancy && command -v nvim && command -v mise && command -v docker && command -v ghostty && alias hwatch'
 nvim ~/.config/nvim/README.md
 ```
 

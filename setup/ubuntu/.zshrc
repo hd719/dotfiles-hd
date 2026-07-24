@@ -29,6 +29,12 @@ if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
 
+if command -v diff-so-fancy >/dev/null 2>&1; then
+  export GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX'
+else
+  export GIT_PAGER='less --tabs=4 -RFX'
+fi
+
 source_if_exists "$ubuntu_repo/config/zsh/shared/development-aliases.zsh"
 unset ubuntu_repo ubuntu_zshrc
 

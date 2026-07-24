@@ -188,6 +188,7 @@ bun = "1.3.14"
 "aqua:ogulcancelik/herdr" = "0.7.5"
 "github:bugzmanov/bookokrat" = "0.3.12"
 "go:golang.org/x/tools/gopls" = { version = "0.23.0", depends = ["go"] }
+"npm:diff-so-fancy" = { version = "1.4.12", depends = ["node"] }
 "npm:hunkdiff" = { version = "0.17.3", depends = ["node"] }
 "npm:@vtsls/language-server" = { version = "0.3.0", depends = ["node"] }
 "npm:vscode-langservers-extracted" = { version = "4.10.0", depends = ["node"] }
@@ -409,6 +410,7 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
 eval "$(mise activate zsh)"
+export GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX'
 eval "$(starship init zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
@@ -463,6 +465,29 @@ EOF
       zsh -f -c 'source "$1"; printf "%s|%s|%s" "$EDITOR" "$TERM" "$path[1]"' _ "$ZSH_CONFIG"
   )"
   [[ "$output" == "nvim|xterm-test|$TEST_ROOT/zsh-home/.local/bin" ]] || fail "Ubuntu zsh config did not load cleanly in isolation"
+
+  HOME="$TEST_ROOT/zsh-home" \
+    PATH="/usr/bin:/bin" \
+    GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' \
+    zsh -f -c '
+      source "$1"
+      [[ "$GIT_PAGER" == "less --tabs=4 -RFX" ]] || exit 1
+    ' _ "$ZSH_CONFIG" || fail "Ubuntu Git pager did not fall back when diff-so-fancy was unavailable"
+
+  case_dir="$TEST_ROOT/zsh-git-pager"
+  mkdir -p "$case_dir/home" "$case_dir/bin"
+  cat > "$case_dir/bin/diff-so-fancy" <<'EOF'
+#!/usr/bin/env bash
+cat
+EOF
+  chmod +x "$case_dir/bin/diff-so-fancy"
+  HOME="$case_dir/home" \
+    PATH="$case_dir/bin:/usr/bin:/bin" \
+    GIT_PAGER='less --tabs=4 -RFX' \
+    zsh -f -c '
+      source "$1"
+      [[ "$GIT_PAGER" == "diff-so-fancy | less --tabs=4 -RFX" ]] || exit 1
+    ' _ "$ZSH_CONFIG" || fail "Ubuntu Git pager did not enable diff-so-fancy when available"
 
   HOME="$TEST_ROOT/zsh-home" \
     PATH="/usr/bin:/bin" \
