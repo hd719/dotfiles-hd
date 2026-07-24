@@ -8,6 +8,9 @@ export VISUAL="nvim"
 export GIT_EDITOR="nvim"
 export STARSHIP_CONFIG="$HOME/.config/starship.toml"
 
+# Keep history suggestions readable over the shared Ghostty Nord background.
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#9399b2'
+
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=10000
 SAVEHIST=10000

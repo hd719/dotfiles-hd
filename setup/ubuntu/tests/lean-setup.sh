@@ -409,6 +409,7 @@ test_zsh_config_is_linux_native() {
 export EDITOR="nvim"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#9399b2'
 eval "$(mise activate zsh)"
 export GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX'
 eval "$(starship init zsh)"
@@ -462,9 +463,9 @@ EOF
     HOME="$TEST_ROOT/zsh-home" \
       PATH="/usr/bin:/bin" \
       TERM="xterm-test" \
-      zsh -f -c 'source "$1"; printf "%s|%s|%s" "$EDITOR" "$TERM" "$path[1]"' _ "$ZSH_CONFIG"
+      zsh -f -c 'source "$1"; printf "%s|%s|%s|%s" "$EDITOR" "$TERM" "$path[1]" "$ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE"' _ "$ZSH_CONFIG"
   )"
-  [[ "$output" == "nvim|xterm-test|$TEST_ROOT/zsh-home/.local/bin" ]] || fail "Ubuntu zsh config did not load cleanly in isolation"
+  [[ "$output" == "nvim|xterm-test|$TEST_ROOT/zsh-home/.local/bin|fg=#9399b2" ]] || fail "Ubuntu zsh config did not load cleanly with the readable autosuggestion color"
 
   HOME="$TEST_ROOT/zsh-home" \
     PATH="/usr/bin:/bin" \
