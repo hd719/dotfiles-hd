@@ -22,6 +22,9 @@ opt.smartcase = true
 opt.scrolloff = 999
 opt.sidescrolloff = 8
 
+if vim.env.SSH_CONNECTION ~= nil or vim.env.SSH_TTY ~= nil then
+  vim.g.clipboard = "osc52"
+end
 opt.clipboard = "unnamedplus"
 opt.mouse = "a"
 opt.undofile = true
