@@ -1,4 +1,4 @@
-# Shared Zsh completion and cache helpers.
+# Portable Zsh completion and cache helpers.
 # Machine profiles still own plugin timing, fpath entries, and cache policy.
 
 zmodload zsh/datetime 2>/dev/null

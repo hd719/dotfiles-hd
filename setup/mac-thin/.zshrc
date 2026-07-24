@@ -14,8 +14,9 @@ compinit -C
 typeset mac_thin_zshrc="${${(%):-%N}:A}"
 typeset mac_thin_dir="${mac_thin_zshrc:h}"
 typeset mac_thin_repo="${mac_thin_dir:h:h}"
-source "$mac_thin_repo/config/zsh/core-functions.zsh"
-source "$mac_thin_repo/config/zsh/mac/base-aliases.zsh"
-source "$mac_thin_repo/config/zsh/mac/personal-control-aliases.zsh"
+source "$mac_thin_repo/config/zsh/shared/functions.zsh"
+source "$mac_thin_repo/config/zsh/shared/aliases.zsh"
+source "$mac_thin_repo/config/zsh/mac/aliases.zsh"
+source "$mac_thin_repo/config/zsh/mac/personal/aliases.zsh"
 source "$mac_thin_dir/vm.zsh"
 unset mac_thin_dir mac_thin_repo mac_thin_zshrc

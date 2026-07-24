@@ -1,4 +1,4 @@
-# Portable aliases shared by Mac and Linux profiles.
+# Portable aliases shared by every shell profile.
 
 ## Shell and navigation
 alias c='clear'

@@ -16,13 +16,13 @@ git clone git@github.com:hd719/dotfiles-hd.git \
 cd "$HOME/Developer/dotfiles-hd"
 ```
 
-| Device                          | Profile or command           | Runbook                                                                    |
-| ------------------------------- | ---------------------------- | -------------------------------------------------------------------------- |
+| Device                          | Profile or command            | Runbook                                                                    |
+| ------------------------------- | ----------------------------- | -------------------------------------------------------------------------- |
 | Thin personal Apple Silicon Mac | `setup/mac-thin/bootstrap.sh` | [`setup/mac-thin/README.md`](setup/mac-thin/README.md)                     |
-| Personal Apple Silicon MacBook  | `--profile mac-pro`          | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
-| Personal Apple Silicon Mac mini | `--profile mac-mini`         | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
-| Resilience work Mac             | `setup/mac-pro-resilience`   | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
-| Ubuntu workstation              | `bash setup/ubuntu/setup.sh` | [`setup/ubuntu/README.md`](setup/ubuntu/README.md)                         |
+| Personal Apple Silicon MacBook  | `--profile mac-pro`           | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
+| Personal Apple Silicon Mac mini | `--profile mac-mini`          | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
+| Resilience work Mac             | `setup/mac-pro-resilience`    | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
+| Ubuntu workstation              | `bash setup/ubuntu/setup.sh`  | [`setup/ubuntu/README.md`](setup/ubuntu/README.md)                         |
 
 Scripts under `setup/fedora` are legacy helpers, not a supported one-command
 bootstrap.
@@ -61,8 +61,9 @@ the approval gate in the Mac bootstrap runbook before `--apply`.
 
 - `config/` contains portable application and tool configuration.
 - `setup/` contains platform installers, machine overlays, tests, and runbooks.
-- `config/zsh/mac/init.zsh` is the shared Mac shell interface.
-- `config/zsh/mac/personal.zsh` adds personal-only workflows.
+- `config/zsh/shared/` contains portable shell modules.
+- `config/zsh/mac/init.zsh` is the full Mac development interface.
+- `config/zsh/mac/personal/init.zsh` adds personal development workflows.
 - Each Mac profile owns its `.zshrc`, plugin timing, runtimes, credentials, and
   machine-specific behavior.
 
@@ -70,10 +71,10 @@ the approval gate in the Mac bootstrap runbook before `--apply`.
 
 The thin profile owns only these two links:
 
-| Tool    | Live path                                                    | Source                    |
-| ------- | ------------------------------------------------------------ | ------------------------- |
-| Shell   | `~/.zshrc`                                                   | `setup/mac-thin/.zshrc`   |
-| Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config`   |
+| Tool    | Live path                                                    | Source                  |
+| ------- | ------------------------------------------------------------ | ----------------------- |
+| Shell   | `~/.zshrc`                                                   | `setup/mac-thin/.zshrc` |
+| Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` |
 
 ## Full Personal Mac Link Inventory
 

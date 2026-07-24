@@ -51,8 +51,9 @@ request into a full-machine migration.
 
 ## Mac Shell Ownership
 
-- `config/zsh/mac/init.zsh` is the shared Mac interface.
-- `config/zsh/mac/personal.zsh` adds personal-only workflows.
+- `config/zsh/shared/` contains portable shell modules.
+- `config/zsh/mac/init.zsh` is the full Mac development interface.
+- `config/zsh/mac/personal/init.zsh` adds personal development workflows.
 - MacBook and Mac mini profiles load both.
 - Resilience loads the shared interface plus work-owned behavior, never the
   personal layer.

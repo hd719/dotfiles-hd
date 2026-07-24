@@ -1,4 +1,4 @@
-# [Personal Mac Functions]
+# [Personal Mac Development Functions]
 # --------------------------------------------------------------------------------------------------------
 
 carchive() {

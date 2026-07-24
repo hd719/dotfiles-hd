@@ -1,9 +1,5 @@
-# [Shared Mac Aliases]
+# [Full Mac Development Aliases]
 # --------------------------------------------------------------------------------------------------------
-
-typeset mac_aliases_file="${${(%):-%N}:A}"
-source "${mac_aliases_file:h}/base-aliases.zsh"
-unset mac_aliases_file
 
 ## Pnpm
 alias npb='pnpm run build'

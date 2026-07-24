@@ -1,19 +1,19 @@
-# Shared Mac ZSH Prompt Optimization Guide
+# Full Mac ZSH Prompt Optimization Guide
 
 Optimizations to reduce zsh shell startup time from ~500ms → ~82ms → **~40ms** (consistent, prioritizing UX).
 
 ## Results
 
-| Metric | Original | Phase 1 | Phase 2 (Current) |
-|--------|----------|---------|-------------------|
-| Shell reload time | ~500-600ms | ~82ms | **~40ms** |
-| Fresh shell startup | ~500ms | ~93ms | **~40ms** |
-| Improvement | - | ~86% faster | **~92% faster** |
-| Reload consistency | Varies | Varies | **Always ~40ms** |
+| Metric              | Original   | Phase 1     | Phase 2 (Current) |
+| ------------------- | ---------- | ----------- | ----------------- |
+| Shell reload time   | ~500-600ms | ~82ms       | **~40ms**         |
+| Fresh shell startup | ~500ms     | ~93ms       | **~40ms**         |
+| Improvement         | -          | ~86% faster | **~92% faster**   |
+| Reload consistency  | Varies     | Varies      | **Always ~40ms**  |
 
 **Note:** Prioritizes UX (immediate plugin functionality, consistent performance) over extreme speed optimization.
 
----
+______________________________________________________________________
 
 ## Phase 2 Optimizations (Jan 2026)
 
@@ -34,6 +34,7 @@ fi
 ```
 
 **Cache Refresh:** `goodMorning()` calls `refresh_zsh_cache()` which rebuilds all caches immediately (eager rebuild):
+
 - `brew shellenv` → `brew-shellenv.zsh`
 - `starship init zsh` → `starship-init.zsh`
 - `zoxide init zsh` → `zoxide-init.zsh`
@@ -47,7 +48,7 @@ This ensures **all** reloads after `goodMorning` are consistently fast (~40ms) i
 
 **Savings:** ~30ms
 
----
+______________________________________________________________________
 
 ### 2. ~~Deferred Plugin Loading~~ → Immediate Loading (Updated Jan 2026)
 
@@ -56,6 +57,7 @@ This ensures **all** reloads after `goodMorning` are consistently fast (~40ms) i
 **Original Solution (Deferred Loading):** Load plugins via `preexec` hook after first command to save ~32ms startup time.
 
 **Why We Changed It:**
+
 - Plugins didn't work until after first command completed
 - Poor UX when starting terminal with `goodMorning` (plugins inactive during entire workflow)
 - 5-10ms startup cost is negligible on modern machines
@@ -72,7 +74,7 @@ _load_nix_plugin "zsh-syntax-highlighting"
 
 **Result:** Better user experience at minimal performance cost (~28ms vs ~20ms startup)
 
----
+______________________________________________________________________
 
 ### 3. Deferred `you-should-use` Plugin
 
@@ -91,7 +93,7 @@ precmd_functions+=(_load_ysu)
 
 **Savings:** ~10ms
 
----
+______________________________________________________________________
 
 ### 4. Native Zsh `zstat` and `EPOCHSECONDS`
 
@@ -117,7 +119,7 @@ if (( EPOCHSECONDS - file_mtime > 86400 )); then
 
 **Savings:** ~5-10ms
 
----
+______________________________________________________________________
 
 ### 5. Zsh Builtin `read` Instead of `$(cat ...)`
 
@@ -138,7 +140,7 @@ read -r cached_path < "$cache_file"
 
 **Savings:** ~2-5ms per read
 
----
+______________________________________________________________________
 
 ## Phase 1 Optimizations (Original)
 
@@ -170,7 +172,7 @@ fi
 
 **Savings:** ~100-200ms
 
----
+______________________________________________________________________
 
 ### 2. Cached Nix Plugin Paths
 
@@ -179,7 +181,7 @@ fi
 **Solution:** Resolve paths once, cache to files, read from cache on startup.
 
 ```zsh
-# functions.zsh (using zsh builtin read)
+# development-functions.zsh (using zsh builtin read)
 _get_cached_nix_plugin() {
   local cache_file="$_ZSH_CACHE_DIR/nix-$1-path"
   if [[ -f "$cache_file" ]]; then
@@ -204,7 +206,7 @@ _load_nix_plugin() {
 
 **Savings:** ~50-150ms
 
----
+______________________________________________________________________
 
 ### 3. Cached Init Scripts (Starship, Zoxide, Devbox)
 
@@ -233,13 +235,14 @@ _cache_init "zoxide" "zoxide init --cmd cd zsh"
 ```
 
 **Cache Refresh Strategy:**
+
 - `goodMorning()` calls `refresh_zsh_cache()` which **eagerly rebuilds** all caches immediately
 - This ensures the first `reload` after `goodMorning` is fast (~28ms) instead of slow (~300ms)
 - The rebuild cost (~300ms) happens during `goodMorning` when you're waiting anyway
 
 **Savings:** ~130-230ms
 
----
+______________________________________________________________________
 
 ### 4. Native Zsh Command Checking
 
@@ -257,7 +260,7 @@ if (( $+commands[nix] )); then
 
 **Savings:** ~10-20ms
 
----
+______________________________________________________________________
 
 ## Cache Management
 
@@ -291,7 +294,7 @@ refresh_nix_plugin_cache  # Refresh Nix plugin paths only
 - If shell behaves unexpectedly
 - `goodMorning` auto-refreshes after updates (rebuilds eagerly, so next `reload` is fast)
 
----
+______________________________________________________________________
 
 ## Measuring Startup Time
 
@@ -318,50 +321,54 @@ zmodload zsh/zprof
 zprof
 ```
 
----
+______________________________________________________________________
 
 ## Performance Breakdown (Current)
 
-| Component | Time |
-|-----------|------|
-| `brew shellenv` (cached) | ~0.1ms |
-| `prompt.zsh` (starship+zoxide cached) | ~12ms |
-| `tooling+functions+alias+k8s` | ~1.5ms |
-| `devbox shellenv` (cached) | ~0.3ms |
-| `compinit -C` (cached) | ~15ms |
-| `zsh-autosuggestions` | ~3ms |
-| `zsh-syntax-highlighting` | ~5ms |
-| **Total startup/reload** | **~40ms** |
+| Component                             | Time      |
+| ------------------------------------- | --------- |
+| `brew shellenv` (cached)              | ~0.1ms    |
+| `prompt.zsh` (starship+zoxide cached) | ~12ms     |
+| `tooling+functions+alias+k8s`         | ~1.5ms    |
+| `devbox shellenv` (cached)            | ~0.3ms    |
+| `compinit -C` (cached)                | ~15ms     |
+| `zsh-autosuggestions`                 | ~3ms      |
+| `zsh-syntax-highlighting`             | ~5ms      |
+| **Total startup/reload**              | **~40ms** |
 
 Deferred (loads after first prompt):
+
 - `you-should-use`: ~10ms
 
 **Note:** All reloads are consistently ~40ms because `goodMorning()` eagerly rebuilds all caches (including completions).
 
----
+______________________________________________________________________
 
 ## File Summary
 
-| File | Purpose |
-|------|---------|
-| `.zprofile` | Brew shellenv (cached) |
-| `.zshrc` | Main config, immediate plugin loading, devbox cache, compinit |
-| `init.zsh` | Shared Mac shell interface |
-| `personal.zsh` | Personal Mac workflow interface |
-| `prompt.zsh` | Starship, zoxide, zsh modules, cached init scripts, deferred `you-should-use` |
-| `functions.zsh` | Shared helpers including `reload()` and guarded dotfiles sync |
-| `personal-functions.zsh` | Personal Codex, `goodMorning()`, and Mission Control workflows |
-| `alias.zsh` | Shared aliases including `refresh-global` |
-| `personal-aliases.zsh` | Personal Codex, OpenClaw, SSH, and project aliases |
-| `tooling.zsh` | Dev tool configs |
-| `k8s.zsh` | Kubernetes config |
+| File                                 | Purpose                                                                       |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| `.zprofile`                          | Brew shellenv (cached)                                                        |
+| `.zshrc`                             | Main config, immediate plugin loading, devbox cache, compinit                 |
+| `shared/functions.zsh`               | Portable helpers including `reload()`                                         |
+| `shared/aliases.zsh`                 | Portable Git, navigation, LSD, and Hunk aliases                               |
+| `mac/init.zsh`                       | Full Mac development interface                                                |
+| `mac/personal/init.zsh`              | Personal Mac development interface                                            |
+| `prompt.zsh`                         | Starship, zoxide, zsh modules, cached init scripts, deferred `you-should-use` |
+| `development-functions.zsh`          | Full Mac helpers and guarded dotfiles sync                                    |
+| `personal/development-functions.zsh` | Personal Codex, `goodMorning()`, and Mission Control workflows                |
+| `development-aliases.zsh`            | Full Mac development aliases                                                  |
+| `personal/aliases.zsh`               | Safe personal Codex and vault aliases                                         |
+| `personal/development-aliases.zsh`   | Personal OpenClaw, SSH, and project aliases                                   |
+| `tooling.zsh`                        | Dev tool configs                                                              |
+| `k8s.zsh`                            | Kubernetes config                                                             |
 
----
+______________________________________________________________________
 
 ## Key Principles
 
 1. **Cache expensive operations** - Subprocess spawning is slow (~5-30ms each)
-2. **Use zsh native builtins** - `zstat`, `EPOCHSECONDS`, `read`, `$+commands[]`
-3. **Prioritize UX over extreme optimization** - Load essential plugins immediately for better experience
-4. **Eager cache rebuild in `goodMorning`** - Rebuild caches immediately (not lazily) so subsequent reloads are fast
-5. **Fall back gracefully** - If cache missing, `_cache_init()` rebuilds automatically
+1. **Use zsh native builtins** - `zstat`, `EPOCHSECONDS`, `read`, `$+commands[]`
+1. **Prioritize UX over extreme optimization** - Load essential plugins immediately for better experience
+1. **Eager cache rebuild in `goodMorning`** - Rebuild caches immediately (not lazily) so subsequent reloads are fast
+1. **Fall back gracefully** - If cache missing, `_cache_init()` rebuilds automatically

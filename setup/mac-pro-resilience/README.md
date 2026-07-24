@@ -16,8 +16,8 @@ Keep the work `~/.zshrc`, `config/mise`, Git identity, credentials,
 certificates, Docker state, Karabiner, and company-managed applications
 machine-owned. Never use the personal Mac bootstrap or Mac mini Brewfile here.
 
-`setup/mac-pro-resilience/.zshrc` loads the shared Mac interface and
-work-specific behavior, but not `config/zsh/mac/personal.zsh`. This runbook
+`setup/mac-pro-resilience/.zshrc` loads the full Mac development interface and
+work-specific behavior, but not `config/zsh/mac/personal/init.zsh`. This runbook
 repairs an existing work shell; it never replaces or links `~/.zshrc`.
 
 ## 1. Preflight

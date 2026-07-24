@@ -1,9 +1,5 @@
-# [Personal Mac Aliases]
+# [Personal Mac Development Aliases]
 # --------------------------------------------------------------------------------------------------------
-
-typeset personal_aliases_file="${${(%):-%N}:A}"
-source "${personal_aliases_file:h}/personal-control-aliases.zsh"
-unset personal_aliases_file
 
 ## Codex extras
 alias coda='carchive'

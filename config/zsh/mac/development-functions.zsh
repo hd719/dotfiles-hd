@@ -1,9 +1,5 @@
-# [Shared Mac Functions]
+# [Full Mac Development Functions]
 # --------------------------------------------------------------------------------------------------------
-
-typeset mac_functions_file="${${(%):-%N}:A}"
-source "${mac_functions_file:h:h}/core-functions.zsh"
-unset mac_functions_file
 
 _load_homebrew_plugin() {
   local plugin_path="$1"

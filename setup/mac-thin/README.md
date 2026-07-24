@@ -108,9 +108,9 @@ route intermittently.
 This is an explicit allowlist. Neovim, Node/Bun/Go, Docker, Kubernetes, project,
 VS Code, tmux, and other development aliases remain inside the Linux VMs.
 
-The shell is assembled from reusable layers:
+The shell is assembled from scoped modules:
 
-- `config/zsh/core-*` provides portable Git, navigation, SSH, and reload helpers.
-- `config/zsh/mac/base-aliases.zsh` adds safe macOS controls.
-- `config/zsh/mac/personal-control-aliases.zsh` adds vault and Codex controls.
+- `config/zsh/shared/` provides portable Git, navigation, SSH, and reload helpers.
+- `config/zsh/mac/aliases.zsh` adds safe macOS controls.
+- `config/zsh/mac/personal/aliases.zsh` adds vault and Codex controls.
 - `setup/mac-thin/vm.zsh` stays host-specific and owns VMware shortcuts.

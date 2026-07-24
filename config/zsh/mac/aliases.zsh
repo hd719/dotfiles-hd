@@ -1,8 +1,4 @@
-# Base aliases shared by every Mac profile.
-
-typeset mac_base_aliases_file="${${(%):-%N}:A}"
-source "${mac_base_aliases_file:h:h}/core-aliases.zsh"
-unset mac_base_aliases_file
+# Safe host aliases shared by every Mac profile.
 
 ## Mac defaults
 alias reset-finder="defaults write com.apple.finder CreateDesktop -bool true; killall Finder; open /System/Library/CoreServices/Finder.app"

@@ -1212,10 +1212,10 @@ test_profile_and_failure_guards() {
 }
 
 test_shared_zsh_interface() {
-  local module="$REPO_DIR/config/zsh/completions.zsh"
+  local module="$REPO_DIR/config/zsh/shared/completions.zsh"
   local shared_dir="$REPO_DIR/config/zsh/mac"
   local shared_init="$shared_dir/init.zsh"
-  local personal_init="$shared_dir/personal.zsh"
+  local personal_init="$shared_dir/personal/init.zsh"
   local root="$TMP_ROOT/shared-zsh-completions"
   local home_dir="$root/home"
   local completion_dir="$root/docker-completions"
@@ -1239,19 +1239,19 @@ test_shared_zsh_interface() {
 
   for zsh_file in \
     "$module" \
-    "$REPO_DIR/config/zsh/core-aliases.zsh" \
-    "$REPO_DIR/config/zsh/core-functions.zsh" \
+    "$REPO_DIR/config/zsh/shared/aliases.zsh" \
+    "$REPO_DIR/config/zsh/shared/functions.zsh" \
     "$shared_dir/init.zsh" \
-    "$shared_dir/base-aliases.zsh" \
+    "$shared_dir/aliases.zsh" \
     "$shared_dir/prompt.zsh" \
     "$shared_dir/tooling.zsh" \
-    "$shared_dir/functions.zsh" \
-    "$shared_dir/alias.zsh" \
+    "$shared_dir/development-functions.zsh" \
+    "$shared_dir/development-aliases.zsh" \
     "$shared_dir/k8s.zsh" \
-    "$shared_dir/personal.zsh" \
-    "$shared_dir/personal-control-aliases.zsh" \
-    "$shared_dir/personal-functions.zsh" \
-    "$shared_dir/personal-aliases.zsh" \
+    "$shared_dir/personal/init.zsh" \
+    "$shared_dir/personal/aliases.zsh" \
+    "$shared_dir/personal/development-functions.zsh" \
+    "$shared_dir/personal/development-aliases.zsh" \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
     "$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh" \
@@ -1268,12 +1268,12 @@ test_shared_zsh_interface() {
     "$REPO_DIR/setup/mac-pro-resilience/.zshrc"; do
     assert_contains "$zsh_file" 'config/zsh/mac/init.zsh'
   done
-  assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal.zsh'
-  assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal.zsh'
-  assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal.zsh'
+  assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
+  assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
+  assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal/'
   assert_not_contains "$REPO_DIR/setup/fedora/.zshrc" 'config/zsh/mac'
   assert_not_contains "$REPO_DIR/setup/fedora/.zshrc" 'setup/mac-blaze'
-  assert_contains "$shared_init" '../completions.zsh'
+  assert_contains "$shared_init" 'source "$zsh_shared_dir/completions.zsh"'
 
   actual="$(
     HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
@@ -1443,7 +1443,7 @@ test_shared_zsh_interface() {
 }
 
 test_goodmorning_timeout_helper() {
-  local functions_file="$REPO_DIR/config/zsh/mac/functions.zsh"
+  local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
   local start_epoch
   local elapsed
 
@@ -1461,7 +1461,7 @@ test_goodmorning_timeout_helper() {
 }
 
 test_goodmorning_dotfiles_sync() {
-  local functions_file="$REPO_DIR/config/zsh/mac/functions.zsh"
+  local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
   local resilience_module="$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh"
   local resilience_profile="$REPO_DIR/setup/mac-pro-resilience/.zshrc"
   local root="$TMP_ROOT/goodmorning-dotfiles-sync"
@@ -1510,7 +1510,7 @@ EOF
 }
 
 test_resilience_goodmorning_guards() {
-  local functions_file="$REPO_DIR/config/zsh/mac/functions.zsh"
+  local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
   local resilience_module="$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh"
   local root="$TMP_ROOT/resilience-goodmorning"
   local home_dir="$root/home"

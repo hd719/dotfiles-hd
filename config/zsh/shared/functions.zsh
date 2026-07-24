@@ -1,4 +1,4 @@
-# Portable functions shared by Mac and Linux profiles.
+# Portable functions shared by every shell profile.
 
 reload() {
   emulate -L zsh
