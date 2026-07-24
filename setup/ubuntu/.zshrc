@@ -20,6 +20,12 @@ source_if_exists() {
   [[ -r "$1" ]] && source "$1"
 }
 
+typeset ubuntu_zshrc="${${(%):-%N}:A}"
+typeset ubuntu_repo="${ubuntu_zshrc:h:h:h}"
+source_if_exists "$ubuntu_repo/config/zsh/core-functions.zsh"
+source_if_exists "$ubuntu_repo/config/zsh/core-aliases.zsh"
+unset ubuntu_repo ubuntu_zshrc
+
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
@@ -32,7 +38,6 @@ if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init --cmd cd zsh)"
 fi
 
-alias g='git'
 alias gs='git status --short --branch'
 alias ga='git add'
 alias gc='git commit'
@@ -40,8 +45,6 @@ alias gp='git push'
 alias d='docker'
 alias dc='docker compose'
 alias lg='lazygit'
-
-source_if_exists "$HOME/.config/zsh/aliases.zsh"
 
 source_if_exists /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source_if_exists /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

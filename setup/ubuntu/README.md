@@ -52,7 +52,6 @@ are never linked.
 | -------------------------------------- | ------------------------------- |
 | `~/.zshrc`                             | `setup/ubuntu/.zshrc`           |
 | `~/.config/ghostty/config`             | `setup/ubuntu/ghostty.conf`     |
-| `~/.config/zsh/aliases.zsh`            | `config/zsh/aliases.zsh`        |
 | `~/.config/starship.toml`              | `config/starship/starship.toml` |
 | `~/.gitignore_global`                  | `config/git/.gitignore_global`  |
 | `~/.config/mise/config.toml`           | `setup/ubuntu/mise.toml`        |

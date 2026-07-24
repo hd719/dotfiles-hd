@@ -1,9 +1,9 @@
 # [Shared Mac Aliases]
 # --------------------------------------------------------------------------------------------------------
 
-## Mac defaults
-alias reset-finder="defaults write com.apple.finder CreateDesktop -bool true; killall Finder; open /System/Library/CoreServices/Finder.app"
-alias reset-dock="defaults write com.apple.dock autohide -bool false; killall Dock"
+typeset mac_aliases_file="${${(%):-%N}:A}"
+source "${mac_aliases_file:h}/base-aliases.zsh"
+unset mac_aliases_file
 
 ## Pnpm
 alias npb='pnpm run build'
@@ -33,41 +33,20 @@ alias kcgnet='kcg networkPolicy'
 alias kcgpod='kcg pods'
 
 ## Git
-alias g=git
-alias gadd='git add .'
-alias gba='git branch -a'
 alias gclean='git branch --merged develop | grep -v develop | grep -v master | xargs git branch -D'
-alias gcm='git commit -a -m'
 alias gdeletemerged='$PATH_TO_REPOS/dev-tools/git-delete-merged-branches.sh'
 alias gdeletesquashed='$PATH_TO_REPOS/dev-tools/git-delete-squashed-branches.sh'
-alias gdiff='git diff'
 alias gitprune='gdeletemerged && gdeletesquashed'
 alias ghd='gcm --no-verify'
 alias glast='git checkout - && gpp'
 alias glist='git branch --merged develop | grep -v develop | grep -v master'
-alias gnew='git checkout -b'
-alias gpp='gpull && gprune'
-alias gprune='git fetch --prune'
-alias gpublish='git push -u origin $(git rev-parse --abbrev-ref HEAD)'
-alias gpull='git pull'
-alias gpush='git push'
-alias gs='git status'
 alias gsoft='git reset --soft HEAD~1'
-alias gsshort='gs | grep -e "Your branch" -e "modified"'
 
 ## Misc
-alias home='cd ~'
-alias c=clear
 alias v='nvim'
-alias open-desktop='cd ~/Desktop/ && open .'
-alias open-home='cd ~ && open .'
 alias dhd='cd ~/Developer/dotfiles-hd && code .'
 alias open-zshrc='code ~/.zshrc'
 alias ff='fastfetch'
-alias r='reload'
-
-## Brew
-alias open-brew='cd /opt/homebrew'
 
 ## Terraform
 alias tf=terraform
@@ -81,9 +60,6 @@ alias coverage='go test -coverprofile=coverage.out ./... && go tool cover -html=
 
 ## VSCode
 alias code-restart="killall electron && killall node && killall code"
-
-## Cross-platform aliases (LSD and Hunk)
-source "$ZSH_CONFIG_DIR/../aliases.zsh"
 
 ## Bat
 alias cat="bat --paging never --theme Nord"
@@ -101,9 +77,6 @@ alias snlp='snitch ls -p'            # Plain output (parsable)
 alias snj='snitch json'              # JSON output for scripting
 alias snw='snitch watch'             # Stream JSON frames
 alias snth='snitch themes'           # List available themes
-
-## SSH
-alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"
 
 # Tmux
 alias tm='tmux'                             # Start tmux

@@ -75,6 +75,11 @@ if [[ "$MODE" == "apply" ]]; then
 fi
 
 require_source "$BREWFILE"
+require_source "$DOTFILES_DIR/config/zsh/core-aliases.zsh"
+require_source "$DOTFILES_DIR/config/zsh/core-functions.zsh"
+require_source "$DOTFILES_DIR/config/zsh/mac/base-aliases.zsh"
+require_source "$DOTFILES_DIR/config/zsh/mac/personal-control-aliases.zsh"
+require_source "$SCRIPT_DIR/vm.zsh"
 for spec in "${LINK_SPECS[@]}"; do
   require_source "${spec%%|*}"
   reject_link_source_alias "${spec%%|*}" "${spec#*|}"

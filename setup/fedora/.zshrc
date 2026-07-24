@@ -1,8 +1,11 @@
 # [Portable ZSH Aliases]
 # --------------------------------------------------------------------------------------------------------
-ZSH_CONFIG_ROOT=~/Developer/dotfiles-hd/config/zsh
-[[ -r "$ZSH_CONFIG_ROOT/lsd-aliases.zsh" ]] && source "$ZSH_CONFIG_ROOT/lsd-aliases.zsh"
-[[ -r "$ZSH_CONFIG_ROOT/hunk-aliases.zsh" ]] && source "$ZSH_CONFIG_ROOT/hunk-aliases.zsh"
+typeset fedora_zshrc="${${(%):-%N}:A}"
+typeset fedora_repo="${fedora_zshrc:h:h:h}"
+ZSH_CONFIG_ROOT="$fedora_repo/config/zsh"
+[[ -r "$ZSH_CONFIG_ROOT/core-functions.zsh" ]] && source "$ZSH_CONFIG_ROOT/core-functions.zsh"
+[[ -r "$ZSH_CONFIG_ROOT/core-aliases.zsh" ]] && source "$ZSH_CONFIG_ROOT/core-aliases.zsh"
+unset fedora_repo fedora_zshrc
 
 # [Environment Variables]
 # --------------------------------------------------------------------------------------------------------

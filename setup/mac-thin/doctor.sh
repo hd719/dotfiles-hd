@@ -82,15 +82,25 @@ fi
 
 if /bin/zsh -dfc "
   source '$DOTFILES_DIR/setup/mac-thin/.zshrc'
+  [[ \"\$(alias g)\" == 'g=git' ]]
+  [[ \"\$(alias gs)\" == \"gs='git status'\" ]]
+  [[ \"\$(alias cod)\" == 'cod=codex' ]]
+  [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
+  [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
+  [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ubuntu)\" == \"ubuntu='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias uvm-open)\" == \"uvm-open='open -a \\\"VMware Fusion\\\"'\" ]]
+  [[ \"\$(whence -w reload)\" == 'reload: function' ]]
   [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
   [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]
+  ! alias v >/dev/null 2>&1
+  ! alias hm-dev >/dev/null 2>&1
+  ! alias docker-nuke >/dev/null 2>&1
 "; then
-  pass "Ubuntu VM shortcuts available"
+  pass "Thin-Mac personal shell allowlist available"
 else
-  fail "Ubuntu VM shortcuts missing"
+  fail "Thin-Mac personal shell allowlist invalid"
 fi
 
 if [[ "$FAILURES" -eq 0 ]]; then

@@ -179,17 +179,21 @@ install_nerd_font() {
 }
 
 link_configs() {
-  local legacy_aliases="$HOME/.config/zsh/lsd-aliases.zsh"
+  local legacy_lsd_aliases="$HOME/.config/zsh/lsd-aliases.zsh"
+  local legacy_shared_aliases="$HOME/.config/zsh/aliases.zsh"
 
   log "Linking Ubuntu configuration"
   ensure_directory "$HOME/.config/ghostty"
-  if [[ -L "$legacy_aliases" ]] \
-    && [[ "$(readlink "$legacy_aliases")" == "$ROOT_DIR/config/zsh/lsd-aliases.zsh" ]]; then
-    rm "$legacy_aliases"
+  if [[ -L "$legacy_lsd_aliases" ]] \
+    && [[ "$(readlink "$legacy_lsd_aliases")" == "$ROOT_DIR/config/zsh/lsd-aliases.zsh" ]]; then
+    rm "$legacy_lsd_aliases"
+  fi
+  if [[ -L "$legacy_shared_aliases" ]] \
+    && [[ "$(readlink "$legacy_shared_aliases")" == "$ROOT_DIR/config/zsh/aliases.zsh" ]]; then
+    rm "$legacy_shared_aliases"
   fi
   safe_link "$SCRIPT_DIR/.zshrc" "$HOME/.zshrc"
   safe_link "$SCRIPT_DIR/ghostty.conf" "$HOME/.config/ghostty/config"
-  safe_link "$ROOT_DIR/config/zsh/aliases.zsh" "$HOME/.config/zsh/aliases.zsh"
   safe_link "$ROOT_DIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
   safe_link "$ROOT_DIR/config/git/.gitignore_global" "$HOME/.gitignore_global"
 

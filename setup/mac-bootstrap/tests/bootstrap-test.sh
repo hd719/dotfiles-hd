@@ -1233,23 +1233,30 @@ test_shared_zsh_interface() {
     "$fake_bin"
   ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
   : > "$home_dir/.local/bin/env"
+  printf '#!/bin/sh\nexit 0\n' > "$fake_bin/lsd"
+  printf '#!/bin/sh\nexit 0\n' > "$fake_bin/hunk"
+  chmod +x "$fake_bin/lsd" "$fake_bin/hunk"
 
   for zsh_file in \
     "$module" \
-    "$REPO_DIR/config/zsh/aliases.zsh" \
+    "$REPO_DIR/config/zsh/core-aliases.zsh" \
+    "$REPO_DIR/config/zsh/core-functions.zsh" \
     "$shared_dir/init.zsh" \
+    "$shared_dir/base-aliases.zsh" \
     "$shared_dir/prompt.zsh" \
     "$shared_dir/tooling.zsh" \
     "$shared_dir/functions.zsh" \
     "$shared_dir/alias.zsh" \
     "$shared_dir/k8s.zsh" \
     "$shared_dir/personal.zsh" \
+    "$shared_dir/personal-control-aliases.zsh" \
     "$shared_dir/personal-functions.zsh" \
     "$shared_dir/personal-aliases.zsh" \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc" \
     "$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh" \
     "$REPO_DIR/setup/mac-pro-resilience/.zshrc" \
+    "$REPO_DIR/setup/mac-thin/vm.zsh" \
     "$REPO_DIR/setup/fedora/.zshrc"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
     TESTS=$((TESTS + 1))
@@ -1278,7 +1285,11 @@ test_shared_zsh_interface() {
       (( $+functions[_goodmorning_sync_dotfiles] )) || exit 1
       alias ll >/dev/null || exit 1
       alias hwatch >/dev/null || exit 1
+      alias g >/dev/null || exit 1
+      alias dots >/dev/null || exit 1
+      alias gs >/dev/null || exit 1
       alias cod >/dev/null 2>&1 && exit 1
+      alias vault >/dev/null 2>&1 && exit 1
       print -r -- interface-ok
     ' zsh "$shared_init" 2>/dev/null
   )"
@@ -1292,6 +1303,8 @@ test_shared_zsh_interface() {
       (( $+functions[carchive] )) || exit 1
       (( $+functions[opmission] )) || exit 1
       alias cod >/dev/null || exit 1
+      [[ "$(alias codu)" == "codu='\''brew upgrade --cask codex'\''" ]] || exit 1
+      alias vault >/dev/null || exit 1
       alias opdash >/dev/null || exit 1
       alias hm-dev >/dev/null || exit 1
       print -r -- personal-ok
@@ -1308,6 +1321,7 @@ test_shared_zsh_interface() {
         (( $+functions[goodMorning] )) || exit 1
         (( $+functions[carchive] )) || exit 1
         alias cod >/dev/null || exit 1
+        alias vault >/dev/null || exit 1
         alias hwatch >/dev/null || exit 1
         print -r -- profile-ok
       ' zsh "$zsh_file" 2>/dev/null
@@ -1324,12 +1338,25 @@ test_shared_zsh_interface() {
       alias v >/dev/null || exit 1
       alias hwatch >/dev/null || exit 1
       alias cod >/dev/null 2>&1 && exit 1
+      alias vault >/dev/null 2>&1 && exit 1
       alias opdash >/dev/null 2>&1 && exit 1
       alias hm-dev >/dev/null 2>&1 && exit 1
       print -r -- resilience-ok
     ' zsh "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 2>/dev/null
   )"
   assert_eq resilience-ok "$actual" "Resilience profile keeps work behavior without personal workflows"
+
+  actual="$(
+    HOME="$home_dir" PATH="/usr/bin:/bin" /bin/zsh -dfc '
+      source "$1" 2>/dev/null
+      [[ "$(alias g)" == "g=git" ]] || exit 1
+      alias dots >/dev/null || exit 1
+      (( $+functions[reload] )) || exit 1
+      alias cod >/dev/null 2>&1 && exit 1
+      print -r -- fedora-core-ok
+    ' zsh "$REPO_DIR/setup/fedora/.zshrc"
+  )"
+  assert_eq fedora-core-ok "$actual" "Fedora profile loads only the portable shell layer"
 
   actual="$(
     HOME="$home_dir" /bin/zsh -dfc '

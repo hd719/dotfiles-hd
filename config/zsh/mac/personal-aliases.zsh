@@ -1,15 +1,13 @@
 # [Personal Mac Aliases]
 # --------------------------------------------------------------------------------------------------------
 
-## Codex
-alias cod='codex'
+typeset personal_aliases_file="${${(%):-%N}:A}"
+source "${personal_aliases_file:h}/personal-control-aliases.zsh"
+unset personal_aliases_file
+
+## Codex extras
 alias coda='carchive'
-alias codd='codex doctor'
-alias codr='codex resume'
-alias codrl='codex resume --last'
-alias codrv='codex review --uncommitted'
 alias codu='brew upgrade --cask codex'
-alias codx='codex exec'
 
 ## SSH
 alias blaze="ssh hamels-macbook-pro-2"

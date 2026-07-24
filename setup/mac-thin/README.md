@@ -77,11 +77,21 @@ The doctor remains red until both applications exist in `/Applications`.
 The bootstrap never restores credentials, starts services, removes packages,
 or installs development tooling.
 
-## Ubuntu VM Shortcuts
+## Personal Shell Allowlist
 
 Start a fresh shell after bootstrap, then use:
 
 ```text
+g, gs        Git and Git status
+gdiff        Git diff
+gpull        Pull the current repository
+gpush        Push the current repository
+cod          Codex CLI
+codr, codrl  Resume a Codex session
+dots         Enter the Mac dotfiles repository
+vault        Enter the Obsidian vault repository
+hosts        List configured SSH hosts
+r            Reload the Zsh configuration
 u, ubuntu   SSH into the Ubuntu VM
 uvm-status  Show whether the Ubuntu VM is running
 uvm-ip      Show the current VMware guest IP
@@ -94,3 +104,13 @@ action to avoid accidental power-offs.
 Keep `AddressFamily inet` in the `ubuntu-vm` SSH block. VMware mDNS can publish
 the guest on multiple IPv6 link-local interfaces, making SSH choose the wrong
 route intermittently.
+
+This is an explicit allowlist. Neovim, Node/Bun/Go, Docker, Kubernetes, project,
+VS Code, tmux, and other development aliases remain inside the Linux VMs.
+
+The shell is assembled from reusable layers:
+
+- `config/zsh/core-*` provides portable Git, navigation, SSH, and reload helpers.
+- `config/zsh/mac/base-aliases.zsh` adds safe macOS controls.
+- `config/zsh/mac/personal-control-aliases.zsh` adds vault and Codex controls.
+- `setup/mac-thin/vm.zsh` stays host-specific and owns VMware shortcuts.

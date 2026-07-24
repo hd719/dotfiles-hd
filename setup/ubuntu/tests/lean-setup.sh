@@ -10,7 +10,8 @@ MISE_CONFIG="$ROOT_DIR/setup/ubuntu/mise.toml"
 ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
-SHARED_ALIASES="$ROOT_DIR/config/zsh/aliases.zsh"
+CORE_ALIASES="$ROOT_DIR/config/zsh/core-aliases.zsh"
+CORE_FUNCTIONS="$ROOT_DIR/config/zsh/core-functions.zsh"
 MAC_ALIASES="$ROOT_DIR/config/zsh/mac/alias.zsh"
 NVIM_EDITOR_CONFIG="$ROOT_DIR/config/nvim/lua/plugins/editor.lua"
 TEST_ROOT="$(mktemp -d)"
@@ -398,11 +399,16 @@ eval "$(zoxide init --cmd cd zsh)"
 /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 alias gs='git status --short --branch'
 alias dc='docker compose'
-source_if_exists "$HOME/.config/zsh/aliases.zsh"
+source_if_exists "$ubuntu_repo/config/zsh/core-functions.zsh"
+source_if_exists "$ubuntu_repo/config/zsh/core-aliases.zsh"
 EOF
 
+  assert_file_contains "$CORE_ALIASES" "alias gadd='git add .'"
+  assert_file_contains "$CORE_ALIASES" "alias dots='cd ~/Developer/dotfiles-hd'"
+  assert_file_contains "$CORE_FUNCTIONS" "reload()"
+
   while IFS= read -r expected; do
-    [[ -n "$expected" ]] && assert_file_contains "$SHARED_ALIASES" "$expected"
+    [[ -n "$expected" ]] && assert_file_contains "$CORE_ALIASES" "$expected"
   done <<'EOF'
 alias ls='lsd --tree --depth 1'
 alias lss='lsd --tree --depth 2'
@@ -415,7 +421,7 @@ alias hdiff='hunk diff'
 alias hstaged='hunk diff --staged'
 alias hshow='hunk show'
 EOF
-  assert_file_contains "$MAC_ALIASES" "source \"\$ZSH_CONFIG_DIR/../aliases.zsh\""
+  assert_file_contains "$MAC_ALIASES" "source \"\${mac_aliases_file:h}/base-aliases.zsh\""
 
   for forbidden in mac-pro mac-vm mac-pro-resilience mac-resilience linuxbrew rbenv 'code --wait' kubectl terraform; do
     if grep -Fq -- "$forbidden" "$ZSH_CONFIG"; then
@@ -431,9 +437,19 @@ EOF
   )"
   [[ "$output" == "nvim|xterm-test|$TEST_ROOT/zsh-home/.local/bin" ]] || fail "Ubuntu zsh config did not load cleanly in isolation"
 
+  HOME="$TEST_ROOT/zsh-home" \
+    PATH="/usr/bin:/bin" \
+    zsh -f -c '
+      source "$1"
+      [[ "$(alias g)" == "g=git" ]]
+      [[ "$(alias gs)" == "gs='\''git status --short --branch'\''" ]]
+      [[ "$(alias gadd)" == "gadd='\''git add .'\''" ]]
+      [[ "$(alias dots)" == "dots='\''cd ~/Developer/dotfiles-hd'\''" ]]
+      [[ "$(whence -w reload)" == "reload: function" ]]
+    ' _ "$ZSH_CONFIG" || fail "Ubuntu did not load the portable shell layer"
+
   case_dir="$TEST_ROOT/zsh-shared-aliases"
-  mkdir -p "$case_dir/home/.config/zsh" "$case_dir/bin"
-  ln -s "$SHARED_ALIASES" "$case_dir/home/.config/zsh/aliases.zsh"
+  mkdir -p "$case_dir/home" "$case_dir/bin"
   cat > "$case_dir/bin/lsd" <<EOF
 #!/usr/bin/env bash
 printf '%s\n' "\$*" >> "$case_dir/lsd.log"
@@ -458,6 +474,7 @@ test_setup_is_lean_and_rerunnable() {
   printf 'legacy shared Ghostty config\n' > "$case_dir/legacy-ghostty/config"
   ln -s "$case_dir/legacy-ghostty" "$case_dir/home/.config/ghostty"
   ln -s "$ROOT_DIR/config/zsh/lsd-aliases.zsh" "$case_dir/home/.config/zsh/lsd-aliases.zsh"
+  ln -s "$ROOT_DIR/config/zsh/aliases.zsh" "$case_dir/home/.config/zsh/aliases.zsh"
 
   cat > "$case_dir/bin/sudo" <<EOF
 #!/usr/bin/env bash
@@ -491,8 +508,7 @@ EOF
   [[ "$(find "$case_dir/home/.config" -maxdepth 1 -name 'ghostty.backup.*' | wc -l | tr -d ' ')" == "1" ]] || fail "setup did not preserve the whole-directory Ghostty link"
   assert_file_contains "$case_dir/legacy-ghostty/config" "legacy shared Ghostty config"
   [[ -L "$case_dir/home/.config/starship.toml" ]] || fail "setup did not link Starship config"
-  [[ -L "$case_dir/home/.config/zsh/aliases.zsh" ]] || fail "setup did not link shared aliases"
-  [[ "$(readlink "$case_dir/home/.config/zsh/aliases.zsh")" == "$SHARED_ALIASES" ]] || fail "shared aliases point to the wrong source"
+  [[ ! -L "$case_dir/home/.config/zsh/aliases.zsh" ]] || fail "setup did not remove the legacy shared alias link"
   [[ ! -L "$case_dir/home/.config/zsh/lsd-aliases.zsh" ]] || fail "setup did not remove the legacy lsd alias link"
 
   assert_file_contains "$case_dir/mutations.log" "apt-get update"

@@ -1,6 +1,10 @@
 # [Shared Mac Functions]
 # --------------------------------------------------------------------------------------------------------
 
+typeset mac_functions_file="${${(%):-%N}:A}"
+source "${mac_functions_file:h:h}/core-functions.zsh"
+unset mac_functions_file
+
 _load_homebrew_plugin() {
   local plugin_path="$1"
   [[ -r "$plugin_path" ]] || return 0
@@ -11,16 +15,6 @@ _activate_mise() {
   local mise_bin
   mise_bin="$(command -v mise 2>/dev/null)" || return 0
   eval "$("$mise_bin" activate zsh)"
-}
-
-reload() {
-  # Use zsh's EPOCHREALTIME for millisecond precision (macOS compatible)
-  zmodload zsh/datetime 2>/dev/null
-  local start_time=$EPOCHREALTIME
-  source ~/.zshrc
-  local end_time=$EPOCHREALTIME
-  local duration=$(( (end_time - start_time) * 1000 ))
-  printf "Zsh configuration reloaded in %.0fms\n" $duration
 }
 
 _now_epoch_ms() {
