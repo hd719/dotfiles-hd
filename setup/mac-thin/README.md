@@ -13,6 +13,7 @@ The host installs only:
 - Brave and Google Chrome
 - ChatGPT/Codex
 - DaisyDisk
+- diff-so-fancy for readable local Git diffs
 - Ghostty
 - Ghostty fonts
 - iStat Menus

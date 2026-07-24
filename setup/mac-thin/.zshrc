@@ -8,6 +8,14 @@ setopt append_history
 setopt hist_ignore_all_dups
 setopt share_history
 
+# Preserve the preferred Git pager while keeping fresh restores usable before
+# Homebrew finishes installing the control-plane formula.
+if (( $+commands[diff-so-fancy] )); then
+  export GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX'
+else
+  export GIT_PAGER='less --tabs=4 -RFX'
+fi
+
 autoload -Uz compinit
 compinit -C
 

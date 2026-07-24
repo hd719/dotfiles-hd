@@ -62,8 +62,11 @@ export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/setup/mac-thin/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]
-/bin/zsh -dfc "
+grep -Fxq 'selection-background = #9ABACE' "$REPO_DIR/config/ghostty/config"
+grep -Fxq 'selection-foreground = #000001' "$REPO_DIR/config/ghostty/config"
+GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   source '$HOME/.zshrc'
+  [[ \"\$GIT_PAGER\" == 'less --tabs=4 -RFX' ]] || exit 1
   [[ \"\$(alias g)\" == 'g=git' ]]
   [[ \"\$(alias gs)\" == \"gs='git status'\" ]]
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
@@ -80,8 +83,19 @@ export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
   ! alias docker-nuke >/dev/null 2>&1
 "
 
+cat > "$TEST_ROOT/bin/diff-so-fancy" <<'EOF'
+#!/bin/sh
+cat
+EOF
+chmod +x "$TEST_ROOT/bin/diff-so-fancy"
+GIT_PAGER='less --tabs=4 -RFX' /bin/zsh -dfc "
+  source '$HOME/.zshrc'
+  [[ \"\$GIT_PAGER\" == 'diff-so-fancy | less --tabs=4 -RFX' ]] || exit 1
+"
+
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -z "$(find "$HOME" -name '*.backup-*' -print -quit)" ]]
 grep -Fq 'bundle install --no-upgrade' "$TEST_ROOT/brew.log"
+grep -Fxq 'brew "diff-so-fancy"' "$REPO_DIR/setup/mac-thin/Brewfile"
 
 printf 'Thin Mac bootstrap tests passed.\n'

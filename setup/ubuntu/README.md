@@ -69,7 +69,9 @@ are never linked.
 
 Ghostty uses the shared Hamel Nord profile. Neovim uses the shared
 `config/nvim`; no Linux-only Lua fork exists. Herdr and Hunk link only their
-configuration files so runtime state remains machine-owned.
+configuration files so runtime state remains machine-owned. The linked btop
+configuration disables save-on-exit so btop cannot rewrite the Git checkout;
+edit the tracked config directly when changing btop settings.
 
 ## Verify
 

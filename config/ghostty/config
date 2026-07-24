@@ -18,8 +18,8 @@ palette = 15=#d8dee9
 background = #3b4252
 foreground = #d8dee9
 cursor-color = #88c0d0
-selection-background = #4c566a
-selection-foreground = #d8dee9
+selection-background = #9ABACE
+selection-foreground = #000001
 
 # Use a 90% Hamel Nord Blur background with a softer blur.
 # Applying opacity to explicit cells keeps Neovim and other full-screen

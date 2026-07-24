@@ -11,6 +11,7 @@ ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
 FASTFETCH_CONFIG="$ROOT_DIR/config/fastfetch/config.jsonc"
+BTOP_CONFIG="$ROOT_DIR/config/btop/btop.conf"
 SHARED_ALIASES="$ROOT_DIR/config/zsh/shared/aliases.zsh"
 SHARED_DEVELOPMENT_ALIASES="$ROOT_DIR/config/zsh/shared/development-aliases.zsh"
 SHARED_FUNCTIONS="$ROOT_DIR/config/zsh/shared/functions.zsh"
@@ -212,6 +213,10 @@ test_ubuntu_ghostty_reuses_shared_config() {
 test_fastfetch_os_age_is_cross_platform() {
   assert_file_contains "$FASTFETCH_CONFIG" 'Darwin) birth_install=$(stat -f %B /)'
   assert_file_contains "$FASTFETCH_CONFIG" 'Linux) birth_install=$(stat -c %W /)'
+}
+
+test_btop_does_not_write_through_config_link() {
+  assert_file_contains "$BTOP_CONFIG" 'save_config_on_exit = false'
 }
 
 test_ubuntu_tree_sitter_inventory_matches_shared_config() {
@@ -1187,6 +1192,7 @@ test_cleanup_wrong_os_stops_before_mutation
 test_ubuntu_mise_toolchain_is_exact
 test_ubuntu_ghostty_reuses_shared_config
 test_fastfetch_os_age_is_cross_platform
+test_btop_does_not_write_through_config_link
 test_ubuntu_tree_sitter_inventory_matches_shared_config
 test_nerd_font_install_verifies_before_replacing
 test_zsh_config_is_linux_native
