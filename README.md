@@ -18,6 +18,7 @@ cd "$HOME/Developer/dotfiles-hd"
 
 | Device                          | Profile or command           | Runbook                                                                    |
 | ------------------------------- | ---------------------------- | -------------------------------------------------------------------------- |
+| Thin personal Apple Silicon Mac | `setup/mac-thin/bootstrap.sh` | [`setup/mac-thin/README.md`](setup/mac-thin/README.md)                     |
 | Personal Apple Silicon MacBook  | `--profile mac-pro`          | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
 | Personal Apple Silicon Mac mini | `--profile mac-mini`         | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
 | Resilience work Mac             | `setup/mac-pro-resilience`   | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
@@ -26,7 +27,21 @@ cd "$HOME/Developer/dotfiles-hd"
 Scripts under `setup/fedora` are legacy helpers, not a supported one-command
 bootstrap.
 
-## Personal Mac Quick Start
+## Thin Mac Quick Start
+
+For the restored MacBook control plane:
+
+```bash
+setup/mac-thin/bootstrap.sh --dry-run
+setup/mac-thin/bootstrap.sh --check
+setup/mac-thin/bootstrap.sh --apply
+setup/mac-thin/doctor.sh
+```
+
+Development repositories, Docker, databases, compilers, language runtimes,
+language servers, Neovim, and project dependencies stay inside the Linux VMs.
+
+## Full Personal Mac Quick Start
 
 Install Xcode Command Line Tools and Homebrew first, then run:
 
@@ -51,7 +66,16 @@ the approval gate in the Mac bootstrap runbook before `--apply`.
 - Each Mac profile owns its `.zshrc`, plugin timing, runtimes, credentials, and
   machine-specific behavior.
 
-## Personal Mac Link Inventory
+## Thin Mac Link Inventory
+
+The thin profile owns only these two links:
+
+| Tool    | Live path                                                    | Source                    |
+| ------- | ------------------------------------------------------------ | ------------------------- |
+| Shell   | `~/.zshrc`                                                   | `setup/mac-thin/.zshrc`   |
+| Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config`   |
+
+## Full Personal Mac Link Inventory
 
 The personal Mac bootstrap owns every row below except the explicitly manual
 AeroSpace link. It backs up non-matching destinations and leaves other state

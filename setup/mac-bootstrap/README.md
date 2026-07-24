@@ -2,6 +2,9 @@
 
 Supported setup path for Apple Silicon personal Macs.
 
+This is the full-development bootstrap. Do not run it on a thin Mac control
+plane; use [`../mac-thin/README.md`](../mac-thin/README.md) instead.
+
 | Profile    | Target            |
 | ---------- | ----------------- |
 | `mac-pro`  | Personal MacBook  |

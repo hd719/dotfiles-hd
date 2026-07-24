@@ -1,0 +1,6 @@
+# macOS control-plane applications only. Development tooling belongs in the VMs.
+
+cask "1password"
+cask "ghostty"
+cask "obsidian"
+cask "tailscale-app"

@@ -15,6 +15,7 @@ before changing state.
 
 | Target                                     | Source of truth                      |
 | ------------------------------------------ | ------------------------------------ |
+| Thin personal MacBook (`mac-thin`)         | `setup/mac-thin/README.md`           |
 | Personal MacBook (`mac-pro`)               | `setup/mac-bootstrap/README.md`      |
 | Personal Mac mini (`mac-mini`)             | `setup/mac-bootstrap/README.md`      |
 | Resilience work Mac (`mac-pro-resilience`) | `setup/mac-pro-resilience/README.md` |
@@ -60,7 +61,20 @@ request into a full-machine migration.
 
 ## Personal Macs
 
-Use only:
+The restored thin MacBook uses only:
+
+```bash
+setup/mac-thin/bootstrap.sh --dry-run
+setup/mac-thin/bootstrap.sh --check
+setup/mac-thin/bootstrap.sh --apply
+setup/mac-thin/doctor.sh
+```
+
+Keep development repositories, Docker, databases, compilers, language
+runtimes, language servers, Neovim, and project dependencies inside the Linux
+VMs. Do not run the full `mac-pro` bootstrap on the thin host.
+
+Full-development personal Macs use only:
 
 ```bash
 setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run

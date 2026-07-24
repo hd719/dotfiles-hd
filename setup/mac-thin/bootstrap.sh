@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
+STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
+MODE="dry-run"
+
+# shellcheck source=../mac-bootstrap/lib.sh
+source "$DOTFILES_DIR/setup/mac-bootstrap/lib.sh"
+
+usage() {
+  cat <<'EOF'
+Usage: bootstrap.sh [--dry-run|--check|--apply]
+
+Modes:
+  --dry-run  Preview packages and links without package-manager calls or writes.
+  --check    Audit packages, applications, and links without changing them.
+  --apply    Install missing control-plane apps and apply backed-up links.
+
+This profile never installs developer runtimes, Docker, databases, compilers,
+language servers, editors, or project dependencies.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      MODE="dry-run"
+      shift
+      ;;
+    --check)
+      MODE="check"
+      shift
+      ;;
+    --apply)
+      MODE="apply"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'error: unknown option: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+BREWFILE="$DOTFILES_DIR/setup/mac-thin/Brewfile"
+LINK_SPECS=(
+  "$DOTFILES_DIR/setup/mac-thin/.zshrc|$HOME/.zshrc"
+  "$DOTFILES_DIR/config/ghostty/config|$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+)
+
+[[ "$(uname -s)" == "Darwin" ]] || die "mac-thin requires macOS"
+[[ "$(uname -m)" == "arm64" ]] || die "mac-thin currently supports Apple Silicon only"
+xcode-select -p >/dev/null 2>&1 \
+  || die "install Xcode Command Line Tools first: xcode-select --install"
+command -v brew >/dev/null 2>&1 || die "install Homebrew first: https://brew.sh"
+git -C "$DOTFILES_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+  || die "not a Git checkout: $DOTFILES_DIR"
+
+if [[ "$MODE" == "apply" ]]; then
+  [[ "$DOTFILES_DIR" == "$HOME/Developer/dotfiles-hd" \
+    || "${DOTFILES_ALLOW_NONCANONICAL:-0}" == "1" ]] \
+    || die "--apply requires the canonical clone at $HOME/Developer/dotfiles-hd"
+  if [[ "${DOTFILES_ALLOW_DIRTY:-0}" != "1" ]]; then
+    [[ -z "$(git -C "$DOTFILES_DIR" status --porcelain)" ]] \
+      || die "dotfiles checkout must be clean before --apply"
+  fi
+fi
+
+require_source "$BREWFILE"
+for spec in "${LINK_SPECS[@]}"; do
+  require_source "${spec%%|*}"
+  reject_link_source_alias "${spec%%|*}" "${spec#*|}"
+done
+
+if [[ "$MODE" == "dry-run" ]]; then
+  say "profile: mac-thin"
+  say "mode: dry-run (no package-manager calls or writes)"
+  say "would install control-plane apps from: $BREWFILE"
+  say "VMware Fusion and ChatGPT remain manual application installs"
+  for spec in "${LINK_SPECS[@]}"; do
+    backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 1
+  done
+  exit 0
+fi
+
+if [[ "$MODE" == "check" ]]; then
+  status=0
+  if HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade --file "$BREWFILE"; then
+    say "Brewfile satisfied: $BREWFILE"
+  else
+    say "Brewfile has missing dependencies: $BREWFILE"
+    status=1
+  fi
+  for spec in "${LINK_SPECS[@]}"; do
+    if link_matches "${spec%%|*}" "${spec#*|}"; then
+      say "link current: ${spec#*|}"
+    else
+      backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 1
+      status=1
+    fi
+  done
+  "$SCRIPT_DIR/doctor.sh" || status=1
+  exit "$status"
+fi
+
+say "Installing thin-Mac control-plane applications without broad upgrades..."
+HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$BREWFILE"
+
+for spec in "${LINK_SPECS[@]}"; do
+  backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 0
+done
+
+"$SCRIPT_DIR/doctor.sh"
+say "Thin Mac bootstrap complete. Start a fresh login shell."
