@@ -7,10 +7,15 @@ TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-mac-thin-test.XXXXXX")"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 
 mkdir -p "$TEST_ROOT/bin" "$TEST_ROOT/home/.ssh" "$TEST_ROOT/apps"
-printf 'Host ubuntu-vm\n' > "$TEST_ROOT/home/.ssh/config"
+cat > "$TEST_ROOT/home/.ssh/config" <<'EOF'
+Host ubuntu-vm
+  HostName ubuntu-vm.local
+  AddressFamily inet
+EOF
 
 for app_name in \
   "1Password.app" \
+  "Brave Browser.app" \
   "ChatGPT.app" \
   "Ghostty.app" \
   "Obsidian.app" \
@@ -57,6 +62,13 @@ export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/setup/mac-thin/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]
+/bin/zsh -dfc "
+  source '$HOME/.zshrc'
+  [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
+  [[ \"\$(alias ubuntu)\" == \"ubuntu='ssh ubuntu-vm'\" ]]
+  [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
+  [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]
+"
 
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -z "$(find "$HOME" -name '*.backup-*' -print -quit)" ]]

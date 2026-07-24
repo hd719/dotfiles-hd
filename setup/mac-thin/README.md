@@ -9,11 +9,23 @@ The host installs only:
 
 - Homebrew
 - 1Password
+- Bartender
+- Brave and Google Chrome
 - ChatGPT/Codex
+- DaisyDisk
 - Ghostty
+- Ghostty fonts
+- iStat Menus
+- Mullvad VPN
+- noTunes
 - Obsidian
+- Pearcleaner
+- Raycast
+- TablePlus
 - Tailscale
+- VLC
 - VMware Fusion
+- Zoom
 - macOS SSH
 
 Do not install project repositories, Docker, databases, compilers, language
@@ -39,9 +51,9 @@ setup/mac-thin/bootstrap.sh --apply
 setup/mac-thin/doctor.sh
 ```
 
-The bootstrap installs 1Password, Ghostty, Obsidian, and Tailscale through
-Homebrew. It links only the thin `.zshrc` and tracked Ghostty configuration,
-backing up any replaced destination beside the original.
+The bootstrap installs the policy casks in `Brewfile` through Homebrew. It links
+only the thin `.zshrc` and tracked Ghostty configuration, backing up any
+replaced destination beside the original.
 
 ## Manual Applications
 
@@ -64,3 +76,21 @@ The doctor remains red until both applications exist in `/Applications`.
 
 The bootstrap never restores credentials, starts services, removes packages,
 or installs development tooling.
+
+## Ubuntu VM Shortcuts
+
+Start a fresh shell after bootstrap, then use:
+
+```text
+u, ubuntu   SSH into the Ubuntu VM
+uvm-status  Show whether the Ubuntu VM is running
+uvm-ip      Show the current VMware guest IP
+uvm-open    Open VMware Fusion
+```
+
+Press `Ctrl-D` to leave the SSH session. VM shutdown remains an explicit VMware
+action to avoid accidental power-offs.
+
+Keep `AddressFamily inet` in the `ubuntu-vm` SSH block. VMware mDNS can publish
+the guest on multiple IPv6 link-local interfaces, making SSH choose the wrong
+route intermittently.

@@ -74,6 +74,24 @@ Keep development repositories, Docker, databases, compilers, language
 runtimes, language servers, Neovim, and project dependencies inside the Linux
 VMs. Do not run the full `mac-pro` bootstrap on the thin host.
 
+### Codex Backup and Restore
+
+- Quit the Codex app with `⌘Q` before backup or restore. Closing its window is
+  not enough. Never copy live Codex databases.
+- Copy the entire `~/.codex/` directory with `rsync`, not Finder. At minimum,
+  verify `sessions/`, `archived_sessions/`, `state_5.sqlite`,
+  `session_index.jsonl`, and `.codex-global-state.json`.
+- On a restored Mac, install Codex and sign in fresh. Preserve the new
+  `auth.json` and `installation_id`; never replace them from backup.
+- After backup and restore, run
+  `/Applications/ChatGPT.app/Contents/Resources/codex doctor --json` from
+  Ghostty. Require healthy database checks and `state.rollout_db_parity: ok`
+  with zero missing, stale, duplicate, mismatched, malformed, or scan-error
+  entries.
+- Keep two independent copies: Guardian-Node plus Time Machine or another
+  disk. A backup is incomplete until transcript and database parity checks
+  pass.
+
 Full-development personal Macs use only:
 
 ```bash
