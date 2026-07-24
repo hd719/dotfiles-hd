@@ -441,11 +441,14 @@ image pulls, and other external dependencies.
 
 ## SSH and Git Identities
 
-The Mac keeps the private keys. An SSH session opened through `ubuntu-vm`
-forwards a live agent socket into Ubuntu.
+Ubuntu's existing personal key is pinned to plain `github.com`, which
+authenticates as `hd719`. The Arbiter and Forgejo private keys remain on the
+Mac. An SSH session opened through `ubuntu-vm` forwards a live agent socket for
+those additional identities.
 
 ```bash
 ssh-add -l
+ssh -T github.com
 ssh -T github.com-arbiter
 ssh -T forgejo-truenas-lan
 ssh -T forgejo-truenas-ts
@@ -459,6 +462,11 @@ git@github.com-arbiter:arbiter-hd/<repository>.git
 git@forgejo-truenas-lan:hd719/<repository>.git
 git@forgejo-truenas-ts:hd719/<repository>.git
 ```
+
+The hostname selects the account used to authenticate. The path after `:`
+selects the owner and repository. For example,
+`git@github.com-arbiter:hd719/project.git` authenticates as Arbiter but accesses
+a repository owned by `hd719`.
 
 Inspect a repository before changing its remote:
 
@@ -478,6 +486,42 @@ git config user.email "YOUR-ARBITER-EMAIL"
 
 Do not set an unverified email, copy private keys into Ubuntu, or replace the
 machine-owned global `~/.gitconfig`.
+
+### Work alongside an agent
+
+Use separate worktrees, branches, remotes, and commit identities. Never let a
+human and agent edit the same working directory or branch.
+
+From the human checkout, configure the repository once:
+
+```bash
+cd ~/Developer/PROJECT
+git config extensions.worktreeConfig true
+git remote add arbiter git@github.com-arbiter:OWNER/PROJECT.git
+git worktree add ../PROJECT-agent -b agent/TASK origin/main
+git -C ../PROJECT-agent config --worktree user.name "arbiter-hd"
+git -C ../PROJECT-agent config --worktree user.email "ARBITER-VERIFIED-EMAIL"
+```
+
+The human keeps using the original checkout and personal remote:
+
+```bash
+git switch -c human/TASK
+git push -u origin human/TASK
+```
+
+The agent works only in its worktree and pushes through the Arbiter alias:
+
+```bash
+cd ~/Developer/PROJECT-agent
+git var GIT_AUTHOR_IDENT
+git remote -v
+git push -u arbiter agent/TASK
+```
+
+Merge through a pull request or a deliberate reviewed merge. The Arbiter
+account must have write access to the target repository, and the configured
+email must be verified on Arbiter's GitHub account for GitHub attribution.
 
 ## Docker and Databases
 

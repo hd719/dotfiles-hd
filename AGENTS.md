@@ -149,6 +149,8 @@ aligned with the supported workstation.
   tracked higher-contrast color unless the shared terminal palette changes.
 - Arbiter GitHub and Forgejo access in Ubuntu must use the Mac's forwarded SSH
   agent. Keep only public-key selectors in the VM; never copy the private keys.
+- Keep plain `github.com` pinned to Ubuntu's local `hd719` key and reserve
+  `github.com-arbiter` for the forwarded Arbiter identity.
 
 ## Preserved Zed Configuration
 

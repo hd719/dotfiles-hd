@@ -117,10 +117,13 @@ maintenance continues and any reboot requirement is reported.
 
 ## Arbiter and Forgejo Access
 
-Private keys stay on the thin Mac and reach Ubuntu only through the forwarded
-SSH agent. Ubuntu stores the matching public keys and machine-owned host aliases:
+Ubuntu's existing personal key is pinned to plain `github.com`, which
+authenticates as `hd719`. The Arbiter and Forgejo private keys stay on the thin
+Mac and reach Ubuntu only through the forwarded SSH agent. Ubuntu stores their
+matching public keys and machine-owned host aliases:
 
 ```text
+github.com               GitHub as hd719
 github.com-arbiter       GitHub as arbiter-hd
 forgejo-truenas-lan      Forgejo over the home LAN
 forgejo-truenas-ts       Forgejo over Tailscale
@@ -135,7 +138,8 @@ ssh -T github.com-arbiter
 ssh -T forgejo-truenas-lan
 ```
 
-Never copy the Arbiter or Forgejo private keys into the VM.
+The SSH hostname selects the account; the path after `:` selects the repository
+owner. Never copy the Arbiter or Forgejo private keys into the VM.
 
 ## One-Time Legacy Migration
 
