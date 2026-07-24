@@ -94,7 +94,7 @@
       "type": "command",
       "key": "  OS Age ",
       "keyColor": "magenta",
-      "text": "birth_install=$(stat -f %B /); current=$(date +%s); time_progression=$((current - birth_install)); days_difference=$((time_progression / 86400)); echo $days_difference days"
+      "text": "case \"$(uname -s)\" in Darwin) birth_install=$(stat -f %B /) ;; Linux) birth_install=$(stat -c %W /) ;; *) birth_install=0 ;; esac; if [ \"$birth_install\" -gt 0 ] 2>/dev/null; then current=$(date +%s); days_difference=$(((current - birth_install) / 86400)); echo \"$days_difference days\"; else echo unknown; fi"
     },
     {
       "type": "uptime",

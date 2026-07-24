@@ -1240,6 +1240,7 @@ test_shared_zsh_interface() {
   for zsh_file in \
     "$module" \
     "$REPO_DIR/config/zsh/shared/aliases.zsh" \
+    "$REPO_DIR/config/zsh/shared/development-aliases.zsh" \
     "$REPO_DIR/config/zsh/shared/functions.zsh" \
     "$shared_dir/init.zsh" \
     "$shared_dir/aliases.zsh" \

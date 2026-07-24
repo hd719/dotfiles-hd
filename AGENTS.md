@@ -52,11 +52,16 @@ request into a full-machine migration.
 ## Mac Shell Ownership
 
 - `config/zsh/shared/` contains portable shell modules.
+- `config/zsh/shared/development-aliases.zsh` is loaded by Ubuntu and full Mac
+  development profiles, never the thin Mac.
 - `config/zsh/mac/init.zsh` is the full Mac development interface.
 - `config/zsh/mac/personal/init.zsh` adds personal development workflows.
 - MacBook and Mac mini profiles load both.
 - Resilience loads the shared interface plus work-owned behavior, never the
   personal layer.
+- Ubuntu and Fedora keep profile-specific shell behavior under `setup/`.
+- Add `config/zsh/linux/` only when multiple Linux profiles share Linux-only
+  modules.
 - Each profile owns plugin timing, runtimes, credentials, and its `.zshrc`
   entry point.
 

@@ -29,12 +29,5 @@ if (( $+commands[lsd] )); then
   alias la='lsd -a'
 fi
 
-if (( $+commands[hunk] )); then
-  alias hwatch='hunk diff --watch'
-  alias hdiff='hunk diff'
-  alias hstaged='hunk diff --staged'
-  alias hshow='hunk show'
-fi
-
 ## SSH
 alias hosts="awk '/^Host / {print \$2}' ~/.ssh/config"

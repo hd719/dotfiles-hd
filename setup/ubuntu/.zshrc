@@ -24,11 +24,13 @@ typeset ubuntu_zshrc="${${(%):-%N}:A}"
 typeset ubuntu_repo="${ubuntu_zshrc:h:h:h}"
 source_if_exists "$ubuntu_repo/config/zsh/shared/functions.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/aliases.zsh"
-unset ubuntu_repo ubuntu_zshrc
 
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
+
+source_if_exists "$ubuntu_repo/config/zsh/shared/development-aliases.zsh"
+unset ubuntu_repo ubuntu_zshrc
 
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"

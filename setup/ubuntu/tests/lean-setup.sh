@@ -10,7 +10,9 @@ MISE_CONFIG="$ROOT_DIR/setup/ubuntu/mise.toml"
 ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
+FASTFETCH_CONFIG="$ROOT_DIR/config/fastfetch/config.jsonc"
 SHARED_ALIASES="$ROOT_DIR/config/zsh/shared/aliases.zsh"
+SHARED_DEVELOPMENT_ALIASES="$ROOT_DIR/config/zsh/shared/development-aliases.zsh"
 SHARED_FUNCTIONS="$ROOT_DIR/config/zsh/shared/functions.zsh"
 MAC_INIT="$ROOT_DIR/config/zsh/mac/init.zsh"
 NVIM_EDITOR_CONFIG="$ROOT_DIR/config/nvim/lua/plugins/editor.lua"
@@ -181,7 +183,11 @@ bun = "1.3.14"
 "aqua:starship/starship" = "1.26.0"
 "aqua:ajeetdsouza/zoxide" = "0.10.0"
 "aqua:koalaman/shellcheck" = "0.11.0"
+"aqua:fastfetch-cli/fastfetch" = "2.66.0"
+"aqua:ogulcancelik/herdr" = "0.7.5"
+"github:bugzmanov/bookokrat" = "0.3.12"
 "go:golang.org/x/tools/gopls" = { version = "0.23.0", depends = ["go"] }
+"npm:hunkdiff" = { version = "0.17.3", depends = ["node"] }
 "npm:@vtsls/language-server" = { version = "0.3.0", depends = ["node"] }
 "npm:vscode-langservers-extracted" = { version = "4.10.0", depends = ["node"] }
 "npm:bash-language-server" = { version = "5.6.0", depends = ["node"] }
@@ -201,6 +207,11 @@ test_ubuntu_ghostty_reuses_shared_config() {
 
   font_families="$(sed -n 's/^font-family = //p' "$GHOSTTY_CONFIG")"
   [[ "$font_families" == $'Maple Mono NF\nHasklug Nerd Font' ]] || fail "shared Ghostty font fallbacks are not ordered for Mac and Ubuntu"
+}
+
+test_fastfetch_os_age_is_cross_platform() {
+  assert_file_contains "$FASTFETCH_CONFIG" 'Darwin) birth_install=$(stat -f %B /)'
+  assert_file_contains "$FASTFETCH_CONFIG" 'Linux) birth_install=$(stat -c %W /)'
 }
 
 test_ubuntu_tree_sitter_inventory_matches_shared_config() {
@@ -384,7 +395,7 @@ EOF
 }
 
 test_zsh_config_is_linux_native() {
-  local case_dir forbidden output
+  local case_dir development_alias_line forbidden mise_line output
 
   while IFS= read -r expected; do
     [[ -n "$expected" ]] && assert_file_contains "$ZSH_CONFIG" "$expected"
@@ -401,6 +412,7 @@ alias gs='git status --short --branch'
 alias dc='docker compose'
 source_if_exists "$ubuntu_repo/config/zsh/shared/functions.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/aliases.zsh"
+source_if_exists "$ubuntu_repo/config/zsh/shared/development-aliases.zsh"
 EOF
 
   assert_file_contains "$SHARED_ALIASES" "alias gadd='git add .'"
@@ -408,21 +420,30 @@ EOF
   assert_file_contains "$SHARED_FUNCTIONS" "reload()"
 
   while IFS= read -r expected; do
-    [[ -n "$expected" ]] && assert_file_contains "$SHARED_ALIASES" "$expected"
+    [[ -n "$expected" ]] && assert_file_contains "$SHARED_DEVELOPMENT_ALIASES" "$expected"
   done <<'EOF'
-alias ls='lsd --tree --depth 1'
-alias lss='lsd --tree --depth 2'
-alias lsss='lsd --tree --depth 3'
-alias ll='lsd -la --tree --depth 1'
-alias l='lsd -l'
-alias la='lsd -a'
 alias hwatch='hunk diff --watch'
 alias hdiff='hunk diff'
 alias hstaged='hunk diff --staged'
 alias hshow='hunk show'
+alias npb='pnpm run build'
+alias ghd='gcm --no-verify'
+alias v='nvim'
+alias ff='fastfetch'
+alias gomod='go mod'
+alias tm='tmux'
 EOF
+  assert_file_contains "$SHARED_ALIASES" "alias ls='lsd --tree --depth 1'"
   assert_file_contains "$MAC_INIT" 'source "$zsh_shared_dir/aliases.zsh"'
+  assert_file_contains "$MAC_INIT" 'source "$zsh_shared_dir/development-aliases.zsh"'
   assert_file_contains "$MAC_INIT" 'source "$zsh_mac_dir/aliases.zsh"'
+  if grep -Fq 'development-aliases.zsh' "$ROOT_DIR/setup/mac-thin/.zshrc"; then
+    fail "thin Mac unexpectedly loads development aliases"
+  fi
+
+  mise_line="$(grep -nF 'eval "$(mise activate zsh)"' "$ZSH_CONFIG" | cut -d: -f1)"
+  development_alias_line="$(grep -nF 'source_if_exists "$ubuntu_repo/config/zsh/shared/development-aliases.zsh"' "$ZSH_CONFIG" | cut -d: -f1)"
+  ((development_alias_line > mise_line)) || fail "Ubuntu loads development aliases before mise"
 
   for forbidden in mac-pro mac-vm mac-pro-resilience mac-resilience linuxbrew rbenv 'code --wait' kubectl terraform; do
     if grep -Fq -- "$forbidden" "$ZSH_CONFIG"; then
@@ -446,6 +467,10 @@ EOF
       [[ "$(alias gs)" == "gs='\''git status --short --branch'\''" ]]
       [[ "$(alias gadd)" == "gadd='\''git add .'\''" ]]
       [[ "$(alias dots)" == "dots='\''cd ~/Developer/dotfiles-hd'\''" ]]
+      [[ "$(alias hdiff)" == "hdiff='\''hunk diff'\''" ]]
+      [[ "$(alias npb)" == "npb='\''pnpm run build'\''" ]]
+      [[ "$(alias v)" == "v=nvim" ]]
+      [[ "$(alias tm)" == "tm=tmux" ]]
       [[ "$(whence -w reload)" == "reload: function" ]]
     ' _ "$ZSH_CONFIG" || fail "Ubuntu did not load the portable shell layer"
 
@@ -509,6 +534,14 @@ EOF
   [[ "$(find "$case_dir/home/.config" -maxdepth 1 -name 'ghostty.backup.*' | wc -l | tr -d ' ')" == "1" ]] || fail "setup did not preserve the whole-directory Ghostty link"
   assert_file_contains "$case_dir/legacy-ghostty/config" "legacy shared Ghostty config"
   [[ -L "$case_dir/home/.config/starship.toml" ]] || fail "setup did not link Starship config"
+  for name in bookokrat btop fastfetch tmux; do
+    [[ -L "$case_dir/home/.config/$name" ]] || fail "setup did not link $name config"
+    [[ "$(readlink "$case_dir/home/.config/$name")" == "$ROOT_DIR/config/$name" ]] || fail "$name config points to the wrong source"
+  done
+  for name in herdr hunk; do
+    [[ -L "$case_dir/home/.config/$name/config.toml" ]] || fail "setup did not link $name config"
+    [[ "$(readlink "$case_dir/home/.config/$name/config.toml")" == "$ROOT_DIR/config/$name/config.toml" ]] || fail "$name config points to the wrong source"
+  done
   [[ ! -L "$case_dir/home/.config/zsh/aliases.zsh" ]] || fail "setup did not remove the legacy shared alias link"
   [[ ! -L "$case_dir/home/.config/zsh/lsd-aliases.zsh" ]] || fail "setup did not remove the legacy lsd alias link"
 
@@ -609,8 +642,9 @@ test_neovim_setup_installs_and_checks_daily_driver() {
   local blink_commit failed_home fresh_home lazy_commit output status tool
   local tree_sitter_languages tree_sitter_parsers
   local tools=(
-    bash-language-server bun fd fzf go gopls graphql-lsp gs lazygit lua-language-server
-    magick mdformat node nvim pnpm python rg ruff shellcheck starship stylua tree-sitter uv wl-copy xclip
+    bash-language-server bookokrat bun fd fastfetch fzf go gopls graphql-lsp gs herdr hunk
+    lazygit lua-language-server magick mdformat node nvim pnpm python rg ruff shellcheck
+    starship stylua tree-sitter uv wl-copy xclip
     vscode-css-language-server vscode-eslint-language-server
     vscode-html-language-server vscode-json-language-server vtsls zoxide
   )
@@ -1152,6 +1186,7 @@ test_cleanup_requires_explicit_confirmation
 test_cleanup_wrong_os_stops_before_mutation
 test_ubuntu_mise_toolchain_is_exact
 test_ubuntu_ghostty_reuses_shared_config
+test_fastfetch_os_age_is_cross_platform
 test_ubuntu_tree_sitter_inventory_matches_shared_config
 test_nerd_font_install_verifies_before_replacing
 test_zsh_config_is_linux_native

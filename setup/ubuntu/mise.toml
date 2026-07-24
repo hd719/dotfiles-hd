@@ -19,7 +19,11 @@ bun = "1.3.14"
 "aqua:starship/starship" = "1.26.0"
 "aqua:ajeetdsouza/zoxide" = "0.10.0"
 "aqua:koalaman/shellcheck" = "0.11.0"
+"aqua:fastfetch-cli/fastfetch" = "2.66.0"
+"aqua:ogulcancelik/herdr" = "0.7.5"
+"github:bugzmanov/bookokrat" = "0.3.12"
 "go:golang.org/x/tools/gopls" = { version = "0.23.0", depends = ["go"] }
+"npm:hunkdiff" = { version = "0.17.3", depends = ["node"] }
 "npm:@vtsls/language-server" = { version = "0.3.0", depends = ["node"] }
 "npm:vscode-langservers-extracted" = { version = "4.10.0", depends = ["node"] }
 "npm:bash-language-server" = { version = "5.6.0", depends = ["node"] }

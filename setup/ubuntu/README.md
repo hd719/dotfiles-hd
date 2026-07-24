@@ -24,7 +24,10 @@ replacing an already-correct link.
 - Installs the lean APT package set, Ghostty, Docker, Zsh, ImageMagick,
   Ghostscript, clipboard tools, and Zsh plugins.
 - Installs Hasklug Nerd Font `3.4.0` from a checksum-verified archive.
-- Installs exact runtimes and editor tools from `setup/ubuntu/mise.toml`.
+- Installs exact runtimes, editor tools, Herdr, Hunk, Bookokrat, and fastfetch
+  from `setup/ubuntu/mise.toml`.
+- Loads the portable full-development alias set, including Hunk, pnpm, Git, Go,
+  Neovim, fastfetch, and tmux shortcuts.
 - Restores locked Neovim plugins and required Tree-sitter parsers.
 - Enables Docker, adds the current user to its group, and changes the login
   shell to Zsh.
@@ -54,19 +57,40 @@ are never linked.
 | `~/.config/ghostty/config`             | `setup/ubuntu/ghostty.conf`     |
 | `~/.config/starship.toml`              | `config/starship/starship.toml` |
 | `~/.gitignore_global`                  | `config/git/.gitignore_global`  |
+| `~/.config/bookokrat`                  | `config/bookokrat`              |
+| `~/.config/btop`                       | `config/btop`                   |
+| `~/.config/fastfetch`                  | `config/fastfetch`              |
+| `~/.config/herdr/config.toml`          | `config/herdr/config.toml`      |
+| `~/.config/hunk/config.toml`           | `config/hunk/config.toml`       |
 | `~/.config/mise/config.toml`           | `setup/ubuntu/mise.toml`        |
 | `~/.config/nvim`                       | `config/nvim`                   |
+| `~/.config/tmux`                       | `config/tmux`                   |
 | `~/.local/graphql-lsp/bin/graphql-lsp` | `setup/ubuntu/bin/graphql-lsp`  |
 
 Ghostty uses the shared Hamel Nord profile. Neovim uses the shared
-`config/nvim`; no Linux-only Lua fork exists.
+`config/nvim`; no Linux-only Lua fork exists. Herdr and Hunk link only their
+configuration files so runtime state remains machine-owned.
 
 ## Verify
 
 ```bash
 bash setup/ubuntu/setup-neovim.sh --check
+for path in \
+  "$HOME/.config/bookokrat" \
+  "$HOME/.config/btop" \
+  "$HOME/.config/fastfetch" \
+  "$HOME/.config/herdr/config.toml" \
+  "$HOME/.config/hunk/config.toml" \
+  "$HOME/.config/mise/config.toml" \
+  "$HOME/.config/nvim" \
+  "$HOME/.config/tmux"; do
+  test -L "$path" && test -e "$path" || {
+    printf 'Missing configuration link: %s\n' "$path" >&2
+    exit 1
+  }
+done
 zsh -lic \
-  'command -v nvim && command -v mise && command -v docker && command -v ghostty && alias hwatch'
+  'command -v herdr && command -v hunk && command -v bookokrat && command -v fastfetch && command -v nvim && command -v mise && command -v docker && command -v ghostty && alias hwatch'
 nvim ~/.config/nvim/README.md
 ```
 

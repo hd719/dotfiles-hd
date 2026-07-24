@@ -291,12 +291,16 @@ check_daily_driver() {
   local nvim_path
   local mise_commands=(
     bash-language-server
+    bookokrat
     bun
     fd
+    fastfetch
     fzf
     go
     gopls
     graphql-lsp
+    herdr
+    hunk
     lazygit
     lua-language-server
     node

@@ -196,6 +196,14 @@ link_configs() {
   safe_link "$SCRIPT_DIR/ghostty.conf" "$HOME/.config/ghostty/config"
   safe_link "$ROOT_DIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
   safe_link "$ROOT_DIR/config/git/.gitignore_global" "$HOME/.gitignore_global"
+  safe_link "$ROOT_DIR/config/bookokrat" "$HOME/.config/bookokrat"
+  safe_link "$ROOT_DIR/config/btop" "$HOME/.config/btop"
+  safe_link "$ROOT_DIR/config/fastfetch" "$HOME/.config/fastfetch"
+  ensure_directory "$HOME/.config/herdr"
+  safe_link "$ROOT_DIR/config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+  ensure_directory "$HOME/.config/hunk"
+  safe_link "$ROOT_DIR/config/hunk/config.toml" "$HOME/.config/hunk/config.toml"
+  safe_link "$ROOT_DIR/config/tmux" "$HOME/.config/tmux"
 
   git config --global core.editor nvim
   git config --global core.excludesfile "$HOME/.gitignore_global"
