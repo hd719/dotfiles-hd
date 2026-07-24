@@ -140,6 +140,12 @@ Follow `setup/ubuntu/README.md`. `setup.sh` installs packages, changes the login
 shell, enables Docker, and links the documented inventory. The destructive
 `cleanup-legacy.sh --yes` migration is separate and must never run implicitly.
 
+- Keep `~/.gitconfig` machine-owned. Ubuntu's `.zshrc` must provide a plain
+  `less` fallback when the mise-owned `diff-so-fancy` is unavailable.
+- Set `ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE` before sourcing zsh-autosuggestions.
+  Ghostty's Nord palette color 8 is too close to its background; preserve the
+  tracked higher-contrast color unless the shared terminal palette changes.
+
 ## Preserved Zed Configuration
 
 Zed is not installed or bootstrap-managed. Keep `config/zed` intact. Run

@@ -28,6 +28,9 @@ replacing an already-correct link.
   diff-so-fancy from `setup/ubuntu/mise.toml`.
 - Loads the portable full-development alias set, including Hunk, pnpm, Git, Go,
   Neovim, fastfetch, and tmux shortcuts.
+- Uses `diff-so-fancy` for Git output with plain `less` as a safe fallback.
+- Uses a higher-contrast autosuggestion color over the shared Ghostty Nord
+  background instead of zsh-autosuggestions' low-contrast palette default.
 - Restores locked Neovim plugins and required Tree-sitter parsers.
 - Enables Docker, adds the current user to its group, and changes the login
   shell to Zsh.
@@ -93,6 +96,8 @@ for path in \
 done
 zsh -lic \
   'command -v herdr && command -v hunk && command -v bookokrat && command -v fastfetch && command -v diff-so-fancy && command -v nvim && command -v mise && command -v docker && command -v ghostty && alias hwatch'
+zsh -lic \
+  'test "$GIT_PAGER" = "diff-so-fancy | less --tabs=4 -RFX" && test "$ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE" = "fg=#9399b2"'
 nvim ~/.config/nvim/README.md
 ```
 

@@ -97,6 +97,8 @@ config/zsh/
 - `mac/init.zsh` adds the complete Mac development shell.
 - `mac/personal/aliases.zsh` contains safe personal host controls.
 - `mac/personal/init.zsh` adds personal development workflows.
+- Ubuntu's `.zshrc` owns Linux plugin timing, readable autosuggestions, and a
+  Git pager that falls back to plain `less` when `diff-so-fancy` is unavailable.
 
 The thin Mac sources only the shared, safe Mac, safe personal, and VMware
 modules. Full personal Macs source both `mac/init.zsh` and
