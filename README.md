@@ -123,25 +123,5 @@ The thin Mac sources only the shared, safe Mac, safe personal, and VMware
 modules. Full personal Macs source both `mac/init.zsh` and
 `mac/personal/init.zsh`. Resilience sources only `mac/init.zsh`.
 
-#### Decision Record
-
-On 2026-07-24, shell modules were organized by consumer:
-
-- Keep portable behavior in `shared/`.
-- Keep reusable macOS behavior in `mac/`.
-- Keep Linux profile behavior in `setup/ubuntu/` and `setup/fedora/`.
-- Add `config/zsh/linux/` only when multiple Linux profiles share Linux-only
-  modules.
-- Keep the thin Mac limited to safe host modules; development remains in VMs.
-
-## Thin Mac Link Inventory
-
-The thin profile owns only these two links:
-
-| Tool    | Live path                                                    | Source                  |
-| ------- | ------------------------------------------------------------ | ----------------------- |
-| Shell   | `~/.zshrc`                                                   | `setup/mac-thin/.zshrc` |
-| Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` |
-
 See [`config/nvim/README.md`](config/nvim/README.md) for the editor contract and
 [`AGENTS.md`](AGENTS.md) for automation rules.
