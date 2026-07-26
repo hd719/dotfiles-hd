@@ -185,6 +185,7 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/identities.yml'
   assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/verify.yml'
   assert_file_contains "$ANSIBLE_DIR/tasks/verify.yml" '--offline'
+  assert_file_contains "$ANSIBLE_DIR/vars.yml" '  - btop'
   assert_file_contains "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
     'growpart "/dev/$parent_name" "$partition_number"'
   assert_file_contains "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \

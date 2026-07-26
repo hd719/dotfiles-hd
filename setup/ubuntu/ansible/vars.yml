@@ -12,6 +12,7 @@ nerd_font_sha256: e82418895a7036158baf9a425faea7de1fe332267b218341eec44c6b5071d1
 workstation_apt_packages:
   - acl
   - avahi-daemon
+  - btop
   - brave-browser
   - build-essential
   - ca-certificates
