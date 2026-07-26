@@ -5,6 +5,7 @@ workstation_password_hash: >-
   $6$ubuntu-vagrant$x9o7n/EGM4RisioZrjkIHjwcxTMm3KZ1YnmkOLpxG4Su8TixT1egsushiNYdgyH8G6l2la43yd60D1QC.2JHh/
 dotfiles_dir: "{{ workstation_home }}/Developer/dotfiles-hd"
 dotfiles_repository_https: https://github.com/hd719/dotfiles-hd.git
+dotfiles_repository_ssh: git@github.com:hd719/dotfiles-hd.git
 nerd_font_version: 3.4.0
 nerd_font_sha256: e82418895a7036158baf9a425faea7de1fe332267b218341eec44c6b5071d1ad
 

@@ -37,7 +37,9 @@
 
 - name: Disable SSH password and root login
   ansible.builtin.copy:
-    dest: /etc/ssh/sshd_config.d/90-dotfiles-workstation.conf
+    # OpenSSH uses the first value it finds, so this file sorts before
+    # image/vendor drop-ins that might otherwise keep password login enabled.
+    dest: /etc/ssh/sshd_config.d/00-dotfiles-workstation.conf
     owner: root
     group: root
     mode: "0644"
@@ -52,3 +54,21 @@
   ansible.builtin.command:
     cmd: sshd -t
   changed_when: false
+
+- name: Read the effective SSH daemon policy
+  ansible.builtin.command:
+    cmd: sshd -T
+  register: workstation_sshd_policy
+  changed_when: false
+
+- name: Verify password and root SSH login are disabled
+  ansible.builtin.assert:
+    that:
+      - "'passwordauthentication no' in workstation_sshd_policy.stdout_lines"
+      - "'kbdinteractiveauthentication no' in workstation_sshd_policy.stdout_lines"
+      - "'permitrootlogin no' in workstation_sshd_policy.stdout_lines"
+    fail_msg: The effective SSH daemon policy is not safely locked down.
+
+# Apply the SSH policy before Tailscale can expose the VM to another network.
+- name: Apply the SSH daemon policy now
+  ansible.builtin.meta: flush_handlers

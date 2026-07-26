@@ -2,11 +2,21 @@
 
 # Vagrant owns only this canary. It never imports or references the legacy VM.
 Vagrant.configure("2") do |config|
+  repo_root = File.expand_path("../..", __dir__)
+  current_branch = IO.popen(
+    ["git", "-C", repo_root, "branch", "--show-current"],
+    &:read
+  ).strip
+  dotfiles_git_ref = ENV.fetch(
+    "DOTFILES_GIT_REF",
+    current_branch.empty? ? "master" : current_branch
+  )
   workstation_hostname = ENV.fetch("UBUNTU_VM_HOSTNAME", "ubuntu-dev-canary")
 
   config.vm.box = "bento/ubuntu-26.04"
   config.vm.box_version = "202606.01.0"
   config.vm.box_architecture = "arm64"
+  config.vm.box_check_update = false
   config.vm.hostname = workstation_hostname
 
   # File transfer uses SSH/rsync. A host-mounted development tree would make
@@ -35,7 +45,9 @@ Vagrant.configure("2") do |config|
                       path: "bootstrap-ansible.sh",
                       sensitive: true,
                       env: {
-                        "DOTFILES_GIT_REF" => ENV.fetch("DOTFILES_GIT_REF", "master"),
+                        # A pushed feature branch can provision itself; master
+                        # remains the normal rebuild path after merge.
+                        "DOTFILES_GIT_REF" => dotfiles_git_ref,
                         "TAILSCALE_AUTH_KEY" => ENV.fetch("TAILSCALE_AUTH_KEY", ""),
                         "WORKSTATION_HOSTNAME" => workstation_hostname,
                         "WORKSTATION_LOGIN_PUBLIC_KEY" => File.read(login_public_key_path).strip
@@ -52,7 +64,7 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "playbook.yml"
     ansible.raw_arguments = [
       "--extra-vars",
-      "@/tmp/ubuntu-workstation-secrets.json"
+      "@/dev/shm/ubuntu-workstation-secrets.json"
     ]
   end
 

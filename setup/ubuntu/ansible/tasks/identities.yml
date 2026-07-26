@@ -27,52 +27,6 @@
     creates: "{{ workstation_home }}/.ssh/{{ item.private_key }}"
   loop: "{{ workstation_git_identities }}"
 
-- name: Install the VM-local SSH identity routes
-  ansible.builtin.copy:
-    dest: "{{ workstation_home }}/.ssh/config"
-    owner: "{{ workstation_user }}"
-    group: "{{ workstation_user }}"
-    mode: "0600"
-    content: |
-      # Each service uses a VM-local private key. Never fall back to a forwarded agent.
-      Host github.com
-        HostName github.com
-        User git
-        IdentityFile ~/.ssh/id_ed25519_hd719
-        IdentitiesOnly yes
-        IdentityAgent none
-        StrictHostKeyChecking accept-new
-        UpdateHostKeys no
-
-      Host github.com-arbiter
-        HostName github.com
-        User git
-        IdentityFile ~/.ssh/id_ed25519_arbiter_hd
-        IdentitiesOnly yes
-        IdentityAgent none
-        StrictHostKeyChecking accept-new
-        UpdateHostKeys no
-
-      Host forgejo-truenas-ts
-        HostName 100.65.26.87
-        User git
-        Port 30143
-        IdentityFile ~/.ssh/id_ed25519_forgejo_truenas
-        IdentitiesOnly yes
-        IdentityAgent none
-        StrictHostKeyChecking accept-new
-        UpdateHostKeys no
-
-      Host forgejo-truenas-lan
-        HostName 192.168.68.74
-        User git
-        Port 30143
-        IdentityFile ~/.ssh/id_ed25519_forgejo_truenas
-        IdentitiesOnly yes
-        IdentityAgent none
-        StrictHostKeyChecking accept-new
-        UpdateHostKeys no
-
 - name: Read the generated public Git keys
   ansible.builtin.slurp:
     src: "{{ workstation_home }}/.ssh/{{ item.private_key }}.pub"

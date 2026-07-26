@@ -41,6 +41,10 @@ a full clone with 10 vCPUs, 25 GB RAM, and a 250 GB virtual disk under the
 existing `~/Virtual Machines.localized/VMWIsoImages` directory. Shared folders
 are disabled.
 
+During canary development, Vagrant provisions the current pushed Git branch.
+On `master`, the normal rebuild stays on `master`. `DOTFILES_GIT_REF` can
+override this only for an intentional test.
+
 ## First Onboarding
 
 Provisioning prints three public keys. Register them with the matching service:
@@ -51,8 +55,8 @@ cat ~/.ssh/id_ed25519_arbiter_hd.pub
 cat ~/.ssh/id_ed25519_forgejo_truenas.pub
 ```
 
-Each key is VM-local, unencrypted, generated once, and selected by the managed
-`~/.ssh/config`. The thin Mac does not forward its agent.
+Each key is VM-local, unencrypted, generated once, and selected by the
+dotfiles-owned `~/.ssh/config`. The thin Mac does not forward its agent.
 
 The local `hamel` console and sudo password is `0000`. SSH password login and
 root login are disabled; SSH accepts only the Mac's existing Ubuntu public key.
@@ -142,6 +146,7 @@ Managed links:
 | `~/.config/ghostty/config`             | `setup/ubuntu/ghostty.conf`     |
 | `~/.config/starship.toml`              | `config/starship/starship.toml` |
 | `~/.gitignore_global`                  | `config/git/.gitignore_global`  |
+| `~/.ssh/config`                        | `setup/ubuntu/ssh/config`       |
 | `~/.config/bookokrat`                  | `config/bookokrat`              |
 | `~/.config/btop`                       | `config/btop`                   |
 | `~/.config/fastfetch`                  | `config/fastfetch`              |

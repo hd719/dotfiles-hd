@@ -53,7 +53,7 @@
 
 - name: Remove temporary Tailscale provision data
   ansible.builtin.file:
-    path: /tmp/ubuntu-workstation-secrets.json
+    path: /dev/shm/ubuntu-workstation-secrets.json
     state: absent
   changed_when: false
   no_log: true

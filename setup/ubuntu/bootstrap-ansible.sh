@@ -10,8 +10,8 @@ apt-get install -y --no-install-recommends ansible-core
 # The file provisioner uploads a fresh playbook after this step.
 rm -rf -- /tmp/ubuntu-workstation-ansible
 
-secrets_file="/tmp/ubuntu-workstation-secrets.json"
-install -m 600 /dev/null "$secrets_file"
+secrets_file="/dev/shm/ubuntu-workstation-secrets.json"
+install -o vagrant -g vagrant -m 600 /dev/null "$secrets_file"
 
 # JSON avoids shell-quoting bugs in public keys and one-time auth keys.
 python3 - "$secrets_file" <<'PY'

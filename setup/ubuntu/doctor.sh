@@ -190,6 +190,7 @@ LINK_SPECS=(
   "$REPO_DIR/setup/ubuntu/ghostty.conf|$HOME/.config/ghostty/config"
   "$REPO_DIR/config/starship/starship.toml|$HOME/.config/starship.toml"
   "$REPO_DIR/config/git/.gitignore_global|$HOME/.gitignore_global"
+  "$REPO_DIR/setup/ubuntu/ssh/config|$HOME/.ssh/config"
   "$REPO_DIR/config/bookokrat|$HOME/.config/bookokrat"
   "$REPO_DIR/config/btop|$HOME/.config/btop"
   "$REPO_DIR/config/fastfetch|$HOME/.config/fastfetch"

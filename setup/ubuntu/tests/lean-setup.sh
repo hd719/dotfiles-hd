@@ -15,6 +15,7 @@ GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
 CODEX_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/codex"
 LINK_SCRIPT="$ROOT_DIR/setup/ubuntu/link-dotfiles.sh"
+SSH_CONFIG="$ROOT_DIR/setup/ubuntu/ssh/config"
 VAGRANTFILE="$ROOT_DIR/setup/ubuntu/Vagrantfile"
 ANSIBLE_BOOTSTRAP="$ROOT_DIR/setup/ubuntu/bootstrap-ansible.sh"
 ANSIBLE_DIR="$ROOT_DIR/setup/ubuntu/ansible"
@@ -158,6 +159,7 @@ test_vagrant_ansible_contract() {
     "$ANSIBLE_DIR/tasks/tools.yml" \
     "$ANSIBLE_DIR/tasks/verify.yml" \
     "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
+    "$SSH_CONFIG" \
     "$LINK_SCRIPT"; do
     [[ -f "$task_file" ]] || fail "missing Vagrant/Ansible file: $task_file"
   done
@@ -179,6 +181,15 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$ANSIBLE_DIR/tasks/verify.yml" '--offline'
   assert_file_contains "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
     'growpart "/dev/$parent_name" "$partition_number"'
+  assert_file_contains "$ROOT_DIR/.gitignore" 'setup/ubuntu/.vagrant/'
+  assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
+    '/var/lib/dotfiles-hd/initial-upgrade-complete'
+  assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
+    'when: not workstation_initial_upgrade.stat.exists'
+  assert_file_contains "$ANSIBLE_DIR/tasks/dotfiles.yml" \
+    'repo: "{{ workstation_dotfiles_origin.stdout }}"'
+  assert_file_contains "$ANSIBLE_DIR/tasks/dotfiles.yml" \
+    '[dotfiles_repository_https, dotfiles_repository_ssh]'
 
   assert_file_contains "$ANSIBLE_DIR/tasks/identities.yml" \
     'creates: "{{ workstation_home }}/.ssh/{{ item.private_key }}"'
@@ -186,11 +197,24 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$ANSIBLE_DIR/tasks/identities.yml" 'id_ed25519_arbiter_hd'
   assert_file_contains "$ANSIBLE_DIR/tasks/identities.yml" \
     'id_ed25519_forgejo_truenas'
+  assert_file_contains "$SSH_CONFIG" 'Host github.com-arbiter'
+  assert_file_contains "$SSH_CONFIG" 'Host forgejo-truenas-ts'
+  assert_file_contains "$SSH_CONFIG" 'Host forgejo-truenas-lan'
+  assert_file_contains "$SSH_CONFIG" 'IdentityAgent none'
   assert_file_contains "$ANSIBLE_DIR/tasks/tailscale.yml" 'no_log: true'
   assert_file_contains "$ANSIBLE_DIR/tasks/tailscale.yml" \
     'state: absent'
   assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" 'PasswordAuthentication no'
   assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" 'PermitRootLogin no'
+  assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" \
+    'dest: /etc/ssh/sshd_config.d/00-dotfiles-workstation.conf'
+  assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" \
+    'ansible.builtin.meta: flush_handlers'
+  assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" 'cmd: sshd -T'
+  if grep -Fq 'dest: "{{ workstation_home }}/.ssh/config"' \
+    "$ANSIBLE_DIR/tasks/identities.yml"; then
+    fail "Ansible must not own the user's SSH config"
+  fi
   if grep -Fq 'password: "0000"' "$ANSIBLE_DIR/tasks/user.yml"; then
     fail "the VM password must be stored only as a hash"
   fi
@@ -204,6 +228,7 @@ test_doctor_is_read_only_and_complete() {
     "setup/ubuntu/ghostty.conf|.config/ghostty/config"
     "config/starship/starship.toml|.config/starship.toml"
     "config/git/.gitignore_global|.gitignore_global"
+    "setup/ubuntu/ssh/config|.ssh/config"
     "config/bookokrat|.config/bookokrat"
     "config/btop|.config/btop"
     "config/fastfetch|.config/fastfetch"
@@ -234,9 +259,6 @@ test_doctor_is_read_only_and_complete() {
       > "$case_dir/home/.ssh/$target.pub"
     chmod 600 "$case_dir/home/.ssh/$target"
   done
-  printf 'managed ssh config\n' > "$case_dir/home/.ssh/config"
-  chmod 600 "$case_dir/home/.ssh/config"
-
   for spec in "${link_specs[@]}"; do
     source="$case_dir/home/Developer/dotfiles-hd/${spec%%|*}"
     target="$case_dir/home/${spec#*|}"

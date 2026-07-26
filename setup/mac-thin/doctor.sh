@@ -16,6 +16,7 @@ LEGACY_AGENT_ROUTES=0
 FAILURES=0
 VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
 VAGRANT_VMWARE_UTILITY="${DOTFILES_VAGRANT_VMWARE_UTILITY:-/opt/vagrant-vmware-desktop/bin/vagrant-vmware-utility}"
+VAGRANT_VMWARE_SERVICE_LABEL="com.vagrant.vagrant-vmware-utility"
 
 # shellcheck source=../mac-bootstrap/lib.sh
 source "$DOTFILES_DIR/setup/mac-bootstrap/lib.sh"
@@ -57,6 +58,12 @@ if [[ -x "$VAGRANT_VMWARE_UTILITY" ]]; then
   pass "Vagrant VMware utility available"
 else
   fail "Vagrant VMware utility missing"
+fi
+
+if launchctl print "system/$VAGRANT_VMWARE_SERVICE_LABEL" >/dev/null 2>&1; then
+  pass "Vagrant VMware utility service active"
+else
+  fail "Vagrant VMware utility service is not active"
 fi
 
 if command -v vagrant >/dev/null 2>&1 \

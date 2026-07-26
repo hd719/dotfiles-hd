@@ -1,9 +1,32 @@
 ---
+- name: Create the workstation state directory
+  ansible.builtin.file:
+    path: /var/lib/dotfiles-hd
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Check whether the first-build upgrade is complete
+  ansible.builtin.stat:
+    path: /var/lib/dotfiles-hd/initial-upgrade-complete
+  register: workstation_initial_upgrade
+
 - name: Update Ubuntu packages for the first build
   ansible.builtin.apt:
     update_cache: true
     upgrade: dist
     cache_valid_time: 3600
+  when: not workstation_initial_upgrade.stat.exists
+
+- name: Record the completed first-build upgrade
+  ansible.builtin.file:
+    path: /var/lib/dotfiles-hd/initial-upgrade-complete
+    state: touch
+    owner: root
+    group: root
+    mode: "0644"
+  when: not workstation_initial_upgrade.stat.exists
 
 - name: Install the Brave repository key
   ansible.builtin.get_url:

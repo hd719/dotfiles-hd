@@ -62,6 +62,11 @@ cat > "$TEST_ROOT/bin/xcode-select" <<'EOF'
 printf '/Library/Developer/CommandLineTools\n'
 EOF
 
+cat > "$TEST_ROOT/bin/launchctl" <<'EOF'
+#!/bin/sh
+test "$*" = "print system/com.vagrant.vagrant-vmware-utility"
+EOF
+
 cat > "$TEST_ROOT/bin/vagrant" <<'EOF'
 #!/bin/sh
 printf 'vagrant %s\n' "$*" >> "$DOTFILES_TEST_BREW_LOG"
@@ -76,6 +81,7 @@ EOF
 touch "$TEST_ROOT/vagrant-vmware-utility"
 chmod +x \
   "$TEST_ROOT/bin/brew" \
+  "$TEST_ROOT/bin/launchctl" \
   "$TEST_ROOT/bin/uname" \
   "$TEST_ROOT/bin/vagrant" \
   "$TEST_ROOT/bin/xcode-select" \
