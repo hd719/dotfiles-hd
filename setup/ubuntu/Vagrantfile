@@ -63,6 +63,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "ansible_local" do |ansible|
     ansible.install = false
+    # Vagrant checks for the "ansible" Python distribution, but Ubuntu ships
+    # "ansible-core". Pin modern CLI flags instead of falling back to 1.8.
+    ansible.compatibility_mode = "2.0"
     ansible.provisioning_path = "/tmp/ubuntu-workstation-ansible"
     ansible.playbook = "playbook.yml"
     ansible.raw_arguments = [

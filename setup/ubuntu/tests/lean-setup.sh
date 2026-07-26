@@ -177,8 +177,10 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$VAGRANTFILE" 'config.vm.provision "file"'
   assert_file_contains "$VAGRANTFILE" 'config.vm.provision "ansible_local"'
   assert_file_contains "$VAGRANTFILE" 'ansible.install = false'
+  assert_file_contains "$VAGRANTFILE" 'ansible.compatibility_mode = "2.0"'
   assert_file_contains "$VAGRANTFILE" \
     'ansible.provisioning_path = "/tmp/ubuntu-workstation-ansible"'
+  assert_file_contains "$ANSIBLE_PLAYBOOK" 'hosts: all'
   assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/system.yml'
   assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/identities.yml'
   assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/verify.yml'

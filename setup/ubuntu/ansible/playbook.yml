@@ -1,6 +1,8 @@
 ---
 - name: Configure the Ubuntu development workstation
-  hosts: localhost
+  # Vagrant names its generated local inventory host "default" and limits the
+  # run to that host. Using all keeps this single-guest play aligned with it.
+  hosts: all
   connection: local
   become: true
   gather_facts: true
