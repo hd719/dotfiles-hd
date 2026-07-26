@@ -14,7 +14,9 @@ grow_partition() {
 
   partition="$(readlink -f "$partition")"
   partition_name="$(basename "$partition")"
-  parent_name="$(lsblk -no PKNAME "$partition" | head -n 1)"
+  # Do not list dependent device-mapper children; their PKNAME points back to
+  # this partition and can be mistaken for the physical parent disk.
+  parent_name="$(lsblk -dn -o PKNAME "$partition")"
   partition_number="$(cat "/sys/class/block/$partition_name/partition")"
 
   [[ -n "$parent_name" && "$partition_number" =~ ^[0-9]+$ ]] || {
@@ -30,7 +32,9 @@ root_type="$(lsblk -no TYPE "$root_device" | head -n 1)"
 root_filesystem="$(findmnt -n -o FSTYPE /)"
 
 if [[ "$root_type" == "lvm" ]]; then
-  volume_group="$(lvs --noheadings -o vg_name "$root_device" | xargs)"
+  # Keep the mapper path for LVM commands. Resolving it to /dev/dm-* makes
+  # lvs interpret the device name as a volume-group name.
+  volume_group="$(lvs --noheadings -o vg_name "$root_source" | xargs)"
   physical_volume="$(
     pvs --noheadings -o pv_name --select "vg_name=$volume_group" | xargs
   )"
@@ -40,7 +44,7 @@ if [[ "$root_type" == "lvm" ]]; then
   }
   grow_partition "$physical_volume"
   pvresize "$physical_volume"
-  lvextend -l +100%FREE -r "$root_device"
+  lvextend -l +100%FREE -r "$root_source"
 else
   grow_partition "$root_device"
   case "$root_filesystem" in

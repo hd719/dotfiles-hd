@@ -187,6 +187,12 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$ANSIBLE_DIR/tasks/verify.yml" '--offline'
   assert_file_contains "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
     'growpart "/dev/$parent_name" "$partition_number"'
+  assert_file_contains "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
+    'lsblk -dn -o PKNAME "$partition"'
+  assert_file_contains "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
+    'lvs --noheadings -o vg_name "$root_source"'
+  assert_file_contains "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
+    'lvextend -l +100%FREE -r "$root_source"'
   assert_file_contains "$ROOT_DIR/.gitignore" 'setup/ubuntu/.vagrant/'
   assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
     '/var/lib/dotfiles-hd/initial-upgrade-complete'
