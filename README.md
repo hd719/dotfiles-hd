@@ -22,7 +22,7 @@ cd "$HOME/Developer/dotfiles-hd"
 | Personal Apple Silicon MacBook  | `--profile mac-pro`           | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
 | Personal Apple Silicon Mac mini | `--profile mac-mini`          | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
 | Resilience work Mac             | `setup/mac-pro-resilience`    | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
-| Ubuntu workstation              | `bash setup/ubuntu/setup.sh`  | [`setup/ubuntu/README.md`](setup/ubuntu/README.md)                         |
+| Ubuntu workstation              | `uvm-up`                      | [`setup/ubuntu/README.md`](setup/ubuntu/README.md)                         |
 
 Scripts under `setup/fedora` are legacy helpers, not a supported one-command
 bootstrap.
@@ -33,21 +33,18 @@ For Mac-to-Linux learning, use the
 ## Ubuntu Quick Start
 
 ```bash
-bash setup/ubuntu/setup.sh
-# One-time remote access:
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up --hostname=ubuntu-dev
-# Log out and back in once, then reconnect with the Mac's `ut` alias.
-bash setup/ubuntu/doctor.sh
+setup/mac-thin/bootstrap.sh --apply
+uvm-up
 ```
 
-Use `bash setup/ubuntu/doctor.sh --offline` when remote identity checks are
-intentionally unavailable.
+Vagrant creates the VMware ARM64 guest and runs guest-local Ansible, mise,
+dotfile linking, and the offline doctor. Register the three generated Git
+public keys, sign in to Codex, then run the full doctor inside Ubuntu.
 
 For Codex remote development, connect Ubuntu to Tailscale as `ubuntu-dev` and
 add the Mac SSH alias `ubuntu-vm-ts`. Keep `ubuntu-vm` as the local fallback.
 The Ubuntu setup pins Codex CLI through mise; run `codex login --device-auth`
-once inside Ubuntu before enabling either SSH connection in Codex desktop.
+once inside Ubuntu before enabling the connection in Codex desktop.
 
 ## Thin Mac Quick Start
 

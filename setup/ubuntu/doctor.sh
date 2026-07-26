@@ -7,6 +7,8 @@ REPO_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
 OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
 NEOVIM_SETUP_SCRIPT="${DOTFILES_NEOVIM_SETUP_SCRIPT:-$SCRIPT_DIR/setup-neovim.sh}"
 EXPECTED_DOTFILES_ORIGIN="git@github.com:hd719/dotfiles-hd.git"
+EXPECTED_DOTFILES_HTTPS_ORIGIN="https://github.com/hd719/dotfiles-hd.git"
+EXPECTED_DOTFILES_BRANCH="${DOTFILES_EXPECTED_BRANCH:-master}"
 OFFLINE=0
 FAILURES=0
 
@@ -17,7 +19,7 @@ Usage: doctor.sh [--offline]
 Verify the live Ubuntu workstation without changing it.
 
 Options:
-  --offline  Skip remote GitHub and Forgejo identity checks.
+  --offline  Skip checks that require external authentication.
   -h, --help
              Show this help.
 EOF
@@ -63,6 +65,35 @@ check_identity() {
   fi
 }
 
+file_mode() {
+  stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1" 2>/dev/null
+}
+
+check_local_identity_route() {
+  local host="$1"
+  local key_name="$2"
+  local private_key="$HOME/.ssh/$key_name"
+  local effective
+
+  if [[ -f "$private_key" \
+    && -f "$private_key.pub" \
+    && "$(file_mode "$private_key")" == "600" ]]; then
+    pass "$key_name is VM-local with mode 600"
+  else
+    fail "$key_name or its public key is missing, or the private key is not mode 600"
+  fi
+
+  effective="$(ssh -G "$host" 2>/dev/null || true)"
+  if printf '%s\n' "$effective" \
+    | grep -Eq "^identityfile .*${key_name}$" \
+    && printf '%s\n' "$effective" | grep -Fxq "identitiesonly yes" \
+    && printf '%s\n' "$effective" | grep -Fxq "identityagent none"; then
+    pass "$host selects only $key_name"
+  else
+    fail "$host must select $key_name without an agent"
+  fi
+}
+
 while (($# > 0)); do
   case "$1" in
     --offline)
@@ -99,13 +130,21 @@ else
   fail "dotfiles must be at $HOME/Developer/dotfiles-hd"
 fi
 
+dotfiles_origin="$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null || true)"
+dotfiles_origin_ready=0
+if [[ "$dotfiles_origin" == "$EXPECTED_DOTFILES_ORIGIN" ]] \
+  || { ((OFFLINE == 1)) \
+    && [[ "$dotfiles_origin" == "$EXPECTED_DOTFILES_HTTPS_ORIGIN" ]]; }; then
+  dotfiles_origin_ready=1
+fi
+
 if [[ -d "$REPO_DIR/.git" ]] \
-  && [[ "$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null || true)" == "$EXPECTED_DOTFILES_ORIGIN" ]] \
-  && [[ "$(git -C "$REPO_DIR" branch --show-current 2>/dev/null || true)" == "master" ]] \
+  && ((dotfiles_origin_ready == 1)) \
+  && [[ "$(git -C "$REPO_DIR" branch --show-current 2>/dev/null || true)" == "$EXPECTED_DOTFILES_BRANCH" ]] \
   && [[ "$(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || true)" == \
-    "$(git -C "$REPO_DIR" rev-parse refs/remotes/origin/master 2>/dev/null || true)" ]] \
+    "$(git -C "$REPO_DIR" rev-parse "refs/remotes/origin/$EXPECTED_DOTFILES_BRANCH" 2>/dev/null || true)" ]] \
   && [[ -z "$(git -C "$REPO_DIR" status --porcelain 2>/dev/null)" ]]; then
-  pass "clean canonical master checkout at origin/master"
+  pass "clean canonical $EXPECTED_DOTFILES_BRANCH checkout at origin"
 else
   fail "dotfiles checkout, origin, branch, parity, or worktree is not ready"
 fi
@@ -127,6 +166,23 @@ if id -nG | tr ' ' '\n' | grep -Fxq docker; then
   pass "current user is in the Docker group"
 else
   fail "current user is not in the Docker group"
+fi
+
+if [[ "$(systemctl get-default 2>/dev/null)" == "graphical.target" ]] \
+  && systemctl is-enabled gdm3 >/dev/null 2>&1 \
+  && systemctl is-active gdm3 >/dev/null 2>&1 \
+  && systemctl is-enabled open-vm-tools >/dev/null 2>&1 \
+  && systemctl is-active open-vm-tools >/dev/null 2>&1; then
+  pass "graphical VMware desktop"
+else
+  fail "graphical desktop or VMware guest tools are not ready"
+fi
+
+root_kib="$(df -Pk / 2>/dev/null | awk 'NR == 2 { print $2 }')"
+if [[ "$root_kib" =~ ^[0-9]+$ ]] && ((root_kib >= 209715200)); then
+  pass "root filesystem has at least 200 GiB"
+else
+  fail "root filesystem did not grow to the 250 GB virtual disk"
 fi
 
 LINK_SPECS=(
@@ -164,17 +220,24 @@ fi
 
 if command -v tailscale >/dev/null 2>&1 \
   && systemctl is-enabled tailscaled >/dev/null 2>&1 \
-  && systemctl is-active tailscaled >/dev/null 2>&1 \
-  && [[ "$(tailscale ip -4 2>/dev/null)" == 100.* ]]; then
+  && systemctl is-active tailscaled >/dev/null 2>&1; then
+  pass "Tailscale is installed and active"
+else
+  fail "Tailscale is not installed and active"
+fi
+
+if ((OFFLINE == 1)); then
+  skip "Tailscale connection (--offline)"
+elif [[ "$(tailscale ip -4 2>/dev/null)" == 100.* ]]; then
   pass "Tailscale is connected"
 else
-  fail "Tailscale is not installed, active, and connected"
+  fail "Tailscale is not connected"
 fi
 
 if zsh -lic '
   set -e
   for command_name in \
-    bookokrat btop codex diff-so-fancy docker fastfetch ghostty herdr hunk lsd \
+    bookokrat brave-browser btop codex diff-so-fancy docker fastfetch ghostty herdr hunk lsd \
     mise nvim tailscale tmux; do
     command -v "$command_name" >/dev/null
   done
@@ -205,13 +268,38 @@ else
   fail "Neovim daily-driver check failed"
 fi
 
+check_local_identity_route github.com id_ed25519_hd719
+check_local_identity_route github.com-arbiter id_ed25519_arbiter_hd
+check_local_identity_route forgejo-truenas-lan id_ed25519_forgejo_truenas
+check_local_identity_route forgejo-truenas-ts id_ed25519_forgejo_truenas
+
+unique_git_keys="$(
+  awk 'NF >= 2 { print $2 }' \
+    "$HOME/.ssh/id_ed25519_hd719.pub" \
+    "$HOME/.ssh/id_ed25519_arbiter_hd.pub" \
+    "$HOME/.ssh/id_ed25519_forgejo_truenas.pub" \
+    2>/dev/null | sort -u | wc -l | tr -d ' '
+)"
+if [[ "$unique_git_keys" == "3" ]]; then
+  pass "three unique VM-local Git keys"
+else
+  fail "GitHub, Arbiter, and Forgejo must use three unique VM-local keys"
+fi
+
 if ((OFFLINE == 1)); then
-  skip "remote GitHub and Forgejo identities (--offline)"
+  skip "remote GitHub, Forgejo, and Codex login checks (--offline)"
 else
   check_identity github.com "Hi hd719!"
   check_identity github.com-arbiter "Hi arbiter-hd!"
   check_identity forgejo-truenas-lan "Hi there, hd719!"
   check_identity forgejo-truenas-ts "Hi there, hd719!"
+
+  codex_login_status="$(zsh -lic 'codex login status' 2>&1 || true)"
+  if [[ "$codex_login_status" == *"Logged in"* ]]; then
+    pass "Codex login is ready"
+  else
+    fail "Codex login is not ready"
+  fi
 fi
 
 if ((FAILURES == 0)); then

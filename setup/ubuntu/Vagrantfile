@@ -1,0 +1,72 @@
+# frozen_string_literal: true
+
+# Vagrant owns only this canary. It never imports or references the legacy VM.
+Vagrant.configure("2") do |config|
+  workstation_hostname = ENV.fetch("UBUNTU_VM_HOSTNAME", "ubuntu-dev-canary")
+
+  config.vm.box = "bento/ubuntu-26.04"
+  config.vm.box_version = "202606.01.0"
+  config.vm.box_architecture = "arm64"
+  config.vm.hostname = workstation_hostname
+
+  # File transfer uses SSH/rsync. A host-mounted development tree would make
+  # the thin Mac part of the workstation data plane.
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  # This route works on an airplane without Tailscale or local networking.
+  config.vm.network "forwarded_port",
+                    guest: 22,
+                    host: 2222,
+                    host_ip: "127.0.0.1",
+                    auto_correct: false
+
+  config.vm.disk :disk, size: "250GB", primary: true
+  config.ssh.insert_key = true
+
+  login_public_key_path = File.expand_path(
+    ENV.fetch("UBUNTU_VM_LOGIN_PUBLIC_KEY", "~/.ssh/id_ed25519_ubuntu_vm.pub")
+  )
+  unless File.file?(login_public_key_path)
+    raise "Ubuntu login public key is missing: #{login_public_key_path}"
+  end
+
+  # The shell step installs only Ansible and writes short-lived provision data.
+  config.vm.provision "shell",
+                      path: "bootstrap-ansible.sh",
+                      sensitive: true,
+                      env: {
+                        "DOTFILES_GIT_REF" => ENV.fetch("DOTFILES_GIT_REF", "master"),
+                        "TAILSCALE_AUTH_KEY" => ENV.fetch("TAILSCALE_AUTH_KEY", ""),
+                        "WORKSTATION_HOSTNAME" => workstation_hostname,
+                        "WORKSTATION_LOGIN_PUBLIC_KEY" => File.read(login_public_key_path).strip
+                      }
+
+  # Shared folders stay disabled; upload the small playbook over Vagrant SSH.
+  config.vm.provision "file",
+                      source: "ansible",
+                      destination: "/tmp/ubuntu-workstation-ansible"
+
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.install = false
+    ansible.provisioning_path = "/tmp/ubuntu-workstation-ansible"
+    ansible.playbook = "playbook.yml"
+    ansible.raw_arguments = [
+      "--extra-vars",
+      "@/tmp/ubuntu-workstation-secrets.json"
+    ]
+  end
+
+  config.vm.provider "vmware_desktop" do |vmware|
+    vmware.gui = ENV.fetch("UBUNTU_VM_GUI", "1") != "0"
+    vmware.linked_clone = false
+    vmware.clone_directory = File.expand_path(
+      ENV.fetch(
+        "VAGRANT_VMWARE_CLONE_DIRECTORY",
+        "~/Virtual Machines.localized/VMWIsoImages"
+      )
+    )
+    vmware.vmx["displayName"] = "ubuntu-dev-canary"
+    vmware.vmx["numvcpus"] = "10"
+    vmware.vmx["memsize"] = "25600"
+  end
+end

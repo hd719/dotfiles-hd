@@ -6,6 +6,7 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
 STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 MODE="dry-run"
+VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
 
 # shellcheck source=../mac-bootstrap/lib.sh
 source "$DOTFILES_DIR/setup/mac-bootstrap/lib.sh"
@@ -85,11 +86,19 @@ for spec in "${LINK_SPECS[@]}"; do
   reject_link_source_alias "${spec%%|*}" "${spec#*|}"
 done
 
+vagrant_vmware_plugin_current() {
+  command -v vagrant >/dev/null 2>&1 || return 1
+  vagrant plugin list 2>/dev/null \
+    | /usr/bin/grep -Eq \
+      "^vagrant-vmware-desktop \\($VAGRANT_VMWARE_PLUGIN_VERSION([,)])"
+}
+
 if [[ "$MODE" == "dry-run" ]]; then
   say "profile: mac-thin"
   say "mode: dry-run (no package-manager calls or writes)"
   say "would install control-plane apps from: $BREWFILE"
   say "VMware Fusion and ChatGPT remain manual application installs"
+  say "would install vagrant-vmware-desktop $VAGRANT_VMWARE_PLUGIN_VERSION"
   for spec in "${LINK_SPECS[@]}"; do
     backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 1
   done
@@ -112,12 +121,24 @@ if [[ "$MODE" == "check" ]]; then
       status=1
     fi
   done
+  if vagrant_vmware_plugin_current; then
+    say "Vagrant VMware provider current: $VAGRANT_VMWARE_PLUGIN_VERSION"
+  else
+    say "Vagrant VMware provider missing or not pinned to $VAGRANT_VMWARE_PLUGIN_VERSION"
+    status=1
+  fi
   "$SCRIPT_DIR/doctor.sh" || status=1
   exit "$status"
 fi
 
 say "Installing thin-Mac control-plane applications without broad upgrades..."
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$BREWFILE"
+
+if ! vagrant_vmware_plugin_current; then
+  say "Installing pinned Vagrant VMware provider..."
+  vagrant plugin install vagrant-vmware-desktop \
+    --plugin-version "$VAGRANT_VMWARE_PLUGIN_VERSION"
+fi
 
 for spec in "${LINK_SPECS[@]}"; do
   backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 0

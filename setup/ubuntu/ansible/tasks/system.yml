@@ -1,0 +1,54 @@
+---
+- name: Update Ubuntu packages for the first build
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+    cache_valid_time: 3600
+
+- name: Install the Brave repository key
+  ansible.builtin.get_url:
+    url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+    dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure the Brave repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/brave-browser-release.list
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main
+
+- name: Install the explicit workstation package set
+  ansible.builtin.apt:
+    name: "{{ workstation_apt_packages }}"
+    state: present
+    install_recommends: false
+    update_cache: true
+
+- name: Grow the existing root filesystem to the Vagrant disk
+  ansible.builtin.script:
+    cmd: files/grow-root-filesystem.sh
+  register: grow_root_filesystem
+  changed_when: "'root-filesystem-grown' in grow_root_filesystem.stdout"
+
+- name: Enable workstation services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - avahi-daemon
+    - docker
+    - gdm3
+    - open-vm-tools
+    - ssh
+
+- name: Boot into the graphical desktop by default
+  ansible.builtin.command:
+    cmd: systemctl set-default graphical.target
+  register: graphical_target
+  changed_when: "'Created symlink' in graphical_target.stderr"

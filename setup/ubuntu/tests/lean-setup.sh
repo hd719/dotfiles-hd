@@ -14,6 +14,11 @@ ZSH_CONFIG="$ROOT_DIR/setup/ubuntu/.zshrc"
 GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
 CODEX_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/codex"
+LINK_SCRIPT="$ROOT_DIR/setup/ubuntu/link-dotfiles.sh"
+VAGRANTFILE="$ROOT_DIR/setup/ubuntu/Vagrantfile"
+ANSIBLE_BOOTSTRAP="$ROOT_DIR/setup/ubuntu/bootstrap-ansible.sh"
+ANSIBLE_DIR="$ROOT_DIR/setup/ubuntu/ansible"
+ANSIBLE_PLAYBOOK="$ANSIBLE_DIR/playbook.yml"
 FASTFETCH_CONFIG="$ROOT_DIR/config/fastfetch/config.jsonc"
 BTOP_CONFIG="$ROOT_DIR/config/btop/btop.conf"
 SHARED_ALIASES="$ROOT_DIR/config/zsh/shared/aliases.zsh"
@@ -124,6 +129,71 @@ EOF
   [[ -L "$stable_socket" ]] || fail "Codex wrapper did not create a stable agent socket"
   [[ "$(readlink "$stable_socket")" == "$socket" ]] \
     || fail "Codex wrapper pointed at the wrong forwarded agent socket"
+
+  rm -f "$stable_socket"
+  ln -s "$case_dir/dead-forwarded.sock" "$stable_socket"
+  output="$(
+    env -u SSH_AUTH_SOCK \
+      HOME="$case_dir/home" \
+      "$CODEX_WRAPPER" app-server proxy
+  )"
+  assert_contains "$output" "socket="
+  [[ "$output" != *"socket=$stable_socket"* ]] \
+    || fail "Codex wrapper reused a stale forwarded socket"
+}
+
+test_vagrant_ansible_contract() {
+  local task_file
+
+  for task_file in \
+    "$VAGRANTFILE" \
+    "$ANSIBLE_BOOTSTRAP" \
+    "$ANSIBLE_PLAYBOOK" \
+    "$ANSIBLE_DIR/vars.yml" \
+    "$ANSIBLE_DIR/tasks/system.yml" \
+    "$ANSIBLE_DIR/tasks/user.yml" \
+    "$ANSIBLE_DIR/tasks/tailscale.yml" \
+    "$ANSIBLE_DIR/tasks/identities.yml" \
+    "$ANSIBLE_DIR/tasks/dotfiles.yml" \
+    "$ANSIBLE_DIR/tasks/tools.yml" \
+    "$ANSIBLE_DIR/tasks/verify.yml" \
+    "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
+    "$LINK_SCRIPT"; do
+    [[ -f "$task_file" ]] || fail "missing Vagrant/Ansible file: $task_file"
+  done
+
+  assert_file_contains "$ANSIBLE_BOOTSTRAP" \
+    'apt-get install -y --no-install-recommends ansible-core'
+  if grep -Eq 'ppa:|cloud-init' "$ANSIBLE_BOOTSTRAP" "$ANSIBLE_DIR"/*.yml "$ANSIBLE_DIR"/tasks/*.yml; then
+    fail "bootstrap must not add an Ansible PPA or cloud-init"
+  fi
+
+  assert_file_contains "$VAGRANTFILE" 'config.vm.provision "file"'
+  assert_file_contains "$VAGRANTFILE" 'config.vm.provision "ansible_local"'
+  assert_file_contains "$VAGRANTFILE" 'ansible.install = false'
+  assert_file_contains "$VAGRANTFILE" \
+    'ansible.provisioning_path = "/tmp/ubuntu-workstation-ansible"'
+  assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/system.yml'
+  assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/identities.yml'
+  assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/verify.yml'
+  assert_file_contains "$ANSIBLE_DIR/tasks/verify.yml" '--offline'
+  assert_file_contains "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
+    'growpart "/dev/$parent_name" "$partition_number"'
+
+  assert_file_contains "$ANSIBLE_DIR/tasks/identities.yml" \
+    'creates: "{{ workstation_home }}/.ssh/{{ item.private_key }}"'
+  assert_file_contains "$ANSIBLE_DIR/tasks/identities.yml" 'id_ed25519_hd719'
+  assert_file_contains "$ANSIBLE_DIR/tasks/identities.yml" 'id_ed25519_arbiter_hd'
+  assert_file_contains "$ANSIBLE_DIR/tasks/identities.yml" \
+    'id_ed25519_forgejo_truenas'
+  assert_file_contains "$ANSIBLE_DIR/tasks/tailscale.yml" 'no_log: true'
+  assert_file_contains "$ANSIBLE_DIR/tasks/tailscale.yml" \
+    'state: absent'
+  assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" 'PasswordAuthentication no'
+  assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" 'PermitRootLogin no'
+  if grep -Fq 'password: "0000"' "$ANSIBLE_DIR/tasks/user.yml"; then
+    fail "the VM password must be stored only as a hash"
+  fi
 }
 
 test_doctor_is_read_only_and_complete() {
@@ -154,6 +224,18 @@ test_doctor_is_read_only_and_complete() {
   printf 'ID=ubuntu\nVERSION_ID=26.04\n' > "$case_dir/os-release"
   mkdir -p "$case_dir/home/.local/share/fonts/Hasklig"
   printf '3.4.0\n' > "$case_dir/home/.local/share/fonts/Hasklig/.nerd-font-version"
+  mkdir -p "$case_dir/home/.ssh"
+  for target in \
+    id_ed25519_hd719 \
+    id_ed25519_arbiter_hd \
+    id_ed25519_forgejo_truenas; do
+    printf 'private-%s\n' "$target" > "$case_dir/home/.ssh/$target"
+    printf 'ssh-ed25519 public-%s test\n' "$target" \
+      > "$case_dir/home/.ssh/$target.pub"
+    chmod 600 "$case_dir/home/.ssh/$target"
+  done
+  printf 'managed ssh config\n' > "$case_dir/home/.ssh/config"
+  chmod 600 "$case_dir/home/.ssh/config"
 
   for spec in "${link_specs[@]}"; do
     source="$case_dir/home/Developer/dotfiles-hd/${spec%%|*}"
@@ -204,7 +286,17 @@ printf 'hamel:x:1000:1000:Hamel:/home/hamel:/usr/bin/zsh\n'
 EOF
   cat > "$case_dir/bin/systemctl" <<'EOF'
 #!/usr/bin/env bash
-[[ "${1:-}" == "is-enabled" || "${1:-}" == "is-active" ]]
+case "${1:-}" in
+  is-enabled|is-active)
+    exit 0
+    ;;
+  get-default)
+    printf 'graphical.target\n'
+    ;;
+  *)
+    exit 1
+    ;;
+esac
 EOF
   cat > "$case_dir/bin/docker" <<'EOF'
 #!/usr/bin/env bash
@@ -216,6 +308,9 @@ EOF
 EOF
   cat > "$case_dir/bin/zsh" <<'EOF'
 #!/usr/bin/env bash
+if [[ "$*" == *"codex login status"* ]]; then
+  printf 'Logged in using ChatGPT\n'
+fi
 exit 0
 EOF
   cat > "$case_dir/bin/fc-list" <<'EOF'
@@ -224,6 +319,24 @@ printf 'Hasklug Nerd Font\n'
 EOF
   cat > "$case_dir/bin/ssh" <<'EOF'
 #!/usr/bin/env bash
+if [[ "${1:-}" == "-G" ]]; then
+  case "${!#}" in
+    github.com)
+      key=id_ed25519_hd719
+      ;;
+    github.com-arbiter)
+      key=id_ed25519_arbiter_hd
+      ;;
+    forgejo-truenas-lan|forgejo-truenas-ts)
+      key=id_ed25519_forgejo_truenas
+      ;;
+    *)
+      exit 1
+      ;;
+  esac
+  printf 'identitiesonly yes\nidentityagent none\nidentityfile ~/.ssh/%s\n' "$key"
+  exit 0
+fi
 case "${!#}" in
   github.com) printf 'Hi hd719!\n' ;;
   github.com-arbiter) printf 'Hi arbiter-hd!\n' ;;
@@ -249,6 +362,10 @@ EOF
   assert_contains "$output" "github.com authenticates as Hi hd719!"
   assert_contains "$output" "github.com-arbiter authenticates as Hi arbiter-hd!"
   assert_contains "$output" "forgejo-truenas-lan authenticates as Hi there, hd719!"
+  assert_contains "$output" "three unique VM-local Git keys"
+  assert_contains "$output" "Codex login is ready"
+  assert_contains "$output" "graphical VMware desktop"
+  assert_contains "$output" "root filesystem has at least 200 GiB"
 
   rm "$case_dir/home/.config/hunk/config.toml"
   set +e
@@ -264,7 +381,9 @@ EOF
   set -e
   ((status != 0)) || fail "doctor ignored a missing managed link"
   assert_contains "$output" "link mismatch: $case_dir/home/.config/hunk/config.toml"
-  assert_contains "$output" "SKIP  remote GitHub and Forgejo identities (--offline)"
+  assert_contains "$output" "SKIP  Tailscale connection (--offline)"
+  assert_contains "$output" \
+    "SKIP  remote GitHub, Forgejo, and Codex login checks (--offline)"
 }
 
 test_cleanup_requires_explicit_confirmation() {
@@ -1400,6 +1519,7 @@ test_wrong_os_stops_before_mutation
 test_help_is_read_only
 test_neovim_help_is_read_only
 test_codex_wrapper_stabilizes_forwarded_agent
+test_vagrant_ansible_contract
 test_doctor_is_read_only_and_complete
 test_cleanup_requires_explicit_confirmation
 test_cleanup_wrong_os_stops_before_mutation

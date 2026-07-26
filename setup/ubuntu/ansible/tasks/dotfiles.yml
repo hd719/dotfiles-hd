@@ -1,0 +1,27 @@
+---
+- name: Create the development root
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/Developer"
+    state: directory
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0755"
+
+- name: Clone the public dotfiles repository over HTTPS
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.git:
+    repo: "{{ dotfiles_repository_https }}"
+    dest: "{{ dotfiles_dir }}"
+    version: "{{ dotfiles_git_ref }}"
+    update: true
+    force: false
+
+- name: Link user configuration from dotfiles
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: bash setup/ubuntu/link-dotfiles.sh
+    chdir: "{{ dotfiles_dir }}"
+  register: dotfiles_linker
+  changed_when: "'Linked ' in dotfiles_linker.stdout or 'Backed up ' in dotfiles_linker.stdout"

@@ -1,0 +1,76 @@
+---
+- name: Check the mise-owned development toolchain
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: bash setup/ubuntu/setup-neovim.sh --check
+    chdir: "{{ dotfiles_dir }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+  register: mise_toolchain_check
+  changed_when: false
+  failed_when: false
+
+- name: Install the mise-owned development toolchain
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: bash setup/ubuntu/setup-neovim.sh
+    chdir: "{{ dotfiles_dir }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+  when: mise_toolchain_check.rc != 0
+  changed_when: true
+
+- name: Create the user font directory
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/fonts/Hasklig"
+    state: directory
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0755"
+
+- name: Check the installed Nerd Font version
+  ansible.builtin.command:
+    cmd: >-
+      grep -Fx {{ nerd_font_version }}
+      {{ workstation_home }}/.local/share/fonts/Hasklig/.nerd-font-version
+  register: nerd_font_check
+  changed_when: false
+  failed_when: false
+
+- name: Download the verified Hasklug Nerd Font archive
+  ansible.builtin.get_url:
+    url: >-
+      https://github.com/ryanoasis/nerd-fonts/releases/download/v{{ nerd_font_version }}/Hasklig.tar.xz
+    dest: "/tmp/Hasklig-{{ nerd_font_version }}.tar.xz"
+    checksum: "sha256:{{ nerd_font_sha256 }}"
+    mode: "0644"
+  register: nerd_font_archive
+  when: nerd_font_check.rc != 0
+
+- name: Install Hasklug Nerd Font
+  ansible.builtin.unarchive:
+    src: "/tmp/Hasklig-{{ nerd_font_version }}.tar.xz"
+    dest: "{{ workstation_home }}/.local/share/fonts/Hasklig"
+    remote_src: true
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+  when: nerd_font_check.rc != 0
+
+- name: Record the installed Nerd Font version
+  ansible.builtin.copy:
+    dest: "{{ workstation_home }}/.local/share/fonts/Hasklig/.nerd-font-version"
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0644"
+    content: "{{ nerd_font_version }}\n"
+  register: nerd_font_version_file
+
+- name: Refresh the user font cache
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: "fc-cache -f {{ workstation_home }}/.local/share/fonts/Hasklig"
+  when: nerd_font_check.rc != 0 or nerd_font_version_file.changed
+  changed_when: true

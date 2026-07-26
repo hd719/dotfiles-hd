@@ -43,8 +43,7 @@ Use this document two ways:
 
 ## One-Command Health Check
 
-Enter Ubuntu through the Mac's `u` alias so forwarded SSH identities are
-available:
+Enter Ubuntu through the Mac's `u` alias:
 
 ```bash
 cd ~/Developer/dotfiles-hd
@@ -53,13 +52,14 @@ bash setup/ubuntu/doctor.sh
 
 It checks the clean canonical checkout, every managed link, Zsh and aliases,
 Docker, Neovim, personal GitHub, Arbiter GitHub, and both Forgejo routes without
-changing the machine. With no network, run:
+changing the machine. With no external authentication, run:
 
 ```bash
 bash setup/ubuntu/doctor.sh --offline
 ```
 
-Offline mode skips only the four remote identity checks.
+Offline mode still checks local keys and configuration. It skips the Tailscale
+connection, four remote identities, and Codex login.
 
 ## Quick Command Card
 
@@ -501,8 +501,8 @@ image pulls, and other external dependencies.
 Ubuntu joins the tailnet as `ubuntu-dev`. The thin Mac has two SSH routes:
 
 ```text
-ubuntu-vm       Local VMware mDNS route
-ubuntu-vm-ts    Tailscale 100.82.171.116 for Codex and remote access
+ubuntu-vm       Local Vagrant route at 127.0.0.1:2222
+ubuntu-vm-ts    Tailscale MagicDNS for Codex and remote access
 ```
 
 Check the Tailscale route:
@@ -513,20 +513,19 @@ tailscale ip -4
 systemctl status tailscaled --no-pager
 ```
 
-Use `ut` or `ubuntu-ts` on the Mac to connect through Tailscale. Both Ubuntu
-routes use the same SSH key and forward the Mac agent.
+Use `ut` or `ubuntu-ts` on the Mac to connect through Tailscale. Both routes
+use the Mac's Ubuntu login key, enforce host-key checking, and disable agent
+forwarding.
 
 ## SSH and Git Identities
 
-Ubuntu's existing personal key is pinned to plain `github.com`, which
-authenticates as `hd719`. The Arbiter and Forgejo private keys remain on the
-Mac. An SSH session opened through `ubuntu-vm` forwards a live agent socket for
-those additional identities. Codex desktop uses the managed
-`~/.local/bin/codex` launcher to keep that forwarded socket at a stable path
-when separate Mac terminal sessions open or close.
+Ubuntu generates three VM-local keys: personal GitHub, Arbiter GitHub, and
+Forgejo. The managed SSH config pins each host alias to its key and sets
+`IdentityAgent none`, so a forwarded Mac agent cannot select the wrong
+identity. The Codex wrapper still preserves its forwarded-socket compatibility
+fix for older sessions and the legacy VM.
 
 ```bash
-ssh-add -l
 ssh -T github.com
 ssh -T github.com-arbiter
 ssh -T forgejo-truenas-lan
@@ -563,8 +562,8 @@ git config user.name "arbiter-hd"
 git config user.email "YOUR-ARBITER-EMAIL"
 ```
 
-Do not set an unverified email, copy private keys into Ubuntu, or replace the
-machine-owned global `~/.gitconfig`.
+Do not set an unverified email, copy private keys from another machine, or
+replace the machine-owned global `~/.gitconfig`.
 
 ### Work alongside an agent
 

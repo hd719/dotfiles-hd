@@ -136,29 +136,30 @@ for those five links. Do not replace it with ad hoc `ln -s` commands.
 
 ## Ubuntu
 
-Follow `setup/ubuntu/README.md`. `setup.sh` installs packages, changes the login
-shell, enables Docker, and links the documented inventory. The destructive
-`cleanup-legacy.sh --yes` migration is separate and must never run implicitly.
-Use `setup/ubuntu/GUIDE.md` for Mac-to-Ubuntu teaching and keep its commands
-aligned with the supported workstation. Run `setup/ubuntu/doctor.sh` from an
-SSH session opened through `ubuntu-vm`; use `--offline` only when remote
-identity checks are intentionally unavailable.
+Follow `setup/ubuntu/README.md`. Vagrant owns the VM lifecycle, guest-local
+Ansible owns system setup, mise owns development tools, and dotfiles owns user
+links. `setup.sh` remains only for the unchanged legacy VM during the rollback
+window. The destructive `cleanup-legacy.sh --yes` migration is separate and
+must never run implicitly. Use `setup/ubuntu/GUIDE.md` for Mac-to-Ubuntu
+teaching and keep its commands aligned with the supported workstation.
 
 - Keep `~/.gitconfig` machine-owned. Ubuntu's `.zshrc` must provide a plain
   `less` fallback when the mise-owned `diff-so-fancy` is unavailable.
 - Set `ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE` before sourcing zsh-autosuggestions.
   Ghostty's Nord palette color 8 is too close to its background; preserve the
   tracked higher-contrast color unless the shared terminal palette changes.
-- Arbiter GitHub and Forgejo access in Ubuntu must use the Mac's forwarded SSH
-  agent. Keep only public-key selectors in the VM; never copy the private keys.
-- Keep plain `github.com` pinned to Ubuntu's local `hd719` key and reserve
-  `github.com-arbiter` for the forwarded Arbiter identity.
+- GitHub `hd719`, Arbiter, and Forgejo must use three separate VM-local
+  Ed25519 keys. Generate them once, never overwrite them during provisioning,
+  and never copy Git private keys from the Mac.
+- Keep plain `github.com` pinned to the local `hd719` key and reserve
+  `github.com-arbiter` for the local Arbiter key.
 - Use `ubuntu-vm-ts` as the primary Codex route to Tailscale node `ubuntu-dev`.
-  Keep `ubuntu-vm` as the local VMware fallback; both must forward the Mac
-  agent and load the Arbiter and Forgejo keys.
+  Keep `ubuntu-vm` as the loopback-only Vagrant fallback. Both must disable Mac
+  agent forwarding and enforce SSH host-key checking.
 - Keep the pinned Codex CLI installed and authenticated in Ubuntu. Codex
   desktop starts it through the remote login shell, where `codex` must be on
-  `PATH`.
+  `PATH`. Preserve the issue 25 forwarded-socket wrapper as a compatibility
+  guard even though the normal Vagrant routes do not forward an agent.
 
 ## Preserved Zed Configuration
 

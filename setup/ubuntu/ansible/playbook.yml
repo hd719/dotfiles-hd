@@ -1,0 +1,47 @@
+---
+- name: Configure the Ubuntu development workstation
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+
+  vars_files:
+    - vars.yml
+
+  handlers:
+    - name: Restart SSH
+      ansible.builtin.systemd_service:
+        name: ssh
+        state: restarted
+
+  tasks:
+    # Always remove the one-time Tailscale key, even when provisioning fails.
+    - name: Configure workstation and remove temporary provision data
+      block:
+        - name: Configure the operating system
+          ansible.builtin.import_tasks: tasks/system.yml
+
+        - name: Configure the daily user
+          ansible.builtin.import_tasks: tasks/user.yml
+
+        - name: Configure Tailscale
+          ansible.builtin.import_tasks: tasks/tailscale.yml
+
+        - name: Configure local Git identities
+          ansible.builtin.import_tasks: tasks/identities.yml
+
+        - name: Clone and link dotfiles
+          ansible.builtin.import_tasks: tasks/dotfiles.yml
+
+        - name: Install mise-owned tools
+          ansible.builtin.import_tasks: tasks/tools.yml
+
+        - name: Verify the offline workstation
+          ansible.builtin.import_tasks: tasks/verify.yml
+      always:
+        - name: Delete temporary provision data
+          ansible.builtin.file:
+            path: /tmp/ubuntu-workstation-secrets.json
+            state: absent
+          changed_when: false
+          no_log: true

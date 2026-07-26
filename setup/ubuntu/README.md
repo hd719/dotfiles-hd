@@ -1,61 +1,140 @@
 # Ubuntu Workstation
 
-Lean daily-driver setup tested on Ubuntu 26.04 ARM64. The installer rejects
-non-Ubuntu hosts.
+Ubuntu 26.04 ARM64 is the primary development workstation. The thin Mac runs
+Vagrant and VMware Fusion only as its control plane.
 
-New to Linux administration? Start with the
-[Ubuntu Field Guide for a Mac User](GUIDE.md).
+## Rebuild
 
-## Install
+Prerequisites on the thin Mac:
 
-Prerequisites: network access, `sudo`, Git, and GitHub SSH access.
+- VMware Fusion is installed and its first-run setup is complete.
+- `setup/mac-thin/bootstrap.sh --apply` has installed Vagrant, the VMware
+  utility, and the pinned provider.
+- `~/.ssh/id_ed25519_ubuntu_vm.pub` exists.
 
-```bash
-mkdir -p "$HOME/Developer"
-git clone git@github.com:hd719/dotfiles-hd.git \
-  "$HOME/Developer/dotfiles-hd"
-cd "$HOME/Developer/dotfiles-hd"
-bash setup/ubuntu/setup.sh
+Create an optional one-time, preauthorized Tailscale auth key. Enter it without
+putting it in shell history:
+
+```zsh
+read -rs "TAILSCALE_AUTH_KEY?One-time Tailscale key: "
+export TAILSCALE_AUTH_KEY
+uvm-up
+unset TAILSCALE_AUTH_KEY
 ```
 
-Log out and back in once so Zsh becomes the login shell and Docker group
-membership applies. Rerunning setup repairs missing packages and links without
-replacing an already-correct link.
+Use `uvm-up-headless` instead when no VMware window is wanted. Without an auth
+key, provisioning still succeeds and localhost SSH works; join Tailscale later
+with `sudo tailscale up --hostname=ubuntu-dev-canary`.
 
-## What Setup Changes
+`vagrant up` performs this flow:
 
-- Installs the lean APT package set, Ghostty, Docker, Zsh, ImageMagick,
-  Ghostscript, clipboard tools, and Zsh plugins.
-- Installs Hasklug Nerd Font `3.4.0` from a checksum-verified archive.
-- Installs exact runtimes, editor tools, Herdr, Hunk, Bookokrat, fastfetch, and
-  diff-so-fancy from `setup/ubuntu/mise.toml`.
-- Loads the portable full-development alias set, including Hunk, pnpm, Git, Go,
-  Neovim, fastfetch, and tmux shortcuts.
-- Uses `diff-so-fancy` for Git output with plain `less` as a safe fallback.
-- Uses a higher-contrast autosuggestion color over the shared Ghostty Nord
-  background instead of zsh-autosuggestions' low-contrast palette default.
-- Restores locked Neovim plugins and required Tree-sitter parsers.
-- Enables Docker, adds the current user to its group, and changes the login
-  shell to Zsh.
-- Sets Git's global editor to Neovim and global excludes file to
-  `~/.gitignore_global`.
+```text
+Bento Ubuntu 26.04 ARM64
+  -> Ubuntu ansible-core package
+  -> Ansible system and user configuration
+  -> mise tools and dotfile links
+  -> doctor.sh --offline
+```
 
-The default setup does not install cloud tools, Ruby, Redis, VS Code, alternate
-launchers, or extra package managers.
+The box is pinned to `bento/ubuntu-26.04` version `202606.01.0`. VMware creates
+a full clone with 10 vCPUs, 25 GB RAM, and a 250 GB virtual disk under the
+existing `~/Virtual Machines.localized/VMWIsoImages` directory. Shared folders
+are disabled.
+
+## First Onboarding
+
+Provisioning prints three public keys. Register them with the matching service:
+
+```bash
+cat ~/.ssh/id_ed25519_hd719.pub
+cat ~/.ssh/id_ed25519_arbiter_hd.pub
+cat ~/.ssh/id_ed25519_forgejo_truenas.pub
+```
+
+Each key is VM-local, unencrypted, generated once, and selected by the managed
+`~/.ssh/config`. The thin Mac does not forward its agent.
+
+The local `hamel` console and sudo password is `0000`. SSH password login and
+root login are disabled; SSH accepts only the Mac's existing Ubuntu public key.
+
+After registration:
+
+```bash
+cd ~/Developer/dotfiles-hd
+git remote set-url origin git@github.com:hd719/dotfiles-hd.git
+codex login --device-auth
+bash setup/ubuntu/doctor.sh
+```
+
+Secrets and `.env` files are restored manually from 1Password. Project
+repositories are fresh clones. Containers, images, volumes, and databases are
+not migrated.
+
+## SSH Routes
+
+Before the first `uc` connection, compare the guest and scanned Ed25519 host-key
+fingerprints from the thin Mac:
+
+```bash
+cd ~/Developer/dotfiles-hd/setup/ubuntu
+vagrant ssh -c \
+  'sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub'
+ssh-keyscan -p 2222 127.0.0.1 2>/dev/null | ssh-keygen -lf -
+```
+
+Only when they match, replace the canary entry:
+
+```bash
+ssh-keygen -R ubuntu-dev-canary
+ssh-keyscan -p 2222 127.0.0.1 2>/dev/null \
+  | awk '{$1="ubuntu-dev-canary"; print}' >> ~/.ssh/known_hosts
+```
+
+The tracked SSH policy keeps host-key checking enabled:
+
+| Alias                 | Route                              |
+| --------------------- | ---------------------------------- |
+| `ubuntu-vm-canary`    | `127.0.0.1:2222`                   |
+| `ubuntu-vm-canary-ts` | Tailscale MagicDNS canary hostname |
+| `ubuntu-vm`           | `127.0.0.1:2222` after cutover     |
+| `ubuntu-vm-ts`        | Tailscale MagicDNS `ubuntu-dev`    |
+
+Use `uc` and `uct` during qualification. Existing `u` and `ut` routes remain
+unchanged until cutover.
+
+## Lifecycle
+
+Run these on the thin Mac:
+
+```text
+uvm-up             Start with the VMware GUI
+uvm-up-headless    Start without a VMware window
+uvm-stop           Graceful Vagrant halt
+uvm-suspend        Suspend
+uvm-resume         Resume
+uvm-status         Show Vagrant state
+uvm-ip             Show guest addresses
+uvm-destroy        Interactive canary destroy
+```
+
+`uvm-destroy` prints the Git key fingerprints when the guest is reachable,
+reminds you to remove registered keys, and calls interactive `vagrant destroy`.
+It never passes `-f` and cannot target the legacy VM.
+
+Transfer files with `rsync` or `scp`; there is no host-mounted development
+folder.
 
 ## Ownership
 
-| Owner      | State                                                                                      |
-| ---------- | ------------------------------------------------------------------------------------------ |
-| APT        | System packages, Ghostty, Docker, `lsd`, build libraries, clipboard tools, and Zsh plugins |
-| mise       | Pinned Codex CLI, Neovim, runtimes, language servers, formatters, and editor CLIs          |
-| User files | Verified Nerd Font and backed-up configuration links                                       |
+| Owner    | State                                                         |
+| -------- | ------------------------------------------------------------- |
+| Vagrant  | VM lifecycle, box version, resources, disk, and SSH transport |
+| Ansible  | Ubuntu packages, user, services, Tailscale, and Git keys      |
+| mise     | Pinned runtimes, Neovim, Codex, and development tools         |
+| dotfiles | User configuration and symlinks                               |
+| doctor   | Final read-only acceptance check                              |
 
-Existing files, directories, and dangling links are timestamp-backed up beside
-their live path before replacement. Credentials and application runtime state
-are never linked.
-
-## Link Inventory
+Managed links:
 
 | Live path                              | Source                          |
 | -------------------------------------- | ------------------------------- |
@@ -74,104 +153,58 @@ are never linked.
 | `~/.local/bin/codex`                   | `setup/ubuntu/bin/codex`        |
 | `~/.local/graphql-lsp/bin/graphql-lsp` | `setup/ubuntu/bin/graphql-lsp`  |
 
-Ghostty uses the shared Hamel Nord profile. Neovim uses the shared
-`config/nvim`; no Linux-only Lua fork exists. Herdr and Hunk link only their
-configuration files so runtime state remains machine-owned. The linked btop
-configuration disables save-on-exit so btop cannot rewrite the Git checkout;
-edit the tracked config directly when changing btop settings.
+Small Bash boundaries remain:
 
-## Tailscale Remote Access
+- `bootstrap-ansible.sh` installs only Ubuntu's `ansible-core`.
+- `grow-root-filesystem.sh` grows Bento's partition to the Vagrant disk.
+- `link-dotfiles.sh` preserves backup-safe symlink behavior.
+- `setup-neovim.sh` manages the existing mise and Neovim workflow.
+- `update-system.sh` performs later Ubuntu and tool updates.
+- `doctor.sh` verifies the finished workstation.
+- `cleanup-legacy.sh` remains separate and destructive; Vagrant never runs it.
 
-Tailscale is a one-time authenticated install, separate from normal setup:
-
-```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up --hostname=ubuntu-dev
-tailscale ip -4
-```
-
-The thin Mac uses `ubuntu-vm-ts` as the primary Codex route and keeps
-`ubuntu-vm` as the local VMware fallback. Both aliases use the Ubuntu SSH key
-and forward the Mac agent.
-
-Authenticate the pinned Codex CLI once from Ubuntu:
-
-```bash
-codex login --device-auth
-codex --version
-```
-
-Codex desktop starts the remote app server through the Ubuntu login shell, so
-`codex` must remain in that shell's `PATH`. The managed Codex launcher gives
-the remote app server a stable path to the current forwarded agent socket, so
-closing a separate Mac terminal session cannot strand Codex on a dead socket.
+`setup.sh` remains temporarily for the unchanged legacy VM. Remove it only
+after the 30-day rollback window.
 
 ## Verify
 
-Open Ubuntu through the Mac's `u` alias so SSH agent forwarding is active, then
-run the one-command doctor:
+The offline doctor runs automatically during provisioning. It verifies local
+state but skips Tailscale connectivity and external logins:
 
 ```bash
-cd "$HOME/Developer/dotfiles-hd"
-bash setup/ubuntu/doctor.sh
-nvim ~/.config/nvim/README.md
+bash setup/ubuntu/doctor.sh --offline
 ```
 
-The doctor is read-only. It checks the canonical clean checkout, every managed
-link, the Nerd Font, Zsh and development aliases, Codex CLI, Docker, Tailscale,
-the pinned Neovim setup, and all four GitHub/Forgejo routes. Use `--offline` to
-skip only the remote identity checks when the VM has no network.
+The full doctor verifies Tailscale, the three local Git keys, four remote Git
+routes, and local Codex login status without making a paid API request:
+
+```bash
+bash setup/ubuntu/doctor.sh
+```
+
+## Canary and Cutover
+
+1. Stop the legacy VM before starting the 25 GB canary.
+1. Build the canary and run `vagrant provision` a second time.
+1. Run the full doctor after onboarding.
+1. Use interactive `uvm-destroy`.
+1. Repeat a clean build and all checks.
+1. Rename the qualified Tailscale node to `ubuntu-dev`.
+1. Put `Include ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf`
+   before the old Ubuntu blocks in `~/.ssh/config`.
+1. Verify the new `ubuntu-dev` host key, then test `u` and `ut`.
+1. Keep the legacy VM powered off for 30 days.
+
+Rollback is simple: stop the canary, remove the new SSH include, and start the
+unchanged legacy VMware VM.
 
 ## Update
+
+Inside Ubuntu:
 
 ```bash
 bash setup/ubuntu/update-system.sh
 ```
 
-The updater accepts only `git@github.com:hd719/dotfiles-hd.git`, pulls `master`
-with `--ff-only`, then runs APT full-upgrade and refreshes pinned mise and
-Neovim state. A failed repository sync never resets local changes; package
-maintenance continues and any reboot requirement is reported.
-
-## Arbiter and Forgejo Access
-
-Ubuntu's existing personal key is pinned to plain `github.com`, which
-authenticates as `hd719`. The Arbiter and Forgejo private keys stay on the thin
-Mac and reach Ubuntu only through the forwarded SSH agent. Ubuntu stores their
-matching public keys and machine-owned host aliases:
-
-```text
-github.com               GitHub as hd719
-github.com-arbiter       GitHub as arbiter-hd
-forgejo-truenas-lan      Forgejo over the home LAN
-forgejo-truenas-ts       Forgejo over Tailscale
-```
-
-Use `git@github.com-arbiter:arbiter-hd/<repository>.git` for Arbiter remotes and
-`git@forgejo-truenas-lan:hd719/<repository>.git` for Forgejo remotes. Verify
-from an SSH session opened through `ubuntu-vm`:
-
-```bash
-ssh -T github.com
-ssh -T github.com-arbiter
-ssh -T forgejo-truenas-lan
-ssh -T forgejo-truenas-ts
-```
-
-The SSH hostname selects the account; the path after `:` selects the repository
-owner. Never copy the Arbiter or Forgejo private keys into the VM.
-
-## One-Time Legacy Migration
-
-This is destructive and never runs from normal setup:
-
-```bash
-bash setup/ubuntu/cleanup-legacy.sh --yes
-bash setup/ubuntu/setup.sh
-```
-
-It removes the old Docker CE repository and packages, AWS CLI, Terraform,
-kubectl, Redis, Ulauncher, VS Code, fastfetch PPA, APT Go, development snaps,
-rbenv, direct Starship install, and superseded user editor toolchains. It
-preserves projects, Docker data, AWS and Kubernetes credentials, Firefox,
-Ubuntu system snaps, and the snap service.
+The updater accepts only the SSH dotfiles origin, pulls `master` with
+`--ff-only`, runs APT maintenance, and refreshes mise and Neovim state.

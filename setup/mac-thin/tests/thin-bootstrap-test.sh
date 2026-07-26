@@ -23,9 +23,11 @@ Host ubuntu-vm-ts
   LocalCommand /usr/bin/ssh-add $TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd $TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas >/dev/null 2>&1
 EOF
 touch \
+  "$TEST_ROOT/home/.ssh/id_ed25519_ubuntu_vm" \
   "$TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd" \
   "$TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas"
 chmod 600 \
+  "$TEST_ROOT/home/.ssh/id_ed25519_ubuntu_vm" \
   "$TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd" \
   "$TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas"
 
@@ -60,14 +62,34 @@ cat > "$TEST_ROOT/bin/xcode-select" <<'EOF'
 printf '/Library/Developer/CommandLineTools\n'
 EOF
 
-chmod +x "$TEST_ROOT/bin/brew" "$TEST_ROOT/bin/uname" "$TEST_ROOT/bin/xcode-select"
+cat > "$TEST_ROOT/bin/vagrant" <<'EOF'
+#!/bin/sh
+printf 'vagrant %s\n' "$*" >> "$DOTFILES_TEST_BREW_LOG"
+if [ "${1:-}" = "plugin" ] && [ "${2:-}" = "list" ]; then
+  printf 'vagrant-vmware-desktop (%s, global)\n' \
+    "$(cat "$DOTFILES_TEST_VAGRANT_STATE")"
+elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "install" ]; then
+  printf '3.0.5\n' > "$DOTFILES_TEST_VAGRANT_STATE"
+fi
+EOF
+
+touch "$TEST_ROOT/vagrant-vmware-utility"
+chmod +x \
+  "$TEST_ROOT/bin/brew" \
+  "$TEST_ROOT/bin/uname" \
+  "$TEST_ROOT/bin/vagrant" \
+  "$TEST_ROOT/bin/xcode-select" \
+  "$TEST_ROOT/vagrant-vmware-utility"
 : > "$TEST_ROOT/brew.log"
+printf '2.0.0\n' > "$TEST_ROOT/vagrant-plugin-version"
 
 export DOTFILES_ALLOW_DIRTY=1
 export DOTFILES_ALLOW_NONCANONICAL=1
 export DOTFILES_APPLICATIONS_DIR="$TEST_ROOT/apps"
 export DOTFILES_DIR="$REPO_DIR"
 export DOTFILES_TEST_BREW_LOG="$TEST_ROOT/brew.log"
+export DOTFILES_TEST_VAGRANT_STATE="$TEST_ROOT/vagrant-plugin-version"
+export DOTFILES_VAGRANT_VMWARE_UTILITY="$TEST_ROOT/vagrant-vmware-utility"
 export HOME="$TEST_ROOT/home"
 export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
 
@@ -93,9 +115,17 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias ubuntu)\" == \"ubuntu='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
   [[ \"\$(alias ubuntu-ts)\" == \"ubuntu-ts='ssh ubuntu-vm-ts'\" ]]
+  [[ \"\$(alias uc)\" == \"uc='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary'\" ]]
+  [[ \"\$(alias uct)\" == \"uct='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary-ts'\" ]]
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
   [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
   [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]
+  [[ \"\$(whence -w uvm-up)\" == 'uvm-up: function' ]]
+  [[ \"\$(whence -w uvm-up-headless)\" == 'uvm-up-headless: function' ]]
+  [[ \"\$(whence -w uvm-stop)\" == 'uvm-stop: function' ]]
+  [[ \"\$(whence -w uvm-suspend)\" == 'uvm-suspend: function' ]]
+  [[ \"\$(whence -w uvm-resume)\" == 'uvm-resume: function' ]]
+  [[ \"\$(whence -w uvm-destroy)\" == 'uvm-destroy: function' ]]
   ! alias v >/dev/null 2>&1
   ! alias hm-dev >/dev/null 2>&1
   ! alias docker-nuke >/dev/null 2>&1
@@ -114,6 +144,11 @@ GIT_PAGER='less --tabs=4 -RFX' /bin/zsh -dfc "
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -z "$(find "$HOME" -name '*.backup-*' -print -quit)" ]]
 grep -Fq 'bundle install --no-upgrade' "$TEST_ROOT/brew.log"
+grep -Fq \
+  'vagrant plugin install vagrant-vmware-desktop --plugin-version 3.0.5' \
+  "$TEST_ROOT/brew.log"
 grep -Fxq 'brew "diff-so-fancy"' "$REPO_DIR/setup/mac-thin/Brewfile"
+grep -Fxq 'cask "vagrant"' "$REPO_DIR/setup/mac-thin/Brewfile"
+grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/setup/mac-thin/Brewfile"
 
 printf 'Thin Mac bootstrap tests passed.\n'
