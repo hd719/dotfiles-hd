@@ -7,6 +7,9 @@ DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
 STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 MODE="dry-run"
 VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
+PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
+SOFTWAREUPDATE="${DOTFILES_SOFTWAREUPDATE:-/usr/sbin/softwareupdate}"
+SUDO="${DOTFILES_SUDO:-/usr/bin/sudo}"
 
 # shellcheck source=../mac-bootstrap/lib.sh
 source "$DOTFILES_DIR/setup/mac-bootstrap/lib.sh"
@@ -93,11 +96,16 @@ vagrant_vmware_plugin_current() {
       "^vagrant-vmware-desktop \\($VAGRANT_VMWARE_PLUGIN_VERSION([,)])"
 }
 
+rosetta_installed() {
+  "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1
+}
+
 if [[ "$MODE" == "dry-run" ]]; then
   say "profile: mac-thin"
   say "mode: dry-run (no package-manager calls or writes)"
   say "would install control-plane apps from: $BREWFILE"
   say "VMware Fusion and ChatGPT remain manual application installs"
+  say "would install Rosetta 2 when missing"
   say "would install vagrant-vmware-desktop $VAGRANT_VMWARE_PLUGIN_VERSION"
   for spec in "${LINK_SPECS[@]}"; do
     backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 1
@@ -107,6 +115,12 @@ fi
 
 if [[ "$MODE" == "check" ]]; then
   status=0
+  if rosetta_installed; then
+    say "Rosetta 2 installed"
+  else
+    say "Rosetta 2 missing"
+    status=1
+  fi
   if HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade --file "$BREWFILE"; then
     say "Brewfile satisfied: $BREWFILE"
   else
@@ -129,6 +143,11 @@ if [[ "$MODE" == "check" ]]; then
   fi
   "$SCRIPT_DIR/doctor.sh" || status=1
   exit "$status"
+fi
+
+if ! rosetta_installed; then
+  say "Installing Rosetta 2 for the Vagrant VMware utility..."
+  "$SUDO" "$SOFTWAREUPDATE" --install-rosetta --agree-to-license
 fi
 
 say "Installing thin-Mac control-plane applications without broad upgrades..."

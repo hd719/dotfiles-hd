@@ -36,7 +36,8 @@ runtimes, language servers, Neovim, or project dependencies on macOS.
 ## Install
 
 Prerequisites are Xcode Command Line Tools, Homebrew, the canonical
-`~/Developer/dotfiles-hd` checkout, and restored `~/.ssh`.
+`~/Developer/dotfiles-hd` checkout, and restored `~/.ssh`. The bootstrap
+installs Rosetta 2 when needed by Vagrant's VMware utility.
 
 Preview and audit first:
 

@@ -67,6 +67,23 @@ cat > "$TEST_ROOT/bin/launchctl" <<'EOF'
 test "$*" = "print system/com.vagrant.vagrant-vmware-utility"
 EOF
 
+cat > "$TEST_ROOT/bin/pkgutil" <<'EOF'
+#!/bin/sh
+test "$*" = "--pkg-info com.apple.pkg.RosettaUpdateAuto" \
+  && test -f "$DOTFILES_TEST_ROSETTA_STATE"
+EOF
+
+cat > "$TEST_ROOT/bin/softwareupdate" <<'EOF'
+#!/bin/sh
+printf 'softwareupdate %s\n' "$*" >> "$DOTFILES_TEST_BREW_LOG"
+touch "$DOTFILES_TEST_ROSETTA_STATE"
+EOF
+
+cat > "$TEST_ROOT/bin/sudo" <<'EOF'
+#!/bin/sh
+"$@"
+EOF
+
 cat > "$TEST_ROOT/bin/vagrant" <<'EOF'
 #!/bin/sh
 printf 'vagrant %s\n' "$*" >> "$DOTFILES_TEST_BREW_LOG"
@@ -82,6 +99,9 @@ touch "$TEST_ROOT/vagrant-vmware-utility"
 chmod +x \
   "$TEST_ROOT/bin/brew" \
   "$TEST_ROOT/bin/launchctl" \
+  "$TEST_ROOT/bin/pkgutil" \
+  "$TEST_ROOT/bin/softwareupdate" \
+  "$TEST_ROOT/bin/sudo" \
   "$TEST_ROOT/bin/uname" \
   "$TEST_ROOT/bin/vagrant" \
   "$TEST_ROOT/bin/xcode-select" \
@@ -94,8 +114,12 @@ export DOTFILES_ALLOW_NONCANONICAL=1
 export DOTFILES_APPLICATIONS_DIR="$TEST_ROOT/apps"
 export DOTFILES_DIR="$REPO_DIR"
 export DOTFILES_TEST_BREW_LOG="$TEST_ROOT/brew.log"
+export DOTFILES_TEST_ROSETTA_STATE="$TEST_ROOT/rosetta-installed"
 export DOTFILES_TEST_VAGRANT_STATE="$TEST_ROOT/vagrant-plugin-version"
 export DOTFILES_VAGRANT_VMWARE_UTILITY="$TEST_ROOT/vagrant-vmware-utility"
+export DOTFILES_PKGUTIL="$TEST_ROOT/bin/pkgutil"
+export DOTFILES_SOFTWAREUPDATE="$TEST_ROOT/bin/softwareupdate"
+export DOTFILES_SUDO="$TEST_ROOT/bin/sudo"
 export HOME="$TEST_ROOT/home"
 export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
 
@@ -103,6 +127,7 @@ export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
 [[ ! -e "$HOME/.zshrc" ]]
 
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
+[[ -f "$DOTFILES_TEST_ROSETTA_STATE" ]]
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/setup/mac-thin/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]
@@ -150,6 +175,8 @@ GIT_PAGER='less --tabs=4 -RFX' /bin/zsh -dfc "
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -z "$(find "$HOME" -name '*.backup-*' -print -quit)" ]]
 grep -Fq 'bundle install --no-upgrade' "$TEST_ROOT/brew.log"
+[[ "$(grep -c '^softwareupdate --install-rosetta --agree-to-license$' \
+  "$TEST_ROOT/brew.log")" == "1" ]]
 grep -Fq \
   'vagrant plugin install vagrant-vmware-desktop --plugin-version 3.0.5' \
   "$TEST_ROOT/brew.log"
