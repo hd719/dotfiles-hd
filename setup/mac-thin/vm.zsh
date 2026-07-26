@@ -61,7 +61,7 @@ uvm-destroy() {
 
   # Best effort only: the VM may already be stopped. Never start it to inspect keys.
   _ubuntu_vagrant ssh -c \
-    'for key in ~/.ssh/id_ed25519_hd719 ~/.ssh/id_ed25519_arbiter_hd ~/.ssh/id_ed25519_forgejo_truenas; do test -f "$key.pub" && ssh-keygen -lf "$key.pub"; done' \
+    'sudo -n -u hamel sh -c '\''for key in /home/hamel/.ssh/id_ed25519_hd719 /home/hamel/.ssh/id_ed25519_arbiter_hd /home/hamel/.ssh/id_ed25519_forgejo_truenas; do test -f "$key.pub" && ssh-keygen -lf "$key.pub"; done'\''' \
     2>/dev/null || true
 
   echo "Remove this VM's three registered Git public keys after replacement."

@@ -1497,6 +1497,7 @@ EOF
   assert_contains "$log" "args=status"
   assert_contains "$log" "args=ssh -c hostname -I"
   assert_contains "$log" "args=destroy"
+  assert_contains "$log" "sudo -n -u hamel"
   assert_not_contains "$log" "destroy -f"
   [[ "$output" == *"Remove this VM's three registered Git public keys"* ]] \
     || fail "destroy should print the Git-key removal reminder"
