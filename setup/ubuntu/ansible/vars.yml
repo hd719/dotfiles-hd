@@ -6,8 +6,34 @@ workstation_password_hash: >-
 dotfiles_dir: "{{ workstation_home }}/Developer/dotfiles-hd"
 dotfiles_repository_https: https://github.com/hd719/dotfiles-hd.git
 dotfiles_repository_ssh: git@github.com:hd719/dotfiles-hd.git
-nerd_font_version: 3.4.0
-nerd_font_sha256: e82418895a7036158baf9a425faea7de1fe332267b218341eec44c6b5071d1ad
+
+# Keep these pinned and checksum-verified so repeated builds install the same
+# font files as the matching Homebrew casks on the Mac.
+workstation_fonts:
+  - name: Caskaydia Cove Nerd Font
+    family: CaskaydiaCove Nerd Font
+    directory: CaskaydiaCove
+    version: 3.4.0
+    archive: CascadiaCode.tar.xz
+    url: >-
+      https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/CascadiaCode.tar.xz
+    sha256: 804b3d311665a059140466fe142cc76cf14ef0695b7c4d3a174f7f8fba46b6e3
+  - name: Hasklug Nerd Font
+    family: Hasklug Nerd Font
+    directory: Hasklig
+    version: 3.4.0
+    archive: Hasklig.tar.xz
+    url: >-
+      https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Hasklig.tar.xz
+    sha256: e82418895a7036158baf9a425faea7de1fe332267b218341eec44c6b5071d1ad
+  - name: Maple Mono NF
+    family: Maple Mono NF
+    directory: MapleMono
+    version: "7.9"
+    archive: MapleMono-NF-unhinted.zip
+    url: >-
+      https://github.com/subframe7536/Maple-font/releases/download/v7.9/MapleMono-NF-unhinted.zip
+    sha256: 8248d6260660be1066b5ebe90d25131582df8383f38db1c284dd1f2dc9d2b46e
 
 workstation_apt_packages:
   - acl

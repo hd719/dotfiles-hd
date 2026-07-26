@@ -12,7 +12,7 @@ Neovim, and tmux. The thin Mac is the control plane; development stays here.
 From the Mac:
 
 ```bash
-u                  # SSH into Ubuntu
+uc                 # SSH into the current canary VM
 exit               # Return to macOS
 ```
 
@@ -41,9 +41,23 @@ Use this document two ways:
 - Want mastery: read one section, run its read-only commands, then complete one
   practice drill.
 
+### Start the VM from the Mac
+
+```bash
+uvm-up             # Start with the VMware Fusion window
+uvm-up-headless    # Start in the background without keeping Fusion open
+uvm-status         # Check before trying to start it again
+uc                 # Connect to the canary VM
+```
+
+VMware's background engine still runs in headless mode, but the Fusion app does
+not need to remain open. Use `uvm-stop` or `uvm-suspend` instead of quitting the
+VM through VMware Fusion.
+
 ## One-Command Health Check
 
-Enter Ubuntu through the Mac's `u` alias:
+Enter Ubuntu through the Mac's `uc` alias during qualification. Use `u` after
+the final cutover:
 
 ```bash
 cd ~/Developer/dotfiles-hd
@@ -513,9 +527,8 @@ tailscale ip -4
 systemctl status tailscaled --no-pager
 ```
 
-Use `ut` or `ubuntu-ts` on the Mac to connect through Tailscale. Both routes
-use the Mac's Ubuntu login key, enforce host-key checking, and disable agent
-forwarding.
+Use `ut` on the Mac to connect through Tailscale. Both SSH routes use the Mac's
+Ubuntu login key, enforce host-key checking, and disable agent forwarding.
 
 ## SSH and Git Identities
 

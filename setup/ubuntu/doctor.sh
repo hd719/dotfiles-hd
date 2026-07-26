@@ -255,12 +255,28 @@ else
   fail "Ubuntu shell, tools, aliases, or colors are incomplete"
 fi
 
-if [[ -f "$HOME/.local/share/fonts/Hasklig/.nerd-font-version" ]] \
-  && [[ "$(<"$HOME/.local/share/fonts/Hasklig/.nerd-font-version")" == "3.4.0" ]] \
-  && fc-list | grep -F "Hasklug Nerd Font" >/dev/null; then
-  pass "Hasklug Nerd Font 3.4.0"
+while IFS='|' read -r font_directory font_version font_family font_name; do
+  if [[ -f "$HOME/.local/share/fonts/$font_directory/.font-version" ]] \
+    && [[ "$(<"$HOME/.local/share/fonts/$font_directory/.font-version")" == "$font_version" ]] \
+    && fc-list | grep -F "$font_family" >/dev/null; then
+    pass "$font_name $font_version"
+  else
+    fail "$font_name $font_version is missing"
+  fi
+done <<'EOF'
+CaskaydiaCove|3.4.0|CaskaydiaCove Nerd Font|Caskaydia Cove Nerd Font
+Hasklig|3.4.0|Hasklug Nerd Font|Hasklug Nerd Font
+MapleMono|7.9|Maple Mono NF|Maple Mono NF
+EOF
+
+ghostty_font="$(
+  sed -n 's/^font-family = //p' "$HOME/.config/ghostty/config" 2>/dev/null \
+    | head -n 1
+)"
+if [[ "$ghostty_font" == "Maple Mono NF" ]]; then
+  pass "Maple Mono NF is the Ghostty default"
 else
-  fail "Hasklug Nerd Font 3.4.0 is missing"
+  fail "Maple Mono NF must be the first Ghostty font family"
 fi
 
 if bash "$NEOVIM_SETUP_SCRIPT" --check >/dev/null 2>&1; then

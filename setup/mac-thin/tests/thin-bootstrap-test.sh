@@ -151,11 +151,12 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
-  [[ \"\$(alias ubuntu)\" == \"ubuntu='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
-  [[ \"\$(alias ubuntu-ts)\" == \"ubuntu-ts='ssh ubuntu-vm-ts'\" ]]
   [[ \"\$(alias uc)\" == \"uc='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary'\" ]]
   [[ \"\$(alias uct)\" == \"uct='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary-ts'\" ]]
+  ! alias ubuntu >/dev/null 2>&1
+  ! alias ubuntu-ts >/dev/null 2>&1
+  ! alias uvm-open >/dev/null 2>&1
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
   [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
   [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]
