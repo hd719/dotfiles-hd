@@ -3128,3 +3128,25 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Hamel confirmed that gopls added `"strings"` to the import block
   automatically.
 - The exercise remained unsaved, so the tracked Go fixture stayed unchanged.
+
+## 2026-07-24 — Session 029: SSH Clipboard
+
+### Confirmed Result
+
+- Neovim now selects its OSC 52 clipboard provider when it inherits an SSH
+  session; local Linux sessions retain their normal desktop provider.
+- Hamel restarted Neovim over SSH, yanked `ssh clipboard test` with `yy`, and
+  pasted the exact text into the Mac Codex message box with `Cmd-v`.
+
+### Mental Model
+
+- Neovim, the files, and the development tools run inside Ubuntu. OSC 52 sends
+  copied text through the SSH terminal connection to Ghostty, which writes it
+  to the Mac clipboard.
+- SSH changes where Neovim's interface is rendered, not where Neovim executes.
+
+### Unresolved Issue and Next Lesson
+
+- No clipboard issue remains from the confirmed copy workflow.
+- Best next core lesson: Curriculum 6.5 — format Go and Lua manually with
+  `Space p` and review the diff.

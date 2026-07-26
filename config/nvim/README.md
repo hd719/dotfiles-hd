@@ -231,7 +231,9 @@ such as `grr` while keeping the code window open. `Space q` runs `:quit` and
 closes whichever Neovim window is currently focused.
 
 This config sets `clipboard=unnamedplus`, so regular yanks such as `yy` also
-copy to the macOS clipboard for `Cmd-v` in other applications.
+reach the system clipboard. In an SSH session, Neovim uses OSC 52 to send the
+yank through the terminal to the Mac clipboard for `Cmd-v` in other
+applications.
 
 For visual current-file replacement, save the file, put the cursor on the exact
 word, and press `Space R`. Type the replacement, review the diff, then press
