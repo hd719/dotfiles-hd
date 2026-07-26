@@ -166,10 +166,10 @@ Small Bash boundaries remain:
 - `setup-neovim.sh` manages the existing mise and Neovim workflow.
 - `update-system.sh` performs later Ubuntu and tool updates.
 - `doctor.sh` verifies the finished workstation.
-- `cleanup-legacy.sh` remains separate and destructive; Vagrant never runs it.
 
-`setup.sh` remains temporarily for the unchanged legacy VM. Remove it only
-after the 30-day rollback window.
+Ansible installs Caskaydia Cove Nerd Font, Hasklug Nerd Font, and Maple Mono NF
+for the Ubuntu user. Maple Mono NF is the first Ghostty font family, so it is
+the terminal default; Hasklug remains the fallback.
 
 ## Verify
 
@@ -187,29 +187,63 @@ routes, and local Codex login status without making a paid API request:
 bash setup/ubuntu/doctor.sh
 ```
 
-## Canary and Cutover
+## Rebuild Safety
 
-1. Stop the legacy VM before starting the 25 GB canary.
-1. Build the canary and run `vagrant provision` a second time.
-1. Run the full doctor after onboarding.
-1. Use interactive `uvm-destroy`.
-1. Repeat a clean build and all checks.
-1. Rename the qualified Tailscale node to `ubuntu-dev`.
-1. Put `Include ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf`
-   before the old Ubuntu blocks in `~/.ssh/config`.
-1. Verify the new `ubuntu-dev` host key, then test `u` and `ut`.
-1. Keep the legacy VM powered off for 30 days.
+The Vagrant-managed VM is the supported workstation. No legacy VMware VM
+remains as a rollback.
 
-Rollback is simple: stop the canary, remove the new SSH include, and start the
-unchanged legacy VMware VM.
+Before `uvm-destroy`:
 
-## Update
+1. Push every repository and confirm each worktree is clean.
+1. Confirm required secrets are recoverable from 1Password.
+1. Record the three Git public-key fingerprints printed by `uvm-destroy`.
+1. Remove the old Git and Tailscale registrations only after the replacement
+   VM passes the full doctor.
+
+Rollback means reverting the unproven pin or provisioning change and rebuilding
+the last known-good version from Git.
+
+## Routine Maintenance
 
 Inside Ubuntu:
 
 ```bash
 bash setup/ubuntu/update-system.sh
+bash setup/ubuntu/doctor.sh
 ```
 
 The updater accepts only the SSH dotfiles origin, pulls `master` with
 `--ff-only`, runs APT maintenance, and refreshes mise and Neovim state.
+If it reports that a reboot is required, leave the SSH session and use
+`uvm-stop` followed by `uvm-up`.
+
+Routine maintenance does not change the pinned Bento box, VMware provider, or
+mise tool versions.
+
+## Pinned Upgrades
+
+Change pins deliberately in a reviewed branch:
+
+- Bento box name and version: `setup/ubuntu/Vagrantfile`.
+- Vagrant VMware provider: `setup/mac-thin/bootstrap.sh`, its doctor, and its
+  tests.
+- Development tools: `setup/ubuntu/mise.toml`.
+
+A new Bento pin affects only a newly created VM. Before destroying the current
+VM, run the repository tests and complete the rebuild-safety checks above.
+Then rebuild, provision twice to prove idempotence, and run both doctors.
+
+## Major Ubuntu Releases
+
+Do not run `do-release-upgrade`. A major Ubuntu release is a fresh workstation
+rebuild:
+
+1. Update the Bento box and exact box version in a branch.
+1. Update release-specific repositories, tests, and documentation.
+1. Run the repository tests before destroying the current VM.
+1. Rebuild with Vagrant and provision twice.
+1. Complete Git, Tailscale, and Codex onboarding.
+1. Run the offline and full doctors before resuming development.
+
+If qualification fails, revert to the previous pins and rebuild the last
+known-good release.

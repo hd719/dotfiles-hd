@@ -22,55 +22,103 @@
   when: mise_toolchain_check.rc != 0
   changed_when: true
 
-- name: Create the user font directory
+- name: Create the user font root
   ansible.builtin.file:
-    path: "{{ workstation_home }}/.local/share/fonts/Hasklig"
+    path: "{{ workstation_home }}/.local/share/fonts"
     state: directory
     owner: "{{ workstation_user }}"
     group: "{{ workstation_user }}"
     mode: "0755"
 
-- name: Check the installed Nerd Font version
+- name: Check installed workstation font versions
   ansible.builtin.command:
-    cmd: >-
-      grep -Fx {{ nerd_font_version }}
-      {{ workstation_home }}/.local/share/fonts/Hasklig/.nerd-font-version
-  register: nerd_font_check
+    argv:
+      - bash
+      - -c
+      - >-
+        grep -Fx "$1" "$2" &&
+        fc-list | grep -F "$3" >/dev/null
+      - check-font
+      - "{{ item.version }}"
+      - "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}/.font-version"
+      - "{{ item.family }}"
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: workstation_font_checks
   changed_when: false
   failed_when: false
 
-- name: Download the verified Hasklug Nerd Font archive
+- name: Download verified workstation font archives
   ansible.builtin.get_url:
-    url: >-
-      https://github.com/ryanoasis/nerd-fonts/releases/download/v{{ nerd_font_version }}/Hasklig.tar.xz
-    dest: "/tmp/Hasklig-{{ nerd_font_version }}.tar.xz"
-    checksum: "sha256:{{ nerd_font_sha256 }}"
+    url: "{{ item.url }}"
+    dest: "/tmp/{{ item.archive }}"
+    checksum: "sha256:{{ item.sha256 }}"
     mode: "0644"
-  register: nerd_font_archive
-  when: nerd_font_check.rc != 0
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
 
-- name: Install Hasklug Nerd Font
+- name: Remove outdated workstation font directories
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}"
+    state: absent
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
+
+- name: Create workstation font directories
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}"
+    state: directory
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0755"
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
+
+- name: Install workstation fonts
   ansible.builtin.unarchive:
-    src: "/tmp/Hasklig-{{ nerd_font_version }}.tar.xz"
-    dest: "{{ workstation_home }}/.local/share/fonts/Hasklig"
+    src: "/tmp/{{ item.archive }}"
+    dest: "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}"
     remote_src: true
     owner: "{{ workstation_user }}"
     group: "{{ workstation_user }}"
-  when: nerd_font_check.rc != 0
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
 
-- name: Record the installed Nerd Font version
+- name: Record installed workstation font versions
   ansible.builtin.copy:
-    dest: "{{ workstation_home }}/.local/share/fonts/Hasklig/.nerd-font-version"
+    dest: >-
+      {{ workstation_home }}/.local/share/fonts/{{ item.directory }}/.font-version
     owner: "{{ workstation_user }}"
     group: "{{ workstation_user }}"
     mode: "0644"
-    content: "{{ nerd_font_version }}\n"
-  register: nerd_font_version_file
+    content: "{{ item.version }}\n"
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
 
 - name: Refresh the user font cache
   become: true
   become_user: "{{ workstation_user }}"
   ansible.builtin.command:
-    cmd: "fc-cache -f {{ workstation_home }}/.local/share/fonts/Hasklig"
-  when: nerd_font_check.rc != 0 or nerd_font_version_file.changed
+    cmd: "fc-cache -f {{ workstation_home }}/.local/share/fonts"
+  when: >-
+    workstation_font_checks.results
+    | selectattr('rc', 'ne', 0)
+    | list
+    | length > 0
   changed_when: true

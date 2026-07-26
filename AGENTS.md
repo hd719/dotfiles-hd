@@ -22,7 +22,7 @@ before changing state.
 | Ubuntu workstation                         | `setup/ubuntu/README.md`             |
 
 `config/` holds portable configuration. `setup/` holds platform installers and
-machine policy. The personal link inventory is in `README.md`.
+machine policy. Profile link inventories live in their matching runbooks.
 
 ## Change Safety
 
@@ -141,10 +141,8 @@ for those five links. Do not replace it with ad hoc `ln -s` commands.
 
 Follow `setup/ubuntu/README.md`. Vagrant owns the VM lifecycle, guest-local
 Ansible owns system setup, mise owns development tools, and dotfiles owns user
-links. `setup.sh` remains only for the unchanged legacy VM during the rollback
-window. The destructive `cleanup-legacy.sh --yes` migration is separate and
-must never run implicitly. Use `setup/ubuntu/GUIDE.md` for Mac-to-Ubuntu
-teaching and keep its commands aligned with the supported workstation.
+links. Use `setup/ubuntu/GUIDE.md` for Mac-to-Ubuntu teaching and keep its
+commands aligned with the supported workstation.
 
 - Keep `~/.gitconfig` machine-owned. Ubuntu's `.zshrc` must provide a plain
   `less` fallback when the mise-owned `diff-so-fancy` is unavailable.

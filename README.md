@@ -143,49 +143,5 @@ The thin profile owns only these two links:
 | Shell   | `~/.zshrc`                                                   | `setup/mac-thin/.zshrc` |
 | Ghostty | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config` |
 
-## Full Personal Mac Link Inventory
-
-The personal Mac bootstrap owns every row below except the explicitly manual
-AeroSpace link. It backs up non-matching destinations and leaves other state
-alone.
-
-| Tool       | Live path                                                    | Source                                            | Scope                          |
-| ---------- | ------------------------------------------------------------ | ------------------------------------------------- | ------------------------------ |
-| Shell      | `~/.zshrc`                                                   | `setup/mac-pro/.zshrc` or `setup/mac-mini/.zshrc` | Profile-specific               |
-| Login PATH | Managed block in `~/.zprofile`                               | `setup/mac-bootstrap/mise-shims.zsh`              | Preserves the rest of the file |
-| Bookokrat  | `~/.config/bookokrat`                                        | `config/bookokrat`                                | Shared                         |
-| btop       | `~/.config/btop`                                             | `config/btop`                                     | Shared                         |
-| fastfetch  | `~/.config/fastfetch`                                        | `config/fastfetch`                                | Shared                         |
-| Ghostty    | `~/Library/Application Support/com.mitchellh.ghostty/config` | `config/ghostty/config`                           | Shared                         |
-| Herdr      | `~/.config/herdr/config.toml`                                | `config/herdr/config.toml`                        | Config only                    |
-| Hunk       | `~/.config/hunk/config.toml`                                 | `config/hunk/config.toml`                         | Config only                    |
-| Karabiner  | `~/.config/karabiner`                                        | `config/karabiner`                                | MacBook only                   |
-| mise       | `~/.config/mise`                                             | `config/mise`                                     | Shared                         |
-| Neovim     | `~/.config/nvim`                                             | `config/nvim`                                     | Shared                         |
-| AeroSpace  | `~/.config/aerospace/aerospace.toml`                         | `config/aerospace/aerospace.toml`                 | Existing manual link           |
-
-Use the profile bootstrap or work-Mac linker to repair links. Do not recreate
-them by hand unless the matching runbook explicitly says to.
-
-## Safety Boundaries
-
-Never copy or link credentials, authentication state, certificates, application
-databases, or company-managed state. In particular:
-
-- Keep `~/.gitconfig` machine-owned.
-- Keep tmux plugins inside the live `~/.config/tmux`; review `tmux.conf`
-  separately.
-- Link only `config.toml` for Herdr and Hunk. Their runtime directories stay
-  local.
-- Treat Raycast exports as backups, not live configuration.
-- Do not link `~/.config/1Password`, `~/.config/op`, `~/.config/gh`, or
-  `~/.config/cagent`.
-- Do not link Zed prompts or `~/Library/Application Support/Zed`; both contain
-  runtime state.
-- Link terminal configuration only on profiles that actively use that terminal.
-
-The Mac bootstrap never restores credentials, removes packages, cleans
-Homebrew, or starts and restarts services.
-
 See [`config/nvim/README.md`](config/nvim/README.md) for the editor contract and
 [`AGENTS.md`](AGENTS.md) for automation rules.
