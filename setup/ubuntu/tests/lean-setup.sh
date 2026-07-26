@@ -166,6 +166,10 @@ test_vagrant_ansible_contract() {
 
   assert_file_contains "$ANSIBLE_BOOTSTRAP" \
     'apt-get install -y --no-install-recommends ansible-core'
+  assert_file_contains "$ANSIBLE_BOOTSTRAP" \
+    'install -o root -g root -m 600 /dev/null "$secrets_file"'
+  assert_file_contains "$ANSIBLE_BOOTSTRAP" \
+    'chown vagrant:vagrant "$secrets_file"'
   if grep -Eq 'ppa:|cloud-init' "$ANSIBLE_BOOTSTRAP" "$ANSIBLE_DIR"/*.yml "$ANSIBLE_DIR"/tasks/*.yml; then
     fail "bootstrap must not add an Ansible PPA or cloud-init"
   fi

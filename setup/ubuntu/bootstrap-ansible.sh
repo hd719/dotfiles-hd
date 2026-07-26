@@ -11,7 +11,7 @@ apt-get install -y --no-install-recommends ansible-core
 rm -rf -- /tmp/ubuntu-workstation-ansible
 
 secrets_file="/dev/shm/ubuntu-workstation-secrets.json"
-install -o vagrant -g vagrant -m 600 /dev/null "$secrets_file"
+install -o root -g root -m 600 /dev/null "$secrets_file"
 
 # JSON avoids shell-quoting bugs in public keys and one-time auth keys.
 python3 - "$secrets_file" <<'PY'
@@ -33,3 +33,7 @@ data = {
 with open(sys.argv[1], "w", encoding="utf-8") as stream:
     json.dump(data, stream)
 PY
+
+# Write before changing ownership: Ubuntu's protected_regular policy blocks
+# root from truncating another user's file in a sticky directory such as /dev/shm.
+chown vagrant:vagrant "$secrets_file"
