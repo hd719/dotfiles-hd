@@ -1528,7 +1528,7 @@ EOF
   assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
     'host_ip: "127.0.0.1"'
   assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
-    'config.vm.disk :disk, size: "250GB", primary: true'
+    'config.vm.disk :disk, size: 250 * 1024**3, primary: true'
   assert_contains "$REPO_DIR/setup/mac-thin/Brewfile" 'cask "vagrant"'
   assert_contains "$REPO_DIR/setup/mac-thin/Brewfile" \
     'cask "vagrant-vmware-utility"'

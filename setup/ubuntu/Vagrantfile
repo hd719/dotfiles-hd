@@ -31,7 +31,9 @@ Vagrant.configure("2") do |config|
                     id: "ssh",
                     auto_correct: false
 
-  config.vm.disk :disk, size: "250GB", primary: true
+  # VMware provider 3.0.5 compares the primary size as bytes before Vagrant
+  # normalizes string sizes, so pass the equivalent integer directly.
+  config.vm.disk :disk, size: 250 * 1024**3, primary: true
   config.ssh.insert_key = true
 
   login_public_key_path = File.expand_path(
