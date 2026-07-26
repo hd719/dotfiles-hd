@@ -1002,7 +1002,7 @@ test_obsolete_ubuntu_helpers_are_gone() {
 
 test_neovim_setup_installs_and_checks_daily_driver() {
   local case_dir="$TEST_ROOT/neovim-setup"
-  local blink_commit failed_home fresh_home lazy_commit output status tool
+  local blink_commit broken_home failed_home fresh_home lazy_commit output status tool
   local tree_sitter_languages tree_sitter_parsers
   local tools=(
     bash-language-server bookokrat bun fd fastfetch fzf go gopls graphql-lsp gs herdr hunk
@@ -1252,10 +1252,11 @@ EOF
 #!/usr/bin/env bash
 printf 'curl %s\n' "\$*" >> "$case_dir/commands.log"
 [[ "\$#" == "2" && "\$1" == "-fsSL" && "\$2" == "https://mise.run" ]] || exit 90
+install_path="\${DOTFILES_MISE_BIN:-\$HOME/.local/bin/mise}"
 cat <<INSTALLER
 #!/usr/bin/env bash
-mkdir -p "\$HOME/.local/bin"
-cp "$case_dir/bin/mise" "\$HOME/.local/bin/mise"
+mkdir -p "\$(dirname "\$install_path")"
+cp "$case_dir/bin/mise" "\$install_path"
 INSTALLER
 EOF
   chmod +x "$case_dir/bin/curl"
@@ -1271,6 +1272,24 @@ EOF
   [[ -x "$fresh_home/.local/bin/mise" ]] || fail "fresh Neovim setup did not install mise"
   [[ -L "$fresh_home/.config/nvim" ]] || fail "fresh mise path did not continue through Neovim setup"
   assert_file_contains "$case_dir/commands.log" "curl -fsSL https://mise.run"
+
+  broken_home="$case_dir/broken-home"
+  mkdir -p "$broken_home/.config" "$broken_home/.local/bin"
+  cat > "$broken_home/.local/bin/mise" <<'EOF'
+#!/usr/bin/env bash
+exit 139
+EOF
+  chmod +x "$broken_home/.local/bin/mise"
+
+  output="$(
+    HOME="$broken_home" \
+      PATH="$case_dir/bin:/usr/bin:/bin" \
+      DOTFILES_MISE_BIN="$broken_home/.local/bin/mise" \
+      bash "$NEOVIM_SCRIPT"
+  )"
+  assert_contains "$output" "Repairing mise"
+  "$broken_home/.local/bin/mise" version >/dev/null ||
+    fail "Neovim setup did not repair a broken mise binary"
 
   failed_home="$case_dir/failed-home"
   mkdir -p "$failed_home/.config"
