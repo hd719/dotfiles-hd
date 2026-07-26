@@ -14,6 +14,13 @@ Host ubuntu-vm
   ForwardAgent yes
   PermitLocalCommand yes
   LocalCommand /usr/bin/ssh-add $TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd $TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas >/dev/null 2>&1
+
+Host ubuntu-vm-ts
+  HostName 100.64.0.1
+  AddressFamily inet
+  ForwardAgent yes
+  PermitLocalCommand yes
+  LocalCommand /usr/bin/ssh-add $TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd $TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas >/dev/null 2>&1
 EOF
 touch \
   "$TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd" \
@@ -84,6 +91,8 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ubuntu)\" == \"ubuntu='ssh ubuntu-vm'\" ]]
+  [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
+  [[ \"\$(alias ubuntu-ts)\" == \"ubuntu-ts='ssh ubuntu-vm-ts'\" ]]
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
   [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
   [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]

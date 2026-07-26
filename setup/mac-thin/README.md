@@ -71,7 +71,8 @@ The doctor remains red until both applications exist in `/Applications`.
 1. Sign in to 1Password, Tailscale, Obsidian, and ChatGPT.
 1. Grant Tailscale's requested network-extension permission.
 1. Complete VMware Fusion's one-time privileged setup.
-1. Add the Ubuntu and Fedora SSH aliases to Codex connections.
+1. Add `ubuntu-vm-ts` to Codex connections as the primary development route.
+   Keep `ubuntu-vm` as the local VMware fallback.
 1. Keep repositories and all development execution on the guests' native Linux
    filesystems.
 
@@ -94,6 +95,8 @@ vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
 r            Reload the Zsh configuration
 u, ubuntu   SSH into the Ubuntu VM
+ut, ubuntu-ts
+             SSH into Ubuntu through Tailscale
 uvm-status  Show whether the Ubuntu VM is running
 uvm-ip      Show the current VMware guest IP
 uvm-open    Open VMware Fusion
@@ -102,9 +105,10 @@ uvm-open    Open VMware Fusion
 Press `Ctrl-D` to leave the SSH session. VM shutdown remains an explicit VMware
 action to avoid accidental power-offs.
 
-Keep `AddressFamily inet` in the `ubuntu-vm` SSH block. VMware mDNS can publish
-the guest on multiple IPv6 link-local interfaces, making SSH choose the wrong
-route intermittently.
+Keep `AddressFamily inet` in both Ubuntu SSH blocks. `ubuntu-vm` uses VMware
+mDNS for the local route; `ubuntu-vm-ts` uses Ubuntu's stable Tailscale address.
+VMware mDNS can publish the guest on multiple IPv6 link-local interfaces,
+making SSH choose the wrong route intermittently.
 
 Arbiter GitHub and Forgejo access use agent forwarding from the thin Mac.
 Private keys remain in `~/.ssh` on macOS; Ubuntu stores only their public keys

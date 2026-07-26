@@ -2,6 +2,8 @@
 
 alias u='ssh ubuntu-vm'
 alias ubuntu='ssh ubuntu-vm'
+alias ut='ssh ubuntu-vm-ts'
+alias ubuntu-ts='ssh ubuntu-vm-ts'
 alias uvm-open='open -a "VMware Fusion"'
 
 uvm-status() {

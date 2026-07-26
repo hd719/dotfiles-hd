@@ -76,30 +76,38 @@ else
   fail "SSH config missing or unreadable"
 fi
 
-SSH_EFFECTIVE="$(ssh -G -F "$SSH_CONFIG" ubuntu-vm 2>/dev/null || true)"
+check_ubuntu_ssh_alias() {
+  local ssh_alias="$1"
+  local effective
 
-if printf '%s\n' "$SSH_EFFECTIVE" \
-  | /usr/bin/awk '$1 == "addressfamily" && $2 == "inet" { found = 1 } END { exit !found }'; then
-  pass "Ubuntu SSH alias prefers IPv4"
-else
-  fail "Ubuntu SSH alias must set AddressFamily inet"
-fi
+  effective="$(ssh -G -F "$SSH_CONFIG" "$ssh_alias" 2>/dev/null || true)"
 
-if printf '%s\n' "$SSH_EFFECTIVE" \
-  | /usr/bin/awk '$1 == "forwardagent" && $2 == "yes" { found = 1 } END { exit !found }'; then
-  pass "Ubuntu SSH alias forwards the Mac agent"
-else
-  fail "Ubuntu SSH alias must set ForwardAgent yes"
-fi
+  if printf '%s\n' "$effective" \
+    | /usr/bin/awk '$1 == "addressfamily" && $2 == "inet" { found = 1 } END { exit !found }'; then
+    pass "$ssh_alias prefers IPv4"
+  else
+    fail "$ssh_alias must set AddressFamily inet"
+  fi
 
-if printf '%s\n' "$SSH_EFFECTIVE" \
-  | /usr/bin/awk '$1 == "permitlocalcommand" && $2 == "yes" { found = 1 } END { exit !found }' \
-  && printf '%s\n' "$SSH_EFFECTIVE" | /usr/bin/grep -Fq "$ARBITER_SSH_KEY" \
-  && printf '%s\n' "$SSH_EFFECTIVE" | /usr/bin/grep -Fq "$FORGEJO_SSH_KEY"; then
-  pass "Ubuntu SSH alias loads Arbiter and Forgejo keys"
-else
-  fail "Ubuntu SSH alias must load Arbiter and Forgejo keys before forwarding"
-fi
+  if printf '%s\n' "$effective" \
+    | /usr/bin/awk '$1 == "forwardagent" && $2 == "yes" { found = 1 } END { exit !found }'; then
+    pass "$ssh_alias forwards the Mac agent"
+  else
+    fail "$ssh_alias must set ForwardAgent yes"
+  fi
+
+  if printf '%s\n' "$effective" \
+    | /usr/bin/awk '$1 == "permitlocalcommand" && $2 == "yes" { found = 1 } END { exit !found }' \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fq "$ARBITER_SSH_KEY" \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fq "$FORGEJO_SSH_KEY"; then
+    pass "$ssh_alias loads Arbiter and Forgejo keys"
+  else
+    fail "$ssh_alias must load Arbiter and Forgejo keys before forwarding"
+  fi
+}
+
+check_ubuntu_ssh_alias ubuntu-vm
+check_ubuntu_ssh_alias ubuntu-vm-ts
 
 for ssh_key in "$ARBITER_SSH_KEY" "$FORGEJO_SSH_KEY"; do
   if [[ -f "$ssh_key" && "$(stat -f '%Lp' "$ssh_key" 2>/dev/null)" == "600" ]]; then
@@ -119,6 +127,8 @@ if /bin/zsh -dfc "
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ubuntu)\" == \"ubuntu='ssh ubuntu-vm'\" ]]
+  [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
+  [[ \"\$(alias ubuntu-ts)\" == \"ubuntu-ts='ssh ubuntu-vm-ts'\" ]]
   [[ \"\$(alias uvm-open)\" == \"uvm-open='open -a \\\"VMware Fusion\\\"'\" ]]
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
   [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
