@@ -1524,6 +1524,7 @@ EOF
     '"DOTFILES_GIT_REF" => dotfiles_git_ref'
   assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
     'config.vm.synced_folder ".", "/vagrant", disabled: true'
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" 'id: "ssh"'
   assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
     'host_ip: "127.0.0.1"'
   assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
