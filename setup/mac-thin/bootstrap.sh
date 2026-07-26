@@ -153,6 +153,14 @@ fi
 say "Installing thin-Mac control-plane applications without broad upgrades..."
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$BREWFILE"
 
+# A cancelled .pkg prompt can leave Homebrew's cask metadata without the
+# Vagrant executable. Repair that partial install before adding the provider.
+if ! command -v vagrant >/dev/null 2>&1; then
+  say "Repairing the incomplete Vagrant package install..."
+  HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall --cask vagrant
+  hash -r
+fi
+
 if ! vagrant_vmware_plugin_current; then
   say "Installing pinned Vagrant VMware provider..."
   vagrant plugin install vagrant-vmware-desktop \

@@ -45,6 +45,10 @@ done
 cat > "$TEST_ROOT/bin/brew" <<'EOF'
 #!/bin/sh
 printf '%s\n' "$*" >> "$DOTFILES_TEST_BREW_LOG"
+if [ "$*" = "reinstall --cask vagrant" ]; then
+  cp "$DOTFILES_TEST_VAGRANT_STUB" "$DOTFILES_TEST_BIN/vagrant"
+  chmod +x "$DOTFILES_TEST_BIN/vagrant"
+fi
 exit 0
 EOF
 
@@ -84,7 +88,7 @@ cat > "$TEST_ROOT/bin/sudo" <<'EOF'
 "$@"
 EOF
 
-cat > "$TEST_ROOT/bin/vagrant" <<'EOF'
+cat > "$TEST_ROOT/vagrant-stub" <<'EOF'
 #!/bin/sh
 printf 'vagrant %s\n' "$*" >> "$DOTFILES_TEST_BREW_LOG"
 if [ "${1:-}" = "plugin" ] && [ "${2:-}" = "list" ]; then
@@ -94,6 +98,7 @@ elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "install" ]; then
   printf '3.0.5\n' > "$DOTFILES_TEST_VAGRANT_STATE"
 fi
 EOF
+cp "$TEST_ROOT/vagrant-stub" "$TEST_ROOT/bin/vagrant"
 
 touch "$TEST_ROOT/vagrant-vmware-utility"
 chmod +x \
@@ -105,6 +110,7 @@ chmod +x \
   "$TEST_ROOT/bin/uname" \
   "$TEST_ROOT/bin/vagrant" \
   "$TEST_ROOT/bin/xcode-select" \
+  "$TEST_ROOT/vagrant-stub" \
   "$TEST_ROOT/vagrant-vmware-utility"
 : > "$TEST_ROOT/brew.log"
 printf '2.0.0\n' > "$TEST_ROOT/vagrant-plugin-version"
@@ -114,7 +120,9 @@ export DOTFILES_ALLOW_NONCANONICAL=1
 export DOTFILES_APPLICATIONS_DIR="$TEST_ROOT/apps"
 export DOTFILES_DIR="$REPO_DIR"
 export DOTFILES_TEST_BREW_LOG="$TEST_ROOT/brew.log"
+export DOTFILES_TEST_BIN="$TEST_ROOT/bin"
 export DOTFILES_TEST_ROSETTA_STATE="$TEST_ROOT/rosetta-installed"
+export DOTFILES_TEST_VAGRANT_STUB="$TEST_ROOT/vagrant-stub"
 export DOTFILES_TEST_VAGRANT_STATE="$TEST_ROOT/vagrant-plugin-version"
 export DOTFILES_VAGRANT_VMWARE_UTILITY="$TEST_ROOT/vagrant-vmware-utility"
 export DOTFILES_PKGUTIL="$TEST_ROOT/bin/pkgutil"
@@ -174,7 +182,11 @@ GIT_PAGER='less --tabs=4 -RFX' /bin/zsh -dfc "
 
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -z "$(find "$HOME" -name '*.backup-*' -print -quit)" ]]
+rm "$TEST_ROOT/bin/vagrant"
+"$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
+[[ -x "$TEST_ROOT/bin/vagrant" ]]
 grep -Fq 'bundle install --no-upgrade' "$TEST_ROOT/brew.log"
+grep -Fq 'reinstall --cask vagrant' "$TEST_ROOT/brew.log"
 [[ "$(grep -c '^softwareupdate --install-rosetta --agree-to-license$' \
   "$TEST_ROOT/brew.log")" == "1" ]]
 grep -Fq \
