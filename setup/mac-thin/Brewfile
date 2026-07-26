@@ -1,6 +1,7 @@
 # macOS control-plane applications only. Development tooling belongs in the VMs.
 
 brew "diff-so-fancy"
+brew "gh"
 
 cask "1password"
 cask "bartender"

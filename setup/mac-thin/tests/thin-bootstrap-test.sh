@@ -193,6 +193,7 @@ grep -Fq \
   'vagrant plugin install vagrant-vmware-desktop --plugin-version 3.0.5' \
   "$TEST_ROOT/brew.log"
 grep -Fxq 'brew "diff-so-fancy"' "$REPO_DIR/setup/mac-thin/Brewfile"
+grep -Fxq 'brew "gh"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/setup/mac-thin/Brewfile"
 
