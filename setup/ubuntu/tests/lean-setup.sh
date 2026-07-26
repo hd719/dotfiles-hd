@@ -199,6 +199,10 @@ test_vagrant_ansible_contract() {
     '/var/lib/dotfiles-hd/initial-upgrade-complete'
   assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
     'when: not workstation_initial_upgrade.stat.exists'
+  assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
+    'dest: /etc/netplan/01-netcfg.yaml'
+  assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
+    'dhcp-identifier: mac'
   assert_file_contains "$ANSIBLE_DIR/tasks/dotfiles.yml" \
     'repo: "{{ workstation_dotfiles_origin.stdout }}"'
   assert_file_contains "$ANSIBLE_DIR/tasks/dotfiles.yml" \

@@ -58,6 +58,22 @@
   register: grow_root_filesystem
   changed_when: "'root-filesystem-grown' in grow_root_filesystem.stdout"
 
+- name: Keep the VMware NAT DHCP address stable across reboots
+  # The Bento guest briefly uses a MAC-based DHCP identity during boot.
+  # Keep netplan on that identity so Vagrant's localhost forward stays valid.
+  ansible.builtin.copy:
+    dest: /etc/netplan/01-netcfg.yaml
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      network:
+        version: 2
+        ethernets:
+          eth0:
+            dhcp4: true
+            dhcp-identifier: mac
+
 - name: Enable workstation services
   ansible.builtin.systemd_service:
     name: "{{ item }}"
