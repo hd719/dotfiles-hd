@@ -31,6 +31,9 @@
     mode: "0755"
 
 - name: Check installed workstation font versions
+  # Fontconfig resolves ~/.local/share/fonts for the invoking user.
+  become: true
+  become_user: "{{ workstation_user }}"
   ansible.builtin.command:
     argv:
       - bash
@@ -42,6 +45,9 @@
       - "{{ item.version }}"
       - "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}/.font-version"
       - "{{ item.family }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+    XDG_DATA_HOME: "{{ workstation_home }}/.local/share"
   loop: "{{ workstation_fonts }}"
   loop_control:
     label: "{{ item.name }}"

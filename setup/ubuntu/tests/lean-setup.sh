@@ -491,7 +491,7 @@ test_ubuntu_tree_sitter_inventory_matches_shared_config() {
 }
 
 test_ubuntu_fonts_are_pinned() {
-  local font
+  local font font_check_task
 
   for font in \
     "Caskaydia Cove Nerd Font" \
@@ -508,6 +508,23 @@ test_ubuntu_fonts_are_pinned() {
     'checksum: "sha256:{{ item.sha256 }}"'
   assert_file_contains "$ANSIBLE_DIR/tasks/tools.yml" \
     'workstation_font_checks.results[font_index].rc != 0'
+
+  font_check_task="$(
+    awk '
+      $0 == "- name: Check installed workstation font versions" {
+        in_task = 1
+      }
+      in_task && $0 ~ /^- name:/ \
+        && $0 != "- name: Check installed workstation font versions" {
+        exit
+      }
+      in_task { print }
+    ' "$ANSIBLE_DIR/tasks/tools.yml"
+  )"
+  assert_contains "$font_check_task" 'become_user: "{{ workstation_user }}"'
+  assert_contains "$font_check_task" 'HOME: "{{ workstation_home }}"'
+  assert_contains "$font_check_task" \
+    'XDG_DATA_HOME: "{{ workstation_home }}/.local/share"'
 }
 
 test_zsh_config_is_linux_native() {

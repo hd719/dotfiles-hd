@@ -187,6 +187,19 @@ routes, and local Codex login status without making a paid API request:
 bash setup/ubuntu/doctor.sh
 ```
 
+## Remaining Cutover
+
+The Vagrant-managed VM is supported, but its canary names remain until the
+Tailscale and SSH cutover is complete:
+
+1. Join Tailscale as `ubuntu-dev-canary`, then run the full Ubuntu doctor.
+1. Rename the qualified Tailscale node to `ubuntu-dev`, then change the Vagrant
+   hostname and VMware display name from `ubuntu-dev-canary` to `ubuntu-dev`.
+1. Verify the final `ubuntu-vm` and `ubuntu-vm-ts` host-key fingerprints and
+   routes.
+1. Retire `uc`, `uct`, and the canary SSH blocks only after `u` and `ut` work.
+1. Provision twice, then run the thin-Mac and Ubuntu doctors.
+
 ## Rebuild Safety
 
 The Vagrant-managed VM is the supported workstation. No legacy VMware VM
