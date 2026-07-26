@@ -1,0 +1,60 @@
+---
+- name: Define VM-local Git identities
+  ansible.builtin.set_fact:
+    workstation_git_identities:
+      - private_key: id_ed25519_hd719
+        comment: "{{ workstation_user }}@{{ workstation_hostname }} GitHub hd719"
+      - private_key: id_ed25519_arbiter_hd
+        comment: "{{ workstation_user }}@{{ workstation_hostname }} GitHub Arbiter"
+      - private_key: id_ed25519_forgejo_truenas
+        comment: "{{ workstation_user }}@{{ workstation_hostname }} Forgejo"
+
+- name: Generate VM-local Ed25519 Git keys once
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    argv:
+      - ssh-keygen
+      - -q
+      - -t
+      - ed25519
+      - -N
+      - ""
+      - -C
+      - "{{ item.comment }}"
+      - -f
+      - "{{ workstation_home }}/.ssh/{{ item.private_key }}"
+    creates: "{{ workstation_home }}/.ssh/{{ item.private_key }}"
+  loop: "{{ workstation_git_identities }}"
+
+- name: Read the generated public Git keys
+  ansible.builtin.slurp:
+    src: "{{ workstation_home }}/.ssh/{{ item.private_key }}.pub"
+  loop: "{{ workstation_git_identities }}"
+  register: workstation_public_keys
+
+- name: Print public Git keys for manual registration
+  ansible.builtin.debug:
+    msg: "{{ item.content | b64decode | trim }}"
+  loop: "{{ workstation_public_keys.results }}"
+  loop_control:
+    label: "{{ item.item.private_key }}"
+
+- name: Read the generated Git key fingerprints
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    argv:
+      - ssh-keygen
+      - -lf
+      - "{{ workstation_home }}/.ssh/{{ item.private_key }}.pub"
+  loop: "{{ workstation_git_identities }}"
+  register: workstation_key_fingerprints
+  changed_when: false
+
+- name: Print Git key fingerprints
+  ansible.builtin.debug:
+    msg: "{{ item.stdout }}"
+  loop: "{{ workstation_key_fingerprints.results }}"
+  loop_control:
+    label: "{{ item.item.private_key }}"

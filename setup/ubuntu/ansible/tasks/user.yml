@@ -1,0 +1,74 @@
+---
+- name: Create the daily workstation user
+  ansible.builtin.user:
+    name: "{{ workstation_user }}"
+    home: "{{ workstation_home }}"
+    create_home: true
+    shell: /usr/bin/zsh
+    groups:
+      - docker
+      - sudo
+    append: true
+    password: "{{ workstation_password_hash }}"
+
+- name: Create the daily user's SSH directory
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.ssh"
+    state: directory
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0700"
+
+- name: Validate the Mac login public key
+  ansible.builtin.assert:
+    that:
+      - workstation_login_public_key is match('^ssh-ed25519 ')
+    fail_msg: The Mac must supply an Ed25519 Ubuntu login public key.
+
+- name: Authorize the Mac login public key
+  ansible.builtin.blockinfile:
+    path: "{{ workstation_home }}/.ssh/authorized_keys"
+    create: true
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0600"
+    marker: "# {mark} dotfiles-hd thin Mac login key"
+    block: "{{ workstation_login_public_key }}"
+
+- name: Disable SSH password and root login
+  ansible.builtin.copy:
+    # OpenSSH uses the first value it finds, so this file sorts before
+    # image/vendor drop-ins that might otherwise keep password login enabled.
+    dest: /etc/ssh/sshd_config.d/00-dotfiles-workstation.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Console login still uses the VM-local password.
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PermitRootLogin no
+  notify: Restart SSH
+
+- name: Validate the SSH daemon configuration
+  ansible.builtin.command:
+    cmd: sshd -t
+  changed_when: false
+
+- name: Read the effective SSH daemon policy
+  ansible.builtin.command:
+    cmd: sshd -T
+  register: workstation_sshd_policy
+  changed_when: false
+
+- name: Verify password and root SSH login are disabled
+  ansible.builtin.assert:
+    that:
+      - "'passwordauthentication no' in workstation_sshd_policy.stdout_lines"
+      - "'kbdinteractiveauthentication no' in workstation_sshd_policy.stdout_lines"
+      - "'permitrootlogin no' in workstation_sshd_policy.stdout_lines"
+    fail_msg: The effective SSH daemon policy is not safely locked down.
+
+# Apply the SSH policy before Tailscale can expose the VM to another network.
+- name: Apply the SSH daemon policy now
+  ansible.builtin.meta: flush_handlers

@@ -1,0 +1,11 @@
+---
+- name: Run the offline workstation doctor
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: bash setup/ubuntu/doctor.sh --offline
+    chdir: "{{ dotfiles_dir }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+    DOTFILES_EXPECTED_BRANCH: "{{ dotfiles_git_ref }}"
+  changed_when: false

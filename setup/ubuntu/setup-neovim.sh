@@ -91,14 +91,22 @@ require_link() {
 
 install_mise() {
   if [[ -x "$MISE_BIN" ]]; then
-    log "Updating mise"
-    "$MISE_BIN" self-update -y
-    return
+    # A cancelled self-update can leave an executable but unusable binary.
+    # Only ask mise to update itself after it proves that it can start.
+    if "$MISE_BIN" version >/dev/null 2>&1; then
+      log "Updating mise"
+      "$MISE_BIN" self-update -y
+      return
+    fi
+
+    log "Repairing mise"
+  else
+    log "Installing mise"
   fi
 
-  log "Installing mise"
   mkdir -p "$(dirname "$MISE_BIN")"
-  curl -fsSL https://mise.run | sh
+  curl -fsSL https://mise.run |
+    MISE_INSTALL_PATH="$MISE_BIN" MISE_INSTALL_HELP=0 sh
   [[ -x "$MISE_BIN" ]] || {
     printf 'mise was not installed at %s.\n' "$MISE_BIN" >&2
     exit 1

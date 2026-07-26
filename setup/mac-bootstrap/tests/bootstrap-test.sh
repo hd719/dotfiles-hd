@@ -1443,6 +1443,104 @@ test_shared_zsh_interface() {
   assert_eq $'first=generated\nsecond=preserved\ndisk=shared_completion_state=preserved' "$actual" "failed refresh preserves a valid completion cache"
 }
 
+test_ubuntu_vagrant_lifecycle() {
+  local root="$TMP_ROOT/ubuntu-vagrant-lifecycle"
+  local fake_bin="$root/bin"
+  local home_dir="$root/home"
+  local log="$root/vagrant.log"
+  local output
+
+  mkdir -p "$fake_bin" "$home_dir"
+  : > "$log"
+
+  cat > "$fake_bin/vagrant" <<'EOF'
+#!/usr/bin/env bash
+printf 'cwd=%s vagrant_cwd=%s gui=%s provider=%s clone=%s args=%s\n' \
+  "$PWD" \
+  "${VAGRANT_CWD:-unset}" \
+  "${UBUNTU_VM_GUI:-unset}" \
+  "${VAGRANT_DEFAULT_PROVIDER:-unset}" \
+  "${VAGRANT_VMWARE_CLONE_DIRECTORY:-unset}" \
+  "$*" >> "${VAGRANT_TEST_LOG:?}"
+if [[ "${1:-}" == "ssh" ]]; then
+  printf '192.0.2.10\n'
+fi
+EOF
+  chmod +x "$fake_bin/vagrant"
+
+  output="$(
+    HOME="$home_dir" \
+      PATH="$fake_bin:/usr/bin:/bin" \
+      DOTFILES_UBUNTU_VAGRANT_DIR="$REPO_DIR/setup/ubuntu" \
+      VAGRANT_TEST_LOG="$log" \
+      /bin/zsh -dfc '
+        source "$1"
+        uvm-up
+        uvm-up-headless
+        uvm-stop
+        uvm-suspend
+        uvm-resume
+        uvm-status
+        uvm-ip
+        uvm-destroy
+      ' zsh "$REPO_DIR/setup/mac-thin/vm.zsh"
+  )"
+
+  assert_contains "$log" \
+    "cwd=$REPO_DIR/setup/ubuntu vagrant_cwd=$REPO_DIR/setup/ubuntu gui=1 provider=vmware_desktop"
+  assert_contains "$log" "args=up"
+  assert_contains "$log" \
+    "cwd=$REPO_DIR/setup/ubuntu vagrant_cwd=$REPO_DIR/setup/ubuntu gui=0 provider=vmware_desktop"
+  assert_contains "$log" "args=halt"
+  assert_contains "$log" "args=suspend"
+  assert_contains "$log" "args=resume"
+  assert_contains "$log" "args=status"
+  assert_contains "$log" "args=ssh -c hostname -I"
+  assert_contains "$log" "args=destroy"
+  assert_contains "$log" "sudo -n -u hamel"
+  assert_not_contains "$log" "destroy -f"
+  [[ "$output" == *"Remove this VM's three registered Git public keys"* ]] \
+    || fail "destroy should print the Git-key removal reminder"
+  TESTS=$((TESTS + 1))
+
+  assert_not_contains "$REPO_DIR/setup/mac-thin/vm.zsh" \
+    'Ubuntu 64-bit Arm 25.10.vmwarevm'
+  assert_contains "$REPO_DIR/setup/mac-thin/vm.zsh" \
+    "alias uc='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary'"
+  assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
+    "Host ubuntu-vm-canary"
+  assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
+    "HostName 127.0.0.1"
+  assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
+    "ForwardAgent no"
+  assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
+    "StrictHostKeyChecking yes"
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
+    'config.vm.box_version = "202606.01.0"'
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
+    'config.vm.box_architecture = "arm64"'
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
+    "config.vm.box_check_update = false"
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
+    '"DOTFILES_GIT_REF" => dotfiles_git_ref'
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
+    'config.vm.synced_folder ".", "/vagrant", disabled: true'
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" 'id: "ssh"'
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
+    'host_ip: "127.0.0.1"'
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
+    'config.vm.disk :disk, size: 250 * 1024**3, primary: true'
+  assert_contains "$REPO_DIR/setup/mac-thin/Brewfile" 'cask "vagrant"'
+  assert_contains "$REPO_DIR/setup/mac-thin/Brewfile" \
+    'cask "vagrant-vmware-utility"'
+  assert_contains "$REPO_DIR/setup/mac-thin/bootstrap.sh" \
+    'VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"'
+  assert_contains "$REPO_DIR/setup/mac-thin/bootstrap.sh" \
+    'vagrant plugin install vagrant-vmware-desktop'
+  assert_contains "$REPO_DIR/setup/mac-thin/bootstrap.sh" \
+    '--plugin-version "$VAGRANT_VMWARE_PLUGIN_VERSION"'
+}
+
 test_goodmorning_timeout_helper() {
   local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
   local start_epoch
@@ -1671,6 +1769,7 @@ test_mac_mini_apply
 test_xdg_bin_home
 test_profile_and_failure_guards
 test_shared_zsh_interface
+test_ubuntu_vagrant_lifecycle
 test_goodmorning_timeout_helper
 test_goodmorning_dotfiles_sync
 test_resilience_goodmorning_guards

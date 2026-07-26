@@ -24,6 +24,7 @@ The host installs only:
 - Raycast
 - TablePlus
 - Tailscale
+- Vagrant and the VMware utility
 - VLC
 - VMware Fusion
 - Zoom
@@ -35,7 +36,8 @@ runtimes, language servers, Neovim, or project dependencies on macOS.
 ## Install
 
 Prerequisites are Xcode Command Line Tools, Homebrew, the canonical
-`~/Developer/dotfiles-hd` checkout, and restored `~/.ssh`.
+`~/Developer/dotfiles-hd` checkout, and restored `~/.ssh`. The bootstrap
+installs Rosetta 2 when needed by Vagrant's VMware utility.
 
 Preview and audit first:
 
@@ -52,9 +54,10 @@ setup/mac-thin/bootstrap.sh --apply
 setup/mac-thin/doctor.sh
 ```
 
-The bootstrap installs the policy casks in `Brewfile` through Homebrew. It links
-only the thin `.zshrc` and tracked Ghostty configuration, backing up any
-replaced destination beside the original.
+The bootstrap installs the policy casks and pins the
+`vagrant-vmware-desktop` provider to `3.0.5`. It links only the thin `.zshrc`
+and tracked Ghostty configuration, backing up any replaced destination beside
+the original.
 
 ## Manual Applications
 
@@ -71,6 +74,7 @@ The doctor remains red until both applications exist in `/Applications`.
 1. Sign in to 1Password, Tailscale, Obsidian, and ChatGPT.
 1. Grant Tailscale's requested network-extension permission.
 1. Complete VMware Fusion's one-time privileged setup.
+1. Build the canary with `uvm-up` or `uvm-up-headless`.
 1. Add `ubuntu-vm-ts` to Codex connections as the primary development route.
    Keep `ubuntu-vm` as the local VMware fallback.
 1. Keep repositories and all development execution on the guests' native Linux
@@ -97,25 +101,30 @@ r            Reload the Zsh configuration
 u, ubuntu   SSH into the Ubuntu VM
 ut, ubuntu-ts
              SSH into Ubuntu through Tailscale
-uvm-status  Show whether the Ubuntu VM is running
-uvm-ip      Show the current VMware guest IP
+uc, uct      SSH into the canary locally or through Tailscale
+uvm-up       Start the Vagrant VM with the VMware GUI
+uvm-up-headless
+             Start the Vagrant VM without a VMware window
+uvm-stop     Gracefully halt the Vagrant VM
+uvm-suspend Suspend the Vagrant VM
+uvm-resume  Resume the Vagrant VM
+uvm-status  Show Vagrant VM state
+uvm-ip      Show the Vagrant guest addresses
+uvm-destroy Interactively destroy only the Vagrant VM
 uvm-open    Open VMware Fusion
 ```
 
-Press `Ctrl-D` to leave the SSH session. VM shutdown remains an explicit VMware
-action to avoid accidental power-offs.
+Press `Ctrl-D` to leave the SSH session. `uvm-destroy` never uses Vagrant's
+force flag and does not reference the legacy VMware VM.
 
-Keep `AddressFamily inet` in both Ubuntu SSH blocks. `ubuntu-vm` uses VMware
-mDNS for the local route; `ubuntu-vm-ts` uses Ubuntu's stable Tailscale address.
-VMware mDNS can publish the guest on multiple IPv6 link-local interfaces,
-making SSH choose the wrong route intermittently.
+The Vagrant local route is fixed at `127.0.0.1:2222`, so it works without
+Tailscale or local networking. The remote route uses Tailscale MagicDNS.
+`setup/mac-thin/ssh/ubuntu-vagrant.conf` keeps host-key checking on and disables
+agent forwarding.
 
-Arbiter GitHub and Forgejo access use agent forwarding from the thin Mac.
-Private keys remain in `~/.ssh` on macOS; Ubuntu stores only their public keys
-as identity selectors. The `ubuntu-vm` block must set `ForwardAgent yes` and
-use `LocalCommand` with `ssh-add` so a fresh Mac agent loads
-`id_ed25519_arbiter_hd` and `id_ed25519_forgejo_truenas` before the Ubuntu
-shell starts.
+The canary generates separate VM-local keys for GitHub `hd719`, Arbiter, and
+Forgejo. No Git private key is copied from the Mac. The existing forwarded
+agent route remains valid only for the unchanged legacy VM until cutover.
 
 This is an explicit allowlist. Neovim, Node/Bun/Go, Docker, Kubernetes, project,
 VS Code, tmux, and other development aliases remain inside the Linux VMs.

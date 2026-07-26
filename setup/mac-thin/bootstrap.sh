@@ -6,6 +6,10 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
 STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 MODE="dry-run"
+VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
+PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
+SOFTWAREUPDATE="${DOTFILES_SOFTWAREUPDATE:-/usr/sbin/softwareupdate}"
+SUDO="${DOTFILES_SUDO:-/usr/bin/sudo}"
 
 # shellcheck source=../mac-bootstrap/lib.sh
 source "$DOTFILES_DIR/setup/mac-bootstrap/lib.sh"
@@ -85,11 +89,24 @@ for spec in "${LINK_SPECS[@]}"; do
   reject_link_source_alias "${spec%%|*}" "${spec#*|}"
 done
 
+vagrant_vmware_plugin_current() {
+  command -v vagrant >/dev/null 2>&1 || return 1
+  vagrant plugin list 2>/dev/null \
+    | /usr/bin/grep -Eq \
+      "^vagrant-vmware-desktop \\($VAGRANT_VMWARE_PLUGIN_VERSION([,)])"
+}
+
+rosetta_installed() {
+  "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1
+}
+
 if [[ "$MODE" == "dry-run" ]]; then
   say "profile: mac-thin"
   say "mode: dry-run (no package-manager calls or writes)"
   say "would install control-plane apps from: $BREWFILE"
   say "VMware Fusion and ChatGPT remain manual application installs"
+  say "would install Rosetta 2 when missing"
+  say "would install vagrant-vmware-desktop $VAGRANT_VMWARE_PLUGIN_VERSION"
   for spec in "${LINK_SPECS[@]}"; do
     backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 1
   done
@@ -98,6 +115,12 @@ fi
 
 if [[ "$MODE" == "check" ]]; then
   status=0
+  if rosetta_installed; then
+    say "Rosetta 2 installed"
+  else
+    say "Rosetta 2 missing"
+    status=1
+  fi
   if HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade --file "$BREWFILE"; then
     say "Brewfile satisfied: $BREWFILE"
   else
@@ -112,12 +135,37 @@ if [[ "$MODE" == "check" ]]; then
       status=1
     fi
   done
+  if vagrant_vmware_plugin_current; then
+    say "Vagrant VMware provider current: $VAGRANT_VMWARE_PLUGIN_VERSION"
+  else
+    say "Vagrant VMware provider missing or not pinned to $VAGRANT_VMWARE_PLUGIN_VERSION"
+    status=1
+  fi
   "$SCRIPT_DIR/doctor.sh" || status=1
   exit "$status"
 fi
 
+if ! rosetta_installed; then
+  say "Installing Rosetta 2 for the Vagrant VMware utility..."
+  "$SUDO" "$SOFTWAREUPDATE" --install-rosetta --agree-to-license
+fi
+
 say "Installing thin-Mac control-plane applications without broad upgrades..."
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$BREWFILE"
+
+# A cancelled .pkg prompt can leave Homebrew's cask metadata without the
+# Vagrant executable. Repair that partial install before adding the provider.
+if ! command -v vagrant >/dev/null 2>&1; then
+  say "Repairing the incomplete Vagrant package install..."
+  HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall --cask vagrant
+  hash -r
+fi
+
+if ! vagrant_vmware_plugin_current; then
+  say "Installing pinned Vagrant VMware provider..."
+  vagrant plugin install vagrant-vmware-desktop \
+    --plugin-version "$VAGRANT_VMWARE_PLUGIN_VERSION"
+fi
 
 for spec in "${LINK_SPECS[@]}"; do
   backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 0
