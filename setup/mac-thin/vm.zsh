@@ -1,12 +1,9 @@
 # Thin-Mac Vagrant shortcuts. Development still runs inside the Ubuntu guest.
 
 alias u='ssh ubuntu-vm'
-alias ubuntu='ssh ubuntu-vm'
 alias ut='ssh ubuntu-vm-ts'
-alias ubuntu-ts='ssh ubuntu-vm-ts'
 alias uc='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary'
 alias uct='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary-ts'
-alias uvm-open='open -a "VMware Fusion"'
 
 _ubuntu_vagrant() {
   emulate -L zsh

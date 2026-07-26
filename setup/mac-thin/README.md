@@ -98,9 +98,8 @@ dots         Enter the Mac dotfiles repository
 vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
 r            Reload the Zsh configuration
-u, ubuntu   SSH into the Ubuntu VM
-ut, ubuntu-ts
-             SSH into Ubuntu through Tailscale
+u            SSH into the Ubuntu VM
+ut           SSH into Ubuntu through Tailscale
 uc, uct      SSH into the canary locally or through Tailscale
 uvm-up       Start the Vagrant VM with the VMware GUI
 uvm-up-headless
@@ -111,7 +110,6 @@ uvm-resume  Resume the Vagrant VM
 uvm-status  Show Vagrant VM state
 uvm-ip      Show the Vagrant guest addresses
 uvm-destroy Interactively destroy only the Vagrant VM
-uvm-open    Open VMware Fusion
 ```
 
 Press `Ctrl-D` to leave the SSH session. `uvm-destroy` never uses Vagrant's

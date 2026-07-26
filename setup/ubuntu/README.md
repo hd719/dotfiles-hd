@@ -121,6 +121,11 @@ uvm-ip             Show guest addresses
 uvm-destroy        Interactive canary destroy
 ```
 
+`uvm-up-headless` starts VMware's background engine; the VMware Fusion app does
+not need to stay open. Once the VM is running, use `uvm-status` and connect with
+`uc` instead of starting it again. Stop or suspend it with `uvm-stop` or
+`uvm-suspend`, not by quitting VMware Fusion.
+
 `uvm-destroy` prints the Git key fingerprints when the guest is reachable,
 reminds you to remove registered keys, and calls interactive `vagrant destroy`.
 It never passes `-f` and cannot target the legacy VM.
