@@ -556,6 +556,13 @@ selects the owner and repository. For example,
 `git@github.com-arbiter:hd719/project.git` authenticates as Arbiter but accesses
 a repository owned by `hd719`.
 
+Authenticate GitHub CLI separately as Arbiter and verify the API identity:
+
+```bash
+gh auth login --hostname github.com --git-protocol ssh --web
+test "$(gh api user --jq .login)" = "arbiter-hd"
+```
+
 Inspect a repository before changing its remote:
 
 ```bash

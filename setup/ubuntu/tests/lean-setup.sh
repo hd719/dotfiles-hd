@@ -13,6 +13,8 @@ GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
 CODEX_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/codex"
 LINK_SCRIPT="$ROOT_DIR/setup/ubuntu/link-dotfiles.sh"
+GIT_ALIASES_SCRIPT="$ROOT_DIR/setup/configure-git-aliases.sh"
+GIT_ALIASES_CONFIG="$ROOT_DIR/config/git/aliases.gitconfig"
 SSH_CONFIG="$ROOT_DIR/setup/ubuntu/ssh/config"
 VAGRANTFILE="$ROOT_DIR/setup/ubuntu/Vagrantfile"
 ANSIBLE_BOOTSTRAP="$ROOT_DIR/setup/ubuntu/bootstrap-ansible.sh"
@@ -105,6 +107,45 @@ EOF
     || fail "Codex wrapper reused a stale forwarded socket"
 }
 
+test_portable_git_aliases() {
+  local case_dir="$TEST_ROOT/git-aliases"
+  local home_dir="$case_dir/home"
+  local linked_home="$case_dir/linked-home"
+  local linked_source="$case_dir/linked-source"
+
+  [[ ! -e "$ROOT_DIR/config/git/.gitconfig" ]] \
+    || fail "legacy non-portable Git config still exists"
+  [[ "$(git config --file "$GIT_ALIASES_CONFIG" --get alias.st)" == "status" ]] \
+    || fail "portable Git aliases are missing st = status"
+
+  mkdir -p "$home_dir"
+  printf '[user]\n\tname = machine-owned\n' > "$home_dir/.gitconfig"
+  HOME="$home_dir" DOTFILES_STAMP=20260727-120000 \
+    "$GIT_ALIASES_SCRIPT" --apply >/dev/null
+
+  [[ "$(HOME="$home_dir" git config --global --get user.name)" == "machine-owned" ]] \
+    || fail "Git alias setup replaced machine-owned identity"
+  [[ "$(HOME="$home_dir" git config --global --includes --get alias.st)" == "status" ]] \
+    || fail "Git alias setup did not activate st = status"
+  [[ -f "$home_dir/.gitconfig.backup-20260727-120000" ]] \
+    || fail "Git alias setup did not back up the global config"
+
+  HOME="$home_dir" DOTFILES_STAMP=20260727-130000 \
+    "$GIT_ALIASES_SCRIPT" --apply >/dev/null
+  [[ ! -e "$home_dir/.gitconfig.backup-20260727-130000" ]] \
+    || fail "idempotent Git alias setup created another backup"
+
+  mkdir -p "$linked_home"
+  printf '[user]\n\tname = linked-machine\n' > "$linked_source"
+  ln -s "$linked_source" "$linked_home/.gitconfig"
+  HOME="$linked_home" DOTFILES_STAMP=20260727-140000 \
+    "$GIT_ALIASES_SCRIPT" --apply >/dev/null
+  [[ -f "$linked_home/.gitconfig" && ! -L "$linked_home/.gitconfig" ]] \
+    || fail "Git alias setup did not migrate a symlinked global config"
+  [[ "$(git config --file "$linked_source" --get user.name)" == "linked-machine" ]] \
+    || fail "Git alias setup changed the old symlink target"
+}
+
 test_vagrant_ansible_contract() {
   local task_file
 
@@ -159,6 +200,7 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$ROOT_DIR/.gitignore" 'setup/ubuntu/.vagrant/'
   assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
     '/var/lib/dotfiles-hd/initial-upgrade-complete'
+  assert_file_contains "$ANSIBLE_DIR/vars.yml" '  - gh'
   assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
     'when: not workstation_initial_upgrade.stat.exists'
   assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
@@ -225,6 +267,14 @@ test_doctor_is_read_only_and_complete() {
   assert_contains "$output" "--offline"
 
   mkdir -p "$case_dir/home/Developer/dotfiles-hd/.git" "$case_dir/bin"
+  mkdir -p \
+    "$case_dir/home/Developer/dotfiles-hd/config/git" \
+    "$case_dir/home/Developer/dotfiles-hd/setup"
+  cp "$GIT_ALIASES_CONFIG" \
+    "$case_dir/home/Developer/dotfiles-hd/config/git/aliases.gitconfig"
+  cp "$GIT_ALIASES_SCRIPT" \
+    "$case_dir/home/Developer/dotfiles-hd/setup/configure-git-aliases.sh"
+  chmod +x "$case_dir/home/Developer/dotfiles-hd/setup/configure-git-aliases.sh"
   printf 'ID=ubuntu\nVERSION_ID=26.04\n' > "$case_dir/os-release"
   mkdir -p \
     "$case_dir/home/.local/share/fonts/CaskaydiaCove" \
@@ -278,6 +328,10 @@ case "$*" in
   *"status --porcelain"*) ;;
   *"config --global core.editor"*) printf 'nvim\n' ;;
   *"config --global core.excludesfile"*) printf '%s/.gitignore_global\n' "$HOME" ;;
+  *"config --global --get-all include.path"*)
+    printf '%s/Developer/dotfiles-hd/config/git/aliases.gitconfig\n' "$HOME"
+    ;;
+  *"config --global --includes --get alias.st"*) printf 'status\n' ;;
   *) exit 1 ;;
 esac
 EOF
@@ -329,6 +383,10 @@ printf '%s\n' \
   'Hasklug Nerd Font' \
   'Maple Mono NF'
 EOF
+  cat > "$case_dir/bin/gh" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == "api user --jq .login" ]] && printf 'arbiter-hd\n'
+EOF
   cat > "$case_dir/bin/ssh" <<'EOF'
 #!/usr/bin/env bash
 if [[ "${1:-}" == "-G" ]]; then
@@ -375,6 +433,7 @@ EOF
   assert_contains "$output" "github.com-arbiter authenticates as Hi arbiter-hd!"
   assert_contains "$output" "forgejo-truenas-lan authenticates as Hi there, hd719!"
   assert_contains "$output" "three unique VM-local Git keys"
+  assert_contains "$output" "GitHub CLI authenticates as arbiter-hd"
   assert_contains "$output" "Codex login is ready"
   assert_contains "$output" "graphical VMware desktop"
   assert_contains "$output" "root filesystem has at least 200 GiB"
@@ -1042,6 +1101,7 @@ EOF
 
 test_neovim_help_is_read_only
 test_codex_wrapper_stabilizes_forwarded_agent
+test_portable_git_aliases
 test_vagrant_ansible_contract
 test_doctor_is_read_only_and_complete
 test_ubuntu_mise_toolchain_is_exact

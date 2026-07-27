@@ -48,6 +48,7 @@ workstation_apt_packages:
   - docker.io
   - fontconfig
   - gdm3
+  - gh
   - ghostscript
   - ghostty
   - git

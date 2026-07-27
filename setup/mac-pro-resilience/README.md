@@ -11,6 +11,7 @@ Manage only:
 - Hunk with the shared Catppuccin Mocha theme
 - Neovim with locked plugins and pinned tools
 - Bookokrat with the Hamel Nord theme
+- Portable Git aliases without changing work identity or credentials
 
 Keep the work `~/.zshrc`, `config/mise`, Git identity, credentials,
 certificates, Docker state, Karabiner, and company-managed applications
@@ -85,6 +86,16 @@ Create the five managed links:
 ```bash
 setup/mac-pro-resilience/link-terminal-editor-config.sh
 ```
+
+Add the portable aliases to the machine-owned global Git config:
+
+```bash
+setup/configure-git-aliases.sh --apply
+```
+
+The configurator backs up the global config before its first change. If the
+global config is a symlink, it migrates the resolved contents to a regular
+machine-owned file before adding the include.
 
 The linker preflights every source, backs up each non-matching destination, and
 is safe to rerun. It owns only:
@@ -168,6 +179,7 @@ Never reset local changes or repeatedly retry a failed stage.
   mdformat --version | grep -F 'mdformat 1.0.0'
   ruff --version | grep -Fx 'ruff 0.15.21'
   "$HOME/.local/graphql-lsp/bin/graphql-lsp" --version | grep -Fx '3.5.0'
+  setup/configure-git-aliases.sh --check
 
   test "$(readlink "$HOME/.config/bookokrat")" = \
     "$HOME/Developer/dotfiles-hd/config/bookokrat"

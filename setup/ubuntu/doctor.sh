@@ -156,6 +156,12 @@ else
   fail "Git editor or global excludes is not configured"
 fi
 
+if "$REPO_DIR/setup/configure-git-aliases.sh" --check >/dev/null 2>&1; then
+  pass "portable Git aliases"
+else
+  fail "portable Git aliases are not configured"
+fi
+
 if [[ "$(getent passwd "$(id -un)" | cut -d: -f7)" == */zsh ]]; then
   pass "Zsh is the login shell"
 else
@@ -238,7 +244,7 @@ fi
 if zsh -lic '
   set -e
   for command_name in \
-    bookokrat brave-browser btop codex diff-so-fancy docker fastfetch ghostty herdr hunk lsd \
+    bookokrat brave-browser btop codex diff-so-fancy docker fastfetch gh ghostty herdr hunk lsd \
     mise nvim tailscale tmux; do
     command -v "$command_name" >/dev/null
   done
@@ -310,6 +316,13 @@ else
   check_identity github.com-arbiter "Hi arbiter-hd!"
   check_identity forgejo-truenas-lan "Hi there, hd719!"
   check_identity forgejo-truenas-ts "Hi there, hd719!"
+
+  gh_login="$(gh api user --jq .login 2>/dev/null || true)"
+  if [[ "$gh_login" == "arbiter-hd" ]]; then
+    pass "GitHub CLI authenticates as arbiter-hd"
+  else
+    fail "GitHub CLI must authenticate as arbiter-hd"
+  fi
 
   codex_login_status="$(zsh -lic 'codex login status' 2>&1 || true)"
   if [[ "$codex_login_status" == *"Logged in"* ]]; then

@@ -1,0 +1,20 @@
+[alias]
+	co = checkout
+	br = branch
+	bdd = branch -D
+	ci = commit
+	cm = commit -m
+	cem = commit --allow-empty -m
+	st = status
+	po = push origin
+	pof = push -f origin
+	pu = pull origin
+	puff = pull origin --no-ff
+	ls = log --oneline
+	ll = log --stat
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	lgg = log --graph --all --pretty='format:%C(auto)%h %C(cyan)%ar %C(auto)%d %C(magenta)%an %C(auto)%s'
+	undo = reset --soft HEAD~1
+	lggg = log --graph --oneline --decorate --all
+	repo-size = !git rev-list --all --count | wc -l
+	delete-merged = "!f() { git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d; }; f"

@@ -4,6 +4,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
+GIT_ALIASES_SCRIPT="$DOTFILES_DIR/setup/configure-git-aliases.sh"
 APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
 BREWFILE="$DOTFILES_DIR/setup/mac-thin/Brewfile"
 SSH_CONFIG="$HOME/.ssh/config"
@@ -85,6 +86,12 @@ for spec in "${LINK_SPECS[@]}"; do
     fail "link mismatch: $destination"
   fi
 done
+
+if "$GIT_ALIASES_SCRIPT" --check >/dev/null 2>&1; then
+  pass "portable Git aliases"
+else
+  fail "portable Git aliases are not configured"
+fi
 
 for app_name in \
   "1Password.app" \

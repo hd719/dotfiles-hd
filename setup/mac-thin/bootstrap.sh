@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
+GIT_ALIASES_SCRIPT="$DOTFILES_DIR/setup/configure-git-aliases.sh"
 STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 MODE="dry-run"
 VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
@@ -84,6 +85,7 @@ require_source "$DOTFILES_DIR/config/zsh/shared/functions.zsh"
 require_source "$DOTFILES_DIR/config/zsh/mac/aliases.zsh"
 require_source "$DOTFILES_DIR/config/zsh/mac/personal/aliases.zsh"
 require_source "$SCRIPT_DIR/vm.zsh"
+require_source "$GIT_ALIASES_SCRIPT"
 for spec in "${LINK_SPECS[@]}"; do
   require_source "${spec%%|*}"
   reject_link_source_alias "${spec%%|*}" "${spec#*|}"
@@ -107,6 +109,7 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "VMware Fusion and ChatGPT remain manual application installs"
   say "would install Rosetta 2 when missing"
   say "would install vagrant-vmware-desktop $VAGRANT_VMWARE_PLUGIN_VERSION"
+  say "would include portable Git aliases without replacing machine-owned identity"
   for spec in "${LINK_SPECS[@]}"; do
     backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 1
   done
@@ -135,6 +138,7 @@ if [[ "$MODE" == "check" ]]; then
       status=1
     fi
   done
+  "$GIT_ALIASES_SCRIPT" --check || status=1
   if vagrant_vmware_plugin_current; then
     say "Vagrant VMware provider current: $VAGRANT_VMWARE_PLUGIN_VERSION"
   else
@@ -170,6 +174,7 @@ fi
 for spec in "${LINK_SPECS[@]}"; do
   backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 0
 done
+DOTFILES_STAMP="$STAMP" "$GIT_ALIASES_SCRIPT" --apply
 
 "$SCRIPT_DIR/doctor.sh"
 say "Thin Mac bootstrap complete. Start a fresh login shell."

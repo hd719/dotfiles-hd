@@ -66,6 +66,9 @@ After registration:
 ```bash
 cd ~/Developer/dotfiles-hd
 git remote set-url origin git@github.com:hd719/dotfiles-hd.git
+git remote add arbiter git@github.com-arbiter:arbiter-hd/dotfiles-hd.git
+gh auth login --hostname github.com --git-protocol ssh --web
+test "$(gh api user --jq .login)" = "arbiter-hd"
 codex login --device-auth
 bash setup/ubuntu/doctor.sh
 ```
@@ -135,7 +138,7 @@ folder.
 | Vagrant  | VM lifecycle, box version, resources, disk, and SSH transport |
 | Ansible  | Ubuntu packages, user, services, Tailscale, and Git keys      |
 | mise     | Pinned runtimes, Neovim, Codex, and development tools         |
-| dotfiles | User configuration and symlinks                               |
+| dotfiles | User configuration, symlinks, and portable Git alias include  |
 | doctor   | Final read-only acceptance check                              |
 
 Managed links:
@@ -160,6 +163,8 @@ Managed links:
 
 Small Bash boundaries remain:
 
+- `configure-git-aliases.sh` adds only the portable alias include and preserves
+  machine-owned Git identity.
 - `bootstrap-ansible.sh` installs only Ubuntu's `ansible-core`.
 - `grow-root-filesystem.sh` grows Bento's partition to the Vagrant disk.
 - `link-dotfiles.sh` preserves backup-safe symlink behavior.
@@ -181,7 +186,8 @@ bash setup/ubuntu/doctor.sh --offline
 ```
 
 The full doctor verifies Tailscale, the three local Git keys, four remote Git
-routes, and local Codex login status without making a paid API request:
+routes, the Arbiter GitHub CLI login, and local Codex login status without
+making a paid API request:
 
 ```bash
 bash setup/ubuntu/doctor.sh

@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
+GIT_ALIASES_SCRIPT="$DOTFILES_DIR/setup/configure-git-aliases.sh"
 STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 PROFILE=""
 MODE="dry-run"
@@ -85,6 +86,7 @@ require_source "$COMMON_BREWFILE"
 require_source "$PROFILE_BREWFILE"
 require_source "$MISE_CONFIG"
 require_source "$MISE_FRAGMENT"
+require_source "$GIT_ALIASES_SCRIPT"
 load_mise_specs "$MISE_CONFIG"
 validate_approved_mise_pins
 validate_neovim_parser_manifest "$DOTFILES_DIR/config/nvim/lua/plugins/editor.lua"
@@ -108,6 +110,7 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "would install pinned mise runtimes from: $MISE_CONFIG"
   say "would install pinned Ruff and mdformat tools with uv"
   say "would install GraphQL LSP 3.5.0 with pinned pnpm under: $HOME/.local/graphql-lsp"
+  say "would include portable Git aliases without replacing machine-owned identity"
   say "would restore locked Neovim plugins and required Tree-sitter parsers without changing lazy-lock.json"
   say "would run the verification doctor"
 
@@ -144,6 +147,7 @@ if [[ "$MODE" == "check" ]]; then
     backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 1
   done
   write_zprofile_block "$HOME/.zprofile" "$MISE_FRAGMENT" "$STAMP" 1
+  "$GIT_ALIASES_SCRIPT" --check || status=1
   exit "$status"
 fi
 
@@ -188,6 +192,7 @@ for spec in "${LINK_SPECS[@]}"; do
   backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 0
 done
 write_zprofile_block "$HOME/.zprofile" "$MISE_FRAGMENT" "$STAMP" 0
+DOTFILES_STAMP="$STAMP" "$GIT_ALIASES_SCRIPT" --apply
 
 say "Restoring locked Neovim plugins and required Tree-sitter parsers..."
 restore_neovim_plugins "$DOTFILES_DIR/config/nvim/lazy-lock.json"

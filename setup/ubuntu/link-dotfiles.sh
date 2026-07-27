@@ -62,3 +62,4 @@ safe_link "$SCRIPT_DIR/bin/codex" "$HOME/.local/bin/codex"
 
 git config --global core.editor nvim
 git config --global core.excludesfile "$HOME/.gitignore_global"
+DOTFILES_BACKUP_SEPARATOR=. "$ROOT_DIR/setup/configure-git-aliases.sh" --apply

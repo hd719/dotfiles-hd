@@ -80,7 +80,8 @@ The doctor remains red until both applications exist in `/Applications`.
    filesystems.
 
 The bootstrap never restores credentials, starts services, removes packages,
-or installs development tooling.
+or installs development tooling. It adds only the portable Git alias include
+to the machine-owned global Git config.
 
 ## Personal Shell Allowlist
 
