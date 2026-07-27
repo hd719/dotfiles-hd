@@ -169,7 +169,7 @@ Never reset local changes or repeatedly retry a failed stage.
 
   for cmd in \
     bash-language-server bookokrat fd fzf gopls herdr hunk lazygit \
-    lua-language-server magick nvim rg stylua tree-sitter uv \
+    lua-language-server magick marksman nvim rg stylua tree-sitter uv \
     vscode-eslint-language-server vscode-json-language-server vtsls \
     mdformat ruff
   do

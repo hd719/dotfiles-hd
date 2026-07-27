@@ -11,8 +11,9 @@ Hamel's existing Zed muscle memory.
 - JavaScript and TypeScript: `vtsls` for language intelligence,
   `vscode-eslint-language-server` for project lint rules, and project-local
   `prettier` for formatting.
-- Markdown: `mdformat`, installed through `uv` with GFM, frontmatter, footnote,
-  alert, and Obsidian-wikilink plugins.
+- Markdown: `marksman` for language intelligence and `mdformat`, installed
+  through `uv` with GFM, frontmatter, footnote, alert, and Obsidian-wikilink
+  plugins.
 - Python: `ruff`, pinned through `uv`.
 - GraphQL: `graphql-lsp` (from `graphql-language-service-cli`), installed to a
   fixed prefix and referenced by absolute path. Schema-aware features need a
@@ -202,6 +203,9 @@ Every agent teaching Neovim must read and update both files.
 | `Space o q/s/b/l` | Quick switch / search / backlinks / links from this note |
 | `Space o d` | Open or create today's private daily note |
 | `Space o o/t/c` | Open in Obsidian / tags / table of contents |
+| `Space o m` | Open the Marksman menu |
+| `Space o m a/d/h` | Marksman actions / definition / hover |
+| `Space o m n/r/s` | Marksman rename / references / symbols |
 | `Space o e` | Open the current file externally; PDFs use Bookokrat |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
 | `Space z a/o/c` | Fold: toggle / open all / close all |
@@ -250,6 +254,14 @@ is the explicit exception: it creates today's note in
 `Knowledge/_private/daily` from the matching private-daily template. Private
 work under `Knowledge/_private`, `Knowledge/raw/_work`, and
 `Knowledge/raw/_drawings` remains excluded from Obsidian pickers.
+Obsidian `![[image.png]]` embeds are resolved to their real attachment path and
+rendered automatically by Snacks; there is no separate key.
+
+`marksman` provides Markdown and `[[wikilink]]` diagnostics, completion, hover,
+go-to-definition, references, and rename support. The vault's
+`.marksman.toml` keeps completion filename-based and disables the create-missing
+file action so note creation remains explicit. Press `Space o m` to discover
+its actions.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves

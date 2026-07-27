@@ -54,6 +54,7 @@ return {
       spec = {
         { "<leader>f", group = "Find" },
         { "<leader>o", group = "Obsidian" },
+        { "<leader>om", group = "Marksman" },
       },
     },
   },

@@ -84,6 +84,36 @@ return {
       { "<leader>oo", "<cmd>Obsidian open<cr>", desc = "Open note in Obsidian" },
       { "<leader>ot", "<cmd>Obsidian tags<cr>", desc = "Tags" },
       { "<leader>oc", "<cmd>Obsidian toc<cr>", desc = "Table of contents" },
+      { "<leader>oma", vim.lsp.buf.code_action, desc = "Marksman actions" },
+      {
+        "<leader>omd",
+        function()
+          Snacks.picker.lsp_definitions()
+        end,
+        desc = "Marksman definition",
+      },
+      {
+        "<leader>omh",
+        function()
+          vim.lsp.buf.hover({ border = "rounded" })
+        end,
+        desc = "Marksman hover",
+      },
+      { "<leader>omn", vim.lsp.buf.rename, desc = "Marksman rename" },
+      {
+        "<leader>omr",
+        function()
+          Snacks.picker.lsp_references()
+        end,
+        desc = "Marksman references",
+      },
+      {
+        "<leader>oms",
+        function()
+          Snacks.picker.lsp_symbols()
+        end,
+        desc = "Marksman symbols",
+      },
     },
   },
 }

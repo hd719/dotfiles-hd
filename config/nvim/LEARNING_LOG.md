@@ -3150,3 +3150,24 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - No clipboard issue remains from the confirmed copy workflow.
 - Best next core lesson: Curriculum 6.5 — format Go and Lua manually with
   `Space p` and review the diff.
+
+## 2026-07-27 — Session 030: Obsidian Images and Marksman
+
+- Added obsidian.nvim's documented Snacks image resolver. Obsidian
+  `![[image.png]]` embeds now resolve to the attachment's real path
+  automatically; there is no new leader mapping.
+- Added the pinned Marksman Markdown language server and enabled it through
+  Neovim's native LSP configuration.
+- Marksman provides Markdown and `[[wikilink]]` diagnostics, completion, hover,
+  definition, references, and rename support. It is an external tool, not a
+  Lazy plugin.
+- `Space o m` opens a discoverable Marksman submenu for actions, definition,
+  hover, rename, references, and document symbols.
+- Added a vault-level `.marksman.toml` that uses filename-based wiki-link
+  completion and disables creating missing files so note creation stays
+  explicit.
+- Automated checks confirmed Marksman attaches at the vault root, every
+  `Space o m` mapping exists, and Snacks resolves both beside-note and nested
+  media-folder images.
+- Human verification remains pending. Curriculum 6.D9 stays unchecked, and the
+  next core lesson remains 6.5.
