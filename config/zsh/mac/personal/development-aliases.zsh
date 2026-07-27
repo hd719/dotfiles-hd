@@ -3,7 +3,6 @@
 
 ## Codex extras
 alias coda='carchive'
-alias codu='brew upgrade --cask codex'
 
 ## SSH
 alias blaze="ssh hamels-macbook-pro-2"

@@ -86,8 +86,8 @@ the approval gate in the Mac bootstrap runbook before `--apply`.
 
 ## System Boundaries
 
-- Thin Macs are control planes for browsers, Codex, Obsidian, SSH, Vagrant, and
-  VMware Fusion.
+- Thin Macs are control planes for browsers, Codex, Obsidian, SSH, the Herdr
+  remote client, Vagrant, and VMware Fusion.
 - Ubuntu VMs own project repositories, Docker, databases, compilers, language
   runtimes, language servers, Neovim, and project dependencies.
 - Full personal Macs own their local development toolchain.

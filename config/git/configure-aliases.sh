@@ -2,8 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd -P)"
-ALIASES_CONFIG="$ROOT_DIR/config/git/aliases.gitconfig"
+ALIASES_CONFIG="$SCRIPT_DIR/aliases.gitconfig"
 MODE="${1:---check}"
 STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 BACKUP_SEPARATOR="${DOTFILES_BACKUP_SEPARATOR:--}"

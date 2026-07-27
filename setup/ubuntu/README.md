@@ -163,7 +163,7 @@ Managed links:
 
 Small Bash boundaries remain:
 
-- `configure-git-aliases.sh` adds only the portable alias include and preserves
+- `config/git/configure-aliases.sh` adds only the portable alias include and preserves
   machine-owned Git identity.
 - `bootstrap-ansible.sh` installs only Ubuntu's `ansible-core`.
 - `grow-root-filesystem.sh` grows Bento's partition to the Vagrant disk.

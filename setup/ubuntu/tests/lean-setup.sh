@@ -13,7 +13,7 @@ GHOSTTY_CONFIG="$ROOT_DIR/setup/ubuntu/ghostty.conf"
 GRAPHQL_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/graphql-lsp"
 CODEX_WRAPPER="$ROOT_DIR/setup/ubuntu/bin/codex"
 LINK_SCRIPT="$ROOT_DIR/setup/ubuntu/link-dotfiles.sh"
-GIT_ALIASES_SCRIPT="$ROOT_DIR/setup/configure-git-aliases.sh"
+GIT_ALIASES_SCRIPT="$ROOT_DIR/config/git/configure-aliases.sh"
 GIT_ALIASES_CONFIG="$ROOT_DIR/config/git/aliases.gitconfig"
 SSH_CONFIG="$ROOT_DIR/setup/ubuntu/ssh/config"
 VAGRANTFILE="$ROOT_DIR/setup/ubuntu/Vagrantfile"
@@ -23,6 +23,7 @@ ANSIBLE_PLAYBOOK="$ANSIBLE_DIR/playbook.yml"
 FASTFETCH_CONFIG="$ROOT_DIR/config/fastfetch/config.jsonc"
 BTOP_CONFIG="$ROOT_DIR/config/btop/btop.conf"
 SHARED_ALIASES="$ROOT_DIR/config/zsh/shared/aliases.zsh"
+SHARED_CODEX_ALIASES="$ROOT_DIR/config/zsh/shared/codex-aliases.zsh"
 SHARED_DEVELOPMENT_ALIASES="$ROOT_DIR/config/zsh/shared/development-aliases.zsh"
 SHARED_FUNCTIONS="$ROOT_DIR/config/zsh/shared/functions.zsh"
 MAC_INIT="$ROOT_DIR/config/zsh/mac/init.zsh"
@@ -273,8 +274,8 @@ test_doctor_is_read_only_and_complete() {
   cp "$GIT_ALIASES_CONFIG" \
     "$case_dir/home/Developer/dotfiles-hd/config/git/aliases.gitconfig"
   cp "$GIT_ALIASES_SCRIPT" \
-    "$case_dir/home/Developer/dotfiles-hd/setup/configure-git-aliases.sh"
-  chmod +x "$case_dir/home/Developer/dotfiles-hd/setup/configure-git-aliases.sh"
+    "$case_dir/home/Developer/dotfiles-hd/config/git/configure-aliases.sh"
+  chmod +x "$case_dir/home/Developer/dotfiles-hd/config/git/configure-aliases.sh"
   printf 'ID=ubuntu\nVERSION_ID=26.04\n' > "$case_dir/os-release"
   mkdir -p \
     "$case_dir/home/.local/share/fonts/CaskaydiaCove" \
@@ -329,7 +330,8 @@ case "$*" in
   *"config --global core.editor"*) printf 'nvim\n' ;;
   *"config --global core.excludesfile"*) printf '%s/.gitignore_global\n' "$HOME" ;;
   *"config --global --get-all include.path"*)
-    printf '%s/Developer/dotfiles-hd/config/git/aliases.gitconfig\n' "$HOME"
+    aliases_dir="$(cd "$HOME/Developer/dotfiles-hd/config/git" && pwd -P)"
+    printf '%s/aliases.gitconfig\n' "$aliases_dir"
     ;;
   *"config --global --includes --get alias.st"*) printf 'status\n' ;;
   *) exit 1 ;;
@@ -606,11 +608,14 @@ alias gs='git status --short --branch'
 alias dc='docker compose'
 source_if_exists "$ubuntu_repo/config/zsh/shared/functions.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/aliases.zsh"
+source_if_exists "$ubuntu_repo/config/zsh/shared/codex-aliases.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/development-aliases.zsh"
 EOF
 
   assert_file_contains "$SHARED_ALIASES" "alias gadd='git add .'"
   assert_file_contains "$SHARED_ALIASES" "alias dots='cd ~/Developer/dotfiles-hd'"
+  assert_file_contains "$SHARED_CODEX_ALIASES" "alias cod='codex'"
+  assert_file_contains "$SHARED_CODEX_ALIASES" "alias codu='codex update'"
   assert_file_contains "$SHARED_FUNCTIONS" "reload()"
 
   while IFS= read -r expected; do

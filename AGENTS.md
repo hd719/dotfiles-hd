@@ -62,6 +62,8 @@ request into a full-machine migration.
 ## Mac Shell Ownership
 
 - `config/zsh/shared/` contains portable shell modules.
+- `config/zsh/shared/codex-aliases.zsh` is loaded by personal Macs and Linux
+  workstations, never work-only profiles.
 - `config/zsh/shared/development-aliases.zsh` is loaded by Ubuntu and full Mac
   development profiles, never the thin Mac.
 - `config/zsh/mac/init.zsh` is the full Mac development interface.
@@ -88,7 +90,8 @@ setup/mac-thin/doctor.sh
 
 Keep development repositories, Docker, databases, compilers, language
 runtimes, language servers, Neovim, and project dependencies inside the Linux
-VMs. Do not run the full `mac-pro` bootstrap on the thin host.
+VMs. Herdr may run only as a thin client for the Ubuntu Herdr server. Do not
+run the full `mac-pro` bootstrap on the thin host.
 
 ### Codex Backup and Restore
 

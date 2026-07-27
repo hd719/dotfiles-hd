@@ -15,6 +15,7 @@ The host installs only:
 - diff-so-fancy for readable local Git diffs
 - Ghostty
 - Ghostty fonts
+- Herdr as a remote Ubuntu client
 - iStat Menus
 - Mullvad VPN
 - noTunes
@@ -53,10 +54,10 @@ setup/mac-thin/bootstrap.sh --apply
 setup/mac-thin/doctor.sh
 ```
 
-The bootstrap installs the policy casks and pins the
-`vagrant-vmware-desktop` provider to `3.0.5`. It links only the thin `.zshrc`
-and tracked Ghostty configuration, backing up any replaced destination beside
-the original.
+The bootstrap installs the policy packages and pins the
+`vagrant-vmware-desktop` provider to `3.0.5`. It links only the thin `.zshrc`,
+Ghostty configuration, and Herdr `config.toml`, backing up any replaced
+destination beside the original. Herdr session and runtime state stay local.
 
 ## Manual Applications
 
@@ -98,6 +99,8 @@ dots         Enter the Mac dotfiles repository
 vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
 r            Reload the Zsh configuration
+hu           Attach Herdr through local Vagrant
+hut          Attach Herdr through Tailscale
 u            SSH into the Ubuntu VM
 ut           SSH into Ubuntu through Tailscale
 uvm-up       Start the Vagrant VM with the VMware GUI
@@ -117,6 +120,12 @@ Tailscale or local networking. The remote route uses Tailscale MagicDNS.
 `setup/mac-thin/ssh/ubuntu-vagrant.conf` keeps host-key checking on and disables
 agent forwarding.
 
+Herdr runs on macOS only as a thin client for the Ubuntu server. Use `hu`
+locally or offline and `hut` through Tailscale. To send an image, copy it in
+Finder with `Cmd-C`, or capture directly to the clipboard with
+`Shift-Cmd-Ctrl-4`, then press `Ctrl-V` inside remote Herdr. A dragged Finder
+path remains Mac-local and is not readable inside Ubuntu.
+
 The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
 Forgejo. No Git private key is copied from the Mac.
 
@@ -126,6 +135,8 @@ VS Code, tmux, and other development aliases remain inside the Linux VMs.
 The shell is assembled from scoped modules:
 
 - `config/zsh/shared/` provides portable Git, navigation, SSH, and reload helpers.
+- `config/zsh/shared/codex-aliases.zsh` provides personal Mac and Linux Codex
+  shortcuts.
 - `config/zsh/mac/aliases.zsh` adds safe macOS controls.
-- `config/zsh/mac/personal/aliases.zsh` adds vault and Codex controls.
+- `config/zsh/mac/personal/aliases.zsh` adds the vault control.
 - `setup/mac-thin/vm.zsh` stays host-specific and owns VMware shortcuts.

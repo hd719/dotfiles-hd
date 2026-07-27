@@ -156,7 +156,7 @@ else
   fail "Git editor or global excludes is not configured"
 fi
 
-if "$REPO_DIR/setup/configure-git-aliases.sh" --check >/dev/null 2>&1; then
+if "$REPO_DIR/config/git/configure-aliases.sh" --check >/dev/null 2>&1; then
   pass "portable Git aliases"
 else
   fail "portable Git aliases are not configured"

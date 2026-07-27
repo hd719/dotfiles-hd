@@ -90,7 +90,7 @@ setup/mac-pro-resilience/link-terminal-editor-config.sh
 Add the portable aliases to the machine-owned global Git config:
 
 ```bash
-setup/configure-git-aliases.sh --apply
+config/git/configure-aliases.sh --apply
 ```
 
 The configurator backs up the global config before its first change. If the
@@ -179,7 +179,7 @@ Never reset local changes or repeatedly retry a failed stage.
   mdformat --version | grep -F 'mdformat 1.0.0'
   ruff --version | grep -Fx 'ruff 0.15.21'
   "$HOME/.local/graphql-lsp/bin/graphql-lsp" --version | grep -Fx '3.5.0'
-  setup/configure-git-aliases.sh --check
+  config/git/configure-aliases.sh --check
 
   test "$(readlink "$HOME/.config/bookokrat")" = \
     "$HOME/Developer/dotfiles-hd/config/bookokrat"

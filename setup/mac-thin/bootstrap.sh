@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
-GIT_ALIASES_SCRIPT="$DOTFILES_DIR/setup/configure-git-aliases.sh"
+GIT_ALIASES_SCRIPT="$DOTFILES_DIR/config/git/configure-aliases.sh"
 STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 MODE="dry-run"
 VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
@@ -59,6 +59,7 @@ BREWFILE="$DOTFILES_DIR/setup/mac-thin/Brewfile"
 LINK_SPECS=(
   "$DOTFILES_DIR/setup/mac-thin/.zshrc|$HOME/.zshrc"
   "$DOTFILES_DIR/config/ghostty/config|$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+  "$DOTFILES_DIR/config/herdr/config.toml|$HOME/.config/herdr/config.toml"
 )
 
 [[ "$(uname -s)" == "Darwin" ]] || die "mac-thin requires macOS"
@@ -81,6 +82,7 @@ fi
 
 require_source "$BREWFILE"
 require_source "$DOTFILES_DIR/config/zsh/shared/aliases.zsh"
+require_source "$DOTFILES_DIR/config/zsh/shared/codex-aliases.zsh"
 require_source "$DOTFILES_DIR/config/zsh/shared/functions.zsh"
 require_source "$DOTFILES_DIR/config/zsh/mac/aliases.zsh"
 require_source "$DOTFILES_DIR/config/zsh/mac/personal/aliases.zsh"
