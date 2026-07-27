@@ -99,6 +99,11 @@ return {
         end,
         desc = "Marksman hover",
       },
+      {
+        "<leader>omm",
+        "<cmd>MarksmanDiagnosticsToggle<cr>",
+        desc = "Marksman diagnostics",
+      },
       { "<leader>omn", vim.lsp.buf.rename, desc = "Marksman rename" },
       {
         "<leader>omr",

@@ -71,6 +71,36 @@ return {
         },
       })
 
+      local function set_marksman_diagnostics(client_id, bufnr, enabled)
+        local namespace = vim.lsp.diagnostic.get_namespace(client_id, false)
+        vim.diagnostic.enable(enabled, { bufnr = bufnr, ns_id = namespace })
+      end
+
+      -- Marksman is useful for navigating the vault, but its diagnostics are
+      -- noisy against years of existing notes. Start muted per Markdown buffer
+      -- and let Space o m m reveal them only when they are useful.
+      vim.lsp.config("marksman", {
+        on_attach = function(client, bufnr)
+          set_marksman_diagnostics(client.id, bufnr, false)
+        end,
+      })
+
+      vim.api.nvim_create_user_command("MarksmanDiagnosticsToggle", function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        local clients = vim.lsp.get_clients({ bufnr = bufnr, name = "marksman" })
+        if #clients == 0 then
+          vim.notify("Marksman is not attached to this buffer", vim.log.levels.WARN)
+          return
+        end
+
+        local namespace = vim.lsp.diagnostic.get_namespace(clients[1].id, false)
+        local enabled = not vim.diagnostic.is_enabled({ bufnr = bufnr, ns_id = namespace })
+        for _, client in ipairs(clients) do
+          set_marksman_diagnostics(client.id, bufnr, enabled)
+        end
+        vim.notify("Marksman diagnostics " .. (enabled and "shown" or "muted") .. " for this note")
+      end, { desc = "Toggle Marksman diagnostics for the current note" })
+
       -- GraphQL. graphql-lsp is a Node tool with no Homebrew formula, so pnpm
       -- installs it under a fixed, node-version-independent home and this config
       -- references it by absolute path. See config/nvim/README.md for the

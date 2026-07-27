@@ -205,7 +205,8 @@ Every agent teaching Neovim must read and update both files.
 | `Space o o/t/c` | Open in Obsidian / tags / table of contents |
 | `Space o m` | Open the Marksman menu |
 | `Space o m a/d/h` | Marksman actions / definition / hover |
-| `Space o m n/r/s` | Marksman rename / references / symbols |
+| `Space o m m/n` | Toggle Marksman diagnostics / rename |
+| `Space o m r/s` | Marksman references / symbols |
 | `Space o e` | Open the current file externally; PDFs use Bookokrat |
 | `Space m` | Toggle Markdown rendering (in Markdown files) |
 | `Space z a/o/c` | Fold: toggle / open all / close all |
@@ -262,6 +263,21 @@ go-to-definition, references, and rename support. The vault's
 `.marksman.toml` keeps completion filename-based and disables the create-missing
 file action so note creation remains explicit. Press `Space o m` to discover
 its actions.
+
+### Using Marksman in the vault
+
+Open a Markdown note under `~/Developer/hd`; Marksman attaches automatically.
+Put the cursor on a `[[wikilink]]`, then use:
+
+- `Space o m h` to preview the target.
+- `Space o m d` to open the target.
+- `Space o m r` to find references to it.
+- `Space o m s` to browse headings in the current note.
+- `Space o m n` to rename a target, or `Space o m a` for available actions.
+
+Marksman diagnostics start muted because the existing vault contains many old
+or intentionally unresolved links. `Space o m m` shows or hides only
+Marksman's diagnostics for the current note; navigation remains available.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves
