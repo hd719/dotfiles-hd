@@ -98,6 +98,7 @@ dots         Enter the Mac dotfiles repository
 vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
 r            Reload the Zsh configuration
+shotvm       Capture a screenshot, upload it to Ubuntu, and copy its VM path
 u            SSH into the Ubuntu VM
 ut           SSH into Ubuntu through Tailscale
 uvm-up       Start the Vagrant VM with the VMware GUI
@@ -111,6 +112,11 @@ uvm-destroy Interactively destroy only the Vagrant VM
 
 Press `Ctrl-D` to leave the SSH session. `uvm-destroy` never uses Vagrant's
 force flag and does not reference the legacy VMware VM.
+
+Run `shotvm` on the thin Mac, select a screenshot region, then press `Cmd-V`
+inside Codex. It uses only macOS `screencapture`, `ssh`, `scp`, and `pbcopy`,
+uploads to `/tmp/codex-images` through `ubuntu-vm-ts`, and copies the Ubuntu
+path to the Mac clipboard. Pass `ubuntu-vm` to use the local Vagrant fallback.
 
 The Vagrant local route is fixed at `127.0.0.1:2222`, so it works without
 Tailscale or local networking. The remote route uses Tailscale MagicDNS.

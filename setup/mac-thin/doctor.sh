@@ -191,6 +191,7 @@ if /bin/zsh -dfc "
   ! alias ubuntu-ts >/dev/null 2>&1
   ! alias uvm-open >/dev/null 2>&1
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
+  [[ \"\$(whence -w shotvm)\" == 'shotvm: function' ]]
   [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
   [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]
   [[ \"\$(whence -w uvm-up)\" == 'uvm-up: function' ]]

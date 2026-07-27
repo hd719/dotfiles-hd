@@ -3,6 +3,54 @@
 alias u='ssh ubuntu-vm'
 alias ut='ssh ubuntu-vm-ts'
 
+shotvm() {
+  emulate -L zsh
+
+  local host="${1:-ubuntu-vm-ts}"
+  local tmp_root="${TMPDIR:-/tmp}"
+  local screenshot_dir
+  local screenshot_file
+  local remote_dir="/tmp/codex-images"
+  local remote_file
+
+  tmp_root="${tmp_root%/}"
+  screenshot_dir="$(command mktemp -d "$tmp_root/shotvm.XXXXXX")" || {
+    print -u2 "shotvm: could not create a temporary directory"
+    return 1
+  }
+  screenshot_file="$screenshot_dir/screenshot.png"
+  remote_file="$remote_dir/${screenshot_dir##*/}.png"
+
+  {
+    if ! command screencapture -i "$screenshot_file" || [[ ! -s "$screenshot_file" ]]; then
+      print -u2 "shotvm: screenshot cancelled"
+      return 1
+    fi
+
+    if ! command ssh "$host" \
+      'umask 077; mkdir -p /tmp/codex-images; chmod 700 /tmp/codex-images'; then
+      print -u2 "shotvm: could not prepare $host:$remote_dir"
+      return 1
+    fi
+
+    if ! command scp -q "$screenshot_file" "$host:$remote_file"; then
+      print -u2 "shotvm: upload failed"
+      return 1
+    fi
+
+    if ! print -rn -- "$remote_file" | command pbcopy; then
+      print -u2 "shotvm: uploaded $remote_file but could not copy its path"
+      return 1
+    fi
+
+    print "shotvm: uploaded $remote_file"
+    print "shotvm: paste into Codex with Cmd-V"
+  } always {
+    command rm -f "$screenshot_file"
+    command rmdir "$screenshot_dir" 2>/dev/null || true
+  }
+}
+
 _ubuntu_vagrant() {
   emulate -L zsh
 

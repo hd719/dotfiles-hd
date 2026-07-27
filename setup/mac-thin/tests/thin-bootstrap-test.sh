@@ -65,6 +65,16 @@ printf 'softwareupdate %s\n' "$*" >> "$DOTFILES_TEST_BREW_LOG"
 touch "$DOTFILES_TEST_ROSETTA_STATE"
 EOF
 
+cat > "$TEST_ROOT/bin/stat" <<'EOF'
+#!/bin/sh
+if [ "$1" = "-f" ] && [ "$2" = "%Lp" ]; then
+  if /usr/bin/stat -c '%a' "$3" >/dev/null 2>&1; then
+    exec /usr/bin/stat -c '%a' "$3"
+  fi
+fi
+exec /usr/bin/stat "$@"
+EOF
+
 cat > "$TEST_ROOT/bin/sudo" <<'EOF'
 #!/bin/sh
 "$@"
@@ -88,6 +98,7 @@ chmod +x \
   "$TEST_ROOT/bin/launchctl" \
   "$TEST_ROOT/bin/pkgutil" \
   "$TEST_ROOT/bin/softwareupdate" \
+  "$TEST_ROOT/bin/stat" \
   "$TEST_ROOT/bin/sudo" \
   "$TEST_ROOT/bin/uname" \
   "$TEST_ROOT/bin/vagrant" \
@@ -141,6 +152,7 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   ! alias ubuntu-ts >/dev/null 2>&1
   ! alias uvm-open >/dev/null 2>&1
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
+  [[ \"\$(whence -w shotvm)\" == 'shotvm: function' ]]
   [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
   [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]
   [[ \"\$(whence -w uvm-up)\" == 'uvm-up: function' ]]
@@ -180,5 +192,48 @@ grep -Fxq 'brew "diff-so-fancy"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "gh"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/setup/mac-thin/Brewfile"
+
+mkdir -p "$TEST_ROOT/shot-tmp"
+: > "$TEST_ROOT/shotvm.log"
+: > "$TEST_ROOT/shotvm-clipboard"
+export DOTFILES_TEST_SHOTVM_LOG="$TEST_ROOT/shotvm.log"
+export DOTFILES_TEST_SHOTVM_CLIPBOARD="$TEST_ROOT/shotvm-clipboard"
+
+cat > "$TEST_ROOT/bin/screencapture" <<'EOF'
+#!/bin/sh
+printf 'screencapture %s\n' "$*" >> "$DOTFILES_TEST_SHOTVM_LOG"
+printf 'fake png\n' > "$2"
+EOF
+
+cat > "$TEST_ROOT/bin/ssh" <<'EOF'
+#!/bin/sh
+printf 'ssh %s\n' "$*" >> "$DOTFILES_TEST_SHOTVM_LOG"
+EOF
+
+cat > "$TEST_ROOT/bin/scp" <<'EOF'
+#!/bin/sh
+printf 'scp %s\n' "$*" >> "$DOTFILES_TEST_SHOTVM_LOG"
+EOF
+
+cat > "$TEST_ROOT/bin/pbcopy" <<'EOF'
+#!/bin/sh
+cat > "$DOTFILES_TEST_SHOTVM_CLIPBOARD"
+EOF
+
+chmod +x \
+  "$TEST_ROOT/bin/pbcopy" \
+  "$TEST_ROOT/bin/scp" \
+  "$TEST_ROOT/bin/screencapture" \
+  "$TEST_ROOT/bin/ssh"
+
+TMPDIR="$TEST_ROOT/shot-tmp" /bin/zsh -dfc '
+  source "$HOME/.zshrc"
+  output="$(shotvm)"
+  remote_path="$(<"$DOTFILES_TEST_SHOTVM_CLIPBOARD")"
+  [[ "$remote_path" == /tmp/codex-images/shotvm.*.png ]]
+  [[ "$output" == *"$remote_path"* ]]
+  [[ "$(<"$DOTFILES_TEST_SHOTVM_LOG")" == *"ubuntu-vm-ts:$remote_path"* ]]
+'
+[[ -z "$(find "$TEST_ROOT/shot-tmp" -mindepth 1 -print -quit)" ]]
 
 printf 'Thin Mac bootstrap tests passed.\n'
