@@ -104,6 +104,8 @@ Use the preflight, dry-run, doctor, and runtime checks above as the full gate.
 - Shared Brewfile plus the selected profile overlay, installed without broad
   upgrades or cleanup.
 - The profile links defined by the bootstrap and verified by the doctor.
+- One global Git include for `config/git/aliases.gitconfig`; Git identity and
+  credentials remain machine-owned.
 - One marker-owned mise-shims block in `~/.zprofile`; all other content remains
   user-owned.
 - Exact mise versions for Node, pnpm, Go, Python, and Bun.

@@ -118,6 +118,7 @@ export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
 
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -f "$DOTFILES_TEST_ROSETTA_STATE" ]]
+[[ "$(git config --global --includes --get alias.st)" == "status" ]]
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/setup/mac-thin/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]

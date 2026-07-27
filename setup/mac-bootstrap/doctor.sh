@@ -4,6 +4,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
+GIT_ALIASES_SCRIPT="$DOTFILES_DIR/setup/configure-git-aliases.sh"
 PROFILE=""
 FAILURES=0
 MISE_RUNTIME_FAILURES=0
@@ -84,6 +85,12 @@ for spec in "${LINK_SPECS[@]}"; do
     fail "link mismatch: $destination"
   fi
 done
+
+if "$GIT_ALIASES_SCRIPT" --check >/dev/null 2>&1; then
+  pass "portable Git aliases"
+else
+  fail "portable Git aliases are not configured"
+fi
 
 if zprofile_block_matches "$HOME/.zprofile" "$MISE_FRAGMENT"; then
   pass "mise shims block is exact in ~/.zprofile"

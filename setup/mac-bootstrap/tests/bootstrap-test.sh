@@ -95,7 +95,6 @@ snapshot_protected_state() {
   : > "$output"
   for relative in \
     '.ssh/sentinel' \
-    '.gitconfig' \
     '.aws/credentials' \
     '.docker/config.json' \
     '.config/1Password/sentinel' \
@@ -780,6 +779,13 @@ test_full_bootstrap() {
   assert_contains "$log" "pnpm add --global --global-dir $home_dir/.local/graphql-lsp/global graphql-language-service-cli@3.5.0"
   assert_contains "$home_dir/.local/graphql-lsp/.pnpm-managed-version" \
     'graphql-language-service-cli@3.5.0 via pnpm@11.2.2'
+  assert_eq sentinel \
+    "$(HOME="$home_dir" /usr/bin/git config --global --get user.name)" \
+    "Git alias include preserves machine-owned identity"
+  assert_eq status \
+    "$(HOME="$home_dir" /usr/bin/git config --global --includes --get alias.st)" \
+    "Git alias include activates st = status"
+  assert_file "$home_dir/.gitconfig.backup-20260715-140000"
   assert_not_contains "$log" 'npm install'
   assert_not_contains "$log" 'setup/mac-mini/Brewfile'
 
@@ -984,6 +990,13 @@ test_mac_mini_apply() {
   assert_not_contains "$log" 'sudo'
   assert_not_contains "$log" 'restart'
   assert_not_contains "$log" 'reload'
+  assert_eq sentinel \
+    "$(HOME="$home_dir" /usr/bin/git config --global --get user.name)" \
+    "Mac mini Git identity remains machine-owned"
+  assert_eq status \
+    "$(HOME="$home_dir" /usr/bin/git config --global --includes --get alias.st)" \
+    "Mac mini includes portable Git aliases"
+  assert_file "$home_dir/.gitconfig.backup-20260715-170000"
   snapshot_protected_state "$home_dir" "$protected_after"
   assert_eq "$(cat "$protected_before")" "$(cat "$protected_after")" "Mac mini apply preserves protected state"
 }

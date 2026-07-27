@@ -55,6 +55,9 @@ request into a full-machine migration.
 - Follow each project's declared package manager and lockfile.
 - Keep npm and npx for compatibility; do not convert project package managers.
 - Do not add broad upgrades, cleanup, or removals to a bootstrap repair.
+- Keep Git identity and credentials machine-owned. Portable Git aliases live in
+  `config/git/aliases.gitconfig`; supported profiles add only that include to
+  the global Git config.
 
 ## Mac Shell Ownership
 
@@ -129,7 +132,8 @@ Service lifecycle changes require separate approval.
 
 ## Resilience Work Mac
 
-- Manage only Ghostty, Herdr, Hunk, Neovim, and Bookokrat.
+- Manage only Ghostty, Herdr, Hunk, Neovim, Bookokrat, and the portable Git
+  alias include.
 - Use `setup/mac-pro-resilience/Brewfile` and
   `setup/mac-pro-resilience/link-terminal-editor-config.sh`.
 - Never run the personal Mac bootstrap or the Mac mini Brewfile.
@@ -158,6 +162,8 @@ commands aligned with the supported workstation.
   and never copy Git private keys from the Mac.
 - Keep plain `github.com` pinned to the local `hd719` key and reserve
   `github.com-arbiter` for the local Arbiter key.
+- Keep GitHub CLI authenticated as `arbiter-hd`; agent branches push only
+  through the `github.com-arbiter` fork route.
 - Use `ubuntu-vm-ts` as the primary Codex route to Tailscale node `ubuntu-dev`.
   Keep `ubuntu-vm` as the loopback-only Vagrant fallback. Both must disable Mac
   agent forwarding and enforce SSH host-key checking.

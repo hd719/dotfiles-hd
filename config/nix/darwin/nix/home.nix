@@ -23,10 +23,6 @@
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
   home.file = {
-    ".gitconfig" = {
-      source = ../../../../config/git/.gitconfig;
-      recursive = false;
-    };
     ".zshrc" = {
       source = ../../../../setup/.zshrc;
       recursive = true;
@@ -65,6 +61,9 @@
   # Configure Git
   programs.git = {
     enable = true;
+    includes = [
+      { path = ../../../../config/git/aliases.gitconfig; }
+    ];
     # Set up global gitignore
     extraConfig = {
       core = {
