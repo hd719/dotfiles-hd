@@ -4,7 +4,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
-GIT_ALIASES_SCRIPT="$DOTFILES_DIR/setup/configure-git-aliases.sh"
+GIT_ALIASES_SCRIPT="$DOTFILES_DIR/config/git/configure-aliases.sh"
 PROFILE=""
 FAILURES=0
 MISE_RUNTIME_FAILURES=0

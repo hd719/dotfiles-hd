@@ -6,10 +6,15 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-mac-thin-test.XXXXXX")"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 
-mkdir -p "$TEST_ROOT/bin" "$TEST_ROOT/home/.ssh" "$TEST_ROOT/apps"
+mkdir -p \
+  "$TEST_ROOT/bin" \
+  "$TEST_ROOT/home/.config/herdr" \
+  "$TEST_ROOT/home/.ssh" \
+  "$TEST_ROOT/apps"
 cat > "$TEST_ROOT/home/.ssh/config" <<EOF
 Include $REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf
 EOF
+printf 'runtime state\n' > "$TEST_ROOT/home/.config/herdr/session"
 touch "$TEST_ROOT/home/.ssh/id_ed25519_ubuntu_vm"
 chmod 600 "$TEST_ROOT/home/.ssh/id_ed25519_ubuntu_vm"
 
@@ -53,6 +58,11 @@ cat > "$TEST_ROOT/bin/launchctl" <<'EOF'
 test "$*" = "print system/com.vagrant.vagrant-vmware-utility"
 EOF
 
+cat > "$TEST_ROOT/bin/herdr" <<'EOF'
+#!/bin/sh
+printf 'herdr %s\n' "$*"
+EOF
+
 cat > "$TEST_ROOT/bin/pkgutil" <<'EOF'
 #!/bin/sh
 test "$*" = "--pkg-info com.apple.pkg.RosettaUpdateAuto" \
@@ -85,6 +95,7 @@ cp "$TEST_ROOT/vagrant-stub" "$TEST_ROOT/bin/vagrant"
 touch "$TEST_ROOT/vagrant-vmware-utility"
 chmod +x \
   "$TEST_ROOT/bin/brew" \
+  "$TEST_ROOT/bin/herdr" \
   "$TEST_ROOT/bin/launchctl" \
   "$TEST_ROOT/bin/pkgutil" \
   "$TEST_ROOT/bin/softwareupdate" \
@@ -122,6 +133,9 @@ export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/setup/mac-thin/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]
+[[ "$(readlink "$HOME/.config/herdr/config.toml")" \
+  == "$REPO_DIR/config/herdr/config.toml" ]]
+[[ "$(<"$HOME/.config/herdr/session")" == "runtime state" ]]
 grep -Fxq 'selection-background = #9ABACE' "$REPO_DIR/config/ghostty/config"
 grep -Fxq 'selection-foreground = #000001' "$REPO_DIR/config/ghostty/config"
 GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
@@ -135,6 +149,8 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
+  [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
+  [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
   ! alias ubuntu >/dev/null 2>&1
@@ -178,6 +194,7 @@ grep -Fq \
   "$TEST_ROOT/brew.log"
 grep -Fxq 'brew "diff-so-fancy"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "gh"' "$REPO_DIR/setup/mac-thin/Brewfile"
+grep -Fxq 'brew "herdr"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/setup/mac-thin/Brewfile"
 

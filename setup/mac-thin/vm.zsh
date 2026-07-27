@@ -2,6 +2,8 @@
 
 alias u='ssh ubuntu-vm'
 alias ut='ssh ubuntu-vm-ts'
+alias hu='herdr --remote ubuntu-vm'
+alias hut='herdr --remote ubuntu-vm-ts'
 
 _ubuntu_vagrant() {
   emulate -L zsh

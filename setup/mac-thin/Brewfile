@@ -2,6 +2,7 @@
 
 brew "diff-so-fancy"
 brew "gh"
+brew "herdr"
 
 cask "1password"
 cask "brave-browser"

@@ -1060,6 +1060,8 @@ test_profile_and_failure_guards() {
   TESTS=$((TESTS + 1))
   assert_eq '' "$(cat "$log")" "removed profile stops before package managers"
 
+  HOME="$home_dir" PATH="$fake_bin:$PATH" \
+    "$REPO_DIR/config/git/configure-aliases.sh" --apply >/dev/null
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-mini --check >/dev/null
   assert_contains "$log" "bundle check --no-upgrade --file $REPO_DIR/setup/mac-mini/Brewfile"
@@ -1198,6 +1200,7 @@ test_shared_zsh_interface() {
   for zsh_file in \
     "$module" \
     "$REPO_DIR/config/zsh/shared/aliases.zsh" \
+    "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" \
     "$REPO_DIR/config/zsh/shared/development-aliases.zsh" \
     "$REPO_DIR/config/zsh/shared/functions.zsh" \
     "$shared_dir/init.zsh" \
@@ -1229,6 +1232,7 @@ test_shared_zsh_interface() {
   assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal/'
+  assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-aliases.zsh"'
   assert_contains "$shared_init" 'source "$zsh_shared_dir/completions.zsh"'
 
   actual="$(
@@ -1259,7 +1263,7 @@ test_shared_zsh_interface() {
       (( $+functions[carchive] )) || exit 1
       (( $+functions[opmission] )) || exit 1
       alias cod >/dev/null || exit 1
-      [[ "$(alias codu)" == "codu='\''brew upgrade --cask codex'\''" ]] || exit 1
+      [[ "$(alias codu)" == "codu='\''codex update'\''" ]] || exit 1
       alias vault >/dev/null || exit 1
       alias opdash >/dev/null || exit 1
       alias hm-dev >/dev/null || exit 1

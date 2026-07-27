@@ -4,7 +4,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
-GIT_ALIASES_SCRIPT="$DOTFILES_DIR/setup/configure-git-aliases.sh"
+GIT_ALIASES_SCRIPT="$DOTFILES_DIR/config/git/configure-aliases.sh"
 APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
 BREWFILE="$DOTFILES_DIR/setup/mac-thin/Brewfile"
 SSH_CONFIG="$HOME/.ssh/config"
@@ -52,6 +52,12 @@ else
   fail "Vagrant missing"
 fi
 
+if command -v herdr >/dev/null 2>&1; then
+  pass "Herdr remote client available"
+else
+  fail "Herdr remote client missing"
+fi
+
 if [[ -x "$VAGRANT_VMWARE_UTILITY" ]]; then
   pass "Vagrant VMware utility available"
 else
@@ -76,6 +82,7 @@ fi
 LINK_SPECS=(
   "$DOTFILES_DIR/setup/mac-thin/.zshrc|$HOME/.zshrc"
   "$DOTFILES_DIR/config/ghostty/config|$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+  "$DOTFILES_DIR/config/herdr/config.toml|$HOME/.config/herdr/config.toml"
 )
 for spec in "${LINK_SPECS[@]}"; do
   source_path="${spec%%|*}"
@@ -185,6 +192,8 @@ if /bin/zsh -dfc "
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
+  [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
+  [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
   ! alias ubuntu >/dev/null 2>&1
