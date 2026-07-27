@@ -1,7 +1,7 @@
 # Thin Mac Control Plane
 
 Supported setup path for Hamel's Apple Silicon MacBook after the 2026 restore.
-macOS is a control plane; Ubuntu and Fedora ARM64 VMs own development.
+macOS is a control plane; the Ubuntu ARM64 VM owns development.
 
 ## Boundary
 

@@ -8,28 +8,10 @@ trap 'rm -rf "$TEST_ROOT"' EXIT
 
 mkdir -p "$TEST_ROOT/bin" "$TEST_ROOT/home/.ssh" "$TEST_ROOT/apps"
 cat > "$TEST_ROOT/home/.ssh/config" <<EOF
-Host ubuntu-vm
-  HostName ubuntu-vm.local
-  AddressFamily inet
-  ForwardAgent yes
-  PermitLocalCommand yes
-  LocalCommand /usr/bin/ssh-add $TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd $TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas >/dev/null 2>&1
-
-Host ubuntu-vm-ts
-  HostName 100.64.0.1
-  AddressFamily inet
-  ForwardAgent yes
-  PermitLocalCommand yes
-  LocalCommand /usr/bin/ssh-add $TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd $TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas >/dev/null 2>&1
+Include $REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf
 EOF
-touch \
-  "$TEST_ROOT/home/.ssh/id_ed25519_ubuntu_vm" \
-  "$TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd" \
-  "$TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas"
-chmod 600 \
-  "$TEST_ROOT/home/.ssh/id_ed25519_ubuntu_vm" \
-  "$TEST_ROOT/home/.ssh/id_ed25519_arbiter_hd" \
-  "$TEST_ROOT/home/.ssh/id_ed25519_forgejo_truenas"
+touch "$TEST_ROOT/home/.ssh/id_ed25519_ubuntu_vm"
+chmod 600 "$TEST_ROOT/home/.ssh/id_ed25519_ubuntu_vm"
 
 for app_name in \
   "1Password.app" \
