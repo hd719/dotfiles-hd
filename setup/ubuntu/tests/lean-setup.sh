@@ -489,6 +489,7 @@ bun = "1.3.14"
 "aqua:jesseduffield/lazygit" = "0.63.0"
 "aqua:tree-sitter/tree-sitter" = "0.26.11"
 "aqua:LuaLS/lua-language-server" = "3.18.2"
+"aqua:artempyanykh/marksman" = "2026-02-08"
 "aqua:JohnnyMorganz/StyLua" = "2.5.2"
 "aqua:astral-sh/uv" = "0.11.28"
 "aqua:astral-sh/ruff" = "0.15.21"
@@ -732,7 +733,7 @@ test_neovim_setup_installs_and_checks_daily_driver() {
   local tree_sitter_languages tree_sitter_parsers
   local tools=(
     bash-language-server bookokrat bun fd fastfetch fzf go gopls graphql-lsp gs herdr hunk
-    lazygit lua-language-server magick mdformat node nvim pnpm python rg ruff shellcheck
+    lazygit lua-language-server magick marksman mdformat node nvim pnpm python rg ruff shellcheck
     starship stylua tree-sitter uv wl-copy xclip
     vscode-css-language-server vscode-eslint-language-server
     vscode-html-language-server vscode-json-language-server vtsls zoxide

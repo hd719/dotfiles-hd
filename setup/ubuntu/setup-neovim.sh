@@ -339,6 +339,7 @@ check_daily_driver() {
     hunk
     lazygit
     lua-language-server
+    marksman
     node
     nvim
     pnpm

@@ -100,3 +100,5 @@ diff before enabling any mutation feature.
   opens or creates today's note under `Knowledge/_private/daily`. A dedicated
   obsidian.nvim template preserves the existing private-daily structure without
   leaving raw Templater expressions in files created from Neovim.
+- Added the documented Snacks resolver on 2026-07-27 so Obsidian
+  `![[image.png]]` embeds resolve to their real attachment paths automatically.

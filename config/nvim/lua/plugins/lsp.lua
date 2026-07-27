@@ -107,6 +107,7 @@ return {
         "html",
         "jsonls",
         "lua_ls",
+        "marksman",
         "vtsls",
       })
 

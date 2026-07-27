@@ -14,6 +14,39 @@ local function anon_header()
   return "NVIM"
 end
 
+local function resolve_obsidian_attachment(path, src)
+  local loaded, api = pcall(require, "obsidian.api")
+  if not loaded or rawget(_G, "Obsidian") == nil or not api.path_is_note(path) then
+    return
+  end
+
+  local configured = api.resolve_attachment_path(src)
+  if vim.fn.filereadable(configured) == 1 then
+    return configured
+  end
+
+  -- This vault keeps some images beside their note and others in a nearby
+  -- media/slides folder. Walk toward the vault root to resolve both layouts.
+  local root = tostring(api.resolve_workspace_dir(path))
+  local dir = vim.fs.dirname(path)
+  while dir do
+    local candidate = vim.fs.joinpath(dir, src)
+    if vim.fn.filereadable(candidate) == 1 then
+      return candidate
+    end
+    if dir == root then
+      break
+    end
+    local parent = vim.fs.dirname(dir)
+    if parent == dir then
+      break
+    end
+    dir = parent
+  end
+
+  return configured
+end
+
 return {
   {
     "folke/snacks.nvim",
@@ -58,6 +91,9 @@ return {
       -- intentionally excluded and opened in the full Bookokrat reader instead.
       image = {
         enabled = true,
+        -- Translate Obsidian embeds such as ![[image.png]] into the attachment's
+        -- real path before Snacks asks ImageMagick to render the preview.
+        resolve = resolve_obsidian_attachment,
         formats = {
           "png",
           "jpg",

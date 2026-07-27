@@ -198,10 +198,10 @@ unexplained magic.
 - [ ] **6.5** Format Go and Lua manually with `Space p` and review the diff.
 - [ ] **6.6** Diagnose formatter availability with `:ConformInfo`.
 - [ ] **6.7** Explain the current coverage: Go, Lua, JavaScript/TypeScript,
-  GraphQL, JSON, CSS, HTML, and shell have language-server support; Go, Lua,
-  JavaScript/TypeScript, Markdown, and Python have manual formatting; Python
-  does not yet have an LSP; ESLint provides project lint diagnostics while
-  automatic formatting and lint fixes on save remain disabled.
+  GraphQL, JSON, CSS, HTML, shell, and Markdown have language-server support;
+  Go, Lua, JavaScript/TypeScript, Markdown, and Python have manual formatting;
+  Python does not yet have an LSP; ESLint provides project lint diagnostics
+  while automatic formatting and lint fixes on save remain disabled.
 
 ### Optional Deep Dives
 
@@ -218,6 +218,8 @@ unexplained magic.
   through `uv`.
 - [x] **6.D8** Verify a live ESLint unused-variable diagnostic and distinguish
   its `E` sign from Gitsigns' `H` changed-hunk sign. — Session 006
+- [ ] **6.D9** Use the `Space o m` Marksman menu for hover, definition, and
+  references on a vault `[[wikilink]]`.
 
 ## Lesson 7 — Multi-File Project Workflow
 
