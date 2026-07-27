@@ -176,8 +176,6 @@ test_zprofile_helper() {
   local root="$TMP_ROOT/zprofile-helper"
   local profile="$root/.zprofile"
   local fragment="$root/mise shims.zsh"
-  local legacy_root="$root/legacy-migration"
-  local legacy_profile="$legacy_root/.zprofile"
   local backup_count
 
   mkdir -p "$root"
@@ -195,59 +193,6 @@ test_zprofile_helper() {
   backup_count="$(find "$root" -maxdepth 1 -name '.zprofile.backup-*' | wc -l | tr -d ' ')"
   assert_eq 1 "$backup_count" "idempotent managed block creates no extra backup"
   assert_eq 1 "$(grep -Fxc '# BEGIN dotfiles-hd mac-bootstrap mise shims' "$profile")" "managed block appears once"
-
-  mkdir -p "$legacy_root"
-  printf '%s\n%s\n%s\n%s\n%s\n' \
-    'export LEGACY_KEEP=yes' \
-    '# BEGIN dotfiles-hd personal-mac mise shims' \
-    'source /tmp/dotfiles/setup/personal-mac/mise-shims.zsh' \
-    '# END dotfiles-hd personal-mac mise shims' \
-    'export LEGACY_AFTER=yes' > "$legacy_profile"
-  write_zprofile_block "$legacy_profile" "$fragment" 20260715-120001 0 >/dev/null
-  assert_eq 1 "$(grep -Fxc '# BEGIN dotfiles-hd mac-bootstrap mise shims' "$legacy_profile")" \
-    "legacy marker is migrated once"
-  assert_not_contains "$legacy_profile" 'dotfiles-hd personal-mac mise shims'
-  assert_not_contains "$legacy_profile" 'setup/personal-mac/mise-shims.zsh'
-  assert_contains "$legacy_profile" 'export LEGACY_KEEP=yes'
-  assert_contains "$legacy_profile" 'export LEGACY_AFTER=yes'
-  assert_file "$legacy_profile.backup-20260715-120001"
-  assert_contains "$legacy_profile.backup-20260715-120001" \
-    '# BEGIN dotfiles-hd personal-mac mise shims'
-  zprofile_block_matches "$legacy_profile" "$fragment" \
-    || fail "migrated legacy block should match the current fragment"
-  TESTS=$((TESTS + 1))
-
-  write_zprofile_block "$legacy_profile" "$fragment" 20260715-120002 0 >/dev/null
-  backup_count="$(find "$legacy_root" -maxdepth 1 -name '.zprofile.backup-*' | wc -l | tr -d ' ')"
-  assert_eq 1 "$backup_count" "second apply after legacy migration creates no backup"
-
-  printf '%s\n' '# BEGIN dotfiles-hd personal-mac mise shims' \
-    > "$root/malformed-legacy"
-  if write_zprofile_block \
-    "$root/malformed-legacy" "$fragment" 20260715-120003 0 >/dev/null 2>&1; then
-    fail "malformed legacy managed block should fail"
-  fi
-  TESTS=$((TESTS + 1))
-  assert_eq '# BEGIN dotfiles-hd personal-mac mise shims' \
-    "$(cat "$root/malformed-legacy")" "malformed legacy block preserves profile bytes"
-
-  cp "$legacy_profile" "$root/dual-managed"
-  printf '%s\n%s\n%s\n' \
-    '# BEGIN dotfiles-hd personal-mac mise shims' \
-    'source /tmp/dotfiles/setup/personal-mac/mise-shims.zsh' \
-    '# END dotfiles-hd personal-mac mise shims' >> "$root/dual-managed"
-  cp "$root/dual-managed" "$root/dual-managed.before"
-  if write_zprofile_block \
-    "$root/dual-managed" "$fragment" 20260715-120004 0 >/dev/null 2>&1; then
-    fail "current and legacy managed blocks together should fail"
-  fi
-  TESTS=$((TESTS + 1))
-  assert_eq "$(cat "$root/dual-managed.before")" "$(cat "$root/dual-managed")" \
-    "multiple managed blocks preserve profile bytes"
-  if zprofile_block_matches "$root/dual-managed" "$fragment"; then
-    fail "doctor helper should reject a stale legacy block beside the current block"
-  fi
-  TESTS=$((TESTS + 1))
 
   printf '# BEGIN dotfiles-hd mac-bootstrap mise shims\n' > "$root/malformed"
   if write_zprofile_block "$root/malformed" "$fragment" 20260715-120000 0 >/dev/null 2>&1; then
@@ -1257,8 +1202,7 @@ test_shared_zsh_interface() {
     "$REPO_DIR/setup/mac-mini/.zshrc" \
     "$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh" \
     "$REPO_DIR/setup/mac-pro-resilience/.zshrc" \
-    "$REPO_DIR/setup/mac-thin/vm.zsh" \
-    "$REPO_DIR/setup/fedora/.zshrc"; do
+    "$REPO_DIR/setup/mac-thin/vm.zsh"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
     TESTS=$((TESTS + 1))
   done
@@ -1272,8 +1216,6 @@ test_shared_zsh_interface() {
   assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal/'
-  assert_not_contains "$REPO_DIR/setup/fedora/.zshrc" 'config/zsh/mac'
-  assert_not_contains "$REPO_DIR/setup/fedora/.zshrc" 'setup/mac-blaze'
   assert_contains "$shared_init" 'source "$zsh_shared_dir/completions.zsh"'
 
   actual="$(
@@ -1346,18 +1288,6 @@ test_shared_zsh_interface() {
     ' zsh "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 2>/dev/null
   )"
   assert_eq resilience-ok "$actual" "Resilience profile keeps work behavior without personal workflows"
-
-  actual="$(
-    HOME="$home_dir" PATH="/usr/bin:/bin" /bin/zsh -dfc '
-      source "$1" 2>/dev/null
-      [[ "$(alias g)" == "g=git" ]] || exit 1
-      alias dots >/dev/null || exit 1
-      (( $+functions[reload] )) || exit 1
-      alias cod >/dev/null 2>&1 && exit 1
-      print -r -- fedora-core-ok
-    ' zsh "$REPO_DIR/setup/fedora/.zshrc"
-  )"
-  assert_eq fedora-core-ok "$actual" "Fedora profile loads only the portable shell layer"
 
   actual="$(
     HOME="$home_dir" /bin/zsh -dfc '

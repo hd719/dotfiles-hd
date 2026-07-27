@@ -62,7 +62,7 @@ request into a full-machine migration.
 - MacBook and Mac mini profiles load both.
 - Resilience loads the shared interface plus work-owned behavior, never the
   personal layer.
-- Ubuntu and Fedora keep profile-specific shell behavior under `setup/`.
+- Ubuntu keeps profile-specific shell behavior under `setup/`.
 - Add `config/zsh/linux/` only when multiple Linux profiles share Linux-only
   modules.
 - Each profile owns plugin timing, runtimes, credentials, and its `.zshrc`

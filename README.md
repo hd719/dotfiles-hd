@@ -24,9 +24,6 @@ cd "$HOME/Developer/dotfiles-hd"
 | Resilience work Mac             | `setup/mac-pro-resilience`    | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
 | Ubuntu workstation              | `uvm-up`                      | [`setup/ubuntu/README.md`](setup/ubuntu/README.md)                         |
 
-Scripts under `setup/fedora` are legacy helpers, not a supported one-command
-bootstrap.
-
 For Mac-to-Linux learning, use the
 [Ubuntu Field Guide](setup/ubuntu/GUIDE.md).
 
@@ -109,7 +106,7 @@ config/zsh/
         └── init.zsh
 ```
 
-- `shared/` is portable and safe for macOS, Ubuntu, and Fedora.
+- `shared/` is portable and safe for macOS and Ubuntu.
 - `shared/development-aliases.zsh` is loaded by Ubuntu and full Mac development
   profiles, but not by the thin Mac.
 - `mac/aliases.zsh` is safe on every Mac, including the thin control plane.

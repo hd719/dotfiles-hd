@@ -10,9 +10,6 @@ SSH_CONFIG="$HOME/.ssh/config"
 VAGRANT_SSH_CONFIG="$DOTFILES_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf"
 UBUNTU_LOGIN_KEY="$HOME/.ssh/id_ed25519_ubuntu_vm"
 UBUNTU_LOGIN_KEY_NAME="$(basename "$UBUNTU_LOGIN_KEY")"
-ARBITER_SSH_KEY="$HOME/.ssh/id_ed25519_arbiter_hd"
-FORGEJO_SSH_KEY="$HOME/.ssh/id_ed25519_forgejo_truenas"
-LEGACY_AGENT_ROUTES=0
 FAILURES=0
 VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
 VAGRANT_VMWARE_UTILITY="${DOTFILES_VAGRANT_VMWARE_UTILITY:-/opt/vagrant-vmware-desktop/bin/vagrant-vmware-utility}"
@@ -124,48 +121,24 @@ check_ubuntu_ssh_alias() {
   fi
 
   if printf '%s\n' "$effective" \
-    | /usr/bin/awk '$1 == "forwardagent" && $2 == "yes" { found = 1 } END { exit !found }'; then
-    LEGACY_AGENT_ROUTES=$((LEGACY_AGENT_ROUTES + 1))
-    pass "$ssh_alias uses the legacy forwarded-agent route"
-
-    if printf '%s\n' "$effective" \
-      | /usr/bin/awk '$1 == "permitlocalcommand" && $2 == "yes" { found = 1 } END { exit !found }' \
-      && printf '%s\n' "$effective" | /usr/bin/grep -Fq "$ARBITER_SSH_KEY" \
-      && printf '%s\n' "$effective" | /usr/bin/grep -Fq "$FORGEJO_SSH_KEY"; then
-      pass "$ssh_alias loads the legacy Arbiter and Forgejo keys"
-    else
-      fail "$ssh_alias legacy route must load Arbiter and Forgejo keys"
-    fi
-  elif printf '%s\n' "$effective" \
     | /usr/bin/awk '$1 == "forwardagent" && $2 == "no" { found = 1 } END { exit !found }' \
     && printf '%s\n' "$effective" \
       | /usr/bin/awk '$1 == "identitiesonly" && $2 == "yes" { found = 1 } END { exit !found }' \
     && printf '%s\n' "$effective" | /usr/bin/grep -Fq "$UBUNTU_LOGIN_KEY_NAME"; then
     pass "$ssh_alias uses only the Ubuntu login key"
   else
-    fail "$ssh_alias must use one complete legacy or Vagrant SSH policy"
+    fail "$ssh_alias must use only the Ubuntu login key"
   fi
 }
 
 check_ubuntu_ssh_alias ubuntu-vm
 check_ubuntu_ssh_alias ubuntu-vm-ts
 
-if ((LEGACY_AGENT_ROUTES == 2)); then
-  ubuntu_ssh_keys=("$ARBITER_SSH_KEY" "$FORGEJO_SSH_KEY" "$UBUNTU_LOGIN_KEY")
-elif ((LEGACY_AGENT_ROUTES == 0)); then
-  ubuntu_ssh_keys=("$UBUNTU_LOGIN_KEY")
+if [[ -f "$UBUNTU_LOGIN_KEY" && "$(stat -f '%Lp' "$UBUNTU_LOGIN_KEY" 2>/dev/null)" == "600" ]]; then
+  pass "$UBUNTU_LOGIN_KEY_NAME present with mode 600"
 else
-  ubuntu_ssh_keys=()
-  fail "Ubuntu SSH routes mix legacy and Vagrant policies"
+  fail "$UBUNTU_LOGIN_KEY_NAME missing or not mode 600"
 fi
-
-for ssh_key in "${ubuntu_ssh_keys[@]}"; do
-  if [[ -f "$ssh_key" && "$(stat -f '%Lp' "$ssh_key" 2>/dev/null)" == "600" ]]; then
-    pass "$(basename "$ssh_key") present with mode 600"
-  else
-    fail "$(basename "$ssh_key") missing or not mode 600"
-  fi
-done
 
 check_vagrant_ssh_alias() {
   local ssh_alias="$1"

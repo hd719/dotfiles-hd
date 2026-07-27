@@ -43,21 +43,9 @@ ensure_directory() {
   mkdir -p "$directory"
 }
 
-legacy_lsd_aliases="$HOME/.config/zsh/lsd-aliases.zsh"
-legacy_shared_aliases="$HOME/.config/zsh/aliases.zsh"
-
 ensure_directory "$HOME/.config/ghostty"
 ensure_directory "$HOME/.config/herdr"
 ensure_directory "$HOME/.config/hunk"
-
-if [[ -L "$legacy_lsd_aliases" ]] \
-  && [[ "$(readlink "$legacy_lsd_aliases")" == "$ROOT_DIR/config/zsh/lsd-aliases.zsh" ]]; then
-  rm "$legacy_lsd_aliases"
-fi
-if [[ -L "$legacy_shared_aliases" ]] \
-  && [[ "$(readlink "$legacy_shared_aliases")" == "$ROOT_DIR/config/zsh/aliases.zsh" ]]; then
-  rm "$legacy_shared_aliases"
-fi
 
 safe_link "$SCRIPT_DIR/.zshrc" "$HOME/.zshrc"
 safe_link "$SCRIPT_DIR/ghostty.conf" "$HOME/.config/ghostty/config"
