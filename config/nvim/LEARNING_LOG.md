@@ -3171,3 +3171,16 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   media-folder images.
 - Human verification remains pending. Curriculum 6.D9 stays unchecked, and the
   next core lesson remains 6.5.
+
+## 2026-07-27 — Session 031: Quiet Marksman Diagnostics
+
+- The first live Marksman session surfaced too many errors across the mature
+  Obsidian vault.
+- Marksman diagnostics now start muted in each Markdown buffer while hover,
+  definitions, references, symbols, completion, rename, and actions remain
+  available.
+- Added `Space o m m` to show or hide only Marksman's diagnostics for the
+  current note.
+- Added a focused Marksman walkthrough to the Neovim README and a pending
+  curriculum checkpoint for practicing the toggle.
+- Human verification remains pending; no curriculum item was marked complete.

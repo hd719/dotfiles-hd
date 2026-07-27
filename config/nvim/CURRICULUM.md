@@ -220,6 +220,9 @@ unexplained magic.
   its `E` sign from Gitsigns' `H` changed-hunk sign. — Session 006
 - [ ] **6.D9** Use the `Space o m` Marksman menu for hover, definition, and
   references on a vault `[[wikilink]]`.
+- [ ] **6.D10** Toggle Marksman diagnostics for the current note with
+  `Space o m m` and explain why navigation stays available while they are
+  muted.
 
 ## Lesson 7 — Multi-File Project Workflow
 
