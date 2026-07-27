@@ -1,8 +1,11 @@
 # dotfiles-hd
 
-Source of truth for Hamel's supported personal, work, and VM setups.
+Personal systems repository for Hamel's Macs and Linux workstations.
 
-## Choose a Profile
+Start here when choosing the right setup path. Automation rules live in
+[`AGENTS.md`](AGENTS.md).
+
+## Start Here
 
 Clone once at the canonical path:
 
@@ -16,18 +19,30 @@ git clone git@github.com:hd719/dotfiles-hd.git \
 cd "$HOME/Developer/dotfiles-hd"
 ```
 
-| Device                          | Profile or command            | Runbook                                                                    |
-| ------------------------------- | ----------------------------- | -------------------------------------------------------------------------- |
-| Thin personal Apple Silicon Mac | `setup/mac-thin/bootstrap.sh` | [`setup/mac-thin/README.md`](setup/mac-thin/README.md)                     |
-| Personal Apple Silicon MacBook  | `--profile mac-pro`           | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
-| Personal Apple Silicon Mac mini | `--profile mac-mini`          | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
-| Resilience work Mac             | `setup/mac-pro-resilience`    | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
-| Ubuntu workstation              | `uvm-up`                      | [`setup/ubuntu/README.md`](setup/ubuntu/README.md)                         |
+If you are on a Mac, choose the Mac profile first:
+
+| Mac                                 | Use this                                              | Runbook                                                                    |
+| ----------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- |
+| Thin personal MacBook control plane | `setup/mac-thin/bootstrap.sh`                         | [`setup/mac-thin/README.md`](setup/mac-thin/README.md)                     |
+| Full personal MacBook               | `setup/mac-bootstrap/bootstrap.sh --profile mac-pro`  | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
+| Personal Mac mini                   | `setup/mac-bootstrap/bootstrap.sh --profile mac-mini` | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
+| Resilience work Mac                 | `setup/mac-pro-resilience`                            | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
+
+If you are on Linux, choose the distro path:
+
+| Linux              | Use this       | Runbook                                            |
+| ------------------ | -------------- | -------------------------------------------------- |
+| Ubuntu workstation | `setup/ubuntu` | [`setup/ubuntu/README.md`](setup/ubuntu/README.md) |
+
+Future Linux distributions should get their own `setup/<distro>/` runbook
+instead of expanding the Ubuntu path.
 
 For Mac-to-Linux learning, use the
 [Ubuntu Field Guide](setup/ubuntu/GUIDE.md).
 
-## Ubuntu Quick Start
+## Common Paths
+
+Thin Mac plus Ubuntu VM:
 
 ```bash
 setup/mac-thin/bootstrap.sh --apply
@@ -43,9 +58,7 @@ add the Mac SSH alias `ubuntu-vm-ts`. Keep `ubuntu-vm` as the local fallback.
 The Ubuntu setup pins Codex CLI through mise; run `codex login --device-auth`
 once inside Ubuntu before enabling the connection in Codex desktop.
 
-## Thin Mac Quick Start
-
-For the restored MacBook control plane:
+Thin Mac only:
 
 ```bash
 setup/mac-thin/bootstrap.sh --dry-run
@@ -57,9 +70,7 @@ setup/mac-thin/doctor.sh
 Development repositories, Docker, databases, compilers, language runtimes,
 language servers, Neovim, and project dependencies stay inside the Linux VMs.
 
-## Full Personal Mac Quick Start
-
-Install Xcode Command Line Tools and Homebrew first, then run:
+Full personal Mac:
 
 ```bash
 setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run
@@ -73,52 +84,23 @@ exec zsh -l
 Use `mac-mini` for a new Mac mini. The existing production Mac mini requires
 the approval gate in the Mac bootstrap runbook before `--apply`.
 
-## Repository Layout
+## System Boundaries
+
+- Thin Macs are control planes for browsers, Codex, Obsidian, SSH, Vagrant, and
+  VMware Fusion.
+- Ubuntu VMs own project repositories, Docker, databases, compilers, language
+  runtimes, language servers, Neovim, and project dependencies.
+- Full personal Macs own their local development toolchain.
+- The production Mac mini has extra approval gates before bootstrap changes.
+- The Resilience work Mac is scoped to terminal and editor repair only.
+
+## Repository Map
 
 - `config/` contains portable application and tool configuration.
 - `setup/` contains platform installers, machine overlays, tests, and runbooks.
-- Each Mac profile owns its `.zshrc`, plugin timing, runtimes, credentials, and
-  machine-specific behavior.
+- Each profile owns its `.zshrc`, plugin timing, runtimes, credentials, and
+  host-specific behavior.
+- Zsh modules are shared where safe and profile-owned where machine behavior
+  differs.
 
-### Zsh Architecture
-
-Shell modules are grouped by who loads them:
-
-```text
-config/zsh/
-├── shared/
-│   ├── aliases.zsh
-│   ├── completions.zsh
-│   ├── development-aliases.zsh
-│   └── functions.zsh
-└── mac/
-    ├── aliases.zsh
-    ├── development-aliases.zsh
-    ├── development-functions.zsh
-    ├── init.zsh
-    ├── k8s.zsh
-    ├── prompt.zsh
-    ├── tooling.zsh
-    └── personal/
-        ├── aliases.zsh
-        ├── development-aliases.zsh
-        ├── development-functions.zsh
-        └── init.zsh
-```
-
-- `shared/` is portable and safe for macOS and Ubuntu.
-- `shared/development-aliases.zsh` is loaded by Ubuntu and full Mac development
-  profiles, but not by the thin Mac.
-- `mac/aliases.zsh` is safe on every Mac, including the thin control plane.
-- `mac/init.zsh` adds the complete Mac development shell.
-- `mac/personal/aliases.zsh` contains safe personal host controls.
-- `mac/personal/init.zsh` adds personal development workflows.
-- Ubuntu's `.zshrc` owns Linux plugin timing, readable autosuggestions, and a
-  Git pager that falls back to plain `less` when `diff-so-fancy` is unavailable.
-
-The thin Mac sources only the shared, safe Mac, safe personal, and VMware
-modules. Full personal Macs source both `mac/init.zsh` and
-`mac/personal/init.zsh`. Resilience sources only `mac/init.zsh`.
-
-See [`config/nvim/README.md`](config/nvim/README.md) for the editor contract and
-[`AGENTS.md`](AGENTS.md) for automation rules.
+See [`config/nvim/README.md`](config/nvim/README.md) for the editor contract.

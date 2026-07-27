@@ -3,6 +3,9 @@
 Be concise. This repository rebuilds real personal and work machines; inspect
 before changing state.
 
+`README.md` is the systems overview. Keep automation rules, machine safety
+constraints, and agent workflow policy here.
+
 ## Start Every Task
 
 1. Run `git status --short --branch`.
@@ -37,9 +40,10 @@ machine policy. Profile link inventories live in their matching runbooks.
 - Never start, stop, restart, reload, or migrate production services without
   explicit approval.
 - Do not commit or push unless Hamel asks.
-- Agent-authored changes must be committed as `arbiter-hd`, pushed only to the
-  `arbiter-hd/dotfiles-hd` fork through `github.com-arbiter`, and opened as a
-  PR to `hd719/dotfiles-hd`. Never commit or push agent work as `hd719`.
+- Agent-authored changes must use either `cortana-hd` or `arbiter-hd`, then
+  open a PR to `hd719/dotfiles-hd`. For `arbiter-hd`, push only to the
+  `arbiter-hd/dotfiles-hd` fork through `github.com-arbiter`. Never commit or
+  push agent work as `hd719`.
 
 If Hamel explicitly asks for one link, create it safely. Do not expand that
 request into a full-machine migration.
