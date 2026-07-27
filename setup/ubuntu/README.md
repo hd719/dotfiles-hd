@@ -22,9 +22,9 @@ uvm-up
 unset TAILSCALE_AUTH_KEY
 ```
 
-Use `uvm-up-headless` instead when no VMware window is wanted. Without an auth
-key, provisioning still succeeds and localhost SSH works; join Tailscale later
-with `sudo tailscale up --hostname=ubuntu-dev-canary`.
+Keep VMware Fusion open while the VM runs. Without an auth key, provisioning
+still succeeds and localhost SSH works; join Tailscale later with
+`sudo tailscale up --hostname=ubuntu-dev`.
 
 `vagrant up` performs this flow:
 
@@ -41,9 +41,9 @@ a full clone with 10 vCPUs, 25 GB RAM, and a 250 GB virtual disk under the
 existing `~/Virtual Machines.localized/VMWIsoImages` directory. Shared folders
 are disabled.
 
-During canary development, Vagrant provisions the current pushed Git branch.
-On `master`, the normal rebuild stays on `master`. `DOTFILES_GIT_REF` can
-override this only for an intentional test.
+Vagrant provisions the current pushed Git branch. On `master`, the normal
+rebuild stays on `master`. `DOTFILES_GIT_REF` can override this only for an
+intentional test.
 
 ## First Onboarding
 
@@ -76,7 +76,7 @@ not migrated.
 
 ## SSH Routes
 
-Before the first `uc` connection, compare the guest and scanned Ed25519 host-key
+Before the first `u` connection, compare the guest and scanned Ed25519 host-key
 fingerprints from the thin Mac:
 
 ```bash
@@ -86,25 +86,22 @@ vagrant ssh -c \
 ssh-keyscan -p 2222 127.0.0.1 2>/dev/null | ssh-keygen -lf -
 ```
 
-Only when they match, replace the canary entry:
+Only when they match, replace the existing entry:
 
 ```bash
-ssh-keygen -R ubuntu-dev-canary
+ssh-keygen -R ubuntu-dev
 ssh-keyscan -p 2222 127.0.0.1 2>/dev/null \
-  | awk '{$1="ubuntu-dev-canary"; print}' >> ~/.ssh/known_hosts
+  | awk '{$1="ubuntu-dev"; print}' >> ~/.ssh/known_hosts
 ```
 
 The tracked SSH policy keeps host-key checking enabled:
 
-| Alias                 | Route                              |
-| --------------------- | ---------------------------------- |
-| `ubuntu-vm-canary`    | `127.0.0.1:2222`                   |
-| `ubuntu-vm-canary-ts` | Tailscale MagicDNS canary hostname |
-| `ubuntu-vm`           | `127.0.0.1:2222` after cutover     |
-| `ubuntu-vm-ts`        | Tailscale MagicDNS `ubuntu-dev`    |
+| Alias          | Route                           |
+| -------------- | ------------------------------- |
+| `ubuntu-vm`    | `127.0.0.1:2222`                |
+| `ubuntu-vm-ts` | Tailscale MagicDNS `ubuntu-dev` |
 
-Use `uc` and `uct` during qualification. Existing `u` and `ut` routes remain
-unchanged until cutover.
+Use `u` locally and `ut` through Tailscale.
 
 ## Lifecycle
 
@@ -112,19 +109,17 @@ Run these on the thin Mac:
 
 ```text
 uvm-up             Start with the VMware GUI
-uvm-up-headless    Start without a VMware window
 uvm-stop           Graceful Vagrant halt
 uvm-suspend        Suspend
 uvm-resume         Resume
 uvm-status         Show Vagrant state
 uvm-ip             Show guest addresses
-uvm-destroy        Interactive canary destroy
+uvm-destroy        Interactive VM destroy
 ```
 
-`uvm-up-headless` starts VMware's background engine; the VMware Fusion app does
-not need to stay open. Once the VM is running, use `uvm-status` and connect with
-`uc` instead of starting it again. Stop or suspend it with `uvm-stop` or
-`uvm-suspend`, not by quitting VMware Fusion.
+VMware Fusion 26 must remain open while this VM runs. Once the VM is running,
+use `uvm-status` and connect with `u` instead of starting it again. Stop or
+suspend it with `uvm-stop` or `uvm-suspend`, not by quitting VMware Fusion.
 
 `uvm-destroy` prints the Git key fingerprints when the guest is reachable,
 reminds you to remove registered keys, and calls interactive `vagrant destroy`.
@@ -192,19 +187,6 @@ routes, and local Codex login status without making a paid API request:
 bash setup/ubuntu/doctor.sh
 ```
 
-## Remaining Cutover
-
-The Vagrant-managed VM is supported, but its canary names remain until the
-Tailscale and SSH cutover is complete:
-
-1. Join Tailscale as `ubuntu-dev-canary`, then run the full Ubuntu doctor.
-1. Rename the qualified Tailscale node to `ubuntu-dev`, then change the Vagrant
-   hostname and VMware display name from `ubuntu-dev-canary` to `ubuntu-dev`.
-1. Verify the final `ubuntu-vm` and `ubuntu-vm-ts` host-key fingerprints and
-   routes.
-1. Retire `uc`, `uct`, and the canary SSH blocks only after `u` and `ut` work.
-1. Provision twice, then run the thin-Mac and Ubuntu doctors.
-
 ## Rebuild Safety
 
 The Vagrant-managed VM is the supported workstation. No legacy VMware VM
@@ -242,7 +224,8 @@ mise tool versions.
 
 Change pins deliberately in a reviewed branch:
 
-- Bento box name and version: `setup/ubuntu/Vagrantfile`.
+- Bento box name, version, and matching `vmware.base_mac`:
+  `setup/ubuntu/Vagrantfile`.
 - Vagrant VMware provider: `setup/mac-thin/bootstrap.sh`, its doctor, and its
   tests.
 - Development tools: `setup/ubuntu/mise.toml`.

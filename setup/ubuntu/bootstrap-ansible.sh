@@ -23,7 +23,7 @@ data = {
     "dotfiles_git_ref": os.environ.get("DOTFILES_GIT_REF", "master"),
     "tailscale_auth_key": os.environ.get("TAILSCALE_AUTH_KEY", ""),
     "workstation_hostname": os.environ.get(
-        "WORKSTATION_HOSTNAME", "ubuntu-dev-canary"
+        "WORKSTATION_HOSTNAME", "ubuntu-dev"
     ),
     "workstation_login_public_key": os.environ[
         "WORKSTATION_LOGIN_PUBLIC_KEY"

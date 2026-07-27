@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Vagrant owns only this canary. It never imports or references the legacy VM.
+# Vagrant owns only this Ubuntu workstation VM.
 Vagrant.configure("2") do |config|
   repo_root = File.expand_path("../..", __dir__)
   current_branch = IO.popen(
@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
     "DOTFILES_GIT_REF",
     current_branch.empty? ? "master" : current_branch
   )
-  workstation_hostname = ENV.fetch("UBUNTU_VM_HOSTNAME", "ubuntu-dev-canary")
+  workstation_hostname = ENV.fetch("UBUNTU_VM_HOSTNAME", "ubuntu-dev")
 
   config.vm.box = "bento/ubuntu-26.04"
   config.vm.box_version = "202606.01.0"
@@ -77,13 +77,16 @@ Vagrant.configure("2") do |config|
   config.vm.provider "vmware_desktop" do |vmware|
     vmware.gui = ENV.fetch("UBUNTU_VM_GUI", "1") != "0"
     vmware.linked_clone = false
+    # Bento's netplan installer file matches this original adapter address.
+    # Reusing it keeps the first Vagrant boot from targeting a missing NIC.
+    vmware.base_mac = "00:0C:29:10:D0:E6"
     vmware.clone_directory = File.expand_path(
       ENV.fetch(
         "VAGRANT_VMWARE_CLONE_DIRECTORY",
         "~/Virtual Machines.localized/VMWIsoImages"
       )
     )
-    vmware.vmx["displayName"] = "ubuntu-dev-canary"
+    vmware.vmx["displayName"] = workstation_hostname
     vmware.vmx["numvcpus"] = "10"
     vmware.vmx["memsize"] = "25600"
   end

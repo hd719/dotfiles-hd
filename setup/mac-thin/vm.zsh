@@ -2,8 +2,6 @@
 
 alias u='ssh ubuntu-vm'
 alias ut='ssh ubuntu-vm-ts'
-alias uc='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary'
-alias uct='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary-ts'
 
 _ubuntu_vagrant() {
   emulate -L zsh
@@ -27,10 +25,6 @@ _ubuntu_vagrant() {
 
 uvm-up() {
   UBUNTU_VM_GUI=1 _ubuntu_vagrant up
-}
-
-uvm-up-headless() {
-  UBUNTU_VM_GUI=0 _ubuntu_vagrant up
 }
 
 uvm-stop() {

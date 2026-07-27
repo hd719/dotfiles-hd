@@ -9,7 +9,6 @@ The host installs only:
 
 - Homebrew
 - 1Password
-- Bartender
 - Brave and Google Chrome
 - ChatGPT/Codex
 - DaisyDisk
@@ -74,7 +73,7 @@ The doctor remains red until both applications exist in `/Applications`.
 1. Sign in to 1Password, Tailscale, Obsidian, and ChatGPT.
 1. Grant Tailscale's requested network-extension permission.
 1. Complete VMware Fusion's one-time privileged setup.
-1. Build the canary with `uvm-up` or `uvm-up-headless`.
+1. Build the Ubuntu VM with `uvm-up` and keep VMware Fusion open.
 1. Add `ubuntu-vm-ts` to Codex connections as the primary development route.
    Keep `ubuntu-vm` as the local VMware fallback.
 1. Keep repositories and all development execution on the guests' native Linux
@@ -100,10 +99,7 @@ hosts        List configured SSH hosts
 r            Reload the Zsh configuration
 u            SSH into the Ubuntu VM
 ut           SSH into Ubuntu through Tailscale
-uc, uct      SSH into the canary locally or through Tailscale
 uvm-up       Start the Vagrant VM with the VMware GUI
-uvm-up-headless
-             Start the Vagrant VM without a VMware window
 uvm-stop     Gracefully halt the Vagrant VM
 uvm-suspend Suspend the Vagrant VM
 uvm-resume  Resume the Vagrant VM
@@ -120,9 +116,8 @@ Tailscale or local networking. The remote route uses Tailscale MagicDNS.
 `setup/mac-thin/ssh/ubuntu-vagrant.conf` keeps host-key checking on and disables
 agent forwarding.
 
-The canary generates separate VM-local keys for GitHub `hd719`, Arbiter, and
-Forgejo. No Git private key is copied from the Mac. The existing forwarded
-agent route remains valid only for the unchanged legacy VM until cutover.
+The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
+Forgejo. No Git private key is copied from the Mac.
 
 This is an explicit allowlist. Neovim, Node/Bun/Go, Docker, Kubernetes, project,
 VS Code, tmux, and other development aliases remain inside the Linux VMs.
