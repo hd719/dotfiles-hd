@@ -1449,8 +1449,10 @@ EOF
 
   assert_not_contains "$REPO_DIR/setup/mac-thin/vm.zsh" \
     'Ubuntu 64-bit Arm 25.10.vmwarevm'
-  assert_contains "$REPO_DIR/setup/mac-thin/vm.zsh" \
+  assert_contains "$REPO_DIR/config/zsh/mac/personal/aliases.zsh" \
     "alias u='ssh ubuntu-vm'"
+  assert_contains "$REPO_DIR/config/zsh/mac/personal/aliases.zsh" \
+    "alias mini='ssh mac-mini-lan'"
   assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
     "Host ubuntu-vm"
   assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
