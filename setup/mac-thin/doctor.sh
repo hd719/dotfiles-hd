@@ -189,8 +189,6 @@ check_vagrant_ssh_alias() {
 }
 
 if [[ -r "$VAGRANT_SSH_CONFIG" ]]; then
-  check_vagrant_ssh_alias ubuntu-vm-canary 127.0.0.1 2222 ubuntu-dev-canary
-  check_vagrant_ssh_alias ubuntu-vm-canary-ts ubuntu-dev-canary 22 ubuntu-dev-canary
   check_vagrant_ssh_alias ubuntu-vm 127.0.0.1 2222 ubuntu-dev
   check_vagrant_ssh_alias ubuntu-vm-ts ubuntu-dev 22 ubuntu-dev
 else
@@ -207,8 +205,8 @@ if /bin/zsh -dfc "
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
-  [[ \"\$(alias uc)\" == \"uc='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary'\" ]]
-  [[ \"\$(alias uct)\" == \"uct='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary-ts'\" ]]
+  ! alias uc >/dev/null 2>&1
+  ! alias uct >/dev/null 2>&1
   ! alias ubuntu >/dev/null 2>&1
   ! alias ubuntu-ts >/dev/null 2>&1
   ! alias uvm-open >/dev/null 2>&1
@@ -216,7 +214,7 @@ if /bin/zsh -dfc "
   [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
   [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]
   [[ \"\$(whence -w uvm-up)\" == 'uvm-up: function' ]]
-  [[ \"\$(whence -w uvm-up-headless)\" == 'uvm-up-headless: function' ]]
+  [[ \"\$(whence -w uvm-up-headless)\" != 'uvm-up-headless: function' ]]
   [[ \"\$(whence -w uvm-stop)\" == 'uvm-stop: function' ]]
   [[ \"\$(whence -w uvm-suspend)\" == 'uvm-suspend: function' ]]
   [[ \"\$(whence -w uvm-resume)\" == 'uvm-resume: function' ]]

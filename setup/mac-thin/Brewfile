@@ -4,7 +4,6 @@ brew "diff-so-fancy"
 brew "gh"
 
 cask "1password"
-cask "bartender"
 cask "brave-browser"
 cask "daisydisk"
 cask "deskflow"

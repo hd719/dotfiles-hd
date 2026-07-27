@@ -1476,7 +1476,6 @@ EOF
       /bin/zsh -dfc '
         source "$1"
         uvm-up
-        uvm-up-headless
         uvm-stop
         uvm-suspend
         uvm-resume
@@ -1489,8 +1488,6 @@ EOF
   assert_contains "$log" \
     "cwd=$REPO_DIR/setup/ubuntu vagrant_cwd=$REPO_DIR/setup/ubuntu gui=1 provider=vmware_desktop"
   assert_contains "$log" "args=up"
-  assert_contains "$log" \
-    "cwd=$REPO_DIR/setup/ubuntu vagrant_cwd=$REPO_DIR/setup/ubuntu gui=0 provider=vmware_desktop"
   assert_contains "$log" "args=halt"
   assert_contains "$log" "args=suspend"
   assert_contains "$log" "args=resume"
@@ -1506,9 +1503,9 @@ EOF
   assert_not_contains "$REPO_DIR/setup/mac-thin/vm.zsh" \
     'Ubuntu 64-bit Arm 25.10.vmwarevm'
   assert_contains "$REPO_DIR/setup/mac-thin/vm.zsh" \
-    "alias uc='ssh -F ~/Developer/dotfiles-hd/setup/mac-thin/ssh/ubuntu-vagrant.conf ubuntu-vm-canary'"
+    "alias u='ssh ubuntu-vm'"
   assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
-    "Host ubuntu-vm-canary"
+    "Host ubuntu-vm"
   assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
     "HostName 127.0.0.1"
   assert_contains "$REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf" \
@@ -1521,6 +1518,8 @@ EOF
     'config.vm.box_architecture = "arm64"'
   assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
     "config.vm.box_check_update = false"
+  assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
+    'vmware.base_mac = "00:0C:29:10:D0:E6"'
   assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \
     '"DOTFILES_GIT_REF" => dotfiles_git_ref'
   assert_contains "$REPO_DIR/setup/ubuntu/Vagrantfile" \

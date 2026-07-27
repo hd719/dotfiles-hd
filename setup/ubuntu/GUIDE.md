@@ -12,7 +12,7 @@ Neovim, and tmux. The thin Mac is the control plane; development stays here.
 From the Mac:
 
 ```bash
-uc                 # SSH into the current canary VM
+u                  # SSH into the Ubuntu VM
 exit               # Return to macOS
 ```
 
@@ -45,19 +45,16 @@ Use this document two ways:
 
 ```bash
 uvm-up             # Start with the VMware Fusion window
-uvm-up-headless    # Start in the background without keeping Fusion open
 uvm-status         # Check before trying to start it again
-uc                 # Connect to the canary VM
+u                  # Connect through the local Vagrant route
 ```
 
-VMware's background engine still runs in headless mode, but the Fusion app does
-not need to remain open. Use `uvm-stop` or `uvm-suspend` instead of quitting the
-VM through VMware Fusion.
+Keep VMware Fusion open while the VM runs. Use `uvm-stop` or `uvm-suspend`
+instead of quitting the VM through VMware Fusion.
 
 ## One-Command Health Check
 
-Enter Ubuntu through the Mac's `uc` alias during qualification. Use `u` after
-the final cutover:
+Enter Ubuntu through the Mac's `u` alias:
 
 ```bash
 cd ~/Developer/dotfiles-hd
