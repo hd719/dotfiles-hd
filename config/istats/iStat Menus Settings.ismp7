@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>build</key>
-	<string>2252</string>
+	<string>2282</string>
 	<key>preferences</key>
 	<dict>
 		<key>Battery.Menubar.Mode.DualValue.Font.Name</key>
@@ -38,12 +38,6 @@
 		</array>
 		<key>Combined.Menubar.Items</key>
 		<array/>
-		<key>Device.Auth-Identifier</key>
-		<string>0C84BC1F-2AA4-464A-9873-05B625A72E69</string>
-		<key>Device.Device</key>
-		<string>6d296a334c22afe6f5469526979f9d8e785dc02d</string>
-		<key>Device.Model</key>
-		<string>Mac15,10</string>
 		<key>Disks.Menu.Filtering</key>
 		<array>
 			<string>17631776-422D-4857-B451-D6E985C2469A</string>
@@ -60,16 +54,6 @@
 		<false/>
 		<key>GPU.Menubar.Mode.LabelValue.Processor.Value.Dark.Text.Color</key>
 		<string>0 0.4784313725490196 1 1</string>
-		<key>License.License</key>
-		<string>ammo-stub-heel-puma-8405-7</string>
-		<key>License.Validation.hashversion</key>
-		<string>3</string>
-		<key>License.Validation.license</key>
-		<string>ammo-stub-heel-puma-8405-7</string>
-		<key>License.Validation.signature</key>
-		<string>MIGIAkIBx6omhHt+bxX+LVh0oc3MUmVEJc221tVdpSvAVCTI8iXwOPcjGiscRCrNgHM5tytlpQAxFZYUq8bwLxdso1Sp72sCQgGL2BsTP7jjPgk0fYkRp2LvHafsNblDaPiQwXtn4M+D+D9SDx7smB0bK8yKNYYMuwoA677lorfpJgb0ZpGx4nNZeg==</string>
-		<key>License.Validation.time</key>
-		<string>1746114128</string>
 		<key>Memory.Menubar.Mode.LabelValue.Pressure.Value.Dark.Text.Color</key>
 		<string>0 0.4784313725490196 1 1</string>
 		<key>Memory.Menubar.Mode.UsedFree.Font.Name</key>
@@ -79,9 +63,15 @@
 		<key>Memory.Menubar.Mode.UsedFree.ShowLabels</key>
 		<false/>
 		<key>Menu.Theme.Dark</key>
+		<string>blue-dark</string>
+		<key>Menu.Theme.Light</key>
 		<string>navy</string>
 		<key>Menubar.Global.ReducePadding</key>
 		<integer>1</integer>
+		<key>Menubar.Theme.Dark</key>
+		<string>custom</string>
+		<key>MenubarCurrentApperance</key>
+		<string>Dark</string>
 		<key>Migration.CombinedPowerItems</key>
 		<true/>
 		<key>Migration.Profiles</key>
@@ -221,23 +211,6 @@
 				<integer>9</integer>
 				<key>subtype</key>
 				<integer>6</integer>
-				<key>type</key>
-				<integer>7</integer>
-			</dict>
-			<dict>
-				<key>source</key>
-				<integer>15</integer>
-				<key>useroptions</key>
-				<dict>
-					<key>width</key>
-					<integer>10</integer>
-				</dict>
-			</dict>
-			<dict>
-				<key>source</key>
-				<integer>6</integer>
-				<key>subtype</key>
-				<integer>7</integer>
 				<key>type</key>
 				<integer>7</integer>
 			</dict>
@@ -563,14 +536,20 @@
 				<string>sensors-launcher</string>
 			</dict>
 		</array>
+		<key>Status.BackgroundInstall</key>
+		<true/>
 		<key>Status.Build.Last</key>
-		<real>2252</real>
+		<real>2282</real>
 		<key>Status.Version.Last</key>
-		<real>7.0999999046325684</real>
+		<real>7.3000001907348633</real>
 		<key>Time.Menubar.FlashSeperators</key>
 		<integer>1</integer>
 		<key>Time.Menubar.Mode.SingleValue.Value.Dark.Text.Color</key>
 		<string>0 0.4784313725490196 1 1</string>
+		<key>Updates.Attempts.2261</key>
+		<integer>1</integer>
+		<key>Updates.Attempts.2282</key>
+		<integer>1</integer>
 		<key>Weather.Global.AvailableProviders</key>
 		<array>
 			<dict>
