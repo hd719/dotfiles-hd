@@ -50,6 +50,9 @@ request into a full-machine migration.
 
 ## Package Ownership
 
+- Mac package policy lives only in the target profile's `setup/*/Brewfile`.
+  Do not keep generated Homebrew inventories or transitive dependency lists
+  under `config/`.
 - Use pnpm for dotfiles-managed global Node tools unless a profile runbook
   documents a fixed-prefix exception that preserves work-owned runtimes.
 - Follow each project's declared package manager and lockfile.
