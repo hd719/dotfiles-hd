@@ -15,9 +15,13 @@ FAILURES=0
 VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
 VAGRANT_VMWARE_UTILITY="${DOTFILES_VAGRANT_VMWARE_UTILITY:-/opt/vagrant-vmware-desktop/bin/vagrant-vmware-utility}"
 VAGRANT_VMWARE_SERVICE_LABEL="com.vagrant.vagrant-vmware-utility"
+HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
 
 # shellcheck source=../mac-bootstrap/lib.sh
 source "$DOTFILES_DIR/setup/mac-bootstrap/lib.sh"
+
+NEOVIM_PARSERS=(markdown markdown_inline)
+NEOVIM_PARSER_BINARIES=(markdown markdown_inline)
 
 pass() {
   printf 'PASS  %s\n' "$*"
@@ -58,6 +62,24 @@ else
   fail "Herdr remote client missing"
 fi
 
+for command_name in hunk marksman nvim rg starship tree-sitter zoxide; do
+  if command -v "$command_name" >/dev/null 2>&1; then
+    pass "$command_name available"
+  else
+    fail "$command_name missing"
+  fi
+done
+
+for plugin_path in \
+  "$HOMEBREW_PREFIX/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" \
+  "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"; do
+  if [[ -r "$plugin_path" ]]; then
+    pass "$(basename "$plugin_path") readable"
+  else
+    fail "Zsh plugin missing: $plugin_path"
+  fi
+done
+
 if [[ -x "$VAGRANT_VMWARE_UTILITY" ]]; then
   pass "Vagrant VMware utility available"
 else
@@ -83,6 +105,9 @@ LINK_SPECS=(
   "$DOTFILES_DIR/setup/mac-thin/.zshrc|$HOME/.zshrc"
   "$DOTFILES_DIR/config/ghostty/config|$HOME/Library/Application Support/com.mitchellh.ghostty/config"
   "$DOTFILES_DIR/config/herdr/config.toml|$HOME/.config/herdr/config.toml"
+  "$DOTFILES_DIR/config/hunk/config.toml|$HOME/.config/hunk/config.toml"
+  "$DOTFILES_DIR/config/nvim|$HOME/.config/nvim"
+  "$DOTFILES_DIR/config/starship/starship.toml|$HOME/.config/starship.toml"
 )
 for spec in "${LINK_SPECS[@]}"; do
   source_path="${spec%%|*}"
@@ -98,6 +123,37 @@ if "$GIT_ALIASES_SCRIPT" --check >/dev/null 2>&1; then
   pass "portable Git aliases"
 else
   fail "portable Git aliases are not configured"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && nvim --headless -u NONE -i NONE --noplugin \
+    "+lua assert(vim.fn.has('nvim-0.12') == 1, 'Neovim 0.12+ required')" \
+    '+qa' >/dev/null 2>&1; then
+  pass "Neovim 0.12+"
+else
+  fail "Neovim 0.12+ required"
+fi
+
+if command -v nvim >/dev/null 2>&1 && verify_neovim_parsers_restored; then
+  pass "Thin-profile Markdown parsers"
+else
+  fail "Thin-profile Markdown parsers are incomplete"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && verify_neovim_config_sandboxed "$DOTFILES_DIR/config/nvim" thin; then
+  pass "Thin-profile Neovim config starts in an isolated data directory"
+else
+  fail "Thin-profile Neovim isolated startup"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && DOTFILES_NVIM_PROFILE=thin nvim --headless "$SCRIPT_DIR/README.md" \
+    "+lua local clients; assert(vim.wait(5000,function() clients=vim.lsp.get_clients({bufnr=0,name='marksman'}); return #clients>0 end),'Marksman did not attach'); local ns=vim.lsp.diagnostic.get_namespace(clients[1].id,false); assert(not vim.diagnostic.is_enabled({bufnr=0,ns_id=ns}),'Marksman diagnostics were not muted')" \
+    '+qa!' >/dev/null 2>&1; then
+  pass "Marksman attaches with diagnostics muted"
+else
+  fail "Marksman did not attach with diagnostics muted"
 fi
 
 for app_name in \
@@ -184,8 +240,18 @@ fi
 
 if /bin/zsh -dfc "
   source '$DOTFILES_DIR/setup/mac-thin/.zshrc'
+  [[ \"\$DOTFILES_NVIM_PROFILE\" == thin ]]
+  [[ \"\$EDITOR\" == nvim ]]
+  [[ \"\$VISUAL\" == nvim ]]
+  [[ \"\$GIT_EDITOR\" == nvim ]]
+  [[ -z \"\${GIT_PAGER+x}\" ]]
   [[ \"\$(alias g)\" == 'g=git' ]]
   [[ \"\$(alias gs)\" == \"gs='git status'\" ]]
+  [[ \"\$(alias hdiff)\" == \"hdiff='hunk diff'\" ]]
+  [[ \"\$(alias hstaged)\" == \"hstaged='hunk diff --staged'\" ]]
+  [[ \"\$(alias hshow)\" == \"hshow='hunk show'\" ]]
+  [[ \"\$(alias hwatch)\" == \"hwatch='hunk diff --watch'\" ]]
+  ! alias gdiff >/dev/null 2>&1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
@@ -215,6 +281,16 @@ if /bin/zsh -dfc "
   pass "Thin-Mac personal shell allowlist available"
 else
   fail "Thin-Mac personal shell allowlist invalid"
+fi
+
+if HOMEBREW_PREFIX="$HOMEBREW_PREFIX" /bin/zsh -dfic "
+  source '$DOTFILES_DIR/setup/mac-thin/.zshrc'
+  (( \${#functions[(I)*autocomplete*]} > 0 ))
+  (( \${#functions[(I)*autosuggest*]} > 0 ))
+" >/dev/null 2>&1; then
+  pass "Thin-Mac interactive Zsh plugins"
+else
+  fail "Thin-Mac interactive Zsh plugins"
 fi
 
 if [[ "$FAILURES" -eq 0 ]]; then

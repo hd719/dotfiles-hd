@@ -27,7 +27,6 @@
           fastfetch
           starship
           btop
-          diff-so-fancy
           lsd
           zoxide
           bat
@@ -50,6 +49,7 @@
         };
 
         brews = [
+          "hunk"
           "mas"
         ];
 

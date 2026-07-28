@@ -161,6 +161,9 @@ Managed links:
 | `~/.local/bin/codex`                   | `setup/ubuntu/bin/codex`        |
 | `~/.local/graphql-lsp/bin/graphql-lsp` | `setup/ubuntu/bin/graphql-lsp`  |
 
+Hunk is the canonical diff viewer on every profile. Use `hdiff`, `hstaged`,
+`hshow`, or `hwatch`; the shell does not install a Git pager override.
+
 Small Bash boundaries remain:
 
 - `config/git/configure-aliases.sh` adds only the portable alias include and preserves

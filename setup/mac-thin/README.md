@@ -12,26 +12,33 @@ The host installs only:
 - Brave and Google Chrome
 - ChatGPT/Codex
 - DaisyDisk
-- diff-so-fancy for readable local Git diffs
 - Ghostty
 - Ghostty fonts
 - Herdr as a remote Ubuntu client
+- Hunk as the local diff viewer
 - iStat Menus
+- Marksman as the only local language server
 - Mullvad VPN
+- Neovim with the shared `thin` profile
 - noTunes
 - Obsidian
 - Pearcleaner
 - Raycast
+- ripgrep
+- Starship
 - TablePlus
 - Tailscale
+- Tree-sitter CLI only to build Neovim's two Markdown parsers
 - Vagrant and the VMware utility
 - VLC
 - VMware Fusion
 - Zoom
+- Zoxide
+- Zsh Autocomplete and Autosuggestions
 - macOS SSH
 
-Do not install project repositories, Docker, databases, compilers, language
-runtimes, language servers, Neovim, or project dependencies on macOS.
+Do not install project repositories, Docker, databases, project compilers,
+language runtimes, other language servers, or project dependencies on macOS.
 
 ## Install
 
@@ -55,9 +62,20 @@ setup/mac-thin/doctor.sh
 ```
 
 The bootstrap installs the policy packages and pins the
-`vagrant-vmware-desktop` provider to `3.0.5`. It links only the thin `.zshrc`,
-Ghostty configuration, and Herdr `config.toml`, backing up any replaced
-destination beside the original. Herdr session and runtime state stay local.
+`vagrant-vmware-desktop` provider to `3.0.5`. It links the thin `.zshrc`,
+Ghostty, Herdr, Hunk, the shared Neovim config, and the shared Starship config,
+backing up any replaced destination beside the original.
+
+Neovim uses the shared `config/nvim` and `lazy-lock.json`, but
+`DOTFILES_NVIM_PROFILE=thin` restores only the approved thin plugin set and the
+Markdown parsers. The Tree-sitter CLI exists only to build those parsers.
+Marksman is the only enabled language server, and its
+diagnostics start muted. Use `Space o m m` to show or mute them for the current
+note.
+
+Mutable state remains local: Herdr sessions, Hunk state, Neovim
+plugins/cache/undo, Zoxide history, Zsh history, and completion caches are
+never symlinked.
 
 ## Manual Applications
 
@@ -77,12 +95,14 @@ The doctor remains red until both applications exist in `/Applications`.
 1. Build the Ubuntu VM with `uvm-up` and keep VMware Fusion open.
 1. Add `ubuntu-vm-ts` to Codex connections as the primary development route.
    Keep `ubuntu-vm` as the local VMware fallback.
+1. Open Neovim once and run `:checkhealth`, `:checkhealth obsidian`, and
+   `:checkhealth vim.lsp`.
 1. Keep repositories and all development execution on the guests' native Linux
    filesystems.
 
 The bootstrap never restores credentials, starts services, removes packages,
-or installs development tooling. It adds only the portable Git alias include
-to the machine-owned global Git config.
+or installs project development tooling. It adds only the portable Git alias
+include to the machine-owned global Git config.
 
 ## Personal Shell Allowlist
 
@@ -90,7 +110,10 @@ Start a fresh shell after bootstrap, then use:
 
 ```text
 g, gs        Git and Git status
-gdiff        Git diff
+hdiff        Review unstaged changes with Hunk
+hstaged      Review staged changes with Hunk
+hshow        Review the latest commit with Hunk
+hwatch       Watch changes with Hunk
 gpull        Pull the current repository
 gpush        Push the current repository
 cod          Codex CLI
@@ -99,6 +122,7 @@ dots         Enter the Mac dotfiles repository
 vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
 r            Reload the Zsh configuration
+nvim FILE    Edit a local file with the thin Neovim profile
 hu           Attach Herdr through local Vagrant
 hut          Attach Herdr through Tailscale
 u            SSH into the Ubuntu VM
@@ -129,8 +153,9 @@ path remains Mac-local and is not readable inside Ubuntu.
 The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
 Forgejo. No Git private key is copied from the Mac.
 
-This is an explicit allowlist. Neovim, Node/Bun/Go, Docker, Kubernetes, project,
-VS Code, tmux, and other development aliases remain inside the Linux VMs.
+This is an explicit allowlist. Node/Bun/Go, Docker, Kubernetes, project
+toolchains, VS Code, tmux, other language servers, and development aliases
+remain inside the Linux VMs.
 
 The shell is assembled from scoped modules:
 

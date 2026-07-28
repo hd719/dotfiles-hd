@@ -1,3 +1,5 @@
+local profile = require("config.profile")
+
 -- Reuse the fastfetch anon logo as the dashboard header. It is resolved from the
 -- dotfiles repo via the ~/.config/nvim symlink and has fastfetch's $N color
 -- codes stripped. Falls back to a simple title if the file is not found.
@@ -47,12 +49,39 @@ local function resolve_obsidian_attachment(path, src)
   return configured
 end
 
+local function profile_snacks_opts(opts)
+  if profile.is_thin then
+    opts.picker.sources.explorer = nil
+    opts.bigfile = nil
+    opts.words = nil
+    opts.indent = nil
+    opts.image = nil
+    opts.explorer = nil
+    opts.lazygit = nil
+    opts.terminal = nil
+    opts.dashboard = nil
+  end
+
+  return opts
+end
+
+local function profile_keys(keys)
+  local enabled = {}
+  for _, key in ipairs(keys) do
+    if profile.is_full or not key.full_only then
+      key.full_only = nil
+      enabled[#enabled + 1] = key
+    end
+  end
+  return enabled
+end
+
 return {
   {
     "folke/snacks.nvim",
     priority = 1000,
     lazy = false,
-    opts = {
+    opts = profile_snacks_opts({
       input = { enabled = true },
       notifier = { enabled = true, timeout = 3000 },
       picker = {
@@ -183,7 +212,7 @@ return {
           { section = "startup" },
         },
       },
-    },
+    }),
     config = function(_, opts)
       local Snacks = require("snacks")
       Snacks.setup(opts)
@@ -215,7 +244,7 @@ return {
         callback = keep_picker_selection,
       })
     end,
-    keys = {
+    keys = profile_keys({
       {
         "<leader>ff",
         function()
@@ -272,6 +301,7 @@ return {
           Snacks.explorer()
         end,
         desc = "File explorer",
+        full_only = true,
       },
       {
         "<leader>/",
@@ -293,6 +323,7 @@ return {
           Snacks.picker.lsp_workspace_symbols()
         end,
         desc = "Project symbols",
+        full_only = true,
       },
       {
         "<leader>cd",
@@ -300,6 +331,7 @@ return {
           Snacks.picker.diagnostics_buffer()
         end,
         desc = "Diagnostics (buffer)",
+        full_only = true,
       },
       {
         "<leader>cD",
@@ -307,6 +339,7 @@ return {
           Snacks.picker.diagnostics()
         end,
         desc = "Diagnostics (project)",
+        full_only = true,
       },
       {
         "<leader>d",
@@ -322,6 +355,7 @@ return {
           Snacks.lazygit({ cwd = Snacks.git.get_root(source) or vim.fn.getcwd(0) })
         end,
         desc = "LazyGit",
+        full_only = true,
       },
       {
         "gd",
@@ -329,6 +363,7 @@ return {
           Snacks.picker.lsp_definitions()
         end,
         desc = "Definitions",
+        full_only = true,
       },
       {
         "<leader>t",
@@ -336,6 +371,7 @@ return {
           Snacks.terminal.open()
         end,
         desc = "New terminal",
+        full_only = true,
       },
       {
         "<leader>T",
@@ -343,8 +379,9 @@ return {
           Snacks.terminal.open(nil, { win = { position = "float" } })
         end,
         desc = "New floating terminal",
+        full_only = true,
       },
-    },
+    }),
   },
   {
     "stevearc/oil.nvim",

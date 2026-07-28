@@ -3,7 +3,20 @@
 This is a small, personal Neovim config based on Kuncheng Gui's structure and
 Hamel's existing Zed muscle memory.
 
-## Requirements
+## Profiles
+
+- `full` is the default and preserves the complete development editor on
+  Ubuntu, full personal Macs, and Resilience.
+- `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
+  editing behavior, Nord, Bufferline, Lualine, WhichKey, Oil, Mini pairs and
+  surround, Gitsigns, rendered Markdown, Obsidian, slim Snacks pickers,
+  Tree-sitter Markdown parsing, and Marksman only.
+
+Both profiles use this directory and the same `lazy-lock.json`. Disabled
+full-only plugins are not restored on a thin machine. An unknown profile stops
+startup instead of silently choosing the wrong tool boundary.
+
+## Full Profile Requirements
 
 - Neovim 0.12+, ripgrep, fd, fzf, LazyGit, and the Tree-sitter CLI.
 - Go: `gopls` and `gofmt`.
@@ -28,6 +41,9 @@ Hamel's existing Zed muscle memory.
   dedicated Herdr tab.
 - Editing: `mini.pairs` auto-closes brackets and quotes; `mini.surround` adds,
   changes, and deletes surrounding pairs with a `gs` prefix.
+
+The thin profile requires only Neovim 0.12+, ripgrep, Marksman, and the
+Tree-sitter CLI used to build its two Markdown parsers.
 
 Install the Markdown formatter with:
 
@@ -60,10 +76,11 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-All 21 plugins below are installed. In `:Lazy`, **Loaded** means a plugin's
-trigger has happened in this session; **Not Loaded** means it is installed and
-waiting for that trigger. `lazy-lock.json` pins exact versions, while the Lua
-files under `lua/plugins/` define their behavior.
+The full profile installs all 21 plugins below. The thin profile installs only
+the subset listed above. In `:Lazy`, **Loaded** means a plugin's trigger has
+happened in this session; **Not Loaded** means it is installed and waiting for
+that trigger. `lazy-lock.json` pins exact versions, while the Lua files under
+`lua/plugins/` define their behavior.
 
 Lazy reads every plugin recipe at launch. A recipe can load immediately with
 `lazy = false`, wait for an event/filetype/key/command, or load as a dependency
@@ -71,32 +88,33 @@ immediately before another plugin needs it. Key-triggered plugins still have
 their placeholder mapping available before the plugin itself loads. Once a
 plugin loads, it stays loaded until that Neovim session ends.
 
-| Plugin | What it does here | Exact load trigger |
-| --- | --- | --- |
-| `blink.cmp` | Autocomplete from LSP, paths, snippets, and buffer words | Every startup: `lazy = false` |
-| `bufferline.nvim` | Shows open buffers across the top | Just after startup: `VeryLazy` event |
-| `friendly-snippets` | Ready-made snippets consumed by Blink | Immediately before Blink as its dependency |
-| `lazy.nvim` | Installs, pins, restores, and lazy-loads plugins | Bootstrapped before all managed plugins |
-| `lualine.nvim` | Bottom status line for mode, Git, diagnostics, LSP, and location | Just after startup: `VeryLazy` event |
-| `mini.icons` | File and folder icons shared by other plugins | Immediately before startup-loaded Oil as its dependency |
-| `nord.nvim` | Transparent Nord colors and custom highlights | Early every startup: `lazy = false`, priority `1000` |
-| `nvim-lspconfig` | Connects installed language servers to matching files | Every startup: `lazy = false` |
-| `nvim-treesitter` | Structure-aware highlighting and folding | Every startup: `lazy = false` |
-| `obsidian.nvim` | Vault-aware note search, backlinks, links, tags, and Obsidian app integration | First Markdown buffer, `Space o …`, or `:Obsidian` |
-| `oil.nvim` | Editable directory browser and file manager | Every startup: `lazy = false` |
-| `schemastore.nvim` | JSON schemas for files such as `package.json` and `tsconfig.json` | Immediately before LSPConfig as its dependency |
-| `snacks.nvim` | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and image previews | Early every startup: `lazy = false`, priority `1000` |
-| `treesitter-parser-registry` | Catalog that tells Tree-sitter where language parsers and queries live | Immediately before Tree-sitter as its dependency |
-| `which-key.nvim` | Shows available mappings after a key prefix | Just after startup: `VeryLazy` event |
-| `conform.nvim` | Runs gofmt, StyLua, Prettier, mdformat, and Ruff | First file read/new file, `Space p`, or `:ConformInfo` |
-| `gitsigns.nvim` | Git add/change/delete gutter marks and current-line blame | First file read or new file: `BufReadPre` / `BufNewFile` |
-| `grug-far.nvim` | Reviewed, exact-word replacement in the current file | First `Space R` |
-| `mini.pairs` | Automatically closes brackets and quotes | First entry into Insert mode: `InsertEnter` |
-| `mini.surround` | Adds, deletes, or replaces quotes, brackets, and tags | First `gsa`, `gsd`, `gsr`, `gsf`, `gsF`, or `gsh` |
-| `render-markdown.nvim` | Decorates Markdown headings, lists, checkboxes, tables, and code blocks | First Markdown buffer or `Space m` |
+| Plugin                       | What it does here                                                                                | Exact load trigger                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| `blink.cmp`                  | Autocomplete from LSP, paths, snippets, and buffer words                                         | Every startup: `lazy = false`                            |
+| `bufferline.nvim`            | Shows open buffers across the top                                                                | Just after startup: `VeryLazy` event                     |
+| `friendly-snippets`          | Ready-made snippets consumed by Blink                                                            | Immediately before Blink as its dependency               |
+| `lazy.nvim`                  | Installs, pins, restores, and lazy-loads plugins                                                 | Bootstrapped before all managed plugins                  |
+| `lualine.nvim`               | Bottom status line for mode, Git, diagnostics, LSP, and location                                 | Just after startup: `VeryLazy` event                     |
+| `mini.icons`                 | File and folder icons shared by other plugins                                                    | Immediately before startup-loaded Oil as its dependency  |
+| `nord.nvim`                  | Transparent Nord colors and custom highlights                                                    | Early every startup: `lazy = false`, priority `1000`     |
+| `nvim-lspconfig`             | Connects installed language servers to matching files                                            | Every startup: `lazy = false`                            |
+| `nvim-treesitter`            | Structure-aware highlighting and folding                                                         | Every startup: `lazy = false`                            |
+| `obsidian.nvim`              | Vault-aware note search, backlinks, links, tags, and Obsidian app integration                    | First Markdown buffer, `Space o …`, or `:Obsidian`       |
+| `oil.nvim`                   | Editable directory browser and file manager                                                      | Every startup: `lazy = false`                            |
+| `schemastore.nvim`           | JSON schemas for files such as `package.json` and `tsconfig.json`                                | Immediately before LSPConfig as its dependency           |
+| `snacks.nvim`                | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and image previews | Early every startup: `lazy = false`, priority `1000`     |
+| `treesitter-parser-registry` | Catalog that tells Tree-sitter where language parsers and queries live                           | Immediately before Tree-sitter as its dependency         |
+| `which-key.nvim`             | Shows available mappings after a key prefix                                                      | Just after startup: `VeryLazy` event                     |
+| `conform.nvim`               | Runs gofmt, StyLua, Prettier, mdformat, and Ruff                                                 | First file read/new file, `Space p`, or `:ConformInfo`   |
+| `gitsigns.nvim`              | Git add/change/delete gutter marks and current-line blame                                        | First file read or new file: `BufReadPre` / `BufNewFile` |
+| `grug-far.nvim`              | Reviewed, exact-word replacement in the current file                                             | First `Space R`                                          |
+| `mini.pairs`                 | Automatically closes brackets and quotes                                                         | First entry into Insert mode: `InsertEnter`              |
+| `mini.surround`              | Adds, deletes, or replaces quotes, brackets, and tags                                            | First `gsa`, `gsd`, `gsr`, `gsf`, `gsF`, or `gsh`        |
+| `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, tables, and code blocks                          | First Markdown buffer or `Space m`                       |
 
 Configuration map:
 
+- `lua/config/profile.lua`: strict `full` or `thin` profile selection.
 - `lua/config/lazy.lua`: Lazy bootstrap.
 - `lua/plugins/colorscheme.lua`: Nord.
 - `lua/plugins/editor.lua`: WhichKey and Tree-sitter.
@@ -159,60 +177,60 @@ Every agent teaching Neovim must read and update both files.
 
 ## Main Keys
 
-| Key | Action |
-| --- | --- |
-| `Space f` | Open the Find menu |
-| `Space f f/r/l/w/g/d/t` | Files / recent / current lines / cursor word / Git changes / dotfiles / TODOs |
-| `Space /` | Search text |
-| `Space S` | Search named code symbols with the attached LSP |
-| `Space h` | Open Oil file browser |
-| `Space e` | Open the file-explorer sidebar (Snacks) |
-| `Space b` | Pick a buffer |
-| `Space d` | Close the current buffer |
-| `Space w` / `Space x` | Save / save and quit |
-| `Space R` | Replace the word under the cursor in the current file |
-| `u` / `Ctrl-r` / `.` | Undo / redo / repeat the last change |
-| `o` / `O` | Open a new line below / above and enter Insert mode |
-| `w` / `e` / `b` | Next word start / word end / previous word start |
-| `2w` / `2dw` | Move two words / delete two words |
-| `0` / `$` / `gg` / `G` | Line start / line end / file top / file bottom |
-| `%` | Jump between matching `()`, `[]`, or `{}` |
-| `d{motion}` / `c{motion}` / `y{motion}` | Delete / change / yank a motion's range |
-| `ciw` / `daw` | Change inner word / delete a word plus adjacent space |
-| `ci(` / `da(` | Change inside / delete around parentheses |
-| `ci"` / `da"` | Change inside / delete around quotes |
-| `/`, then `n` / `N` | Search current file, then next / previous match |
-| `:noh` | Clear current search highlighting |
-| `Ctrl-a` | Select the whole buffer |
-| `yy` / `p` / `P` | Yank current line / paste after / paste before |
-| Visual `<` / `>` / `J` / `K` / `Space c` | Outdent / indent / move down / move up / comment |
-| `Space v` / `Space s` | Split right / down |
-| `Ctrl-h/j/k/l` | Focus window left / down / up / right |
-| `Ctrl-o` / `Ctrl-i` | Jump-history Back / Forward |
-| `Space q` | Close the current window |
-| `Space t` / `Space T` | Bottom / floating terminal |
-| `Space g` | Open LazyGit |
-| `Space p` | Format |
-| `Space c a` | LSP code action |
-| `Space c q` | Close only the quickfix/references list |
-| `Space c d` / `Space c D` | Diagnostics list (buffer / project) |
-| `]d` / `[d` | Next / previous diagnostic |
-| `Space y p/d/f` | Copy file path / working dir / file folder |
-| `Space r` | Reload files changed on disk |
-| `Space o` | Open the Obsidian menu |
-| `Space o q/s/b/l` | Quick switch / search / backlinks / links from this note |
-| `Space o d` | Open or create today's private daily note |
-| `Space o o/t/c` | Open in Obsidian / tags / table of contents |
-| `Space o m` | Open the Marksman menu |
-| `Space o m a/d/h` | Marksman actions / definition / hover |
-| `Space o m m/n` | Toggle Marksman diagnostics / rename |
-| `Space o m r/s` | Marksman references / symbols |
-| `Space o e` | Open the current file externally; PDFs use Bookokrat |
-| `Space m` | Toggle Markdown rendering (in Markdown files) |
-| `Space z a/o/c` | Fold: toggle / open all / close all |
-| `gd` / `gh` / `grr` | Definition / hover / references |
-| `gsa` / `gsd` / `gsr` | Surround add / delete / replace |
-| `H` / `L` | Previous / next buffer |
+| Key                                      | Action                                                                        |
+| ---------------------------------------- | ----------------------------------------------------------------------------- |
+| `Space f`                                | Open the Find menu                                                            |
+| `Space f f/r/l/w/g/d/t`                  | Files / recent / current lines / cursor word / Git changes / dotfiles / TODOs |
+| `Space /`                                | Search text                                                                   |
+| `Space S`                                | Search named code symbols with the attached LSP                               |
+| `Space h`                                | Open Oil file browser                                                         |
+| `Space e`                                | Open the file-explorer sidebar (Snacks)                                       |
+| `Space b`                                | Pick a buffer                                                                 |
+| `Space d`                                | Close the current buffer                                                      |
+| `Space w` / `Space x`                    | Save / save and quit                                                          |
+| `Space R`                                | Replace the word under the cursor in the current file                         |
+| `u` / `Ctrl-r` / `.`                     | Undo / redo / repeat the last change                                          |
+| `o` / `O`                                | Open a new line below / above and enter Insert mode                           |
+| `w` / `e` / `b`                          | Next word start / word end / previous word start                              |
+| `2w` / `2dw`                             | Move two words / delete two words                                             |
+| `0` / `$` / `gg` / `G`                   | Line start / line end / file top / file bottom                                |
+| `%`                                      | Jump between matching `()`, `[]`, or `{}`                                     |
+| `d{motion}` / `c{motion}` / `y{motion}`  | Delete / change / yank a motion's range                                       |
+| `ciw` / `daw`                            | Change inner word / delete a word plus adjacent space                         |
+| `ci(` / `da(`                            | Change inside / delete around parentheses                                     |
+| `ci"` / `da"`                            | Change inside / delete around quotes                                          |
+| `/`, then `n` / `N`                      | Search current file, then next / previous match                               |
+| `:noh`                                   | Clear current search highlighting                                             |
+| `Ctrl-a`                                 | Select the whole buffer                                                       |
+| `yy` / `p` / `P`                         | Yank current line / paste after / paste before                                |
+| Visual `<` / `>` / `J` / `K` / `Space c` | Outdent / indent / move down / move up / comment                              |
+| `Space v` / `Space s`                    | Split right / down                                                            |
+| `Ctrl-h/j/k/l`                           | Focus window left / down / up / right                                         |
+| `Ctrl-o` / `Ctrl-i`                      | Jump-history Back / Forward                                                   |
+| `Space q`                                | Close the current window                                                      |
+| `Space t` / `Space T`                    | Bottom / floating terminal                                                    |
+| `Space g`                                | Open LazyGit                                                                  |
+| `Space p`                                | Format                                                                        |
+| `Space c a`                              | LSP code action                                                               |
+| `Space c q`                              | Close only the quickfix/references list                                       |
+| `Space c d` / `Space c D`                | Diagnostics list (buffer / project)                                           |
+| `]d` / `[d`                              | Next / previous diagnostic                                                    |
+| `Space y p/d/f`                          | Copy file path / working dir / file folder                                    |
+| `Space r`                                | Reload files changed on disk                                                  |
+| `Space o`                                | Open the Obsidian menu                                                        |
+| `Space o q/s/b/l`                        | Quick switch / search / backlinks / links from this note                      |
+| `Space o d`                              | Open or create today's private daily note                                     |
+| `Space o o/t/c`                          | Open in Obsidian / tags / table of contents                                   |
+| `Space o m`                              | Open the Marksman menu                                                        |
+| `Space o m a/d/h`                        | Marksman actions / definition / hover                                         |
+| `Space o m m/n`                          | Toggle Marksman diagnostics / rename                                          |
+| `Space o m r/s`                          | Marksman references / symbols                                                 |
+| `Space o e`                              | Open the current file externally; PDFs use Bookokrat                          |
+| `Space m`                                | Toggle Markdown rendering (in Markdown files)                                 |
+| `Space z a/o/c`                          | Fold: toggle / open all / close all                                           |
+| `gd` / `gh` / `grr`                      | Definition / hover / references                                               |
+| `gsa` / `gsd` / `gsr`                    | Surround add / delete / replace                                               |
+| `H` / `L`                                | Previous / next buffer                                                        |
 
 The four search scopes are different: `/` searches text in the current file,
 `Space /` searches text across the project, `Space f f` searches project

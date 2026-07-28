@@ -117,7 +117,6 @@
           bat
           btop
           # devbox
-          diff-so-fancy
           fastfetch
           ffmpeg
           ghostscript
@@ -167,6 +166,7 @@
         brews = [
           "anycable-go"
           "ffmpeg"
+          "hunk"
           "imagemagick"
           "llvm@14"
           "ruby-build"
