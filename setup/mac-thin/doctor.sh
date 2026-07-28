@@ -164,7 +164,8 @@ for app_name in \
   "Ghostty.app" \
   "Obsidian.app" \
   "Tailscale.app" \
-  "VMware Fusion.app"; do
+  "VMware Fusion.app" \
+  "zoom.us.app"; do
   if [[ -d "$APPLICATIONS_DIR/$app_name" ]]; then
     pass "$app_name installed"
   else

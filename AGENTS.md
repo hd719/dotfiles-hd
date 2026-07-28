@@ -209,6 +209,7 @@ Run checks that match the changed surface:
 
 ```bash
 git diff --check
+bash scripts/tests/sync-dotfiles-test.sh
 bash setup/mac-bootstrap/tests/bootstrap-test.sh
 bash setup/ubuntu/tests/lean-setup.sh
 bash setup/ubuntu/doctor.sh

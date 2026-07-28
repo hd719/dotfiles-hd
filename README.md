@@ -42,6 +42,15 @@ For Mac-to-Linux learning, use the
 
 ## Common Paths
 
+After a reviewed change is merged, sync canonical `master` from the thin Mac:
+
+```bash
+scripts/sync-dotfiles.sh
+```
+
+The helper checks all three canonical repos before the first pull and stops if
+any worktree is dirty.
+
 Thin Mac plus Ubuntu VM:
 
 ```bash

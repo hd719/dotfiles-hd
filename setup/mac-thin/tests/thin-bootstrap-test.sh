@@ -32,7 +32,8 @@ for app_name in \
   "Ghostty.app" \
   "Obsidian.app" \
   "Tailscale.app" \
-  "VMware Fusion.app"; do
+  "VMware Fusion.app" \
+  "zoom.us.app"; do
   mkdir -p "$TEST_ROOT/apps/$app_name"
 done
 
@@ -284,6 +285,7 @@ grep -Fxq 'brew "zsh-autosuggestions"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "zsh-syntax-highlighting"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/setup/mac-thin/Brewfile"
+grep -Fxq 'cask "zoom"' "$REPO_DIR/setup/mac-thin/Brewfile"
 ! grep -Fq 'diff-so-fancy' "$REPO_DIR/setup/mac-thin/Brewfile"
 
 printf 'Thin Mac bootstrap tests passed.\n'
