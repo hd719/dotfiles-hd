@@ -71,7 +71,8 @@ Neovim uses the shared `config/nvim` and `lazy-lock.json`, but
 Markdown parsers. The Tree-sitter CLI exists only to build those parsers.
 Marksman is the only enabled language server, and its
 diagnostics start muted. Use `Space o m m` to show or mute them for the current
-note.
+note. `Space e` opens the existing Snacks file-explorer sidebar; it does not
+add another plugin.
 
 Mutable state remains local: Herdr sessions, Hunk state, Neovim
 plugins/cache/undo, Zoxide history, Zsh history, and completion caches are

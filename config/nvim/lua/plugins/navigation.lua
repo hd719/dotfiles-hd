@@ -51,12 +51,10 @@ end
 
 local function profile_snacks_opts(opts)
   if profile.is_thin then
-    opts.picker.sources.explorer = nil
     opts.bigfile = nil
     opts.words = nil
     opts.indent = nil
     opts.image = nil
-    opts.explorer = nil
     opts.lazygit = nil
     opts.terminal = nil
     opts.dashboard = nil
@@ -301,7 +299,6 @@ return {
           Snacks.explorer()
         end,
         desc = "File explorer",
-        full_only = true,
       },
       {
         "<leader>/",
