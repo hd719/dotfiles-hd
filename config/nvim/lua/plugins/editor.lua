@@ -56,17 +56,23 @@ local selected_filetypes = profile.is_thin and {
   "markdown",
 } or filetypes
 
+local which_key_spec = {
+  { "<leader>f", group = "Find" },
+  { "<leader>o", group = "Obsidian" },
+  { "<leader>om", group = "Marksman" },
+}
+
+if profile.is_thin then
+  table.insert(which_key_spec, { "<leader>m", group = "Markdown" })
+end
+
 return {
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
     opts = {
       preset = "modern",
-      spec = {
-        { "<leader>f", group = "Find" },
-        { "<leader>o", group = "Obsidian" },
-        { "<leader>om", group = "Marksman" },
-      },
+      spec = which_key_spec,
     },
   },
   {

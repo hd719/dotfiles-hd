@@ -159,11 +159,11 @@ fi
 
 if command -v nvim >/dev/null 2>&1 \
   && DOTFILES_NVIM_PROFILE=thin nvim --headless "$SCRIPT_DIR/README.md" \
-    "+lua local clients; assert(vim.wait(5000,function() clients=vim.lsp.get_clients({bufnr=0,name='marksman'}); return #clients>0 end),'Marksman did not attach'); local ns=vim.lsp.diagnostic.get_namespace(clients[1].id,false); assert(not vim.diagnostic.is_enabled({bufnr=0,ns_id=ns}),'Marksman diagnostics were not muted')" \
+    "+lua assert(not vim.lsp.is_enabled('marksman'),'Marksman was enabled globally'); assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached before request'); local mapping=vim.fn.maparg(' mm','n',false,true); assert(mapping.desc=='Start Marksman for file','Space m m is not mapped to Marksman'); vim.cmd.MarksmanStartCurrent(); local clients; assert(vim.wait(5000,function() clients=vim.lsp.get_clients({bufnr=0,name='marksman'}); return #clients>0 end),'Marksman did not attach on request'); local first=vim.api.nvim_get_current_buf(); vim.cmd.enew(); vim.bo.filetype='markdown'; assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached to an unrequested buffer'); assert(#vim.lsp.get_clients({bufnr=first,name='marksman'})>0,'Marksman detached from the requested buffer')" \
     '+qa!' >/dev/null 2>&1; then
-  pass "Marksman attaches with diagnostics muted"
+  pass "Marksman is opt-in per Markdown buffer"
 else
-  fail "Marksman did not attach with diagnostics muted"
+  fail "Marksman is not opt-in per Markdown buffer"
 fi
 
 for app_name in \

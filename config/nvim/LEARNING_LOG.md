@@ -3184,3 +3184,15 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Added a focused Marksman walkthrough to the Neovim README and a pending
   curriculum checkpoint for practicing the toggle.
 - Human verification remains pending; no curriculum item was marked complete.
+
+## 2026-07-28 — Session 032: Opt-In Marksman on the Thin Mac
+
+- Marksman no longer starts automatically in Markdown buffers on the thin
+  profile.
+- `Space m m` starts Marksman only for the current Markdown file. Other open
+  Markdown buffers stay unattached until requested.
+- To keep `Space m` as a clear Markdown prefix on the thin profile, the
+  render-markdown toggle moved to `Space m r`. Full profiles keep the existing
+  automatic Marksman behavior and `Space m` render toggle.
+- Automated checks passed; human verification remains pending. No curriculum
+  item was marked complete.

@@ -110,7 +110,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `grug-far.nvim`              | Reviewed, exact-word replacement in the current file                                             | First `Space R`                                          |
 | `mini.pairs`                 | Automatically closes brackets and quotes                                                         | First entry into Insert mode: `InsertEnter`              |
 | `mini.surround`              | Adds, deletes, or replaces quotes, brackets, and tags                                            | First `gsa`, `gsd`, `gsr`, `gsf`, `gsF`, or `gsh`        |
-| `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, tables, and code blocks                          | First Markdown buffer or `Space m`                       |
+| `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, tables, and code blocks                          | First Markdown buffer or its profile-specific toggle     |
 
 Configuration map:
 
@@ -226,7 +226,9 @@ Every agent teaching Neovim must read and update both files.
 | `Space o m m/n`                          | Toggle Marksman diagnostics / rename                                          |
 | `Space o m r/s`                          | Marksman references / symbols                                                 |
 | `Space o e`                              | Open the current file externally; PDFs use Bookokrat                          |
-| `Space m`                                | Toggle Markdown rendering (in Markdown files)                                 |
+| `Space m m`                              | Thin profile: start Marksman only for the current Markdown file                |
+| `Space m r`                              | Thin profile: toggle Markdown rendering                                       |
+| `Space m`                                | Full profile: toggle Markdown rendering                                       |
 | `Space z a/o/c`                          | Fold: toggle / open all / close all                                           |
 | `gd` / `gh` / `grr`                      | Definition / hover / references                                               |
 | `gsa` / `gsd` / `gsr`                    | Surround add / delete / replace                                               |
@@ -284,8 +286,9 @@ its actions.
 
 ### Using Marksman in the vault
 
-Open a Markdown note under `~/Developer/hd`; Marksman attaches automatically.
-Put the cursor on a `[[wikilink]]`, then use:
+On the thin profile, open a Markdown note under `~/Developer/hd` and press
+`Space m m`. Marksman attaches only to that file. Put the cursor on a
+`[[wikilink]]`, then use:
 
 - `Space o m h` to preview the target.
 - `Space o m d` to open the target.
@@ -293,9 +296,9 @@ Put the cursor on a `[[wikilink]]`, then use:
 - `Space o m s` to browse headings in the current note.
 - `Space o m n` to rename a target, or `Space o m a` for available actions.
 
-Marksman diagnostics start muted because the existing vault contains many old
-or intentionally unresolved links. `Space o m m` shows or hides only
-Marksman's diagnostics for the current note; navigation remains available.
+On full profiles, Marksman still attaches automatically with diagnostics muted.
+`Space o m m` shows or hides only Marksman's diagnostics for the current note;
+navigation remains available.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves
@@ -339,7 +342,8 @@ mode, Git branch and diff, filename, diagnostics, attached LSP client(s),
 filetype, and compact cursor location/progress.
 
 In Markdown files, render-markdown decorates headings, checkboxes, code blocks,
-tables, and quotes in the editor; `Space m` toggles between raw and rendered.
+tables, and quotes in the editor. `Space m r` toggles it on the thin profile;
+`Space m` keeps the existing full-profile mapping.
 Those decorations use Catppuccin Mocha accents over Neovim's transparent Nord
 base, with compact heading bands and trimmed table cells.
 

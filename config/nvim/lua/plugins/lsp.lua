@@ -81,14 +81,47 @@ return {
         vim.diagnostic.enable(enabled, { bufnr = bufnr, ns_id = namespace })
       end
 
-      -- Marksman is useful for navigating the vault, but its diagnostics are
-      -- noisy against years of existing notes. Start muted per Markdown buffer
-      -- and let Space o m m reveal them only when they are useful.
-      vim.lsp.config("marksman", {
-        on_attach = function(client, bufnr)
-          set_marksman_diagnostics(client.id, bufnr, false)
-        end,
-      })
+      if profile.is_full then
+        -- Full profiles keep Marksman attached with diagnostics muted. The thin
+        -- profile starts Marksman only when requested for the current file.
+        vim.lsp.config("marksman", {
+          on_attach = function(client, bufnr)
+            set_marksman_diagnostics(client.id, bufnr, false)
+          end,
+        })
+      end
+
+      if profile.is_thin then
+        vim.api.nvim_create_user_command("MarksmanStartCurrent", function()
+          local bufnr = vim.api.nvim_get_current_buf()
+          if not vim.list_contains({ "markdown", "markdown.mdx" }, vim.bo[bufnr].filetype) then
+            vim.notify("Marksman can start only in a Markdown file", vim.log.levels.WARN)
+            return
+          end
+
+          if #vim.lsp.get_clients({ bufnr = bufnr, name = "marksman" }) > 0 then
+            vim.notify("Marksman is already running for this file")
+            return
+          end
+
+          local config = vim.deepcopy(vim.lsp.config.marksman)
+          config.root_dir = vim.fs.root(bufnr, config.root_markers or {})
+          if vim.lsp.start(config, { bufnr = bufnr, reuse_client = config.reuse_client }) then
+            vim.notify("Marksman started for this file")
+          end
+        end, { desc = "Start Marksman for the current Markdown file" })
+
+        vim.api.nvim_create_autocmd("FileType", {
+          desc = "Add the thin-profile Marksman start mapping",
+          pattern = { "markdown", "markdown.mdx" },
+          callback = function(args)
+            vim.keymap.set("n", "<leader>mm", "<cmd>MarksmanStartCurrent<cr>", {
+              buffer = args.buf,
+              desc = "Start Marksman for file",
+            })
+          end,
+        })
+      end
 
       vim.api.nvim_create_user_command("MarksmanDiagnosticsToggle", function()
         local bufnr = vim.api.nvim_get_current_buf()
@@ -146,8 +179,6 @@ return {
           "marksman",
           "vtsls",
         })
-      else
-        vim.lsp.enable({ "marksman" })
       end
 
       vim.diagnostic.config({
