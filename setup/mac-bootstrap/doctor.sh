@@ -250,14 +250,26 @@ else
   fail "Neovim 0.12+ required, got '${nvim_version_output:-missing}'"
 fi
 
+nvim_runtime_ready=0
 if ! verify_neovim_plugins_restored "$DOTFILES_DIR/config/nvim/lazy-lock.json"; then
   fail "Neovim plugins are not fully restored"
 elif ! verify_neovim_parsers_restored; then
   fail "Tree-sitter parsers are not fully restored"
 elif verify_neovim_config_sandboxed "$DOTFILES_DIR/config/nvim"; then
   pass "Neovim config starts in an isolated, network-blocked data directory"
+  nvim_runtime_ready=1
 else
   fail "Neovim isolated headless startup"
+fi
+
+if [[ "$nvim_runtime_ready" -eq 1 ]]; then
+  if DOTFILES_NVIM_PROFILE=full nvim --headless "$DOTFILES_DIR/config/nvim/README.md" \
+    "+lua assert(not vim.lsp.is_enabled('marksman'),'Marksman was enabled globally'); local mapping=vim.fn.maparg(' mm','n',false,true); assert(mapping.desc=='Toggle Marksman for file','Space m m is not mapped to Marksman'); local bufnr=vim.api.nvim_get_current_buf(); vim.cmd.MarksmanToggleCurrent(); assert(vim.wait(5000,function() return #vim.lsp.get_clients({bufnr=bufnr,name='marksman'})>0 end),'Marksman did not attach on request'); vim.cmd.MarksmanToggleCurrent(); assert(vim.wait(5000,function() return #vim.lsp.get_clients({bufnr=bufnr,name='marksman'})==0 end),'Marksman did not detach on request')" \
+    '+qa!' >/dev/null 2>&1; then
+    pass "Full-profile Marksman toggles per Markdown buffer"
+  else
+    fail "Full-profile Marksman does not toggle per Markdown buffer"
+  fi
 fi
 
 if [[ "$FAILURES" -eq 0 ]]; then

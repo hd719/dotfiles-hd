@@ -74,6 +74,20 @@ local function profile_keys(keys)
   return enabled
 end
 
+local function hide_empty_scratch(item)
+  local buf = item.buf
+  if not buf or not vim.api.nvim_buf_is_valid(buf) or not vim.api.nvim_buf_is_loaded(buf) then
+    return item
+  end
+  if item.name ~= "" or vim.bo[buf].modified or vim.bo[buf].buftype ~= "" then
+    return item
+  end
+  if vim.api.nvim_buf_line_count(buf) == 1 and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == "" then
+    return false
+  end
+  return item
+end
+
 return {
   {
     "folke/snacks.nvim",
@@ -99,6 +113,23 @@ return {
                 keys = {
                   ["<Tab>"] = "list_down",
                   ["<S-Tab>"] = "list_up",
+                },
+              },
+            },
+          },
+          buffers = {
+            -- Neovim creates a fresh empty buffer when the last one closes.
+            -- Hide that placeholder so it does not look undeletable.
+            transform = hide_empty_scratch,
+            win = {
+              input = {
+                keys = {
+                  ["<leader>d"] = { "bufdelete", mode = { "i", "n" } },
+                },
+              },
+              list = {
+                keys = {
+                  ["<leader>d"] = "bufdelete",
                 },
               },
             },

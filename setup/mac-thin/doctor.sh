@@ -150,20 +150,20 @@ fi
 
 if command -v nvim >/dev/null 2>&1 \
   && DOTFILES_NVIM_PROFILE=thin nvim --headless \
-    "+lua local mapping=vim.fn.maparg(' e','n',false,true); local Snacks=require('snacks'); assert(mapping.desc=='File explorer','Space e is not mapped to Snacks Explorer'); assert(Snacks.config.explorer.replace_netrw==false,'Snacks Explorer would replace Oil'); assert(Snacks.config.picker.sources.explorer.hidden==true,'Snacks Explorer should show dotfiles')" \
+    "+lua local mapping=vim.fn.maparg(' e','n',false,true); local Snacks=require('snacks'); local source=Snacks.config.picker.sources.buffers; local buffers=source.win; local scratch=vim.api.nvim_create_buf(true,false); assert(mapping.desc=='File explorer','Space e is not mapped to Snacks Explorer'); assert(Snacks.config.explorer.replace_netrw==false,'Snacks Explorer would replace Oil'); assert(Snacks.config.picker.sources.explorer.hidden==true,'Snacks Explorer should show dotfiles'); assert(buffers.input.keys['<leader>d'][1]=='bufdelete','Space d is not mapped in the buffer-picker input'); assert(buffers.list.keys['<leader>d']=='bufdelete','Space d is not mapped in the buffer-picker list'); assert(source.transform({buf=scratch,name=''})==false,'Empty replacement buffers should stay hidden'); vim.api.nvim_buf_delete(scratch,{force=true})" \
     '+qa!' >/dev/null 2>&1; then
-  pass "Thin-profile Snacks explorer"
+  pass "Thin-profile Snacks explorer and buffer picker"
 else
-  fail "Thin-profile Snacks explorer is unavailable"
+  fail "Thin-profile Snacks explorer or buffer picker is unavailable"
 fi
 
 if command -v nvim >/dev/null 2>&1 \
   && DOTFILES_NVIM_PROFILE=thin nvim --headless "$SCRIPT_DIR/README.md" \
-    "+lua assert(not vim.lsp.is_enabled('marksman'),'Marksman was enabled globally'); assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached before request'); local mapping=vim.fn.maparg(' mm','n',false,true); assert(mapping.desc=='Start Marksman for file','Space m m is not mapped to Marksman'); vim.cmd.MarksmanStartCurrent(); local clients; assert(vim.wait(5000,function() clients=vim.lsp.get_clients({bufnr=0,name='marksman'}); return #clients>0 end),'Marksman did not attach on request'); local first=vim.api.nvim_get_current_buf(); vim.cmd.enew(); vim.bo.filetype='markdown'; assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached to an unrequested buffer'); assert(#vim.lsp.get_clients({bufnr=first,name='marksman'})>0,'Marksman detached from the requested buffer')" \
+    "+lua assert(not vim.lsp.is_enabled('marksman'),'Marksman was enabled globally'); assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached before request'); local mapping=vim.fn.maparg(' mm','n',false,true); assert(mapping.desc=='Toggle Marksman for file','Space m m is not mapped to Marksman'); local first=vim.api.nvim_get_current_buf(); vim.cmd.MarksmanToggleCurrent(); assert(vim.wait(5000,function() return #vim.lsp.get_clients({bufnr=first,name='marksman'})>0 end),'Marksman did not attach on request'); vim.cmd.enew(); vim.bo.filetype='markdown'; assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached to an unrequested buffer'); vim.api.nvim_set_current_buf(first); vim.cmd.MarksmanToggleCurrent(); assert(vim.wait(5000,function() return #vim.lsp.get_clients({bufnr=first,name='marksman'})==0 end),'Marksman did not detach on request')" \
     '+qa!' >/dev/null 2>&1; then
-  pass "Marksman is opt-in per Markdown buffer"
+  pass "Marksman toggles per Markdown buffer"
 else
-  fail "Marksman is not opt-in per Markdown buffer"
+  fail "Marksman does not toggle per Markdown buffer"
 fi
 
 for app_name in \

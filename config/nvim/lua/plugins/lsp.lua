@@ -81,47 +81,43 @@ return {
         vim.diagnostic.enable(enabled, { bufnr = bufnr, ns_id = namespace })
       end
 
-      if profile.is_full then
-        -- Full profiles keep Marksman attached with diagnostics muted. The thin
-        -- profile starts Marksman only when requested for the current file.
-        vim.lsp.config("marksman", {
-          on_attach = function(client, bufnr)
-            set_marksman_diagnostics(client.id, bufnr, false)
-          end,
-        })
-      end
+      vim.api.nvim_create_user_command("MarksmanToggleCurrent", function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        if not vim.list_contains({ "markdown", "markdown.mdx" }, vim.bo[bufnr].filetype) then
+          vim.notify("Marksman can toggle only in a Markdown file", vim.log.levels.WARN)
+          return
+        end
 
-      if profile.is_thin then
-        vim.api.nvim_create_user_command("MarksmanStartCurrent", function()
-          local bufnr = vim.api.nvim_get_current_buf()
-          if not vim.list_contains({ "markdown", "markdown.mdx" }, vim.bo[bufnr].filetype) then
-            vim.notify("Marksman can start only in a Markdown file", vim.log.levels.WARN)
-            return
+        local clients = vim.lsp.get_clients({ bufnr = bufnr, name = "marksman" })
+        if #clients > 0 then
+          for _, client in ipairs(clients) do
+            if vim.tbl_count(client.attached_buffers) == 1 then
+              client:stop()
+            else
+              vim.lsp.buf_detach_client(bufnr, client.id)
+            end
           end
+          vim.notify("Marksman stopped for this file")
+          return
+        end
 
-          if #vim.lsp.get_clients({ bufnr = bufnr, name = "marksman" }) > 0 then
-            vim.notify("Marksman is already running for this file")
-            return
-          end
+        local config = vim.deepcopy(vim.lsp.config.marksman)
+        config.root_dir = vim.fs.root(bufnr, config.root_markers or {})
+        if vim.lsp.start(config, { bufnr = bufnr, reuse_client = config.reuse_client }) then
+          vim.notify("Marksman started for this file")
+        end
+      end, { desc = "Toggle Marksman for the current Markdown file" })
 
-          local config = vim.deepcopy(vim.lsp.config.marksman)
-          config.root_dir = vim.fs.root(bufnr, config.root_markers or {})
-          if vim.lsp.start(config, { bufnr = bufnr, reuse_client = config.reuse_client }) then
-            vim.notify("Marksman started for this file")
-          end
-        end, { desc = "Start Marksman for the current Markdown file" })
-
-        vim.api.nvim_create_autocmd("FileType", {
-          desc = "Add the thin-profile Marksman start mapping",
-          pattern = { "markdown", "markdown.mdx" },
-          callback = function(args)
-            vim.keymap.set("n", "<leader>mm", "<cmd>MarksmanStartCurrent<cr>", {
-              buffer = args.buf,
-              desc = "Start Marksman for file",
-            })
-          end,
-        })
-      end
+      vim.api.nvim_create_autocmd("FileType", {
+        desc = "Add the per-file Marksman toggle",
+        pattern = { "markdown", "markdown.mdx" },
+        callback = function(args)
+          vim.keymap.set("n", "<leader>mm", "<cmd>MarksmanToggleCurrent<cr>", {
+            buffer = args.buf,
+            desc = "Toggle Marksman for file",
+          })
+        end,
+      })
 
       vim.api.nvim_create_user_command("MarksmanDiagnosticsToggle", function()
         local bufnr = vim.api.nvim_get_current_buf()
@@ -176,7 +172,6 @@ return {
           "html",
           "jsonls",
           "lua_ls",
-          "marksman",
           "vtsls",
         })
       end

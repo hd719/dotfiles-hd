@@ -1,5 +1,3 @@
-local profile = require("config.profile")
-
 return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
@@ -20,7 +18,7 @@ return {
     },
     keys = {
       {
-        profile.is_thin and "<leader>mr" or "<leader>m",
+        "<leader>mr",
         "<cmd>RenderMarkdown toggle<cr>",
         desc = "Toggle Markdown render",
       },

@@ -186,6 +186,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space h`                                | Open Oil file browser                                                         |
 | `Space e`                                | Open the file-explorer sidebar (Snacks)                                       |
 | `Space b`                                | Pick a buffer                                                                 |
+| `Space b`, then `Space d`                | Close the highlighted buffer; empty replacement buffers stay hidden           |
 | `Space d`                                | Close the current buffer                                                      |
 | `Space w` / `Space x`                    | Save / save and quit                                                          |
 | `Space R`                                | Replace the word under the cursor in the current file                         |
@@ -226,9 +227,8 @@ Every agent teaching Neovim must read and update both files.
 | `Space o m m/n`                          | Toggle Marksman diagnostics / rename                                          |
 | `Space o m r/s`                          | Marksman references / symbols                                                 |
 | `Space o e`                              | Open the current file externally; PDFs use Bookokrat                          |
-| `Space m m`                              | Thin profile: start Marksman only for the current Markdown file                |
-| `Space m r`                              | Thin profile: toggle Markdown rendering                                       |
-| `Space m`                                | Full profile: toggle Markdown rendering                                       |
+| `Space m m`                              | Toggle Marksman for the current Markdown file                                 |
+| `Space m r`                              | Toggle Markdown rendering                                                     |
 | `Space z a/o/c`                          | Fold: toggle / open all / close all                                           |
 | `gd` / `gh` / `grr`                      | Definition / hover / references                                               |
 | `gsa` / `gsd` / `gsr`                    | Surround add / delete / replace                                               |
@@ -286,8 +286,8 @@ its actions.
 
 ### Using Marksman in the vault
 
-On the thin profile, open a Markdown note under `~/Developer/hd` and press
-`Space m m`. Marksman attaches only to that file. Put the cursor on a
+Open a Markdown note under `~/Developer/hd` and press `Space m m`. Marksman
+attaches only to that file; press it again to detach. Put the cursor on a
 `[[wikilink]]`, then use:
 
 - `Space o m h` to preview the target.
@@ -296,9 +296,8 @@ On the thin profile, open a Markdown note under `~/Developer/hd` and press
 - `Space o m s` to browse headings in the current note.
 - `Space o m n` to rename a target, or `Space o m a` for available actions.
 
-On full profiles, Marksman still attaches automatically with diagnostics muted.
 `Space o m m` shows or hides only Marksman's diagnostics for the current note;
-navigation remains available.
+navigation remains available while diagnostics are muted.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves
@@ -342,8 +341,7 @@ mode, Git branch and diff, filename, diagnostics, attached LSP client(s),
 filetype, and compact cursor location/progress.
 
 In Markdown files, render-markdown decorates headings, checkboxes, code blocks,
-tables, and quotes in the editor. `Space m r` toggles it on the thin profile;
-`Space m` keeps the existing full-profile mapping.
+tables, and quotes in the editor. `Space m r` toggles it in either profile.
 Those decorations use Catppuccin Mocha accents over Neovim's transparent Nord
 base, with compact heading bands and trimmed table cells.
 

@@ -218,9 +218,9 @@ unexplained magic.
   through `uv`.
 - [x] **6.D8** Verify a live ESLint unused-variable diagnostic and distinguish
   its `E` sign from Gitsigns' `H` changed-hunk sign. — Session 006
-- [ ] **6.D9** On the thin profile, start Marksman for one Markdown file with
-  `Space m m`, then use the `Space o m` menu for hover, definition, and
-  references on a vault `[[wikilink]]`.
+- [ ] **6.D9** Toggle Marksman for one Markdown file with `Space m m`, then use
+  the `Space o m` menu for hover, definition, and references on a vault
+  `[[wikilink]]`.
 - [ ] **6.D10** Toggle Marksman diagnostics for the current note with
   `Space o m m` and explain why navigation stays available while they are
   muted.

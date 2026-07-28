@@ -3196,3 +3196,32 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   automatic Marksman behavior and `Space m` render toggle.
 - Automated checks passed; human verification remains pending. No curriculum
   item was marked complete.
+
+## 2026-07-28 — Session 033: Per-File Marksman Toggle
+
+- `Space m m` now toggles Marksman for the current Markdown file on the thin
+  profile. The first press attaches it; the second press detaches it.
+- Turning Marksman off in one file leaves any other manually enabled Markdown
+  buffers attached.
+- Automated checks passed; human verification remains pending. No curriculum
+  item was marked complete.
+
+## 2026-07-28 — Session 034: Shared Marksman Toggle
+
+- Marksman now stays off by default in both the `thin` and `full` profiles.
+- `Space m m` toggles Marksman only for the current Markdown file in either
+  profile.
+- `Space m r` is now the shared Markdown-render toggle, leaving `Space m` as a
+  discoverable Markdown menu in both profiles.
+- Automated checks passed; human verification remains pending. No curriculum
+  item was marked complete.
+
+## 2026-07-28 — Session 035: Buffer-Picker Dismiss Key
+
+- Inside the `Space b` buffer picker, `Space d` now closes the highlighted
+  buffer without opening it first.
+- This matches the existing global `Space d` mnemonic: `d` dismisses a buffer
+  without deleting its file from disk.
+- Neovim's automatic empty replacement buffer stays hidden from the picker, so
+  deleting the final `[Scratch]` entry leaves the list clear.
+- Automated checks passed; human verification remains pending.

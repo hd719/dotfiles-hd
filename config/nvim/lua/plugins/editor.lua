@@ -58,13 +58,10 @@ local selected_filetypes = profile.is_thin and {
 
 local which_key_spec = {
   { "<leader>f", group = "Find" },
+  { "<leader>m", group = "Markdown" },
   { "<leader>o", group = "Obsidian" },
   { "<leader>om", group = "Marksman" },
 }
-
-if profile.is_thin then
-  table.insert(which_key_spec, { "<leader>m", group = "Markdown" })
-end
 
 return {
   {
