@@ -62,7 +62,7 @@ else
   fail "Herdr remote client missing"
 fi
 
-for command_name in hunk marksman nvim rg starship tree-sitter zoxide; do
+for command_name in hunk lsd marksman nvim rg starship tree-sitter zoxide; do
   if command -v "$command_name" >/dev/null 2>&1; then
     pass "$command_name available"
   else
@@ -262,6 +262,8 @@ if /bin/zsh -dfc "
   [[ \"\$(alias hstaged)\" == \"hstaged='hunk diff --staged'\" ]]
   [[ \"\$(alias hshow)\" == \"hshow='hunk show'\" ]]
   [[ \"\$(alias hwatch)\" == \"hwatch='hunk diff --watch'\" ]]
+  [[ \"\$(alias ls)\" == \"ls='lsd --tree --depth 1'\" ]]
+  [[ \"\$(alias ll)\" == \"ll='lsd -la --tree --depth 1'\" ]]
   [[ \"\$(alias v)\" == 'v=nvim' ]]
   ! alias gdiff >/dev/null 2>&1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]

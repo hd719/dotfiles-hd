@@ -3,6 +3,7 @@
 brew "gh"
 brew "herdr"
 brew "hunk"
+brew "lsd"
 brew "marksman"
 brew "neovim"
 brew "ripgrep"
