@@ -149,6 +149,15 @@ else
 fi
 
 if command -v nvim >/dev/null 2>&1 \
+  && DOTFILES_NVIM_PROFILE=thin nvim --headless \
+    "+lua local mapping=vim.fn.maparg(' e','n',false,true); local Snacks=require('snacks'); assert(mapping.desc=='File explorer','Space e is not mapped to Snacks Explorer'); assert(Snacks.config.explorer.replace_netrw==false,'Snacks Explorer would replace Oil'); assert(Snacks.config.picker.sources.explorer.hidden==true,'Snacks Explorer should show dotfiles')" \
+    '+qa!' >/dev/null 2>&1; then
+  pass "Thin-profile Snacks explorer"
+else
+  fail "Thin-profile Snacks explorer is unavailable"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
   && DOTFILES_NVIM_PROFILE=thin nvim --headless "$SCRIPT_DIR/README.md" \
     "+lua local clients; assert(vim.wait(5000,function() clients=vim.lsp.get_clients({bufnr=0,name='marksman'}); return #clients>0 end),'Marksman did not attach'); local ns=vim.lsp.diagnostic.get_namespace(clients[1].id,false); assert(not vim.diagnostic.is_enabled({bufnr=0,ns_id=ns}),'Marksman diagnostics were not muted')" \
     '+qa!' >/dev/null 2>&1; then
@@ -253,6 +262,7 @@ if /bin/zsh -dfc "
   [[ \"\$(alias hstaged)\" == \"hstaged='hunk diff --staged'\" ]]
   [[ \"\$(alias hshow)\" == \"hshow='hunk show'\" ]]
   [[ \"\$(alias hwatch)\" == \"hwatch='hunk diff --watch'\" ]]
+  [[ \"\$(alias v)\" == 'v=nvim' ]]
   ! alias gdiff >/dev/null 2>&1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
@@ -276,7 +286,6 @@ if /bin/zsh -dfc "
   [[ \"\$(whence -w uvm-suspend)\" == 'uvm-suspend: function' ]]
   [[ \"\$(whence -w uvm-resume)\" == 'uvm-resume: function' ]]
   [[ \"\$(whence -w uvm-destroy)\" == 'uvm-destroy: function' ]]
-  ! alias v >/dev/null 2>&1
   ! alias hm-dev >/dev/null 2>&1
   ! alias docker-nuke >/dev/null 2>&1
 "; then

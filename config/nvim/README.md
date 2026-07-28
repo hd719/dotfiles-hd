@@ -9,8 +9,8 @@ Hamel's existing Zed muscle memory.
   Ubuntu, full personal Macs, and Resilience.
 - `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
   editing behavior, Nord, Bufferline, Lualine, WhichKey, Oil, Mini pairs and
-  surround, Gitsigns, rendered Markdown, Obsidian, slim Snacks pickers,
-  Tree-sitter Markdown parsing, and Marksman only.
+  surround, Gitsigns, rendered Markdown, Obsidian, slim Snacks pickers and
+  Explorer, Tree-sitter Markdown parsing, and Marksman only.
 
 Both profiles use this directory and the same `lazy-lock.json`. Disabled
 full-only plugins are not restored on a thin machine. An unknown profile stops

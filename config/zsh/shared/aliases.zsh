@@ -24,6 +24,9 @@ alias hdiff='hunk diff'
 alias hstaged='hunk diff --staged'
 alias hshow='hunk show'
 
+## Editor
+alias v='nvim'
+
 ## Optional portable tools
 if (( $+commands[lsd] )); then
   alias ls='lsd --tree --depth 1'
