@@ -38,12 +38,6 @@ alias glast='git checkout - && gpp'
 alias glist='git branch --merged develop | grep -v develop | grep -v master'
 alias gsoft='git reset --soft HEAD~1'
 
-## Hunk
-alias hwatch='hunk diff --watch'
-alias hdiff='hunk diff'
-alias hstaged='hunk diff --staged'
-alias hshow='hunk show'
-
 ## Editor and system
 alias v='nvim'
 alias ff='fastfetch'

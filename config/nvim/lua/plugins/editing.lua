@@ -1,3 +1,5 @@
+local profile = require("config.profile")
+
 local function open_grug_far_float()
   local existing_buffers = {}
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
@@ -96,6 +98,7 @@ return {
   -- Visual search and replace for the current file with a reviewable diff.
   {
     "MagicDuck/grug-far.nvim",
+    enabled = profile.is_full,
     init = function()
       vim.api.nvim_create_user_command("GrugFarFloat", open_grug_far_float, {
         desc = "Open Grug Far in a centered float",

@@ -1,8 +1,17 @@
 # macOS control-plane applications only. Development tooling belongs in the VMs.
 
-brew "diff-so-fancy"
 brew "gh"
 brew "herdr"
+brew "hunk"
+brew "marksman"
+brew "neovim"
+brew "ripgrep"
+brew "starship"
+brew "tree-sitter-cli"
+brew "zoxide"
+brew "zsh-autocomplete"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
 
 cask "1password"
 cask "brave-browser"

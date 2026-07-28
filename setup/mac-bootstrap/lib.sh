@@ -556,6 +556,7 @@ verify_neovim_parsers_restored() {
 
 verify_neovim_config_sandboxed() {
   local config_dir="$1"
+  local profile="${2:-full}"
   local live_data="${XDG_DATA_HOME:-$HOME/.local/share}/nvim"
   local sandbox
   local exit_status=0
@@ -584,6 +585,7 @@ verify_neovim_config_sandboxed() {
     done
 
     PATH="$sandbox/bin:$PATH" \
+      DOTFILES_NVIM_PROFILE="$profile" \
       XDG_CACHE_HOME="$sandbox/cache" \
       XDG_CONFIG_HOME="$sandbox/config" \
       XDG_DATA_HOME="$sandbox/data" \

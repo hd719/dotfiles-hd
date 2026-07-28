@@ -89,9 +89,11 @@ setup/mac-thin/doctor.sh
 ```
 
 Keep development repositories, Docker, databases, compilers, language
-runtimes, language servers, Neovim, and project dependencies inside the Linux
-VMs. Herdr may run only as a thin client for the Ubuntu Herdr server. Do not
-run the full `mac-pro` bootstrap on the thin host.
+runtimes, project language servers, and project dependencies inside the Linux
+VMs. The only local editor exception is the shared Neovim `thin` profile with
+Marksman for Markdown and Obsidian notes; its Tree-sitter CLI builds only the
+two Markdown parsers. Herdr may run only as a thin client for the Ubuntu Herdr
+server. Do not run the full `mac-pro` bootstrap on the thin host.
 
 ### Codex Backup and Restore
 
@@ -155,8 +157,8 @@ Ansible owns system setup, mise owns development tools, and dotfiles owns user
 links. Use `setup/ubuntu/GUIDE.md` for Mac-to-Ubuntu teaching and keep its
 commands aligned with the supported workstation.
 
-- Keep `~/.gitconfig` machine-owned. Ubuntu's `.zshrc` must provide a plain
-  `less` fallback when the mise-owned `diff-so-fancy` is unavailable.
+- Keep `~/.gitconfig` machine-owned. Hunk is the shared diff viewer through
+  `hdiff`; do not install `diff-so-fancy` or set a profile-owned `GIT_PAGER`.
 - Set `ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE` before sourcing zsh-autosuggestions.
   Ghostty's Nord palette color 8 is too close to its background; preserve the
   tracked higher-contrast color unless the shared terminal palette changes.

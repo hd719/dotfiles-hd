@@ -1,4 +1,5 @@
 local opt = vim.opt
+local profile = require("config.profile")
 
 opt.number = true
 opt.relativenumber = true
@@ -38,20 +39,33 @@ opt.updatetime = 250
 opt.timeoutlen = 400
 opt.completeopt = { "menu", "menuone", "noselect" }
 
--- Structure-aware folding via Tree-sitter. Files open fully unfolded
--- (foldlevel 99); fold on demand with the Space z maps or the native z commands.
-opt.foldmethod = "expr"
-opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-opt.foldlevel = 99
-opt.foldlevelstart = 99
-opt.foldenable = true
+if profile.is_full then
+  -- Structure-aware folding via Tree-sitter. Files open fully unfolded
+  -- (foldlevel 99); fold on demand with the Space z maps or the native z commands.
+  opt.foldmethod = "expr"
+  opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+  opt.foldlevel = 99
+  opt.foldlevelstart = 99
+  opt.foldenable = true
 
-vim.filetype.add({
-  extension = {
-    js = "javascriptreact",
-    tmpl = "html",
-  },
-})
+  vim.filetype.add({
+    extension = {
+      js = "javascriptreact",
+      tmpl = "html",
+    },
+  })
+else
+  vim.api.nvim_create_autocmd("FileType", {
+    desc = "Enable Tree-sitter folding for thin-profile Markdown",
+    pattern = "markdown",
+    callback = function()
+      vim.opt_local.foldmethod = "expr"
+      vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+      vim.opt_local.foldlevel = 99
+      vim.opt_local.foldenable = true
+    end,
+  })
+end
 
 vim.api.nvim_create_autocmd("TextYankPost", {
   desc = "Briefly highlight yanked text",

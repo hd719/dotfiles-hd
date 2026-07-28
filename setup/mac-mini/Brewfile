@@ -1,7 +1,6 @@
 tap "steipete/tap"
 
 brew "coreutils"
-brew "diff-so-fancy"
 brew "ffmpeg"
 brew "git-filter-repo"
 brew "gogcli"

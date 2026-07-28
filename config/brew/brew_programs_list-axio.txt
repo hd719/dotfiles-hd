@@ -11,7 +11,7 @@ cjson
 cloudflared
 coreutils
 dav1d
-diff-so-fancy
+hunk
 docker
 docker-completion
 fastfetch

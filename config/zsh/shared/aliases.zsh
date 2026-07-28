@@ -11,13 +11,18 @@ alias g='git'
 alias gadd='git add .'
 alias gba='git branch -a'
 alias gcm='git commit -a -m'
-alias gdiff='git diff'
 alias gnew='git checkout -b'
 alias gpp='gpull && gprune'
 alias gprune='git fetch --prune'
 alias gpublish='git push -u origin $(git rev-parse --abbrev-ref HEAD)'
 alias gpull='git pull'
 alias gpush='git push'
+
+## Hunk
+alias hwatch='hunk diff --watch'
+alias hdiff='hunk diff'
+alias hstaged='hunk diff --staged'
+alias hshow='hunk show'
 
 ## Optional portable tools
 if (( $+commands[lsd] )); then

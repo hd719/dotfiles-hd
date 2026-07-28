@@ -500,7 +500,6 @@ bun = "1.3.14"
 "aqua:ogulcancelik/herdr" = "0.7.5"
 "github:bugzmanov/bookokrat" = "0.3.12"
 "go:golang.org/x/tools/gopls" = { version = "0.23.0", depends = ["go"] }
-"npm:diff-so-fancy" = { version = "1.4.12", depends = ["node"] }
 "npm:hunkdiff" = { version = "0.17.3", depends = ["node"] }
 "npm:@openai/codex" = { version = "0.145.0", depends = ["node"] }
 "npm:@vtsls/language-server" = { version = "0.3.0", depends = ["node"] }
@@ -600,7 +599,7 @@ export VISUAL="nvim"
 export GIT_EDITOR="nvim"
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#9399b2'
 eval "$(mise activate zsh)"
-export GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX'
+unset GIT_PAGER
 eval "$(starship init zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
@@ -615,6 +614,10 @@ EOF
 
   assert_file_contains "$SHARED_ALIASES" "alias gadd='git add .'"
   assert_file_contains "$SHARED_ALIASES" "alias dots='cd ~/Developer/dotfiles-hd'"
+  assert_file_contains "$SHARED_ALIASES" "alias hwatch='hunk diff --watch'"
+  assert_file_contains "$SHARED_ALIASES" "alias hdiff='hunk diff'"
+  assert_file_contains "$SHARED_ALIASES" "alias hstaged='hunk diff --staged'"
+  assert_file_contains "$SHARED_ALIASES" "alias hshow='hunk show'"
   assert_file_contains "$SHARED_CODEX_ALIASES" "alias cod='codex'"
   assert_file_contains "$SHARED_CODEX_ALIASES" "alias codu='codex update'"
   assert_file_contains "$SHARED_FUNCTIONS" "reload()"
@@ -622,10 +625,6 @@ EOF
   while IFS= read -r expected; do
     [[ -n "$expected" ]] && assert_file_contains "$SHARED_DEVELOPMENT_ALIASES" "$expected"
   done <<'EOF'
-alias hwatch='hunk diff --watch'
-alias hdiff='hunk diff'
-alias hstaged='hunk diff --staged'
-alias hshow='hunk show'
 alias npb='pnpm run build'
 alias ghd='gcm --no-verify'
 alias v='nvim'
@@ -664,23 +663,8 @@ EOF
     GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' \
     zsh -f -c '
       source "$1"
-      [[ "$GIT_PAGER" == "less --tabs=4 -RFX" ]] || exit 1
-    ' _ "$ZSH_CONFIG" || fail "Ubuntu Git pager did not fall back when diff-so-fancy was unavailable"
-
-  case_dir="$TEST_ROOT/zsh-git-pager"
-  mkdir -p "$case_dir/home" "$case_dir/bin"
-  cat > "$case_dir/bin/diff-so-fancy" <<'EOF'
-#!/usr/bin/env bash
-cat
-EOF
-  chmod +x "$case_dir/bin/diff-so-fancy"
-  HOME="$case_dir/home" \
-    PATH="$case_dir/bin:/usr/bin:/bin" \
-    GIT_PAGER='less --tabs=4 -RFX' \
-    zsh -f -c '
-      source "$1"
-      [[ "$GIT_PAGER" == "diff-so-fancy | less --tabs=4 -RFX" ]] || exit 1
-    ' _ "$ZSH_CONFIG" || fail "Ubuntu Git pager did not enable diff-so-fancy when available"
+      [[ -z "${GIT_PAGER+x}" ]] || exit 1
+    ' _ "$ZSH_CONFIG" || fail "Ubuntu inherited a profile-owned Git pager"
 
   HOME="$TEST_ROOT/zsh-home" \
     PATH="/usr/bin:/bin" \
@@ -691,6 +675,10 @@ EOF
       [[ "$(alias gadd)" == "gadd='\''git add .'\''" ]]
       [[ "$(alias dots)" == "dots='\''cd ~/Developer/dotfiles-hd'\''" ]]
       [[ "$(alias hdiff)" == "hdiff='\''hunk diff'\''" ]]
+      [[ "$(alias hstaged)" == "hstaged='\''hunk diff --staged'\''" ]]
+      [[ "$(alias hshow)" == "hshow='\''hunk show'\''" ]]
+      [[ "$(alias hwatch)" == "hwatch='\''hunk diff --watch'\''" ]]
+      ! alias gdiff >/dev/null 2>&1
       [[ "$(alias npb)" == "npb='\''pnpm run build'\''" ]]
       [[ "$(alias v)" == "v=nvim" ]]
       [[ "$(alias tm)" == "tm=tmux" ]]

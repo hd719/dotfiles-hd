@@ -1,3 +1,5 @@
+local profile = require("config.profile")
+
 local parsers = {
   "bash",
   "ecma",
@@ -45,6 +47,15 @@ local filetypes = {
   "yaml",
 }
 
+local selected_parsers = profile.is_thin and {
+  "markdown",
+  "markdown_inline",
+} or parsers
+
+local selected_filetypes = profile.is_thin and {
+  "markdown",
+} or filetypes
+
 return {
   {
     "folke/which-key.nvim",
@@ -67,11 +78,11 @@ return {
     lazy = false,
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter").install(parsers)
+      require("nvim-treesitter").install(selected_parsers)
 
       vim.api.nvim_create_autocmd("FileType", {
         desc = "Enable Tree-sitter highlighting when a parser is installed",
-        pattern = filetypes,
+        pattern = selected_filetypes,
         callback = function()
           pcall(vim.treesitter.start)
         end,

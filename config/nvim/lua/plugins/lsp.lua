@@ -1,6 +1,9 @@
+local profile = require("config.profile")
+
 return {
   {
     "saghen/blink.cmp",
+    enabled = profile.is_full,
     version = "1.*",
     lazy = false,
     dependencies = {
@@ -38,38 +41,40 @@ return {
   {
     "neovim/nvim-lspconfig",
     lazy = false,
-    dependencies = {
+    dependencies = profile.is_full and {
       "saghen/blink.cmp",
       "b0o/schemastore.nvim",
-    },
+    } or {},
     config = function()
-      vim.lsp.config("*", {
-        capabilities = require("blink.cmp").get_lsp_capabilities(),
-      })
+      if profile.is_full then
+        vim.lsp.config("*", {
+          capabilities = require("blink.cmp").get_lsp_capabilities(),
+        })
 
-      vim.lsp.config("lua_ls", {
-        settings = {
-          Lua = {
-            runtime = {
-              version = "LuaJIT",
-            },
-            workspace = {
-              checkThirdParty = false,
-              library = {
-                vim.env.VIMRUNTIME,
+        vim.lsp.config("lua_ls", {
+          settings = {
+            Lua = {
+              runtime = {
+                version = "LuaJIT",
+              },
+              workspace = {
+                checkThirdParty = false,
+                library = {
+                  vim.env.VIMRUNTIME,
+                },
               },
             },
           },
-        },
-      })
+        })
 
-      vim.lsp.config("vtsls", {
-        settings = {
-          vtsls = {
-            autoUseWorkspaceTsdk = true,
+        vim.lsp.config("vtsls", {
+          settings = {
+            vtsls = {
+              autoUseWorkspaceTsdk = true,
+            },
           },
-        },
-      })
+        })
+      end
 
       local function set_marksman_diagnostics(client_id, bufnr, enabled)
         local namespace = vim.lsp.diagnostic.get_namespace(client_id, false)
@@ -101,45 +106,49 @@ return {
         vim.notify("Marksman diagnostics " .. (enabled and "shown" or "muted") .. " for this note")
       end, { desc = "Toggle Marksman diagnostics for the current note" })
 
-      -- GraphQL. graphql-lsp is a Node tool with no Homebrew formula, so pnpm
-      -- installs it under a fixed, node-version-independent home and this config
-      -- references it by absolute path. See config/nvim/README.md for the
-      -- reproducible install. Scoped to .graphql files; schema-aware features
-      -- come from the project's graphql-config (e.g. graphql.config.ts).
-      vim.lsp.config("graphql", {
-        cmd = {
-          vim.fn.expand("~/.local/graphql-lsp/bin/graphql-lsp"),
-          "server",
-          "-m",
-          "stream",
-        },
-        filetypes = { "graphql" },
-      })
-
-      -- JSON with SchemaStore catalogs (package.json, tsconfig.json, etc.).
-      -- The jsonls/cssls/html servers ship with vscode-langservers-extracted,
-      -- which is already installed for ESLint.
-      vim.lsp.config("jsonls", {
-        settings = {
-          json = {
-            schemas = require("schemastore").json.schemas(),
-            validate = { enable = true },
+      if profile.is_full then
+        -- GraphQL. graphql-lsp is a Node tool with no Homebrew formula, so pnpm
+        -- installs it under a fixed, node-version-independent home and this config
+        -- references it by absolute path. See config/nvim/README.md for the
+        -- reproducible install. Scoped to .graphql files; schema-aware features
+        -- come from the project's graphql-config (e.g. graphql.config.ts).
+        vim.lsp.config("graphql", {
+          cmd = {
+            vim.fn.expand("~/.local/graphql-lsp/bin/graphql-lsp"),
+            "server",
+            "-m",
+            "stream",
           },
-        },
-      })
+          filetypes = { "graphql" },
+        })
 
-      vim.lsp.enable({
-        "bashls",
-        "cssls",
-        "eslint",
-        "gopls",
-        "graphql",
-        "html",
-        "jsonls",
-        "lua_ls",
-        "marksman",
-        "vtsls",
-      })
+        -- JSON with SchemaStore catalogs (package.json, tsconfig.json, etc.).
+        -- The jsonls/cssls/html servers ship with vscode-langservers-extracted,
+        -- which is already installed for ESLint.
+        vim.lsp.config("jsonls", {
+          settings = {
+            json = {
+              schemas = require("schemastore").json.schemas(),
+              validate = { enable = true },
+            },
+          },
+        })
+
+        vim.lsp.enable({
+          "bashls",
+          "cssls",
+          "eslint",
+          "gopls",
+          "graphql",
+          "html",
+          "jsonls",
+          "lua_ls",
+          "marksman",
+          "vtsls",
+        })
+      else
+        vim.lsp.enable({ "marksman" })
+      end
 
       vim.diagnostic.config({
         severity_sort = true,
@@ -154,6 +163,7 @@ return {
   },
   {
     "stevearc/conform.nvim",
+    enabled = profile.is_full,
     event = { "BufReadPre", "BufNewFile" },
     cmd = { "ConformInfo" },
     keys = {

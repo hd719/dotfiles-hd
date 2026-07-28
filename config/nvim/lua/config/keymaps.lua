@@ -1,4 +1,5 @@
 local map = vim.keymap.set
+local profile = require("config.profile")
 
 -- Intentional Zed muscle memory. Nonrecursive mappings prevent an i/a loop.
 map("n", "i", "a", { desc = "Insert after cursor" })
@@ -72,71 +73,79 @@ map("n", "<leader>s", "<cmd>rightbelow split<cr>", { desc = "Split down" })
 map("n", "<leader>n", "<cmd>enew<cr>", { desc = "New file" })
 map("n", "<leader>r", "<cmd>checktime<cr>", { desc = "Reload files changed on disk" })
 
-local function open_default_app(path)
-  local _, err = vim.ui.open(path)
-  if err then
-    vim.notify(err, vim.log.levels.ERROR)
-  end
-end
-
-local function open_pdf(path)
-  local bookokrat = vim.fn.exepath("bookokrat")
-  if bookokrat == "" then
-    vim.notify("Bookokrat is unavailable; opening the PDF in its default app", vim.log.levels.WARN)
-    open_default_app(path)
-    return
+if profile.is_full then
+  local function open_default_app(path)
+    local _, err = vim.ui.open(path)
+    if err then
+      vim.notify(err, vim.log.levels.ERROR)
+    end
   end
 
-  local directory = vim.fs.dirname(path)
-  local command = vim.fn.shellescape(bookokrat) .. " " .. vim.fn.shellescape(path) .. "; exit"
-  local workspace = vim.env.HERDR_WORKSPACE_ID
+  local function open_pdf(path)
+    local bookokrat = vim.fn.exepath("bookokrat")
+    if bookokrat == "" then
+      vim.notify(
+        "Bookokrat is unavailable; opening the PDF in its default app",
+        vim.log.levels.WARN
+      )
+      open_default_app(path)
+      return
+    end
 
-  if vim.env.HERDR_ENV == "1" and workspace and vim.fn.executable("herdr") == 1 then
-    vim.system({
-      "herdr",
-      "tab",
-      "create",
-      "--workspace",
-      workspace,
-      "--cwd",
-      directory,
-      "--label",
-      "PDF",
-      "--focus",
-    }, { text = true }, function(result)
-      vim.schedule(function()
-        if result.code ~= 0 then
-          vim.notify(
-            "Could not create the Herdr PDF tab: " .. vim.trim(result.stderr or ""),
-            vim.log.levels.ERROR
-          )
-          return
-        end
+    local directory = vim.fs.dirname(path)
+    local command = vim.fn.shellescape(bookokrat) .. " " .. vim.fn.shellescape(path) .. "; exit"
+    local workspace = vim.env.HERDR_WORKSPACE_ID
 
-        local ok, response = pcall(vim.json.decode, result.stdout or "")
-        local pane = ok and vim.tbl_get(response, "result", "root_pane", "pane_id") or nil
-        if not pane then
-          vim.notify("Herdr did not return a pane for the PDF viewer", vim.log.levels.ERROR)
-          return
-        end
-
-        vim.system({ "herdr", "pane", "run", pane, command }, { text = true }, function(run_result)
-          if run_result.code ~= 0 then
-            vim.schedule(function()
-              vim.notify(
-                "Could not start Bookokrat: " .. vim.trim(run_result.stderr or ""),
-                vim.log.levels.ERROR
-              )
-            end)
+    if vim.env.HERDR_ENV == "1" and workspace and vim.fn.executable("herdr") == 1 then
+      vim.system({
+        "herdr",
+        "tab",
+        "create",
+        "--workspace",
+        workspace,
+        "--cwd",
+        directory,
+        "--label",
+        "PDF",
+        "--focus",
+      }, { text = true }, function(result)
+        vim.schedule(function()
+          if result.code ~= 0 then
+            vim.notify(
+              "Could not create the Herdr PDF tab: " .. vim.trim(result.stderr or ""),
+              vim.log.levels.ERROR
+            )
+            return
           end
+
+          local ok, response = pcall(vim.json.decode, result.stdout or "")
+          local pane = ok and vim.tbl_get(response, "result", "root_pane", "pane_id") or nil
+          if not pane then
+            vim.notify("Herdr did not return a pane for the PDF viewer", vim.log.levels.ERROR)
+            return
+          end
+
+          vim.system(
+            { "herdr", "pane", "run", pane, command },
+            { text = true },
+            function(run_result)
+              if run_result.code ~= 0 then
+                vim.schedule(function()
+                  vim.notify(
+                    "Could not start Bookokrat: " .. vim.trim(run_result.stderr or ""),
+                    vim.log.levels.ERROR
+                  )
+                end)
+              end
+            end
+          )
         end)
       end)
-    end)
-    return
-  end
+      return
+    end
 
-  if vim.fn.has("mac") == 1 and vim.fn.isdirectory("/Applications/Ghostty.app") == 1 then
-    local ghostty_tab_script = [[
+    if vim.fn.has("mac") == 1 and vim.fn.isdirectory("/Applications/Ghostty.app") == 1 then
+      local ghostty_tab_script = [[
 on run argv
   set bookokratPath to item 1 of argv
   set pdfPath to item 2 of argv
@@ -150,80 +159,81 @@ on run argv
 end run
 ]]
 
-    vim.system(
-      { "/usr/bin/osascript", "-e", ghostty_tab_script, bookokrat, path, directory },
-      { text = true },
-      function(result)
-        if result.code ~= 0 then
-          vim.schedule(function()
-            vim.notify(
-              "Could not create the Ghostty PDF tab: " .. vim.trim(result.stderr or ""),
-              vim.log.levels.ERROR
-            )
-          end)
+      vim.system(
+        { "/usr/bin/osascript", "-e", ghostty_tab_script, bookokrat, path, directory },
+        { text = true },
+        function(result)
+          if result.code ~= 0 then
+            vim.schedule(function()
+              vim.notify(
+                "Could not create the Ghostty PDF tab: " .. vim.trim(result.stderr or ""),
+                vim.log.levels.ERROR
+              )
+            end)
+          end
         end
-      end
-    )
-    return
-  end
-
-  vim.notify(
-    "Run this in a supported terminal: bookokrat " .. vim.fn.shellescape(path),
-    vim.log.levels.WARN
-  )
-end
-
-local pdf_launcher_group = vim.api.nvim_create_augroup("BookokratPdfLauncher", { clear = true })
-
-vim.api.nvim_create_autocmd("BufReadCmd", {
-  group = pdf_launcher_group,
-  -- One mixed-case pattern avoids two matches when macOS sets fileignorecase.
-  pattern = "*.[pP][dD][fF]",
-  desc = "Open PDFs in Bookokrat instead of rendering them with Snacks",
-  callback = function(args)
-    local path = vim.api.nvim_buf_get_name(args.buf)
-    vim.bo[args.buf].buftype = "nofile"
-    vim.bo[args.buf].bufhidden = "wipe"
-    vim.bo[args.buf].swapfile = false
-    vim.bo[args.buf].modifiable = true
-    vim.api.nvim_buf_set_lines(args.buf, 0, -1, false, {
-      "PDF launch requested.",
-      "",
-      "j / k       scroll down / up",
-      "h / l       previous / next page",
-      "+ / -       zoom in / out",
-      "z / Z       fit height / width",
-      "/           search the PDF",
-      "?           open Bookokrat help",
-      "q           quit (press n first if NORMAL is shown)",
-      "",
-      "Space o e   reopen the PDF",
-      "Space d     close this placeholder buffer",
-    })
-    vim.bo[args.buf].filetype = "pdf_launcher"
-    vim.bo[args.buf].modifiable = false
-    vim.bo[args.buf].readonly = true
-    vim.bo[args.buf].modified = false
-
-    if #vim.api.nvim_list_uis() > 0 then
-      open_pdf(path)
+      )
+      return
     end
-  end,
-})
 
-map("n", "<leader>oe", function()
-  local path = vim.api.nvim_buf_get_name(0)
-  if path == "" then
-    vim.notify("Current buffer has no file", vim.log.levels.WARN)
-    return
+    vim.notify(
+      "Run this in a supported terminal: bookokrat " .. vim.fn.shellescape(path),
+      vim.log.levels.WARN
+    )
   end
 
-  if path:lower():sub(-4) == ".pdf" then
-    open_pdf(path)
-  else
-    open_default_app(path)
-  end
-end, { desc = "Open file externally" })
+  local pdf_launcher_group = vim.api.nvim_create_augroup("BookokratPdfLauncher", { clear = true })
+
+  vim.api.nvim_create_autocmd("BufReadCmd", {
+    group = pdf_launcher_group,
+    -- One mixed-case pattern avoids two matches when macOS sets fileignorecase.
+    pattern = "*.[pP][dD][fF]",
+    desc = "Open PDFs in Bookokrat instead of rendering them with Snacks",
+    callback = function(args)
+      local path = vim.api.nvim_buf_get_name(args.buf)
+      vim.bo[args.buf].buftype = "nofile"
+      vim.bo[args.buf].bufhidden = "wipe"
+      vim.bo[args.buf].swapfile = false
+      vim.bo[args.buf].modifiable = true
+      vim.api.nvim_buf_set_lines(args.buf, 0, -1, false, {
+        "PDF launch requested.",
+        "",
+        "j / k       scroll down / up",
+        "h / l       previous / next page",
+        "+ / -       zoom in / out",
+        "z / Z       fit height / width",
+        "/           search the PDF",
+        "?           open Bookokrat help",
+        "q           quit (press n first if NORMAL is shown)",
+        "",
+        "Space o e   reopen the PDF",
+        "Space d     close this placeholder buffer",
+      })
+      vim.bo[args.buf].filetype = "pdf_launcher"
+      vim.bo[args.buf].modifiable = false
+      vim.bo[args.buf].readonly = true
+      vim.bo[args.buf].modified = false
+
+      if #vim.api.nvim_list_uis() > 0 then
+        open_pdf(path)
+      end
+    end,
+  })
+
+  map("n", "<leader>oe", function()
+    local path = vim.api.nvim_buf_get_name(0)
+    if path == "" then
+      vim.notify("Current buffer has no file", vim.log.levels.WARN)
+      return
+    end
+
+    if path:lower():sub(-4) == ".pdf" then
+      open_pdf(path)
+    else
+      open_default_app(path)
+    end
+  end, { desc = "Open file externally" })
+end
 
 -- Copy paths to the system clipboard. WhichKey lists these under Space y, so
 -- there is nothing to memorize: press Space y and pick.
@@ -261,11 +271,13 @@ map("n", "<leader>w", "<cmd>write<cr>", { desc = "Save" })
 map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Quit" })
 map("n", "<leader>x", "<cmd>x<cr>", { desc = "Save and quit" })
 
-map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
 map("n", "<leader>cq", "<cmd>cclose<cr>", { desc = "Close quickfix" })
-map("n", "gh", function()
-  vim.lsp.buf.hover({ border = "rounded" })
-end, { desc = "Hover" })
+if profile.is_full then
+  map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
+  map("n", "gh", function()
+    vim.lsp.buf.hover({ border = "rounded" })
+  end, { desc = "Hover" })
+end
 
 map("x", "<", "<gv", { desc = "Outdent" })
 map("x", ">", ">gv", { desc = "Indent" })

@@ -67,8 +67,11 @@ setup/mac-thin/bootstrap.sh --apply
 setup/mac-thin/doctor.sh
 ```
 
-Development repositories, Docker, databases, compilers, language runtimes,
-language servers, Neovim, and project dependencies stay inside the Linux VMs.
+Development repositories, Docker, databases, project compilers, language
+runtimes, project dependencies, and language servers other than the thin
+profile's Marksman stay inside the Linux VMs. The local Tree-sitter CLI builds
+only Neovim's two Markdown parsers. Thin Neovim is for local configuration and
+Obsidian notes, not project development.
 
 Full personal Mac:
 
@@ -86,13 +89,14 @@ the approval gate in the Mac bootstrap runbook before `--apply`.
 
 ## System Boundaries
 
-- Thin Macs are control planes for browsers, Codex, Obsidian, SSH, the Herdr
-  remote client, Vagrant, and VMware Fusion.
+- Thin Macs are control planes for browsers, Codex, Obsidian, thin-profile
+  Neovim, SSH, the Herdr remote client, Vagrant, and VMware Fusion.
 - Ubuntu VMs own project repositories, Docker, databases, compilers, language
-  runtimes, language servers, Neovim, and project dependencies.
+  runtimes, full-profile Neovim, project language servers, and dependencies.
 - Full personal Macs own their local development toolchain.
 - The production Mac mini has extra approval gates before bootstrap changes.
 - The Resilience work Mac is scoped to terminal and editor repair only.
+- Every shell profile uses Hunk through `hdiff`; no profile owns a Git pager.
 
 ## Repository Map
 

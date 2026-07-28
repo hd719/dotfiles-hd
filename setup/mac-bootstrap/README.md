@@ -117,6 +117,8 @@ Use the preflight, dry-run, doctor, and runtime checks above as the full gate.
 
 Herdr sessions, Hunk state, tmux plugins, credentials, auth state, services,
 Docker state, and application databases remain outside bootstrap ownership.
+Use the shared `hdiff`, `hstaged`, `hshow`, and `hwatch` aliases instead of a
+profile-owned Git pager.
 
 ## Roll Back
 

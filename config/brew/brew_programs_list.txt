@@ -1,7 +1,7 @@
 bat
 btop
 ca-certificates
-diff-so-fancy
+hunk
 docker-completion
 fastfetch
 helm

@@ -15,6 +15,9 @@ SUDO="${DOTFILES_SUDO:-/usr/bin/sudo}"
 # shellcheck source=../mac-bootstrap/lib.sh
 source "$DOTFILES_DIR/setup/mac-bootstrap/lib.sh"
 
+NEOVIM_PARSERS=(markdown markdown_inline)
+NEOVIM_PARSER_BINARIES=(markdown markdown_inline)
+
 usage() {
   cat <<'EOF'
 Usage: bootstrap.sh [--dry-run|--check|--apply]
@@ -24,8 +27,9 @@ Modes:
   --check    Audit packages, applications, and links without changing them.
   --apply    Install missing control-plane apps and apply backed-up links.
 
-This profile never installs developer runtimes, Docker, databases, compilers,
-language servers, editors, or project dependencies.
+This profile never installs project runtimes, Docker, databases, project compilers,
+project dependencies, or language servers other than Marksman for Markdown.
+Neovim always runs the restricted thin profile.
 EOF
 }
 
@@ -56,10 +60,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 BREWFILE="$DOTFILES_DIR/setup/mac-thin/Brewfile"
+NVIM_LOCKFILE="$DOTFILES_DIR/config/nvim/lazy-lock.json"
 LINK_SPECS=(
   "$DOTFILES_DIR/setup/mac-thin/.zshrc|$HOME/.zshrc"
   "$DOTFILES_DIR/config/ghostty/config|$HOME/Library/Application Support/com.mitchellh.ghostty/config"
   "$DOTFILES_DIR/config/herdr/config.toml|$HOME/.config/herdr/config.toml"
+  "$DOTFILES_DIR/config/hunk/config.toml|$HOME/.config/hunk/config.toml"
+  "$DOTFILES_DIR/config/nvim|$HOME/.config/nvim"
+  "$DOTFILES_DIR/config/starship/starship.toml|$HOME/.config/starship.toml"
 )
 
 [[ "$(uname -s)" == "Darwin" ]] || die "mac-thin requires macOS"
@@ -88,6 +96,8 @@ require_source "$DOTFILES_DIR/config/zsh/mac/aliases.zsh"
 require_source "$DOTFILES_DIR/config/zsh/mac/personal/aliases.zsh"
 require_source "$SCRIPT_DIR/vm.zsh"
 require_source "$GIT_ALIASES_SCRIPT"
+require_source "$NVIM_LOCKFILE"
+require_source "$DOTFILES_DIR/config/nvim/lua/config/profile.lua"
 for spec in "${LINK_SPECS[@]}"; do
   require_source "${spec%%|*}"
   reject_link_source_alias "${spec%%|*}" "${spec#*|}"
@@ -104,6 +114,38 @@ rosetta_installed() {
   "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1
 }
 
+restore_thin_neovim() {
+  local lockfile_backup
+  local nvim_status=0
+
+  validate_neovim_lockfile "$NVIM_LOCKFILE" || return 1
+  lockfile_backup="$(mktemp "${TMPDIR:-/tmp}/dotfiles-thin-lazy-lock.XXXXXX")"
+  cp -p "$NVIM_LOCKFILE" "$lockfile_backup"
+
+  if DOTFILES_NVIM_PROFILE=thin DOTFILES_NVIM_RESTORE_ALL=1 \
+    nvim --headless '+Lazy! restore' '+qa'; then
+    if DOTFILES_NVIM_PROFILE=thin nvim --headless \
+      "+lua local ok=require('nvim-treesitter').install({'markdown','markdown_inline'}):wait(); if not ok then vim.cmd('cquit 1') end" \
+      '+qa'; then
+      if ! verify_neovim_parsers_restored; then
+        nvim_status=1
+      fi
+    else
+      nvim_status=$?
+    fi
+  else
+    nvim_status=$?
+  fi
+
+  if ! cmp -s "$NVIM_LOCKFILE" "$lockfile_backup"; then
+    cp -p "$lockfile_backup" "$NVIM_LOCKFILE"
+    say "restored unchanged Neovim lockfile: $NVIM_LOCKFILE"
+  fi
+  rm -f "$lockfile_backup"
+
+  [[ "$nvim_status" -eq 0 ]] || die "Thin-profile Neovim restore failed"
+}
+
 if [[ "$MODE" == "dry-run" ]]; then
   say "profile: mac-thin"
   say "mode: dry-run (no package-manager calls or writes)"
@@ -111,6 +153,7 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "VMware Fusion and ChatGPT remain manual application installs"
   say "would install Rosetta 2 when missing"
   say "would install vagrant-vmware-desktop $VAGRANT_VMWARE_PLUGIN_VERSION"
+  say "would restore only thin-profile Neovim plugins and Markdown parsers"
   say "would include portable Git aliases without replacing machine-owned identity"
   for spec in "${LINK_SPECS[@]}"; do
     backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 1
@@ -177,6 +220,9 @@ for spec in "${LINK_SPECS[@]}"; do
   backup_and_link "${spec%%|*}" "${spec#*|}" "$STAMP" 0
 done
 DOTFILES_STAMP="$STAMP" "$GIT_ALIASES_SCRIPT" --apply
+
+say "Restoring locked thin-profile Neovim plugins and Markdown parsers..."
+restore_thin_neovim
 
 "$SCRIPT_DIR/doctor.sh"
 say "Thin Mac bootstrap complete. Start a fresh login shell."

@@ -244,16 +244,18 @@ fi
 if zsh -lic '
   set -e
   for command_name in \
-    bookokrat brave-browser btop codex diff-so-fancy docker fastfetch gh ghostty herdr hunk lsd \
+    bookokrat brave-browser btop codex docker fastfetch gh ghostty herdr hunk lsd \
     mise nvim tailscale tmux; do
     command -v "$command_name" >/dev/null
   done
   alias hwatch >/dev/null
   alias hdiff >/dev/null
+  alias hstaged >/dev/null
+  alias hshow >/dev/null
   alias npb >/dev/null
   whence -w _zsh_autosuggest_start >/dev/null
   whence -w _zsh_highlight >/dev/null
-  test "$GIT_PAGER" = "diff-so-fancy | less --tabs=4 -RFX"
+  test -z "${GIT_PAGER+x}"
   test "$ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE" = "fg=#9399b2"
 ' >/dev/null 2>&1; then
   pass "Ubuntu shell and development aliases"
