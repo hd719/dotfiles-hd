@@ -262,6 +262,7 @@ if /bin/zsh -dfc "
   [[ \"\$(alias hstaged)\" == \"hstaged='hunk diff --staged'\" ]]
   [[ \"\$(alias hshow)\" == \"hshow='hunk show'\" ]]
   [[ \"\$(alias hwatch)\" == \"hwatch='hunk diff --watch'\" ]]
+  [[ \"\$(alias v)\" == 'v=nvim' ]]
   ! alias gdiff >/dev/null 2>&1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
@@ -285,7 +286,6 @@ if /bin/zsh -dfc "
   [[ \"\$(whence -w uvm-suspend)\" == 'uvm-suspend: function' ]]
   [[ \"\$(whence -w uvm-resume)\" == 'uvm-resume: function' ]]
   [[ \"\$(whence -w uvm-destroy)\" == 'uvm-destroy: function' ]]
-  ! alias v >/dev/null 2>&1
   ! alias hm-dev >/dev/null 2>&1
   ! alias docker-nuke >/dev/null 2>&1
 "; then

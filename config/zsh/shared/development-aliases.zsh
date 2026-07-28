@@ -38,8 +38,7 @@ alias glast='git checkout - && gpp'
 alias glist='git branch --merged develop | grep -v develop | grep -v master'
 alias gsoft='git reset --soft HEAD~1'
 
-## Editor and system
-alias v='nvim'
+## System
 alias ff='fastfetch'
 if (( $+commands[bat] )); then
   alias cat='bat --paging never --theme Nord'

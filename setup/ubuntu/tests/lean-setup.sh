@@ -618,6 +618,7 @@ EOF
   assert_file_contains "$SHARED_ALIASES" "alias hdiff='hunk diff'"
   assert_file_contains "$SHARED_ALIASES" "alias hstaged='hunk diff --staged'"
   assert_file_contains "$SHARED_ALIASES" "alias hshow='hunk show'"
+  assert_file_contains "$SHARED_ALIASES" "alias v='nvim'"
   assert_file_contains "$SHARED_CODEX_ALIASES" "alias cod='codex'"
   assert_file_contains "$SHARED_CODEX_ALIASES" "alias codu='codex update'"
   assert_file_contains "$SHARED_FUNCTIONS" "reload()"
@@ -627,7 +628,6 @@ EOF
   done <<'EOF'
 alias npb='pnpm run build'
 alias ghd='gcm --no-verify'
-alias v='nvim'
 alias ff='fastfetch'
 alias gomod='go mod'
 alias tm='tmux'

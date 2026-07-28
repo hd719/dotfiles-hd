@@ -123,7 +123,7 @@ dots         Enter the Mac dotfiles repository
 vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
 r            Reload the Zsh configuration
-nvim FILE    Edit a local file with the thin Neovim profile
+v FILE, v .  Edit a local file or directory with the thin Neovim profile
 hu           Attach Herdr through local Vagrant
 hut          Attach Herdr through Tailscale
 u            SSH into the Ubuntu VM
