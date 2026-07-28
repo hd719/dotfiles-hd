@@ -100,8 +100,10 @@ the approval gate in the Mac bootstrap runbook before `--apply`.
 
 ## Repository Map
 
-- `config/` contains portable application and tool configuration.
+- `config/` contains portable application and tool configuration, not package
+  inventories.
 - `setup/` contains platform installers, machine overlays, tests, and runbooks.
+- Each Mac profile declares its package policy in its own `setup/*/Brewfile`.
 - Each profile owns its `.zshrc`, plugin timing, runtimes, credentials, and
   host-specific behavior.
 - Zsh modules are shared where safe and profile-owned where machine behavior
