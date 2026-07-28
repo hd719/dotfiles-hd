@@ -76,6 +76,11 @@ cat > "$TEST_ROOT/bin/hunk" <<'EOF'
 exit 0
 EOF
 
+cat > "$TEST_ROOT/bin/lsd" <<'EOF'
+#!/bin/sh
+exit 0
+EOF
+
 cat > "$TEST_ROOT/bin/marksman" <<'EOF'
 #!/bin/sh
 printf 'marksman %s\n' "$*"
@@ -158,6 +163,7 @@ chmod +x \
   "$TEST_ROOT/bin/herdr" \
   "$TEST_ROOT/bin/hunk" \
   "$TEST_ROOT/bin/launchctl" \
+  "$TEST_ROOT/bin/lsd" \
   "$TEST_ROOT/bin/marksman" \
   "$TEST_ROOT/bin/nvim" \
   "$TEST_ROOT/bin/pkgutil" \
@@ -225,6 +231,8 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias hstaged)\" == \"hstaged='hunk diff --staged'\" ]]
   [[ \"\$(alias hshow)\" == \"hshow='hunk show'\" ]]
   [[ \"\$(alias hwatch)\" == \"hwatch='hunk diff --watch'\" ]]
+  [[ \"\$(alias ls)\" == \"ls='lsd --tree --depth 1'\" ]]
+  [[ \"\$(alias ll)\" == \"ll='lsd -la --tree --depth 1'\" ]]
   [[ \"\$(alias v)\" == 'v=nvim' ]]
   ! alias gdiff >/dev/null 2>&1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
@@ -274,6 +282,7 @@ grep -Fq "markdown_inline" "$TEST_ROOT/brew.log"
 grep -Fxq 'brew "gh"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "herdr"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "hunk"' "$REPO_DIR/setup/mac-thin/Brewfile"
+grep -Fxq 'brew "lsd"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "marksman"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "neovim"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "ripgrep"' "$REPO_DIR/setup/mac-thin/Brewfile"

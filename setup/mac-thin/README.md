@@ -17,6 +17,7 @@ The host installs only:
 - Herdr as a remote Ubuntu client
 - Hunk as the local diff viewer
 - iStat Menus
+- lsd for file listings
 - Marksman as the only local language server
 - Mullvad VPN
 - Neovim with the shared `thin` profile
@@ -122,6 +123,8 @@ codr, codrl  Resume a Codex session
 dots         Enter the Mac dotfiles repository
 vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
+ls, lss, lsss Show directory trees one, two, or three levels deep
+l, la, ll    Show compact, hidden, or detailed lsd listings
 r            Reload the Zsh configuration
 v FILE, v .  Edit a local file or directory with the thin Neovim profile
 hu           Attach Herdr through local Vagrant
