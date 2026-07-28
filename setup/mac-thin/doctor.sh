@@ -72,7 +72,8 @@ done
 
 for plugin_path in \
   "$HOMEBREW_PREFIX/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" \
-  "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"; do
+  "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
+  "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"; do
   if [[ -r "$plugin_path" ]]; then
     pass "$(basename "$plugin_path") readable"
   else
@@ -287,6 +288,7 @@ if HOMEBREW_PREFIX="$HOMEBREW_PREFIX" /bin/zsh -dfic "
   source '$DOTFILES_DIR/setup/mac-thin/.zshrc'
   (( \${#functions[(I)*autocomplete*]} > 0 ))
   (( \${#functions[(I)*autosuggest*]} > 0 ))
+  whence -w _zsh_highlight >/dev/null
 " >/dev/null 2>&1; then
   pass "Thin-Mac interactive Zsh plugins"
 else

@@ -15,6 +15,7 @@ mkdir -p \
   "$TEST_ROOT/home/.ssh" \
   "$TEST_ROOT/homebrew/share/zsh-autocomplete" \
   "$TEST_ROOT/homebrew/share/zsh-autosuggestions" \
+  "$TEST_ROOT/homebrew/share/zsh-syntax-highlighting" \
   "$TEST_ROOT/apps"
 cat > "$TEST_ROOT/home/.ssh/config" <<EOF
 Include $REPO_DIR/setup/mac-thin/ssh/ubuntu-vagrant.conf
@@ -115,6 +116,10 @@ EOF
 
 cat > "$TEST_ROOT/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh" <<'EOF'
 _zsh_autosuggest_start() { :; }
+EOF
+
+cat > "$TEST_ROOT/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" <<'EOF'
+_zsh_highlight() { :; }
 EOF
 
 cat > "$TEST_ROOT/bin/pkgutil" <<'EOF'
@@ -246,6 +251,10 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   ! alias hm-dev >/dev/null 2>&1
   ! alias docker-nuke >/dev/null 2>&1
 "
+HOMEBREW_PREFIX="$TEST_ROOT/homebrew" TERM=xterm-256color /bin/zsh -dfic "
+  source '$HOME/.zshrc'
+  whence -w _zsh_highlight >/dev/null
+"
 
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -z "$(find "$HOME" -name '*.backup-*' -print -quit)" ]]
@@ -272,6 +281,7 @@ grep -Fxq 'brew "tree-sitter-cli"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "zoxide"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "zsh-autocomplete"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "zsh-autosuggestions"' "$REPO_DIR/setup/mac-thin/Brewfile"
+grep -Fxq 'brew "zsh-syntax-highlighting"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/setup/mac-thin/Brewfile"
 ! grep -Fq 'diff-so-fancy' "$REPO_DIR/setup/mac-thin/Brewfile"

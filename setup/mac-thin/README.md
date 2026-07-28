@@ -34,7 +34,7 @@ The host installs only:
 - VMware Fusion
 - Zoom
 - Zoxide
-- Zsh Autocomplete and Autosuggestions
+- Zsh Autocomplete, Autosuggestions, and Syntax Highlighting
 - macOS SSH
 
 Do not install project repositories, Docker, databases, project compilers,

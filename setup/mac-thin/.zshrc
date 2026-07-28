@@ -49,3 +49,9 @@ fi
 
 unset mac_thin_brew_prefix
 unset mac_thin_dir mac_thin_repo mac_thin_zshrc
+
+# Load last so it can wrap every ZLE widget created above.
+if [[ -o interactive \
+  && -r "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
