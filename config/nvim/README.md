@@ -206,6 +206,7 @@ Every agent teaching Neovim must read and update both files.
 | `yy` / `p` / `P`                         | Yank current line / paste after / paste before                                |
 | Visual `<` / `>` / `J` / `K` / `Space c` | Outdent / indent / move down / move up / comment                              |
 | `Space v` / `Space s`                    | Split right / down                                                            |
+| `Space Z` / `Space X`                    | Move the current buffer tab left / right; wrap at the ends                    |
 | `Ctrl-h/j/k/l`                           | Focus window left / down / up / right                                         |
 | `Ctrl-o` / `Ctrl-i`                      | Jump-history Back / Forward                                                   |
 | `Space q`                                | Close the current window                                                      |

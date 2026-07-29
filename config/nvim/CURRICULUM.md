@@ -20,13 +20,13 @@ unexplained magic.
 
 ## Current Checkpoint
 
-- **Lesson:** 6 — Diagnostics, Code Actions, and Formatting
-- **Next core sub-lesson:** 6.5 — format Go and Lua manually with `Space p`
-  and review the diff.
+- **Lesson:** 9 — Safe File Operations with Oil
+- **Next core sub-lesson:** 9.1 — create an isolated practice directory before
+  modifying files.
 - **Go practice module:**
   `~/Developer/dotfiles-hd/config/nvim/practice/lesson-05-go`.
-- **Why Lesson 6 remains open:** its formatting, formatter-health, and
-  tool-coverage drills remain.
+- **Why Lesson 9 remains open:** its isolated Oil file-operation and recovery
+  drills remain.
 
 ## Lesson 1 — Editor Foundations
 
@@ -186,7 +186,7 @@ unexplained magic.
 
 ## Lesson 6 — Diagnostics, Code Actions, and Formatting
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 036
 
 ### Core Sub-Lessons
 
@@ -195,13 +195,16 @@ unexplained magic.
 - [x] **6.3** Open a diagnostic detail float with `Ctrl-w d` without changing
   code. — Session 019
 - [x] **6.4** Inspect and choose LSP actions with `Space c a`. — Session 028
-- [ ] **6.5** Format Go and Lua manually with `Space p` and review the diff.
-- [ ] **6.6** Diagnose formatter availability with `:ConformInfo`.
-- [ ] **6.7** Explain the current coverage: Go, Lua, JavaScript/TypeScript,
+- [x] **6.5** Format Go and Lua manually with `Space p` and review the diff. —
+  Session 036
+- [x] **6.6** Diagnose formatter availability with `:ConformInfo`. — Session
+  036
+- [x] **6.7** Explain the current coverage: Go, Lua, JavaScript/TypeScript,
   GraphQL, JSON, CSS, HTML, shell, and Markdown have language-server support;
   Go, Lua, JavaScript/TypeScript, Markdown, and Python have manual formatting;
   Python does not yet have an LSP; ESLint provides project lint diagnostics
-  while automatic formatting and lint fixes on save remain disabled.
+  while automatic formatting and lint fixes on save remain disabled. — Session
+  036
 
 ### Optional Deep Dives
 
@@ -227,17 +230,22 @@ unexplained magic.
 
 ## Lesson 7 — Multi-File Project Workflow
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 036
 
 ### Core Sub-Lessons
 
-- [ ] **7.1** Recall buffers, windows, and splits without looking at the log.
-- [ ] **7.2** Place two different files in a deliberate split layout.
-- [ ] **7.3** Change one window's buffer without disturbing the other window.
-- [ ] **7.4** Move through buffers, search results, and jump history while
-  preserving context.
-- [ ] **7.5** Close the intended buffer or window and explain the difference.
-- [ ] **7.6** Complete one real edit across multiple files from search to save.
+- [x] **7.1** Recall buffers, windows, and splits without looking at the log. —
+  Session 036
+- [x] **7.2** Place two different files in a deliberate split layout. —
+  Session 036
+- [x] **7.3** Change one window's buffer without disturbing the other window. —
+  Session 036
+- [x] **7.4** Move through buffers, search results, and jump history while
+  preserving context. — Session 036
+- [x] **7.5** Close the intended buffer or window and explain the difference. —
+  Session 036
+- [x] **7.6** Complete one real edit across multiple files from search to save.
+  — Session 036
 
 ### Optional Deep Dives
 
@@ -250,22 +258,29 @@ unexplained magic.
 - [ ] **7.D6** Auto-reload buffers changed on disk by an external tool (e.g. the
   Cursor agent) with `autoread` and a `checktime` autocmd, plus `Space r` to
   reload on demand.
+- [x] **7.D7** Reorder the current Bufferline tab with `Space Z` and `Space X`,
+  then distinguish buffer order from window layout. — Session 036
 
 ## Lesson 8 — Terminal and Git Workflow
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 036
 
 ### Core Sub-Lessons
 
-- [ ] **8.1** Open bottom and floating terminals with `Space t` and `Space T`.
-- [ ] **8.2** Distinguish terminal-input mode from terminal Normal mode.
-- [ ] **8.3** Exit terminal-input mode with Snacks' double-`Escape` behavior and
-  the native `Ctrl-\`, `Ctrl-n` fallback while Shortcat owns `Ctrl-Space`.
-- [ ] **8.4** Navigate between terminal and editor windows without losing work.
+- [x] **8.1** Open bottom and floating terminals with `Space t` and `Space T`. —
+  Session 036
+- [x] **8.2** Distinguish terminal-input mode from terminal Normal mode. —
+  Session 036
+- [x] **8.3** Exit terminal-input mode with Snacks' double-`Escape` behavior and
+  the native `Ctrl-\`, `Ctrl-n` fallback while Shortcat owns `Ctrl-Space`. —
+  Session 036
+- [x] **8.4** Navigate between terminal and editor windows without losing work.
+  — Session 036
 - [x] **8.5** Read Gitsigns gutter changes and current-line blame. — Session 008
 - [x] **8.6** Open LazyGit with `Space g` and inspect status and diffs. —
   Session 007
-- [ ] **8.7** Exit terminal and Git views while preserving editor buffers.
+- [x] **8.7** Exit terminal and Git views while preserving editor buffers. —
+  Session 036
 
 ### Optional Deep Dives
 
