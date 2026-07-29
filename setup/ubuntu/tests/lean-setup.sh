@@ -20,6 +20,7 @@ VAGRANTFILE="$ROOT_DIR/setup/ubuntu/Vagrantfile"
 ANSIBLE_BOOTSTRAP="$ROOT_DIR/setup/ubuntu/bootstrap-ansible.sh"
 ANSIBLE_DIR="$ROOT_DIR/setup/ubuntu/ansible"
 ANSIBLE_PLAYBOOK="$ANSIBLE_DIR/playbook.yml"
+APT_SUDOERS_FILE="$ANSIBLE_DIR/files/dotfiles-hd-update-system.sudoers"
 FASTFETCH_CONFIG="$ROOT_DIR/config/fastfetch/config.jsonc"
 BTOP_CONFIG="$ROOT_DIR/config/btop/btop.conf"
 SHARED_ALIASES="$ROOT_DIR/config/zsh/shared/aliases.zsh"
@@ -162,6 +163,7 @@ test_vagrant_ansible_contract() {
     "$ANSIBLE_DIR/tasks/dotfiles.yml" \
     "$ANSIBLE_DIR/tasks/tools.yml" \
     "$ANSIBLE_DIR/tasks/verify.yml" \
+    "$APT_SUDOERS_FILE" \
     "$ANSIBLE_DIR/files/grow-root-filesystem.sh" \
     "$SSH_CONFIG" \
     "$LINK_SCRIPT"; do
@@ -233,6 +235,17 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" \
     'ansible.builtin.meta: flush_handlers'
   assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" 'cmd: sshd -T'
+  assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" \
+    'dest: /etc/sudoers.d/dotfiles-hd-update-system'
+  assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" \
+    'validate: /usr/sbin/visudo -cf %s'
+  assert_file_contains "$APT_SUDOERS_FILE" \
+    'NOPASSWD: DOTFILES_APT_MAINTENANCE'
+  assert_file_contains "$APT_SUDOERS_FILE" \
+    '/usr/bin/env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get full-upgrade -y'
+  if grep -Fq 'NOPASSWD: ALL' "$APT_SUDOERS_FILE"; then
+    fail "Ubuntu maintenance must not grant broad passwordless sudo"
+  fi
   if grep -Fq 'dest: "{{ workstation_home }}/.ssh/config"' \
     "$ANSIBLE_DIR/tasks/identities.yml"; then
     fail "Ansible must not own the user's SSH config"
@@ -1081,6 +1094,8 @@ EOF
   assert_file_contains "$case_dir/commands.log" "apt-get update"
   assert_file_contains "$case_dir/commands.log" "apt-get full-upgrade -y"
   assert_file_contains "$case_dir/commands.log" "apt-get autoremove -y"
+  assert_file_contains "$case_dir/commands.log" \
+    "-n /usr/bin/apt-get autoclean"
   assert_file_contains "$case_dir/commands.log" "mise self-update -y"
   assert_file_contains "$case_dir/commands.log" "neovim"
   self_update_count="$(grep -Fxc "mise self-update -y" "$case_dir/commands.log")"

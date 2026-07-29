@@ -88,13 +88,14 @@ main() {
     printf 'Dotfiles sync failed; continuing without resetting local changes.\n' >&2
   fi
 
-  sudo -v
-
   log "Updating Ubuntu packages"
-  sudo env DEBIAN_FRONTEND=noninteractive apt-get update
-  sudo env DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
-  sudo env DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
-  sudo apt-get autoclean
+  sudo -n /usr/bin/env DEBIAN_FRONTEND=noninteractive \
+    /usr/bin/apt-get update
+  sudo -n /usr/bin/env DEBIAN_FRONTEND=noninteractive \
+    /usr/bin/apt-get full-upgrade -y
+  sudo -n /usr/bin/env DEBIAN_FRONTEND=noninteractive \
+    /usr/bin/apt-get autoremove -y
+  sudo -n /usr/bin/apt-get autoclean
 
   log "Refreshing the pinned Neovim setup"
   bash "$NEOVIM_SETUP_SCRIPT"

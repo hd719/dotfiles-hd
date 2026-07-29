@@ -1,0 +1,7 @@
+# Allow the supported updater to maintain APT without granting broad sudo.
+Cmnd_Alias DOTFILES_APT_MAINTENANCE = \
+  /usr/bin/env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get update, \
+  /usr/bin/env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get full-upgrade -y, \
+  /usr/bin/env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get autoremove -y, \
+  /usr/bin/apt-get autoclean
+hamel ALL=(root) NOPASSWD: DOTFILES_APT_MAINTENANCE
