@@ -6,6 +6,10 @@ return {
       "nvim-mini/mini.icons",
     },
     event = "VeryLazy",
+    keys = {
+      { "<leader>Z", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer left" },
+      { "<leader>X", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer right" },
+    },
     config = function()
       -- Reuse the already-loaded mini.icons as the devicons provider so we do
       -- not add a second icon plugin.
@@ -60,6 +64,7 @@ return {
         options = {
           mode = "buffers",
           diagnostics = "nvim_lsp",
+          move_wraps_at_ends = true,
           separator_style = "thin",
           always_show_bufferline = true,
           show_buffer_close_icons = false,

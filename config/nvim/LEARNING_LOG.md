@@ -3225,3 +3225,214 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Neovim's automatic empty replacement buffer stays hidden from the picker, so
   deleting the final `[Scratch]` entry leaves the list clear.
 - Automated checks passed; human verification remains pending.
+
+## 2026-07-29 — Session 036: Manual Go and Lua Formatting
+
+### Go and Lua Formatting Confirmed
+
+- Hamel opened the isolated Go practice module, removed the formatter-owned
+  space from `prefix: prefix`, and pressed `Space p`.
+- Hamel confirmed that Conform selected `gofmt` and restored `prefix: prefix`.
+- Hamel then opened `lua/plugins/lsp.lua`, changed `version =` to `version=`,
+  and confirmed that `Space p` used StyLua to restore `version =`.
+- `Space w` wrote each formatted buffer to disk. Neither practiced file has a
+  tracked diff.
+
+### Git-Change Review
+
+- Hamel opened `Space f g` and chose to remember it as the fast visual
+  Git-status workflow.
+- Precision: `Space f g` is the Git-changed-files picker. It lists changed
+  files with a diff preview; it is not the full porcelain output of
+  `git status`.
+- Mental model: format with `Space p`, save with `Space w`, then review tracked
+  changes with `Space f g`.
+
+### Corrections and Teaching Preference
+
+- The normal-mode `f:` character-motion attempt did not move as expected. The
+  formatting drill continued safely with `:s/: /:/`; revisit the motion
+  separately instead of blocking Lesson 6.
+- Hamel prefers the full directions for one coherent drill instead of waiting
+  after every individual keystroke.
+- A separate saved addition in the Go practice module's `main.go` was present
+  during final verification and was preserved without modification.
+
+### Formatter Health Confirmed
+
+- Hamel ran `:ConformInfo` from the Lua buffer and confirmed that `stylua` was
+  reported as ready.
+- Mental model: `:ConformInfo` identifies the formatter selected for the
+  current filetype and whether Conform can find and run its executable.
+- **Curriculum 6.6 complete:** formatter availability was inspected and
+  confirmed from inside Neovim.
+
+### Tool Coverage Recalled
+
+- Hamel confirmed the current three-part coverage model: the configured
+  language servers, the filetypes formatted manually with `Space p`, and the
+  deliberate exceptions.
+- Markdown language intelligence is opt-in through Marksman. Python has Ruff
+  formatting but no LSP. ESLint supplies project lint diagnostics.
+- Automatic formatting and lint fixes on save remain disabled.
+- **Curriculum 6.7 complete:** Hamel confirmed that he understood and could
+  distinguish language intelligence, formatting, and lint coverage.
+
+### Buffer, Window, and Split Recall
+
+- Hamel first asked for a refresher, then recalled the model without looking at
+  the guide: a buffer is content, a window is a view, and a split creates
+  another window.
+- A split may show the same buffer or a different buffer.
+- **Curriculum 7.1 complete:** the buffer/window/split distinction was recalled
+  and confirmed.
+
+### Deliberate Two-File Split
+
+- From `lsp.lua`, Hamel used `Space v` to create a right-hand window.
+- In the new right window, Hamel used `Space f f` to open `greeter.go` and
+  confirmed that `lsp.lua` remained visible on the left.
+- **Curriculum 7.2 complete:** two different buffers were placed in a
+  deliberate side-by-side layout.
+
+### Window-Local Buffer Change
+
+- With `lsp.lua` still visible on the left, Hamel used the file picker in the
+  right window to replace `greeter.go` with `CURRICULUM.md`.
+- Hamel confirmed that the left window remained unchanged.
+- **Curriculum 7.3 complete:** changing one window's displayed buffer was
+  distinguished from changing another window.
+
+### Buffer, Search, and Jump History
+
+- In the right window, Hamel selected `greeter.go` with `Space b`, searched the
+  project for `formatters_by_ft` with `Space /`, and opened the result in
+  `lsp.lua`.
+- `Ctrl-o` returned the right window to `greeter.go`; `Ctrl-i` moved forward to
+  the `formatters_by_ft` location. The left window stayed unchanged.
+- Hamel related this to `H` and `L`. The distinction is that `H` and `L` move
+  through buffer order, while `Ctrl-o` and `Ctrl-i` move through meaningful
+  cursor-location history.
+- **Curriculum 7.4 complete:** buffer selection, project search, and jump
+  history were combined without losing the split context.
+
+### Buffer Close vs. Window Close
+
+- In the right window, Hamel used `Space d` to close `greeter.go` as a buffer
+  while preserving both windows.
+- Hamel then used `Space q` to close only the right window, leaving the
+  left-hand `lsp.lua` window open.
+- Mental model: `Space d` removes content from Neovim without deleting its file
+  from disk; `Space q` removes the focused view.
+- **Curriculum 7.5 complete:** the intended buffer and window were closed
+  separately and their effects were confirmed.
+
+### Multi-File Edit, Test, and Review
+
+- Hamel changed the Go practice prefix from `Hello` to `Welcome` in `main.go`,
+  formatted it, saved it, and attempted to find and update the matching test
+  data.
+- When the result was reported as a test failure, evidence-first inspection
+  found that only `main.go` had changed on disk; `greeter_test.go` still used
+  `Hello`. The reported failure did not reproduce from the saved files because
+  the test constructs its own `Hello` greeter independently.
+- The missing three test-file substitutions were applied directly:
+  two expected greetings and the `New` argument now used `Welcome`.
+- `go test -count=1 -v ./...` passed both named subtests. Hamel reloaded the
+  externally changed buffer with `Space r` and reviewed both Go files with
+  `Space f g`.
+- The temporary `Welcome` substitutions were restored to `Hello` after the
+  confirmed review. Hamel's separate `Greet("Test")` marker was preserved.
+- **Curriculum 7.6 complete:** a coherent two-file edit was taken through
+  search, formatting, save, test diagnosis, external reload, and diff review.
+
+### Window Exchange Mapping Added
+
+- Hamel asked for a leader-key alternative to native `Ctrl-w x` after
+  practicing a two-file vertical split.
+- Added `Space X` for window exchange. With two vertical windows it swaps
+  left/right; with two horizontal windows it swaps top/bottom; with only one
+  window it has no visible effect.
+- The mapping delegates directly to Neovim's native window command and does not
+  change buffers or files.
+- Human verification remains pending, so optional Curriculum 1.D3 stays
+  unchecked.
+
+### Correction: Buffer Order, Not Window Exchange
+
+- Hamel's screenshot showed one editor window with `AGENTS.md` and `README.md`
+  in Bufferline. The intended operation was to reorder those buffer tabs, not
+  exchange split windows.
+- Removed the mistaken global `Space X` window-exchange mapping.
+- `Space X` now runs Bufferline's move-next command. Buffer movement wraps at
+  the ends, so with two tabs it swaps their displayed order regardless of
+  which one is current.
+- Added the matching `Space Z` move-previous command for an explicit move to
+  the left. `Z` and `X` form the left/right Bufferline-reordering pair.
+- Split layout is unaffected. The new optional Curriculum 7.D7 remains open
+  until Hamel practices and confirms the corrected mapping.
+- After restarting Neovim, Hamel confirmed that `Space Z` moved the current
+  Bufferline entry left and `Space X` moved it right.
+- **Optional Curriculum 7.D7 complete:** buffer-order changes were practiced
+  and distinguished from window-layout changes.
+
+### Terminal Shapes and Modes
+
+- Hamel opened a bottom terminal with `Space t` and a floating terminal with
+  `Space T`.
+- In each terminal, double `Escape` returned from terminal-input mode to
+  terminal Normal mode, after which `Space q` closed the terminal window.
+- Hamel confirmed that this terminal shape and mode workflow was already
+  familiar.
+- **Curricula 8.1, 8.2, and 8.3 complete:** both terminal layouts and the
+  input-to-Normal-mode escape behavior were practiced and confirmed.
+
+### Terminal and Explorer Window Navigation
+
+- Hamel opened a bottom terminal, ran a harmless command, entered terminal
+  Normal mode, and used `Ctrl-k` to move up.
+- The upper window was the Snacks Explorer picker rather than a normal file
+  buffer. Its local `Ctrl-j` mapping moves down the picker list, so it
+  intentionally overrides the global window-down mapping.
+- Hamel used `Space j` instead and confirmed that focus returned to the
+  terminal with its output intact.
+- **Curriculum 8.4 complete:** terminal and editor-area windows were navigated
+  without losing either state.
+- Optional Curriculum 1.D2 remains open until all three leader alternatives,
+  `Space j`, `Space k`, and `Space l`, are practiced.
+
+### Shell Vi Mode vs. Neovim Terminal Mode
+
+- A screenshot showed Starship's green backward `❮` prompt while Neovim's
+  status still read `TERMINAL`.
+- The backward prompt means zsh is in its own vi-command mode; it does not mean
+  Neovim has reached terminal Normal mode. Pressing `i` returns zsh to shell
+  input and restores the forward `❯` prompt.
+- Two `Escape` presses within Snacks' 200 ms window enter Neovim terminal
+  Normal mode. The native `Ctrl-\`, `Ctrl-n` sequence remains the reliable
+  fallback.
+- Once Neovim shows `NORMAL`, leader mappings such as `Space q` control the
+  terminal window instead of sending text to the shell.
+- Hamel confirmed that he understood the two independent mode layers.
+
+### Terminal and LazyGit Exit
+
+- From Neovim terminal Normal mode, Hamel closed the terminal window with
+  `Space q` and confirmed that the Explorer and editor buffers remained.
+- Hamel opened LazyGit with `Space g`, exited it with `q`, and again confirmed
+  that the editor state was preserved.
+- **Curriculum 8.7 complete:** both embedded tool views were exited without
+  closing or changing the working editor buffers.
+
+### Result and Next Lesson
+
+- **Curriculum 6.5 complete:** manual Go and Lua formatting plus Git-change
+  review were practiced and confirmed.
+- **Lesson 6 core complete:** diagnostics, code actions, manual formatting,
+  formatter health, and tool coverage have all been practiced.
+- **Lesson 7 core complete:** buffers, windows, splits, search, jump history,
+  close semantics, and a tested multi-file edit have all been practiced.
+- **Lesson 8 core complete:** terminal layouts and modes, terminal/editor
+  navigation, Gitsigns, LazyGit, and clean exits have all been practiced.
+- Best next core lesson: Curriculum 9.1 — create an isolated practice directory
+  before modifying files.
