@@ -11,6 +11,15 @@
     append: true
     password: "{{ workstation_password_hash }}"
 
+- name: Allow only unattended APT maintenance without a password
+  ansible.builtin.copy:
+    src: files/dotfiles-hd-update-system.sudoers
+    dest: /etc/sudoers.d/dotfiles-hd-update-system
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+
 - name: Create the daily user's SSH directory
   ansible.builtin.file:
     path: "{{ workstation_home }}/.ssh"

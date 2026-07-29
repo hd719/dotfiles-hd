@@ -223,6 +223,8 @@ bash setup/ubuntu/doctor.sh
 
 The updater accepts only the SSH dotfiles origin, pulls `master` with
 `--ff-only`, runs APT maintenance, and refreshes mise and Neovim state.
+Provisioning installs a scoped sudo rule for only the updater's exact APT
+commands. Every other `sudo` command still requires authentication.
 If it reports that a reboot is required, leave the SSH session and use
 `uvm-stop` followed by `uvm-up`.
 
