@@ -16,6 +16,7 @@ brew "zsh-syntax-highlighting"
 
 cask "1password"
 cask "brave-browser"
+cask "codex"
 cask "daisydisk"
 cask "deskflow"
 cask "font-caskaydia-cove-nerd-font"

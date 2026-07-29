@@ -10,7 +10,8 @@ The host installs only:
 - Homebrew
 - 1Password
 - Brave and Google Chrome
-- ChatGPT/Codex
+- ChatGPT desktop app
+- Codex CLI
 - DaisyDisk
 - Ghostty
 - Ghostty fonts
@@ -62,8 +63,8 @@ setup/mac-thin/bootstrap.sh --apply
 setup/mac-thin/doctor.sh
 ```
 
-The bootstrap installs the policy packages and pins the
-`vagrant-vmware-desktop` provider to `3.0.5`. It links the thin `.zshrc`,
+The bootstrap installs the policy packages, including the Codex CLI, and pins
+the `vagrant-vmware-desktop` provider to `3.0.5`. It links the thin `.zshrc`,
 Ghostty, Herdr, Hunk, the shared Neovim config, and the shared Starship config,
 backing up any replaced destination beside the original.
 
@@ -81,7 +82,8 @@ never symlinked.
 
 ## Manual Applications
 
-- ChatGPT is the supported Codex desktop app. Install it from
+- ChatGPT is the supported Codex desktop app. The standalone Codex CLI is
+  installed by the Brewfile. Install ChatGPT from
   <https://chatgpt.com/download/> when it is not already present.
 - VMware Fusion is not available as a current Homebrew cask. Download it
   through Broadcom's official flow:
