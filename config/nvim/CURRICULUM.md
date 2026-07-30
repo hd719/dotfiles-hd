@@ -155,6 +155,8 @@ unexplained magic.
   distinguish it from redo with `Ctrl-r`.
 - [x] **4.D6** Use a visual current-file search-and-replace workflow, prefilled
   from the word under the cursor and reviewed before applying. — Session 010
+- [ ] **4.D7** Copy the entire current buffer to the system clipboard with
+  `Space y a` without moving the cursor or entering Visual mode.
 
 ## Lesson 5 — Code Navigation with LSP
 
@@ -192,8 +194,8 @@ unexplained magic.
 
 - [x] **6.1** Read diagnostic signs, highlights, and messages. — Session 019
 - [x] **6.2** Move between diagnostics with `[d` and `]d`. — Session 019
-- [x] **6.3** Open a diagnostic detail float with `Ctrl-w d` without changing
-  code. — Session 019
+- [x] **6.3** Open a diagnostic detail float without changing code. — Session
+  019 used `Ctrl-w d`; Session 039 replaced it with `Space c f`
 - [x] **6.4** Inspect and choose LSP actions with `Space c a`. — Session 028
 - [x] **6.5** Format Go and Lua manually with `Space p` and review the diff. —
   Session 036
@@ -227,6 +229,8 @@ unexplained magic.
 - [ ] **6.D10** Toggle Marksman diagnostics for the current note with
   `Space o m m` and explain why navigation stays available while they are
   muted.
+- [ ] **6.D11** Open the diagnostic under the cursor with the discoverable
+  `Space c f` leader mapping.
 
 ## Lesson 7 — Multi-File Project Workflow
 

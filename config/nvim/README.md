@@ -216,10 +216,11 @@ Every agent teaching Neovim must read and update both files.
 | `Space g`                                | Open LazyGit                                                                  |
 | `Space p`                                | Format                                                                        |
 | `Space c a`                              | LSP code action                                                               |
+| `Space c f`                              | Show the diagnostic under the cursor                                          |
 | `Space c q`                              | Close only the quickfix/references list                                       |
 | `Space c d` / `Space c D`                | Diagnostics list (buffer / project)                                           |
 | `]d` / `[d`                              | Next / previous diagnostic                                                    |
-| `Space y p/d/f`                          | Copy file path / working dir / file folder                                    |
+| `Space y a/p/d/f`                        | Copy whole buffer / file path / working dir / file folder                     |
 | `Space r`                                | Reload files changed on disk                                                  |
 | `Space o`                                | Open the Obsidian menu                                                        |
 | `Space o q/s/b/l`                        | Quick switch / search / backlinks / links from this note                      |
@@ -261,7 +262,8 @@ closes whichever Neovim window is currently focused.
 This config sets `clipboard=unnamedplus`, so regular yanks such as `yy` also
 reach the system clipboard. In an SSH session, Neovim uses OSC 52 to send the
 yank through the terminal to the Mac clipboard for `Cmd-v` in other
-applications.
+applications. `Space y a` copies the entire current buffer, including unsaved
+changes, without moving the cursor or entering Visual mode.
 
 For visual current-file replacement, save the file, put the cursor on the exact
 word, and press `Space R`. Type the replacement, review the diff, then press
@@ -327,7 +329,7 @@ go-to-definition for `.graphql` files, resolving the schema from the project's
 `graphql-config` (for example `graphql.config.ts`).
 
 Diagnostics from any server show inline at the end of the line (virtual text).
-Use `]d` / `[d` to jump between them, `Ctrl-w d` for the detail float, and
+Use `]d` / `[d` to jump between them, `Space c f` for the detail float, and
 `Space c d` / `Space c D` for a searchable list of the current buffer's or the
 project's diagnostics.
 

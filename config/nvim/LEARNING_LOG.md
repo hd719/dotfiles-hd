@@ -3436,3 +3436,45 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   navigation, Gitsigns, LazyGit, and clean exits have all been practiced.
 - Best next core lesson: Curriculum 9.1 — create an isolated practice directory
   before modifying files.
+
+## 2026-07-30 — Session 037: Whole-Buffer Copy Shortcut
+
+### Mapping Added
+
+- `Space y a` copies the entire current buffer to the system clipboard.
+- The copy includes unsaved buffer changes and preserves the cursor position.
+- Existing `Ctrl-a`, then `y`, remains available for the visual-selection
+  workflow.
+- The new mapping is discoverable in the existing `Space y` copy menu.
+
+### Verification State
+
+- Automated mapping and clipboard checks passed.
+- Human practice remains pending, so Curriculum 4.D7 stays unchecked.
+
+## 2026-07-30 — Session 038: Leader Diagnostic Detail
+
+### Mapping Added
+
+- `Space c f` opens the diagnostic detail float for the cursor position.
+- The mapping lives in the existing `Space c` code and diagnostics menu.
+- Native `Ctrl-w d` remains available as a backup while Hamel evaluates the
+  leader workflow.
+
+### Verification State
+
+- Automated mapping and diagnostic-scope checks passed.
+- Human practice remains pending, so Curriculum 6.D11 stays unchecked.
+
+## 2026-07-30 — Session 039: Diagnostic Control Mapping Removed
+
+### Correction
+
+- Hamel chose not to keep the native diagnostic shortcut as a backup.
+- `Ctrl-w d` and its `Ctrl-w Ctrl-d` alias are now explicitly unmapped.
+- `Space c f` is the only configured diagnostic-detail shortcut.
+
+### Verification State
+
+- Automated thin/full mapping checks passed.
+- Human practice remains pending, so Curriculum 6.D11 stays unchecked.
