@@ -235,8 +235,13 @@ end run
   end, { desc = "Open file externally" })
 end
 
--- Copy paths to the system clipboard. WhichKey lists these under Space y, so
--- there is nothing to memorize: press Space y and pick.
+-- Copy buffer content and paths to the system clipboard. WhichKey lists these
+-- under Space y, so there is nothing to memorize: press Space y and pick.
+map("n", "<leader>ya", function()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  vim.fn.setreg("+", lines, "l")
+  vim.notify("Copied entire buffer")
+end, { desc = "Copy entire buffer" })
 map("n", "<leader>yp", function()
   local path = vim.fn.expand("%:p")
   vim.fn.setreg("+", path)
@@ -285,6 +290,11 @@ map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Quit" })
 map("n", "<leader>x", "<cmd>x<cr>", { desc = "Save and quit" })
 
 map("n", "<leader>cq", "<cmd>cclose<cr>", { desc = "Close quickfix" })
+map("n", "<leader>cf", function()
+  vim.diagnostic.open_float({ scope = "cursor" })
+end, { desc = "Diagnostic detail" })
+pcall(vim.keymap.del, "n", "<C-w>d")
+pcall(vim.keymap.del, "n", "<C-w><C-d>")
 if profile.is_full then
   map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
   map("n", "gh", function()
