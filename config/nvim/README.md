@@ -190,6 +190,8 @@ Every agent teaching Neovim must read and update both files.
 | `Space d`                                | Close the current buffer                                                      |
 | `Space w` / `Space x`                    | Save / save and quit                                                          |
 | `Space R`                                | Replace the word under the cursor in the current file                         |
+| `Space C`                                | Open the Crosshair menu                                                       |
+| `Space C c/v`                            | Toggle the full crosshair / vertical line only; the row stays on              |
 | `u` / `Ctrl-r` / `.`                     | Undo / redo / repeat the last change                                          |
 | `o` / `O`                                | Open a new line below / above and enter Insert mode                           |
 | `w` / `e` / `b`                          | Next word start / word end / previous word start                              |
@@ -369,8 +371,10 @@ Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
 open all / close all) or the native `za` / `zR` / `zM`.
 
 The cursor line stays vertically centered as you move up and down
-(`scrolloff = 999`). An always-on blue-gray row-and-column crosshair marks the
-cursor position without an extra plugin.
+(`scrolloff = 999`). A blue-gray row-and-column crosshair marks the cursor
+position without an extra plugin. Press `Space C` to open its menu: `c` toggles
+the full crosshair, and `v` toggles only the vertical line while keeping the row
+highlighted.
 
 Opening Neovim with no file shows a start dashboard (Snacks) with shortcuts
 (find, grep, recent, explorer, new, LazyGit, config, Lazy, quit), a recent-files
