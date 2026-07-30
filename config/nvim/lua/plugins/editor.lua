@@ -57,6 +57,7 @@ local selected_filetypes = profile.is_thin and {
 } or filetypes
 
 local which_key_spec = {
+  { "<leader>C", group = "Crosshair" },
   { "<leader>f", group = "Find" },
   { "<leader>m", group = "Markdown" },
   { "<leader>o", group = "Obsidian" },

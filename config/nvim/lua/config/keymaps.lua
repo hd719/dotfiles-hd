@@ -259,6 +259,19 @@ map("n", "<leader>za", "za", { desc = "Toggle fold" })
 map("n", "<leader>zo", "zR", { desc = "Open all folds" })
 map("n", "<leader>zc", "zM", { desc = "Close all folds" })
 
+map("n", "<leader>Cc", function()
+  local enabled = not (vim.wo.cursorline and vim.wo.cursorcolumn)
+  vim.wo.cursorline = enabled
+  vim.wo.cursorcolumn = enabled
+  vim.notify("Crosshair " .. (enabled and "on" or "off"))
+end, { desc = "Toggle full crosshair" })
+
+map("n", "<leader>Cv", function()
+  vim.wo.cursorline = true
+  vim.wo.cursorcolumn = not vim.wo.cursorcolumn
+  vim.notify("Vertical crosshair " .. (vim.wo.cursorcolumn and "on" or "off"))
+end, { desc = "Toggle vertical crosshair" })
+
 map("n", "<C-h>", "<C-w>h", { desc = "Window left" })
 map("n", "<C-j>", "<C-w>j", { desc = "Window down" })
 map("n", "<C-k>", "<C-w>k", { desc = "Window up" })
