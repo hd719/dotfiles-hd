@@ -3585,3 +3585,157 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   remains the explicit menu-close key.
 - The thin profile now keeps the existing bottom and floating Snacks terminals.
 - Automated thin-profile checks cover the leader behavior and both mappings.
+
+## 2026-07-29 — Session 045: Safe Oil Practice Setup
+
+### Isolated Practice Directory Confirmed
+
+- Hamel created `/tmp/nvim-oil-practice` before beginning any Oil file
+  operations.
+- Hamel opened the directory with `:Oil /tmp/nvim-oil-practice` and shared a
+  screenshot confirming the `oil:///tmp/nvim-oil-practice/` buffer.
+- The directory was empty except for Oil's `../` parent-directory entry. No
+  file operation had been attempted.
+- **Curriculum 9.1 complete:** the remaining create, rename, move, and delete
+  drills are isolated from repositories and real files.
+- Best next core lesson: Curriculum 9.2 — distinguish Oil's local `Ctrl-h` and
+  `Ctrl-l` mappings from normal window-focus navigation.
+
+### Leader-Based Window Navigation Added
+
+- Hamel recognized that `Ctrl-w` is Neovim's Normal-mode window-command prefix
+  and asked to move frequent window navigation away from Control.
+- Added `Space W h/j/k/l` as a complete left/down/up/right window-focus group.
+  Uppercase `W` means Windows; lowercase `Space w` remains Save and `Space h`
+  remains Oil.
+- Existing `Ctrl-h/j/k/l` and `Space j/k/l` mappings remain available.
+- Human verification remains pending, so Curricula 1.D2 and 9.2 stay open.
+
+### Full Window Leader Menu Added
+
+- After viewing Neovim's native `Ctrl-w` WhichKey menu, Hamel asked for every
+  displayed operation to be available without the Control prefix.
+- Expanded `Space W` to cover diagnostic detail, directional focus, moving a
+  window to an edge, horizontal and vertical splits, moving a window to a new
+  tab, quitting or closing other windows, switching or swapping windows, and
+  resizing, equalizing, or maximizing height.
+- Native `Ctrl-w` commands remain as a harmless fallback, but the complete
+  displayed workflow is now available from the leader-based Windows menu.
+- Human verification remains pending.
+
+### Oil-Local and Window Navigation Confirmed
+
+- In the isolated Oil directory, Hamel confirmed that `Ctrl-l` refreshed Oil
+  and `Ctrl-h` on `../` opened `/tmp` in a horizontal split.
+- Hamel closed that split with `Space W q`, created a vertical split, moved
+  between its windows with `Space W h/l`, and closed the extra window.
+- **Curriculum 9.2 complete:** Oil's local Control mappings were distinguished
+  from the leader-based Windows menu.
+- Optional Curriculum 1.D2 remains open until `Space W j/k` are also practiced.
+- Best next core lesson: Curriculum 9.3 — create a file and directory through
+  Oil.
+
+### Pending Oil Operation Safely Discarded
+
+- Hamel entered pending CREATE operations for `hello.txt` and `archive/` and
+  reached Oil's confirmation preview without approving it.
+- Filesystem inspection confirmed that neither entry existed on disk while the
+  Oil buffer showed `[+]`.
+- Hamel chose not to apply the operations, then used `:edit!`; both pending
+  entries disappeared and the modified marker cleared.
+- **Curriculum 9.9 complete:** an unintended pending operation was recovered
+  from without changing the filesystem.
+- Curriculum 9.3 remains open because the CREATE operations were deliberately
+  not applied.
+
+### Oil Positioned as an Optional Batch Tool
+
+- Hamel asked why he would use Oil after safely declining the pending CREATE
+  operations.
+- Oil's useful niche was clarified: edit a directory listing with Vim motions,
+  preview a batch of creates, renames, or moves, and apply the reviewed actions
+  together.
+- For ordinary navigation and opening files, Hamel can continue using
+  `Space f f` or the `Space e` explorer instead.
+- Hamel asked to preserve this distinction and move to the next lesson.
+  Curricula 9.3–9.8 and Lesson 9 core remain deliberately incomplete.
+- By Hamel's explicit choice, the active checkpoint advances to Curriculum
+  10.1 — named registers.
+
+### Lesson 9 Resumed
+
+- After checking the Lesson 9 status, Hamel chose to return and complete the
+  remaining Oil core drills before starting Lesson 10.
+- Filesystem inspection reconfirmed that `/tmp/nvim-oil-practice` was empty.
+- The active checkpoint returns to Curriculum 9.3 — create a file and
+  directory through Oil.
+
+### Oil Creation Applied
+
+- Hamel re-entered `hello.txt` and `archive/`, reviewed Oil's two CREATE
+  actions, approved them, and confirmed that the operation worked.
+- **Curriculum 9.3 complete:** a file and directory were created through Oil
+  inside the isolated playground.
+
+### Correction: Runtime-Local `/tmp`
+
+- The agent shell has no Neovim process and its `/tmp` is not authoritative for
+  the separate runtime visible in Hamel's Neovim session.
+- Earlier agent-side `/tmp` checks supported the pending-buffer explanation but
+  must not be treated as verification of Hamel's applied Oil operations.
+- Curriculum 9.8 remains open until filesystem state is verified from a
+  terminal opened inside Hamel's Neovim runtime.
+- Best next core lesson: Curriculum 9.4 — rename a file and distinguish the
+  pending Oil buffer from applied filesystem state.
+
+### Oil Rename and Pending State Confirmed
+
+- With the cursor on `hello` in `hello.txt`, Hamel used `ciw` to change only
+  the filename stem to `greeting`, leaving `.txt` intact.
+- Hamel observed `[+]` before writing, reviewed the proposed rename, approved
+  it, refreshed Oil, and confirmed that `greeting.txt` remained.
+- Mental model: editing an Oil line changes only the pending directory buffer;
+  `:w` previews and applies the corresponding filesystem operation.
+- **Curriculum 9.4 complete:** a rename and Oil's pending-change state were
+  practiced and confirmed.
+- Best next core lesson: Curriculum 9.5 — move the renamed file into the
+  practice directory's `archive/` folder.
+
+### Oil Move Confirmed
+
+- Hamel changed the `greeting.txt` entry to `archive/greeting.txt`, observed the
+  pending `[+]` state, reviewed the proposed operation, and approved it.
+- After refreshing, the parent showed only `archive/`. Hamel entered that
+  directory, confirmed that `greeting.txt` was inside, and returned with `-`.
+- **Curriculum 9.5 complete:** a file was moved between directories through
+  Oil and verified from both sides.
+- Best next core lesson: Curriculum 9.6 — understand this configuration's
+  permanent-delete behavior before attempting the isolated deletion drill.
+
+### Permanent-Deletion Safety Understood
+
+- Before any deletion, Hamel was told that this Oil configuration uses
+  `delete_to_trash = false`.
+- Hamel correctly confirmed that an approved Oil deletion cannot be recovered
+  from Trash; Vim undo can only reverse pending buffer edits, not an applied
+  filesystem deletion.
+- **Curriculum 9.6 complete:** permanent-delete behavior was understood before
+  selecting a target.
+- Best next core lesson: Curriculum 9.7 — explicitly confirm and delete only
+  `/tmp/nvim-oil-practice/archive/greeting.txt`.
+
+### Crosshair Toggle Added
+
+- Hamel found the editor crosshair distracting at times and asked for a
+  leader-based menu.
+- Clarified that the effect is Neovim's built-in `cursorline` plus
+  `cursorcolumn`, not a plugin.
+- Added a `Space C` Crosshair menu: `c` toggles both directions, and `v`
+  toggles only the vertical line while keeping the row highlighted.
+- The crosshair remains enabled at startup; the toggle is window-local because
+  both Neovim options are window-local.
+- The full toggle restores both directions when switching from row-only mode.
+- Headless checks confirmed both mappings and their toggle directions in the
+  `full` and `thin` profiles. Human visual confirmation remains pending.
+- Best next core lesson remains Curriculum 9.7 — delete only the isolated
+  practice file with explicit confirmation.

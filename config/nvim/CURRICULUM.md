@@ -21,12 +21,12 @@ unexplained magic.
 ## Current Checkpoint
 
 - **Lesson:** 9 — Safe File Operations with Oil
-- **Next core sub-lesson:** 9.1 — create an isolated practice directory before
-  modifying files.
+- **Next core sub-lesson:** 9.7 — permanently delete only the isolated practice
+  file with explicit confirmation.
 - **Go practice module:**
   `~/Developer/dotfiles-hd/config/nvim/practice/lesson-05-go`.
-- **Why Lesson 9 remains open:** its isolated Oil file-operation and recovery
-  drills remain.
+- **Why Lesson 9 remains open:** its confirmed deletion and
+  apply-and-verify drills remain.
 
 ## Lesson 1 — Editor Foundations
 
@@ -66,9 +66,9 @@ unexplained magic.
 ### Optional Deep Dives
 
 - [ ] **1.D1** Start with `nvim --clean` and compare the unconfigured editor.
-- [ ] **1.D2** Use `Space j`, `Space k`, and `Space l` as window-focus
-  alternatives.
-- [ ] **1.D3** Resize, equalize, and rotate window layouts.
+- [ ] **1.D2** Use `Space W h/j/k/l` as window-focus alternatives.
+- [ ] **1.D3** Resize, equalize, move, and exchange window layouts through the
+  `Space W` menu.
 
 ## Lesson 2 — Project Search and Results
 
@@ -304,17 +304,22 @@ unexplained magic.
 
 ### Core Sub-Lessons
 
-- [ ] **9.1** Create an isolated practice directory before modifying files.
-- [ ] **9.2** Recognize that Oil locally maps `Ctrl-h` to open a horizontal split
-  and `Ctrl-l` to refresh; leave Oil or use `Ctrl-w h/l` for window focus.
-- [ ] **9.3** Create a file and directory through Oil.
-- [ ] **9.4** Rename a file and understand Oil's pending-change state.
-- [ ] **9.5** Move a file between directories.
-- [ ] **9.6** Explain before deletion that this config has
+- [x] **9.1** Create an isolated practice directory before modifying files. —
+  Session 045
+- [x] **9.2** Recognize that Oil locally maps `Ctrl-h` to open a horizontal split
+  and `Ctrl-l` to refresh; use `Space W h/j/k/l` or the native `Ctrl-w h/j/k/l`
+  fallback for window focus. — Session 045
+- [x] **9.3** Create a file and directory through Oil. — Session 045
+- [x] **9.4** Rename a file and understand Oil's pending-change state. —
+  Session 045
+- [x] **9.5** Move a file between directories. — Session 045
+- [x] **9.6** Explain before deletion that this config has
   `delete_to_trash = false`, so an applied Oil deletion is permanent.
+  — Session 045
 - [ ] **9.7** Delete only an isolated practice file with explicit confirmation.
 - [ ] **9.8** Apply Oil changes and verify the resulting filesystem state.
-- [ ] **9.9** Recover safely from an unintended pending operation.
+- [x] **9.9** Recover safely from an unintended pending operation. — Session
+  045
 
 ### Optional Deep Dives
 

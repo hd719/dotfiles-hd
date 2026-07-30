@@ -211,6 +211,12 @@ Every agent teaching Neovim must read and update both files.
 | Visual `<` / `>` / `J` / `K` / `Space c` | Outdent / indent / move down / move up / comment                              |
 | `Space v` / `Space s`                    | Split right / down                                                            |
 | `Space 0`, then `H` / `L`                | Move current buffer left / right; three idle seconds or `Escape` exits        |
+| `Space W d`                              | Show diagnostics under the cursor                                             |
+| `Space W h/j/k/l`                        | Focus window left / down / up / right                                         |
+| `Space W H/J/K/L`                        | Move the current window to the far left / bottom / top / right                |
+| `Space W s/v/T`                          | Split horizontally / vertically / move the window to a new tab                |
+| `Space W q/o/w/x`                        | Quit / close others / switch / swap windows                                   |
+| `Space W +/-/</>/=/_`                    | Resize, equalize, or maximize window height                                   |
 | `Ctrl-h/j/k/l`                           | Focus window left / down / up / right                                         |
 | `Ctrl-o` / `Ctrl-i`                      | Jump-history Back / Forward                                                   |
 | `Space q`                                | Close the current window                                                      |
@@ -309,12 +315,12 @@ attaches only to that file; press it again to detach. Put the cursor on a
 navigation remains available while diagnostics are muted.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
-tree, `Space l` (or `Ctrl-l`) moves focus to the editor, and `Ctrl-h` moves
-focus back to the tree. There is no `Space h` for window-left because `Space h`
-opens Oil, so the key to return to the tree is `Ctrl-h`. Press `Space e` again
-to close the sidebar. The sidebar shows dotfiles by default (matching Oil) but
-hides `.gitignore`d files; inside the tree press `H` to toggle dotfiles and `I`
-to toggle gitignored files.
+tree, `Space W l` moves focus to the editor, and `Space W h` moves focus back
+to the tree. The existing `Space l` and `Ctrl-h/l` shortcuts remain available,
+but the `Space W` group works consistently even where a plugin owns a plain
+Control mapping. Press `Space e` again to close the sidebar. The sidebar shows
+dotfiles by default (matching Oil) but hides `.gitignore`d files; inside the
+tree press `H` to toggle dotfiles and `I` to toggle gitignored files.
 
 Completion appears automatically. Press `Enter` to accept the selected item.
 
@@ -335,7 +341,8 @@ go-to-definition for `.graphql` files, resolving the schema from the project's
 Diagnostics from any server show inline at the end of the line (virtual text).
 Use `]d` / `[d` to jump between them, `Space c f` for the detail float, and
 `Space c d` / `Space c D` for a searchable list of the current buffer's or the
-project's diagnostics.
+project's diagnostics. `Space W d` mirrors native `Ctrl-w d` inside the Windows
+menu.
 
 Diagnostic-navigation mnemonic: `]d` moves forward to the next diagnostic,
 `[d` moves backward to the previous one, and `d` means diagnostic. This is the
