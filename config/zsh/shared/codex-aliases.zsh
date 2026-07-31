@@ -1,9 +1,15 @@
 # Codex aliases shared by personal Macs and Linux workstations.
 
 alias cod='codex'
+alias coda='codex archive'
+alias codapp='codex app'
 alias codd='codex doctor'
+alias codf='codex fork'
+alias codfl='codex fork --last'
 alias codr='codex resume'
+alias codra='codex resume --all'
 alias codrl='codex resume --last'
 alias codrv='codex review --uncommitted'
 alias codu='codex update'
+alias codun='codex unarchive'
 alias codx='codex exec'
