@@ -3478,3 +3478,18 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 
 - Automated thin/full mapping checks passed.
 - Human practice remains pending, so Curriculum 6.D11 stays unchecked.
+
+## 2026-07-31 — Session 040: Buffer Move Mode
+
+### Mapping Changed
+
+- `Space Z` now opens a temporary Bufferline move mode.
+- `Left` and `Right` move the current buffer repeatedly; `Escape` exits.
+- `Space X` remains available to move the current buffer right once.
+
+### Verification State
+
+- Thin/full startup, mapping, repeated-movement, wrap, and exit checks passed.
+- Hamel confirmed that the move mode works locally.
+- **Optional Curriculum 7.D8 complete:** repeated buffer movement and exit were
+  practiced and confirmed.

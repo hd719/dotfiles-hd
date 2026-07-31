@@ -262,8 +262,10 @@ unexplained magic.
 - [ ] **7.D6** Auto-reload buffers changed on disk by an external tool (e.g. the
   Cursor agent) with `autoread` and a `checktime` autocmd, plus `Space r` to
   reload on demand.
-- [x] **7.D7** Reorder the current Bufferline tab with `Space Z` and `Space X`,
-  then distinguish buffer order from window layout. — Session 036
+- [x] **7.D7** Reorder the current Bufferline tab, then distinguish buffer order
+  from window layout. — Session 036
+- [x] **7.D8** Enter Bufferline move mode with `Space Z`, reorder repeatedly with
+  `Left` / `Right`, and exit with `Escape`. — Session 040
 
 ## Lesson 8 — Terminal and Git Workflow
 

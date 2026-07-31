@@ -1,3 +1,5 @@
+local buffer_move_prefix = "<F13>"
+
 return {
   {
     "akinsho/bufferline.nvim",
@@ -7,10 +9,20 @@ return {
     },
     event = "VeryLazy",
     keys = {
-      { "<leader>Z", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer left" },
+      {
+        "<leader>Z",
+        function()
+          require("which-key").show({ keys = buffer_move_prefix, loop = true })
+        end,
+        desc = "Move buffer with arrows",
+      },
+      { buffer_move_prefix .. "<Left>", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer left" },
+      { buffer_move_prefix .. "<Right>", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer right" },
       { "<leader>X", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer right" },
     },
     config = function()
+      require("which-key").add({ { buffer_move_prefix, group = "Move buffer" } })
+
       -- Reuse the already-loaded mini.icons as the devicons provider so we do
       -- not add a second icon plugin.
       require("mini.icons").mock_nvim_web_devicons()
