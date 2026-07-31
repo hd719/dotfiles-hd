@@ -290,6 +290,16 @@ map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Quit" })
 map("n", "<leader>x", "<cmd>x<cr>", { desc = "Save and quit" })
 
 map("n", "<leader>cq", "<cmd>cclose<cr>", { desc = "Close quickfix" })
+map("n", "<leader>cr", function()
+  local session = vim.fs.joinpath(vim.fn.stdpath("state"), "restart-session.vim")
+  vim.cmd("mksession! " .. vim.fn.fnameescape(session))
+  local restarted, err = pcall(vim.cmd, "restart source " .. vim.fn.fnameescape(session))
+  if not restarted and tostring(err):find("restart failed: +cmd did not quit", 1, true) then
+    vim.notify("Restart canceled; unsaved changes kept", vim.log.levels.INFO)
+  elseif not restarted then
+    vim.notify(tostring(err), vim.log.levels.ERROR)
+  end
+end, { desc = "Restart Neovim with session" })
 map("n", "<leader>cf", function()
   vim.diagnostic.open_float({ scope = "cursor" })
 end, { desc = "Diagnostic detail" })

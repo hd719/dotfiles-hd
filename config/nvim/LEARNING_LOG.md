@@ -3513,3 +3513,30 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   locally.
 - **Optional Curriculum 7.D8 complete:** the final buffer-move workflow was
   practiced and confirmed.
+
+## 2026-07-31 — Session 042: Thin-Profile Dashboard and Session Restart
+
+### Dashboard Enabled
+
+- Enabled the existing Snacks dashboard and shared anon-mask header in the
+  `thin` profile.
+- Kept the thin profile's bigfile, words, indent, image, LazyGit, and terminal
+  modules disabled.
+- Hid the dashboard's LazyGit shortcut because LazyGit is not installed on the
+  thin Mac.
+- `v` with no path opens the dashboard; `v .` opens the current directory in
+  Oil.
+
+### Session-Preserving Restart
+
+- Added `Space c r` (`config restart`) to save a local Neovim session, restart
+  Neovim, and restore the open buffers and windows.
+- Unsaved changes prompt for save or cancel instead of being discarded; cancel
+  keeps the current Neovim session open.
+- Optional Curriculum 7.D9 remains unchecked until Hamel practices the mapping.
+
+### Verification State
+
+- Thin/full startup, dashboard mask, Oil routing, restart/restore, cancel safety,
+  bootstrap tests, and the thin-Mac doctor passed.
+- Human verification remains pending, so Curriculum 7.D9 stays unchecked.

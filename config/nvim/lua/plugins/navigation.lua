@@ -57,7 +57,6 @@ local function profile_snacks_opts(opts)
     opts.image = nil
     opts.lazygit = nil
     opts.terminal = nil
-    opts.dashboard = nil
   end
 
   return opts
@@ -180,7 +179,7 @@ return {
         enabled = true,
         preset = {
           header = anon_header(),
-          keys = {
+          keys = profile_keys({
             {
               icon = " ",
               key = "f",
@@ -221,6 +220,7 @@ return {
               action = function()
                 Snacks.lazygit()
               end,
+              full_only = true,
             },
             {
               icon = " ",
@@ -232,7 +232,7 @@ return {
             },
             { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
             { icon = " ", key = "q", desc = "Quit", action = ":qa" },
-          },
+          }),
         },
         sections = {
           { section = "header" },
