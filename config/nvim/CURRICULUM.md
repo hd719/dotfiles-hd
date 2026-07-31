@@ -264,8 +264,8 @@ unexplained magic.
   reload on demand.
 - [x] **7.D7** Reorder the current Bufferline tab, then distinguish buffer order
   from window layout. — Session 036
-- [x] **7.D8** Enter Bufferline move mode with `Space Z`, reorder repeatedly with
-  `Left` / `Right`, and exit with `Escape`. — Session 040
+- [x] **7.D8** Enter Bufferline move mode with `Space 0`, reorder repeatedly with
+  `H` / `L`, and exit with `Escape` or three idle seconds. — Session 041
 
 ## Lesson 8 — Terminal and Git Workflow
 
