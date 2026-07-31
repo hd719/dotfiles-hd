@@ -266,8 +266,8 @@ unexplained magic.
   from window layout. — Session 036
 - [x] **7.D8** Enter Bufferline move mode with `Space 0`, reorder repeatedly with
   `H` / `L`, and exit with `Escape` or three idle seconds. — Session 041
-- [ ] **7.D9** Restart Neovim with `Space c r` while restoring open buffers and
-  windows from a session.
+- [x] **7.D9** Restart Neovim with `Space c r` while restoring open buffers and
+  windows from a session. — Session 043
 
 ## Lesson 8 — Terminal and Git Workflow
 
