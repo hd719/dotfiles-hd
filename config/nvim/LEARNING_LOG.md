@@ -3493,3 +3493,23 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Hamel confirmed that the move mode works locally.
 - **Optional Curriculum 7.D8 complete:** repeated buffer movement and exit were
   practiced and confirmed.
+
+## 2026-07-31 — Session 041: One-Step Buffer Shortcut Removed
+
+### Mapping Removed
+
+- Removed the one-step `Space X` buffer-move shortcut at Hamel's request.
+- `Space 0`, then `H` / `L`, is now the only configured buffer-reordering
+  workflow.
+
+### Entry Mapping Changed
+
+- Replaced `Space Z` with the easier `Space 0` entry mapping.
+- Move mode uses `H` / `L` to reorder left / right; outside move mode those keys
+  still switch buffers.
+- Move mode exits after three seconds without an `H` / `L` move.
+- Each move resets the timeout; `Escape` exits immediately.
+- Hamel confirmed that the final `Space 0`, `H` / `L`, and timeout workflow works
+  locally.
+- **Optional Curriculum 7.D8 complete:** the final buffer-move workflow was
+  practiced and confirmed.

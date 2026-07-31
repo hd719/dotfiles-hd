@@ -1,4 +1,33 @@
 local buffer_move_prefix = "<F13>"
+local buffer_move_timeout_ms = 3000
+local buffer_move_generation = 0
+
+local function arm_buffer_move_timeout()
+  buffer_move_generation = buffer_move_generation + 1
+  local generation = buffer_move_generation
+
+  vim.defer_fn(function()
+    if generation ~= buffer_move_generation then
+      return
+    end
+
+    local state = require("which-key.state")
+    local active = state.state
+    if active and active.filter and active.filter.keys == buffer_move_prefix then
+      vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "nt", false)
+    end
+  end, buffer_move_timeout_ms)
+end
+
+local function show_buffer_move_mode()
+  arm_buffer_move_timeout()
+  require("which-key").show({ keys = buffer_move_prefix, loop = true })
+end
+
+local function move_buffer(command)
+  vim.cmd(command)
+  arm_buffer_move_timeout()
+end
 
 return {
   {
@@ -10,15 +39,24 @@ return {
     event = "VeryLazy",
     keys = {
       {
-        "<leader>Z",
-        function()
-          require("which-key").show({ keys = buffer_move_prefix, loop = true })
-        end,
-        desc = "Move buffer with arrows",
+        "<leader>0",
+        show_buffer_move_mode,
+        desc = "Move buffer with H/L",
       },
-      { buffer_move_prefix .. "<Left>", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer left" },
-      { buffer_move_prefix .. "<Right>", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer right" },
-      { "<leader>X", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer right" },
+      {
+        buffer_move_prefix .. "H",
+        function()
+          move_buffer("BufferLineMovePrev")
+        end,
+        desc = "Move buffer left",
+      },
+      {
+        buffer_move_prefix .. "L",
+        function()
+          move_buffer("BufferLineMoveNext")
+        end,
+        desc = "Move buffer right",
+      },
     },
     config = function()
       require("which-key").add({ { buffer_move_prefix, group = "Move buffer" } })
