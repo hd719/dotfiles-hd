@@ -3540,3 +3540,31 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Thin/full startup, dashboard mask, Oil routing, restart/restore, cancel safety,
   bootstrap tests, and the thin-Mac doctor passed.
 - Human verification remains pending, so Curriculum 7.D9 stays unchecked.
+
+## 2026-07-31 — Session 043: Restart Buffer Collision
+
+### Bug Found During Practice
+
+- Restarting from `v .` failed while restoring the Oil directory buffer with
+  `E95: Buffer with this name already exists`.
+- Neovim restarted with its original `.` argument, so Oil opened the directory
+  before `restart-session.vim` tried to restore the same buffer.
+
+### Fix
+
+- The fresh Neovim process now wipes only its startup buffers before sourcing
+  the saved session.
+- Active Snacks pickers close before the session is saved; their temporary
+  explorer/list/preview windows no longer restore as empty `[No Name]` panes.
+- The original process still prompts before leaving when unsaved changes exist.
+
+### Verification State
+
+- Reproduced the original Oil collision, then verified dashboard-only, normal
+  file, and Oil restarts without `E95`.
+- Restarting with the Snacks explorer open now restores one Oil window with no
+  empty `[No Name]` panes.
+- Thin/full startup, the thin-Mac doctor, and bootstrap tests passed.
+- Hamel confirmed the corrected restart workflow works locally.
+- **Optional Curriculum 7.D9 complete:** session-preserving restart was
+  practiced and confirmed.
