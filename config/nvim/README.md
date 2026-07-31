@@ -218,6 +218,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space c a`                              | LSP code action                                                               |
 | `Space c f`                              | Show the diagnostic under the cursor                                          |
 | `Space c q`                              | Close only the quickfix/references list                                       |
+| `Space c r`                              | Restart Neovim and restore open buffers/windows                               |
 | `Space c d` / `Space c D`                | Diagnostics list (buffer / project)                                           |
 | `]d` / `[d`                              | Next / previous diagnostic                                                    |
 | `Space y a/p/d/f`                        | Copy whole buffer / file path / working dir / file folder                     |
