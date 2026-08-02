@@ -968,6 +968,8 @@ test_mac_mini_apply() {
   make_fake_toolchain "$fake_bin"
   seed_protected_state "$home_dir"
   printf 'old-mini-zshrc\n' > "$home_dir/.zshrc"
+  mkdir -p "$home_dir/.hermes/skins"
+  printf 'old-hermes-skin\n' > "$home_dir/.hermes/skins/hamel-nord.yaml"
   printf 'export MINI_KEEP=yes\n' > "$home_dir/.zprofile"
   : > "$log"
   snapshot_protected_state "$home_dir" "$protected_before"
@@ -979,6 +981,10 @@ test_mac_mini_apply() {
 
   assert_eq "$REPO_DIR/setup/mac-mini/.zshrc" "$(readlink "$home_dir/.zshrc")" "Mac mini zshrc target"
   assert_eq "$REPO_DIR/config/bookokrat" "$(readlink "$home_dir/.config/bookokrat")" "Mac mini Bookokrat config target"
+  assert_eq "$REPO_DIR/config/hermes/skins/hamel-nord.yaml" \
+    "$(readlink "$home_dir/.hermes/skins/hamel-nord.yaml")" "Mac mini Hermes skin target"
+  assert_contains "$home_dir/.hermes/skins/hamel-nord.yaml.backup-20260715-170000" \
+    old-hermes-skin
   assert_no_path "$home_dir/.config/karabiner"
   assert_no_path "$home_dir/.config/aerospace/aerospace.toml"
   assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/setup/mac-mini/Brewfile"

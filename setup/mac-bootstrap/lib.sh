@@ -315,6 +315,7 @@ load_profile() {
       ;;
     mac-mini)
       LINK_SPECS+=(
+        "$dotfiles_dir/config/hermes/skins/hamel-nord.yaml|$home_dir/.hermes/skins/hamel-nord.yaml"
         "$dotfiles_dir/setup/mac-mini/.zshrc|$home_dir/.zshrc"
       )
       ;;
