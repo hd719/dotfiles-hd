@@ -186,6 +186,9 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$VAGRANTFILE" 'ansible.compatibility_mode = "2.0"'
   assert_file_contains "$VAGRANTFILE" \
     'ansible.provisioning_path = "/tmp/ubuntu-workstation-ansible"'
+  assert_file_contains "$VAGRANTFILE" \
+    '"UBUNTU_VM_TAILSCALE_TAG",'
+  assert_file_contains "$VAGRANTFILE" '"tag:ubuntu-dev"'
   assert_file_contains "$ANSIBLE_PLAYBOOK" 'hosts: all'
   assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/system.yml'
   assert_file_contains "$ANSIBLE_PLAYBOOK" 'tasks/identities.yml'
@@ -226,6 +229,9 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$SSH_CONFIG" 'Host forgejo-truenas-lan'
   assert_file_contains "$SSH_CONFIG" 'IdentityAgent none'
   assert_file_contains "$ANSIBLE_DIR/tasks/tailscale.yml" 'no_log: true'
+  assert_file_contains "$ANSIBLE_DIR/tasks/tailscale.yml" \
+    '"--advertise-tags={{ tailscale_acl_tag }}"'
+  assert_file_contains "$ANSIBLE_DIR/tasks/tailscale.yml" '--ssh=true'
   assert_file_contains "$ANSIBLE_DIR/tasks/tailscale.yml" \
     'state: absent'
   assert_file_contains "$ANSIBLE_DIR/tasks/user.yml" 'PasswordAuthentication no'

@@ -524,8 +524,9 @@ tailscale ip -4
 systemctl status tailscaled --no-pager
 ```
 
-Use `ut` on the Mac to connect through Tailscale. Both SSH routes use the Mac's
-Ubuntu login key, enforce host-key checking, and disable agent forwarding.
+Use `ut` on the Mac to connect through Tailscale. The local route uses the
+Mac's Ubuntu login key; the remote route uses Tailscale SSH identity. Both
+enforce host-key checking and disable agent forwarding.
 
 ## SSH and Git Identities
 
