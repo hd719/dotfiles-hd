@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT="$(cd "$TEST_DIR/.." && pwd)/configure-himalaya-email-beta.sh"
+TMP_ROOT="$(mktemp -d)"
+TESTS=0
+trap 'rm -rf "$TMP_ROOT"' EXIT
+
+fail() {
+  printf 'FAIL: %s\n' "$*" >&2
+  exit 1
+}
+
+assert_contains() {
+  TESTS=$((TESTS + 1))
+  grep -Fq -- "$2" "$1" || fail "expected '$2' in $1"
+}
+
+assert_not_contains() {
+  TESTS=$((TESTS + 1))
+  ! grep -Fq -- "$2" "$1" || fail "did not expect '$2' in $1"
+}
+
+assert_eq() {
+  TESTS=$((TESTS + 1))
+  [[ "$1" == "$2" ]] || fail "$3 (expected '$1', got '$2')"
+}
+
+file_mode() {
+  if stat -f '%Lp' "$1" >/dev/null 2>&1; then
+    stat -f '%Lp' "$1"
+  else
+    stat -c '%a' "$1"
+  fi
+}
+
+fake_bin="$TMP_ROOT/bin"
+home_dir="$TMP_ROOT/home"
+config="$home_dir/.config/himalaya/config.toml"
+command_log="$TMP_ROOT/commands.log"
+mkdir -p "$fake_bin" "$home_dir"
+
+cat > "$fake_bin/himalaya" <<'EOF'
+#!/usr/bin/env bash
+if [[ "${1:-}" == '--version' ]]; then
+  printf 'himalaya v2.0.0 +imap\n'
+  exit 0
+fi
+printf 'himalaya %s\n' "$*" >> "${COMMAND_LOG:?}"
+EOF
+chmod +x "$fake_bin/himalaya"
+
+cat > "$fake_bin/security" <<'EOF'
+#!/usr/bin/env bash
+account=''
+service=''
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -a) account="$2"; shift 2 ;;
+    -s) service="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+IFS= read -r secret
+[[ -n "$secret" ]] || exit 41
+printf 'security account=%s service=%s\n' "$account" "$service" >> "${COMMAND_LOG:?}"
+EOF
+chmod +x "$fake_bin/security"
+
+run_configure() {
+  printf '%s\n' \
+    personal personal@example.com \
+    work work@example.com \
+    first-test-password second-test-password \
+    | HOME="$home_dir" \
+      COMMAND_LOG="$command_log" \
+      HIMALAYA_BIN="$fake_bin/himalaya" \
+      SECURITY_BIN="$fake_bin/security" \
+      HIMALAYA_CONFIG_PATH="$config" \
+      HIMALAYA_BETA_ALLOW_NONINTERACTIVE=1 \
+      "$SCRIPT" --configure >/dev/null
+}
+
+run_configure
+config_mode="$(file_mode "$config")"
+assert_eq '600' "$config_mode" 'config is private'
+assert_eq '2' "$(grep -c '^\[accounts\.' "$config")" 'config has exactly two accounts'
+assert_contains "$config" '[accounts.personal]'
+assert_contains "$config" '[accounts.work]'
+assert_contains "$config" 'imap.sasl.plain.username = "personal@example.com"'
+assert_contains "$config" 'hd.himalaya.personal'
+assert_contains "$config" 'hd.himalaya.work'
+assert_not_contains "$config" 'first-test-password'
+assert_not_contains "$config" 'second-test-password'
+assert_not_contains "$config" 'smtp.'
+assert_contains "$command_log" 'security account=personal@example.com service=hd.himalaya.personal'
+assert_contains "$command_log" 'security account=work@example.com service=hd.himalaya.work'
+
+if [[ -n "${REAL_HIMALAYA_BIN:-}" ]]; then
+  "$REAL_HIMALAYA_BIN" -c "$config" account list >/dev/null
+  TESTS=$((TESTS + 1))
+fi
+
+HOME="$home_dir" \
+  COMMAND_LOG="$command_log" \
+  HIMALAYA_BIN="$fake_bin/himalaya" \
+  HIMALAYA_CONFIG_PATH="$config" \
+  "$SCRIPT" --check >/dev/null
+assert_contains "$command_log" '--backend imap account check'
+
+run_configure
+assert_eq '1' "$(find "$(dirname "$config")" -maxdepth 1 -name 'config.toml.backup-*' | wc -l | tr -d ' ')" \
+  'reconfigure creates one backup'
+
+printf 'Himalaya email beta tests passed: %d assertions.\n' "$TESTS"
