@@ -4,6 +4,7 @@ brew "coreutils"
 brew "ffmpeg"
 brew "git-filter-repo"
 brew "gogcli"
+brew "himalaya"
 # Runtime exception: LaunchAgents prepend /opt/homebrew/opt/node@22/bin and stay
 # on Homebrew Node until a separate maintenance window is approved. Keep this
 # keg-only so unversioned Node dependencies cannot create link conflicts.
