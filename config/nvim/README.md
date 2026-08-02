@@ -10,7 +10,7 @@ Hamel's existing Zed muscle memory.
 - `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
   editing behavior, Nord, Bufferline, Lualine, WhichKey, Oil, Mini pairs and
   surround, Gitsigns, rendered Markdown, Obsidian, slim Snacks pickers and
-  Explorer, Tree-sitter Markdown parsing, and Marksman only.
+  Explorer, Snacks terminals, Tree-sitter Markdown parsing, and Marksman only.
 
 Both profiles use this directory and the same `lazy-lock.json`. Disabled
 full-only plugins are not restored on a thin machine. An unknown profile stops
@@ -147,7 +147,8 @@ Configuration map:
   the current buffer is disposable.
 
 For a calm first run, open this file with `nvim ~/.config/nvim/README.md`, then
-press `Space` and pause to see the available commands.
+press `Space` to see the available commands immediately. Press `Escape` to
+close WhichKey; an extra `Space` is ignored instead of moving the cursor.
 
 ## Curriculum and Learning Log
 

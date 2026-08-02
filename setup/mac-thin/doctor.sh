@@ -158,6 +158,15 @@ else
 fi
 
 if command -v nvim >/dev/null 2>&1 \
+  && DOTFILES_NVIM_PROFILE=thin nvim --headless \
+    "+lua local repeated=vim.fn.maparg('  ','n',false,true); local terminal=vim.fn.maparg(' t','n',false,true); local floating=vim.fn.maparg(' T','n',false,true); assert(repeated.desc=='Ignore repeated leader','Repeated Space is not consumed'); assert(terminal.desc=='New terminal','Space t is not mapped on thin'); assert(floating.desc=='New floating terminal','Space T is not mapped on thin'); assert(require('which-key.config').delay==0,'WhichKey is not immediate'); vim.api.nvim_buf_set_lines(0,0,-1,false,{'leader test'}); vim.api.nvim_win_set_cursor(0,{1,0}); vim.api.nvim_feedkeys('  ','xt',false); vim.wait(1000); assert(vim.api.nvim_win_get_cursor(0)[2]==0,'Repeated Space moved the cursor')" \
+    '+qa!' >/dev/null 2>&1; then
+  pass "Thin-profile immediate leader and terminal mappings"
+else
+  fail "Thin-profile leader or terminal mappings are unavailable"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
   && DOTFILES_NVIM_PROFILE=thin nvim --headless "$SCRIPT_DIR/README.md" \
     "+lua assert(not vim.lsp.is_enabled('marksman'),'Marksman was enabled globally'); assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached before request'); local mapping=vim.fn.maparg(' mm','n',false,true); assert(mapping.desc=='Toggle Marksman for file','Space m m is not mapped to Marksman'); local first=vim.api.nvim_get_current_buf(); vim.cmd.MarksmanToggleCurrent(); assert(vim.wait(5000,function() return #vim.lsp.get_clients({bufnr=first,name='marksman'})>0 end),'Marksman did not attach on request'); vim.cmd.enew(); vim.bo.filetype='markdown'; assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached to an unrequested buffer'); vim.api.nvim_set_current_buf(first); vim.cmd.MarksmanToggleCurrent(); assert(vim.wait(5000,function() return #vim.lsp.get_clients({bufnr=first,name='marksman'})==0 end),'Marksman did not detach on request')" \
     '+qa!' >/dev/null 2>&1; then

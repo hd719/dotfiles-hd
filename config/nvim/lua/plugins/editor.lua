@@ -57,6 +57,7 @@ local selected_filetypes = profile.is_thin and {
 } or filetypes
 
 local which_key_spec = {
+  { "<leader><leader>", hidden = true },
   { "<leader>C", group = "Crosshair" },
   { "<leader>f", group = "Find" },
   { "<leader>m", group = "Markdown" },
@@ -69,6 +70,7 @@ return {
     "folke/which-key.nvim",
     event = "VeryLazy",
     opts = {
+      delay = 0,
       preset = "modern",
       spec = which_key_spec,
     },
