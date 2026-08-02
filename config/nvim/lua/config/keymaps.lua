@@ -1,6 +1,10 @@
 local map = vim.keymap.set
 local profile = require("config.profile")
 
+-- Consume a repeated leader so closing WhichKey with Space cannot fall through
+-- to Neovim's native cursor-right motion. Escape remains the normal close key.
+map("n", "<leader><leader>", "<Nop>", { desc = "Ignore repeated leader" })
+
 -- Intentional Zed muscle memory. Nonrecursive mappings prevent an i/a loop.
 map("n", "i", "a", { desc = "Insert after cursor" })
 map("n", "a", "i", { desc = "Insert before cursor" })

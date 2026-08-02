@@ -75,7 +75,8 @@ Marksman is the only installed language server, but it stays off by default.
 In a Markdown file, use `Space m m` to turn it on or off only for that file.
 `Space e` opens the existing Snacks file-explorer sidebar; it does not add
 another plugin. Run `v` with no path for the shared Snacks dashboard and anon
-mask; `v .` opens the current directory in Oil instead.
+mask; `v .` opens the current directory in Oil instead. `Space t` opens a
+bottom terminal and `Space T` opens a floating terminal.
 
 Mutable state remains local: Herdr sessions, Hunk state, Neovim
 plugins/cache/undo, Zoxide history, Zsh history, and completion caches are

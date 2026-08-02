@@ -3568,3 +3568,20 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Hamel confirmed the corrected restart workflow works locally.
 - **Optional Curriculum 7.D9 complete:** session-preserving restart was
   practiced and confirmed.
+
+## 2026-08-01 — Session 044: Thin Leader Menu and Terminals
+
+### Bugs Found
+
+- WhichKey used its default 200 ms delay, so the leader menu felt slow.
+- Pressing `Space` again to close the menu replayed two unmatched spaces;
+  Neovim's native Normal-mode motion then moved the cursor right twice.
+- The thin profile disabled Snacks terminal support and filtered out `Space t`
+  and `Space T`, although the shared key guide advertised both mappings.
+
+### Fix
+
+- WhichKey now opens immediately and a repeated leader is consumed. `Escape`
+  remains the explicit menu-close key.
+- The thin profile now keeps the existing bottom and floating Snacks terminals.
+- Automated thin-profile checks cover the leader behavior and both mappings.

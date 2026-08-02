@@ -56,7 +56,6 @@ local function profile_snacks_opts(opts)
     opts.indent = nil
     opts.image = nil
     opts.lazygit = nil
-    opts.terminal = nil
   end
 
   return opts
@@ -399,7 +398,6 @@ return {
           Snacks.terminal.open()
         end,
         desc = "New terminal",
-        full_only = true,
       },
       {
         "<leader>T",
@@ -407,7 +405,6 @@ return {
           Snacks.terminal.open(nil, { win = { position = "float" } })
         end,
         desc = "New floating terminal",
-        full_only = true,
       },
     }),
   },
