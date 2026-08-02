@@ -150,7 +150,7 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "profile: mac-thin"
   say "mode: dry-run (no package-manager calls or writes)"
   say "would install control-plane apps from: $BREWFILE"
-  say "VMware Fusion and ChatGPT remain manual application installs"
+  say "VMware Fusion, ChatGPT, and Hermes Desktop remain manual application installs"
   say "would install Rosetta 2 when missing"
   say "would install vagrant-vmware-desktop $VAGRANT_VMWARE_PLUGIN_VERSION"
   say "would restore only thin-profile Neovim plugins and Markdown parsers"

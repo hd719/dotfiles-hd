@@ -30,6 +30,7 @@ for app_name in \
   "Brave Browser.app" \
   "ChatGPT.app" \
   "Ghostty.app" \
+  "Hermes.app" \
   "Obsidian.app" \
   "Tailscale.app" \
   "VMware Fusion.app" \

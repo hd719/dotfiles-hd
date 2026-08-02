@@ -16,6 +16,7 @@ The host installs only:
 - Ghostty
 - Ghostty fonts
 - Herdr as a remote Ubuntu client
+- Hermes Desktop as a remote Mac mini agent client
 - Hunk as the local diff viewer
 - iStat Menus
 - lsd for file listings
@@ -78,15 +79,23 @@ another plugin. Run `v` with no path for the shared Snacks dashboard and anon
 mask; `v .` opens the current directory in Oil instead. `Space t` opens a
 bottom terminal and `Space T` opens a floating terminal.
 
-Mutable state remains local: Herdr sessions, Hunk state, Neovim
-plugins/cache/undo, Zoxide history, Zsh history, and completion caches are
-never symlinked.
+Mutable state remains local: Herdr sessions, Hermes Desktop connection state,
+Hunk state, Neovim plugins/cache/undo, Zoxide history, Zsh history, and
+completion caches are never symlinked.
 
 ## Manual Applications
 
 - ChatGPT is the supported Codex desktop app. The standalone Codex CLI is
   installed by the Brewfile. Install ChatGPT from
   <https://chatgpt.com/download/> when it is not already present.
+- Hermes Desktop is a remote client for the Mac mini Hermes stack. The official
+  macOS default is the signed DMG, but its installer also installs a local
+  Hermes runtime. Keep the thin Mac remote-only: build the Desktop app from the
+  Mac mini's pinned, clean Hermes checkout with `hermes desktop --build-only`,
+  copy `apps/desktop/release/mac-arm64/Hermes.app` into `/Applications`, then use
+  **Connect via SSH** with `mac-mini-ts`. Do not run the installer's **Install
+  Hermes** action on the thin Mac. Keep its connection state machine-owned. See
+  <https://hermes-agent.nousresearch.com/docs/user-guide/desktop>.
 - VMware Fusion is not available as a current Homebrew cask. Download it
   through Broadcom's official flow:
   <https://knowledge.broadcom.com/external/article/315638/download-and-install-vmware-fusion.html>.
@@ -97,6 +106,7 @@ The doctor remains red until both applications exist in `/Applications`.
 
 1. Sign in to 1Password, Tailscale, Obsidian, and ChatGPT.
 1. Grant Tailscale's requested network-extension permission.
+1. Connect Hermes Desktop to `mac-mini-ts` with its **Connect via SSH** mode.
 1. Complete VMware Fusion's one-time privileged setup.
 1. Build the Ubuntu VM with `uvm-up` and keep VMware Fusion open.
 1. Add `ubuntu-vm-ts` to Codex connections as the primary development route.
