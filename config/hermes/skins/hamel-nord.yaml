@@ -1,0 +1,61 @@
+name: hamel-nord
+description: Hamel Nord Blur - frost cyan on polar-night blue
+
+colors:
+  background: "#3b4252"
+
+  banner_border: "#434c5e"
+  banner_title: "#e5e9f0"
+  banner_accent: "#88c0d0"
+  banner_dim: "#a0aec8"
+  banner_text: "#d8dee9"
+
+  ui_primary: "#e5e9f0"
+  ui_text: "#d8dee9"
+  ui_label: "#88c0d0"
+  ui_accent: "#88c0d0"
+  ui_border: "#434c5e"
+  ui_tool: "#88c0d0"
+  ui_thinking: "#b48ead"
+  ui_ok: "#a3be8c"
+  ui_warn: "#ebcb8b"
+  ui_error: "#bf616a"
+
+  diff_added: "#3b4d43"
+  diff_removed: "#503b45"
+  diff_added_word: "#a3be8c"
+  diff_removed_word: "#bf616a"
+
+  syntax_string: "#a3be8c"
+  syntax_number: "#b48ead"
+  syntax_keyword: "#81a1c1"
+  syntax_comment: "#a0aec8"
+
+  prompt: "#d8dee9"
+  input_rule: "#88c0d0"
+  response_border: "#88c0d0"
+
+  status_bar_bg: "#2e3440"
+  status_bar_text: "#d8dee9"
+  status_bar_strong: "#e5e9f0"
+  status_bar_dim: "#a0aec8"
+  status_bar_good: "#a3be8c"
+  status_bar_warn: "#ebcb8b"
+  status_bar_bad: "#d08770"
+  status_bar_critical: "#bf616a"
+
+  session_label: "#88c0d0"
+  session_border: "#4c566a"
+  voice_status_bg: "#2e3440"
+  selection_bg: "#4c566a"
+  completion_menu_bg: "#2e3440"
+  completion_menu_current_bg: "#4c566a"
+  completion_menu_meta_bg: "#2e3440"
+  completion_menu_meta_current_bg: "#4c566a"
+
+branding:
+  agent_name: Hermes Agent
+  prompt_symbol: "❯"
+  help_header: "(^_^)? Commands"
+
+tool_prefix: "┊"

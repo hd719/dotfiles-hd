@@ -130,6 +130,8 @@ pass `--check` and the read-only mailbox QA is green.
 - Shared Brewfile plus the selected profile overlay, installed without broad
   upgrades or cleanup.
 - The profile links defined by the bootstrap and verified by the doctor.
+  On `mac-mini`, this includes the tracked Hamel Nord Hermes skin at
+  `~/.hermes/skins/hamel-nord.yaml`.
 - One global Git include for `config/git/aliases.gitconfig`; Git identity and
   credentials remain machine-owned.
 - One marker-owned mise-shims block in `~/.zprofile`; all other content remains
@@ -141,9 +143,10 @@ pass `--check` and the read-only mailbox QA is green.
   conditional.
 - A final doctor run.
 
-Herdr sessions, Hunk state, tmux plugins, credentials, auth state, services,
-Docker state, and application databases remain outside bootstrap ownership.
-Use the shared `hdiff`, `hstaged`, `hshow`, and `hwatch` aliases instead of a
+Other Hermes state, Herdr sessions, Hunk state, tmux plugins, credentials, auth
+state, services, Docker state, and application databases remain outside
+bootstrap ownership. Use the shared `hdiff`, `hstaged`, `hshow`, and `hwatch`
+aliases instead of a
 profile-owned Git pager.
 
 ## Roll Back
