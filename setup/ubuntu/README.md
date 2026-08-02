@@ -11,6 +11,8 @@ Prerequisites on the thin Mac:
 - `setup/mac-thin/bootstrap.sh --apply` has installed Vagrant, the VMware
   utility, and the pinned provider.
 - `~/.ssh/id_ed25519_ubuntu_vm.pub` exists.
+- The tailnet policy defines `tag:ubuntu-dev` and lets `hd719@github` connect
+  to that tag as the `hamel` user.
 
 Create an optional one-time, preauthorized Tailscale auth key. Enter it without
 putting it in shell history:
@@ -24,7 +26,9 @@ unset TAILSCALE_AUTH_KEY
 
 Keep VMware Fusion open while the VM runs. Without an auth key, provisioning
 still succeeds and localhost SSH works; join Tailscale later with
-`sudo tailscale up --hostname=ubuntu-dev`.
+`sudo tailscale up --hostname=ubuntu-dev --advertise-tags=tag:ubuntu-dev --ssh`.
+With an auth key, Vagrant requests that tag and enables Tailscale SSH by
+default. Override only the tag with `UBUNTU_VM_TAILSCALE_TAG` when needed.
 
 `vagrant up` performs this flow:
 
@@ -104,7 +108,7 @@ The tracked SSH policy keeps host-key checking enabled:
 | `ubuntu-vm`    | `127.0.0.1:2222`                |
 | `ubuntu-vm-ts` | Tailscale MagicDNS `ubuntu-dev` |
 
-Use `u` locally and `ut` through Tailscale.
+Use `u` locally with the Mac's Ubuntu key and `ut` through Tailscale SSH.
 
 ## Lifecycle
 

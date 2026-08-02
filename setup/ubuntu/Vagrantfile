@@ -68,6 +68,12 @@ Vagrant.configure("2") do |config|
     ansible.compatibility_mode = "2.0"
     ansible.provisioning_path = "/tmp/ubuntu-workstation-ansible"
     ansible.playbook = "playbook.yml"
+    ansible.extra_vars = {
+      tailscale_acl_tag: ENV.fetch(
+        "UBUNTU_VM_TAILSCALE_TAG",
+        "tag:ubuntu-dev"
+      )
+    }
     ansible.raw_arguments = [
       "--extra-vars",
       "@/dev/shm/ubuntu-workstation-secrets.json"
