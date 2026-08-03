@@ -10,7 +10,8 @@ Hamel's existing Zed muscle memory.
 - `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
   editing behavior, Nord, Bufferline, Lualine, WhichKey, Oil, Mini pairs and
   surround, Gitsigns, rendered Markdown, Obsidian, slim Snacks pickers and
-  Explorer, Snacks terminals, Tree-sitter Markdown parsing, and Marksman only.
+  Explorer, Snacks terminals, Tree-sitter Markdown parsing, Marksman, and
+  Bookokrat PDF reading.
 
 Both profiles use this directory and the same `lazy-lock.json`. Disabled
 full-only plugins are not restored on a thin machine. An unknown profile stops
@@ -42,7 +43,7 @@ startup instead of silently choosing the wrong tool boundary.
 - Editing: `mini.pairs` auto-closes brackets and quotes; `mini.surround` adds,
   changes, and deletes surrounding pairs with a `gs` prefix.
 
-The thin profile requires only Neovim 0.12+, ripgrep, Marksman, and the
+The thin profile requires Neovim 0.12+, Bookokrat, ripgrep, Marksman, and the
 Tree-sitter CLI used to build its two Markdown parsers.
 
 Install the Markdown formatter with:
@@ -235,6 +236,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space o q/s/b/l`                        | Quick switch / search / backlinks / links from this note                      |
 | `Space o d`                              | Open or create today's private daily note                                     |
 | `Space o o/t/c`                          | Open in Obsidian / tags / table of contents                                   |
+| `Space o p`                              | Export the current vault note to PDF through Obsidian                         |
 | `Space o m`                              | Open the Marksman menu                                                        |
 | `Space o m a/d/h`                        | Marksman actions / definition / hover                                         |
 | `Space o m m/n`                          | Toggle Marksman diagnostics / rename                                          |

@@ -186,9 +186,10 @@ commands aligned with the supported workstation.
 - Use `ubuntu-vm-ts` as the primary Codex route to Tailscale node `ubuntu-dev`.
   Keep `ubuntu-vm` as the loopback-only Vagrant fallback. Both must disable Mac
   agent forwarding and enforce SSH host-key checking.
-- Keep the pinned Codex CLI installed and authenticated in Ubuntu. Codex
-  desktop starts it through the remote login shell, where `codex` must be on
-  `PATH`. Preserve the issue 25 forwarded-socket wrapper as a compatibility
+- Keep Ubuntu mise-managed CLI and editor tools on their latest available
+  releases. Keep Node, Go, Python, and Bun on reviewed exact versions. Codex
+  desktop starts Codex through the remote login shell, where `codex` must be
+  on `PATH`. Preserve the issue 25 forwarded-socket wrapper as a compatibility
   guard even though the normal Vagrant routes do not forward an agent.
 
 ## Preserved Zed Configuration

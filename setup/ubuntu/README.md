@@ -156,7 +156,7 @@ folder.
 | -------- | ------------------------------------------------------------- |
 | Vagrant  | VM lifecycle, box version, resources, disk, and SSH transport |
 | Ansible  | Ubuntu packages, user, services, Tailscale, and Git keys      |
-| mise     | Pinned runtimes, Neovim, Codex, and development tools         |
+| mise     | Pinned core runtimes; other development tools track latest    |
 | dotfiles | User configuration, symlinks, and portable Git alias include  |
 | doctor   | Final read-only acceptance check                              |
 

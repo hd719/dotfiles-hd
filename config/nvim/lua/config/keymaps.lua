@@ -77,7 +77,8 @@ map("n", "<leader>s", "<cmd>rightbelow split<cr>", { desc = "Split down" })
 map("n", "<leader>n", "<cmd>enew<cr>", { desc = "New file" })
 map("n", "<leader>r", "<cmd>checktime<cr>", { desc = "Reload files changed on disk" })
 
-if profile.is_full then
+-- Scope the shared full and thin PDF-launcher helpers.
+do
   local function open_default_app(path)
     local _, err = vim.ui.open(path)
     if err then

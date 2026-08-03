@@ -65,8 +65,9 @@ public keys, sign in to Codex, then run the full doctor inside Ubuntu.
 
 For Codex remote development, connect Ubuntu to Tailscale as `ubuntu-dev` and
 add the Mac SSH alias `ubuntu-vm-ts`. Keep `ubuntu-vm` as the local fallback.
-The Ubuntu setup pins Codex CLI through mise; run `codex login --device-auth`
-once inside Ubuntu before enabling the connection in Codex desktop.
+The Ubuntu setup keeps Codex and other mise-managed development tools current;
+run `codex login --device-auth` once inside Ubuntu before enabling the
+connection in Codex desktop.
 
 Thin Mac only:
 
