@@ -64,6 +64,24 @@ add_result FAIL core "Core failure" "down" "Recover"
 [[ "$(home_lab_overall)" == 'NOT READY' ]] || fail "core failure readiness classification"
 pass "readiness aggregation"
 
+hermes_release_payload=""
+ssh_capture() {
+  hermes_release_payload="$2"
+  LAST_STATUS=0
+  LAST_OUTPUT='reviewed=v2026.7.30 installed=v2026.7.30 official_latest=v2026.8.3 report_only=yes'
+}
+reset_results
+MAC_HOST=mac-mini-ts
+check_hermes_release_pin
+[[ "${RESULT_STATUS[0]}" == PASS ]] || fail "reviewed Hermes release should pass"
+[[ "${RESULT_EVIDENCE[0]}" == *"report_only=yes"* ]] \
+  || fail "newer official release should remain report-only"
+[[ "$hermes_release_payload" == *"hermes-reviewed-stable.json"* ]] \
+  || fail "Hermes release check should read the deployed manifest"
+[[ "$hermes_release_payload" == *"rev-parse HEAD"* && "$hermes_release_payload" == *"version_string"* ]] \
+  || fail "Hermes release check should verify commit and version"
+pass "reviewed Hermes release manifest contract"
+
 ssh_capture() {
   local payload="$2"
   LAST_OUTPUT=""

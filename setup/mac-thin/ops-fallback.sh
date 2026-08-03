@@ -529,6 +529,54 @@ check_postgres() {
   add_advisory "PostgreSQL Desktop dumps are same-host rollback protection, not off-device disaster recovery."
 }
 
+check_hermes_release_pin() {
+  local payload
+  IFS= read -r -d '' payload <<'SH' || true
+manifest=/Users/h/.hermes/skills/home-lab-maintenance/references/hermes-reviewed-stable.json
+repo=/Users/h/.hermes/hermes-agent
+test -r "$manifest" || exit 10
+jq -e '.schema_version == 1
+  and (.tag | type == "string")
+  and (.commit | test("^[0-9a-f]{40}$"))
+  and (.version_string | type == "string")' "$manifest" >/dev/null || exit 11
+reviewed_tag="$(jq -r .tag "$manifest")"
+reviewed_commit="$(jq -r .commit "$manifest")"
+reviewed_version="$(jq -r .version_string "$manifest")"
+test -z "$(git -C "$repo" status --short)" || exit 12
+test "$(git -C "$repo" rev-parse HEAD)" = "$reviewed_commit" || exit 13
+test "$(git -C "$repo" rev-list -n 1 "$reviewed_tag")" = "$reviewed_commit" || exit 14
+test "$(git -C "$repo" describe --tags --exact-match HEAD)" = "$reviewed_tag" || exit 15
+/Users/h/.local/bin/hermes --version | grep -Fq "$reviewed_version" || exit 16
+official_json="$(
+  curl -fsSL --max-time 20 \
+    https://api.github.com/repos/NousResearch/hermes-agent/releases/latest \
+    2>/dev/null || true
+)"
+official_tag="$(
+  printf '%s' "$official_json" | jq -r '.tag_name // empty' 2>/dev/null || true
+)"
+if test -z "$official_tag"; then
+  official_tag=unavailable
+  report_only=unknown
+elif test "$official_tag" = "$reviewed_tag"; then
+  report_only=no
+else
+  report_only=yes
+fi
+printf 'reviewed=%s installed=%s official_latest=%s report_only=%s\n' \
+  "$reviewed_tag" "$reviewed_tag" "$official_tag" "$report_only"
+SH
+
+  ssh_capture "$MAC_HOST" "$payload"
+  if ((LAST_STATUS == 0)); then
+    add_result PASS secondary "Hermes release pin" "$LAST_OUTPUT" "None"
+  else
+    add_result WARN secondary "Hermes release pin" \
+      "checkout does not exactly match the deployed reviewed release manifest" \
+      "Route review to home-lab-maintenance"
+  fi
+}
+
 check_hermes() {
   local profile reply
   [[ -n "$MAC_HOST" ]] || return
@@ -566,13 +614,7 @@ check_hermes() {
     fi
   done
 
-  ssh_capture "$MAC_HOST" 'cd /Users/h/.hermes/hermes-agent && test -z "$(git status --short)" && git describe --tags --always --dirty --long | grep -vq dirty'
-  if ((LAST_STATUS == 0)); then
-    add_result PASS secondary "Hermes release pin" "checkout is clean at a described revision" "None"
-  else
-    add_result WARN secondary "Hermes release pin" "checkout is dirty or not cleanly described" \
-      "Route review to home-lab-maintenance"
-  fi
+  check_hermes_release_pin
 }
 
 check_queues_and_delivery() {
