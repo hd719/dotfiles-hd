@@ -126,8 +126,11 @@ install_tools() {
   "$MISE_BIN" trust "$MISE_TARGET"
   "$MISE_BIN" install node@24.18.0 go@1.26.5 python@3.14.6 bun@1.3.14
 
-  log "Installing pinned editor tools"
+  log "Installing configured editor tools"
   "$MISE_BIN" install
+
+  log "Updating unpinned tools"
+  "$MISE_BIN" upgrade
   "$MISE_BIN" reshim
 
   log "Installing pinned Markdown formatter"

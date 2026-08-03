@@ -11,8 +11,8 @@ print_usage() {
   cat <<'EOF'
 Usage: update-system.sh
 
-Update the lean Ubuntu workstation through APT and refresh the pinned mise and
-Neovim daily-driver setup.
+Update the lean Ubuntu workstation through APT, refresh pinned runtimes and
+locked Neovim plugins, and upgrade unpinned mise tools.
 EOF
 }
 
