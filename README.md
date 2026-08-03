@@ -49,7 +49,8 @@ scripts/sync-dotfiles.sh
 ```
 
 The helper checks all three canonical repos before the first pull and stops if
-any worktree is dirty.
+any worktree is dirty. A clean non-`master` branch is returned to `master` only
+when its exact `HEAD` is already merged into current `origin/master`.
 
 Thin Mac plus Ubuntu VM:
 

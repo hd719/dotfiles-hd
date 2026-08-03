@@ -52,20 +52,6 @@ thin_status="$(git -C "$THIN_REPO" status --porcelain)"
 }
 
 thin_branch="$(git -C "$THIN_REPO" branch --show-current)"
-if [[ "$thin_branch" != master ]]; then
-  remote_refs="$(
-    git -C "$THIN_REPO" for-each-ref \
-      --format='%(refname:short)' --contains HEAD refs/remotes
-  )"
-  [[ -n "$remote_refs" ]] \
-    || die "Thin Mac HEAD is not present on a remote-tracking branch"
-fi
-
-ubuntu_branch="$(
-  remote_git "$ubuntu_host" "$UBUNTU_REPO" branch --show-current
-)" || die "Cannot inspect Ubuntu branch"
-[[ "$ubuntu_branch" == master ]] || die "Ubuntu repo is on $ubuntu_branch, not master"
-
 ubuntu_status="$(
   remote_git "$ubuntu_host" "$UBUNTU_REPO" status --porcelain
 )" || die "Cannot inspect Ubuntu status"
@@ -73,11 +59,6 @@ ubuntu_status="$(
   remote_git "$ubuntu_host" "$UBUNTU_REPO" status -sb >&2 || true
   die "Ubuntu repo is dirty"
 }
-
-mini_branch="$(
-  remote_git "$mini_host" "$MINI_REPO" branch --show-current
-)" || die "Cannot inspect Mac mini branch"
-[[ "$mini_branch" == master ]] || die "Mac mini repo is on $mini_branch, not master"
 
 mini_status="$(
   remote_git "$mini_host" "$MINI_REPO" status --porcelain
@@ -87,8 +68,40 @@ mini_status="$(
   die "Mac mini repo is dirty"
 }
 
+ubuntu_branch="$(
+  remote_git "$ubuntu_host" "$UBUNTU_REPO" branch --show-current
+)" || die "Cannot inspect Ubuntu branch"
+mini_branch="$(
+  remote_git "$mini_host" "$MINI_REPO" branch --show-current
+)" || die "Cannot inspect Mac mini branch"
+
+git -C "$THIN_REPO" fetch origin master
+remote_git "$ubuntu_host" "$UBUNTU_REPO" fetch origin master
+remote_git "$mini_host" "$MINI_REPO" fetch origin master
+
+if [[ "$thin_branch" != master ]]; then
+  git -C "$THIN_REPO" merge-base --is-ancestor HEAD origin/master \
+    || die "Thin Mac branch $thin_branch is not merged into origin/master"
+fi
+if [[ "$ubuntu_branch" != master ]]; then
+  remote_git "$ubuntu_host" "$UBUNTU_REPO" \
+    merge-base --is-ancestor HEAD origin/master \
+    || die "Ubuntu branch $ubuntu_branch is not merged into origin/master"
+fi
+if [[ "$mini_branch" != master ]]; then
+  remote_git "$mini_host" "$MINI_REPO" \
+    merge-base --is-ancestor HEAD origin/master \
+    || die "Mac mini branch $mini_branch is not merged into origin/master"
+fi
+
 if [[ "$thin_branch" != master ]]; then
   git -C "$THIN_REPO" switch master
+fi
+if [[ "$ubuntu_branch" != master ]]; then
+  remote_git "$ubuntu_host" "$UBUNTU_REPO" switch master
+fi
+if [[ "$mini_branch" != master ]]; then
+  remote_git "$mini_host" "$MINI_REPO" switch master
 fi
 
 git -C "$THIN_REPO" pull --ff-only origin master
