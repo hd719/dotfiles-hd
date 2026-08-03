@@ -107,7 +107,8 @@ configure SMTP, send mail, download attachments, or authorize automated mailbox
 changes.
 
 After the change is merged and pulled, install the reviewed Brewfile through the
-normal Mac mini apply gate. Then configure the two accounts interactively:
+normal Mac mini apply gate. Use Screen Sharing to open Terminal in the Mac
+mini's desktop session, then run these commands there, not over SSH:
 
 ```bash
 setup/mac-mini/configure-himalaya-email-beta.sh --configure
@@ -116,9 +117,12 @@ setup/mac-mini/configure-himalaya-email-beta.sh --check
 
 The setup script stores each Google app password in the Mac login Keychain and
 writes a mode-`0600` machine-owned file at
-`~/.config/himalaya/config.toml`. Existing configuration is backed up beside the
-file before replacement. Email addresses, app passwords, Keychain data, and the
-generated TOML must never be committed.
+`~/.config/himalaya/config.toml`. The generated password commands explicitly
+read `~/Library/Keychains/login.keychain-db`, so they do not depend on the
+default Keychain search list when Himalaya runs outside the desktop Terminal.
+Existing configuration is backed up beside the file before replacement. Email
+addresses, app passwords, Keychain data, and the generated TOML must never be
+committed.
 
 Google app passwords require 2-Step Verification. If an account cannot create
 one, stop and use a separately reviewed OAuth flow instead of entering the main
