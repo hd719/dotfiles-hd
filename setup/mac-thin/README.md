@@ -10,6 +10,7 @@ The host installs only:
 - Homebrew
 - 1Password
 - Brave and Google Chrome
+- Bookokrat for terminal PDF reading
 - ChatGPT desktop app
 - Codex CLI
 - DaisyDisk
@@ -65,9 +66,9 @@ setup/mac-thin/doctor.sh
 ```
 
 The bootstrap installs the policy packages, including the Codex CLI, and pins
-the `vagrant-vmware-desktop` provider to `3.0.5`. It links the thin `.zshrc`,
-Ghostty, Herdr, Hunk, the shared Neovim config, and the shared Starship config,
-backing up any replaced destination beside the original.
+the `vagrant-vmware-desktop` provider to `3.0.5`. It links Bookokrat, the thin
+`.zshrc`, Ghostty, Herdr, Hunk, the shared Neovim config, and the shared
+Starship config, backing up any replaced destination beside the original.
 
 Neovim uses the shared `config/nvim` and `lazy-lock.json`, but
 `DOTFILES_NVIM_PROFILE=thin` restores only the approved thin plugin set and the
@@ -76,8 +77,9 @@ Marksman is the only installed language server, but it stays off by default.
 In a Markdown file, use `Space m m` to turn it on or off only for that file.
 `Space e` opens the existing Snacks file-explorer sidebar; it does not add
 another plugin. Run `v` with no path for the shared Snacks dashboard and anon
-mask; `v .` opens the current directory in Oil instead. `Space t` opens a
-bottom terminal and `Space T` opens a floating terminal.
+mask; `v .` opens the current directory in Oil instead. Opening a PDF launches
+Bookokrat instead of Snacks' image converter. `Space t` opens a bottom
+terminal and `Space T` opens a floating terminal.
 
 Mutable state remains local: Herdr sessions, Hermes Desktop connection state,
 Hunk state, Neovim plugins/cache/undo, Zoxide history, Zsh history, and

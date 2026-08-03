@@ -62,6 +62,7 @@ done
 BREWFILE="$DOTFILES_DIR/setup/mac-thin/Brewfile"
 NVIM_LOCKFILE="$DOTFILES_DIR/config/nvim/lazy-lock.json"
 LINK_SPECS=(
+  "$DOTFILES_DIR/config/bookokrat|$HOME/.config/bookokrat"
   "$DOTFILES_DIR/setup/mac-thin/.zshrc|$HOME/.zshrc"
   "$DOTFILES_DIR/config/ghostty/config|$HOME/Library/Application Support/com.mitchellh.ghostty/config"
   "$DOTFILES_DIR/config/herdr/config.toml|$HOME/.config/herdr/config.toml"

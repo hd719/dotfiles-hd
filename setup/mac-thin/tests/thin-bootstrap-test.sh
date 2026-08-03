@@ -205,6 +205,7 @@ export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -f "$DOTFILES_TEST_ROSETTA_STATE" ]]
 [[ "$(git config --global --includes --get alias.st)" == "status" ]]
+[[ "$(readlink "$HOME/.config/bookokrat")" == "$REPO_DIR/config/bookokrat" ]]
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/setup/mac-thin/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]
@@ -280,6 +281,7 @@ grep -Fq \
   "$TEST_ROOT/brew.log"
 grep -Fq 'nvim --headless +Lazy! restore +qa' "$TEST_ROOT/brew.log"
 grep -Fq "markdown_inline" "$TEST_ROOT/brew.log"
+grep -Fxq 'brew "bookokrat"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "gh"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "herdr"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "hunk"' "$REPO_DIR/setup/mac-thin/Brewfile"

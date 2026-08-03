@@ -62,7 +62,7 @@ else
   fail "Herdr remote client missing"
 fi
 
-for command_name in hunk lsd marksman nvim rg starship tree-sitter zoxide; do
+for command_name in bookokrat hunk lsd marksman nvim rg starship tree-sitter zoxide; do
   if command -v "$command_name" >/dev/null 2>&1; then
     pass "$command_name available"
   else
@@ -103,6 +103,7 @@ else
 fi
 
 LINK_SPECS=(
+  "$DOTFILES_DIR/config/bookokrat|$HOME/.config/bookokrat"
   "$DOTFILES_DIR/setup/mac-thin/.zshrc|$HOME/.zshrc"
   "$DOTFILES_DIR/config/ghostty/config|$HOME/Library/Application Support/com.mitchellh.ghostty/config"
   "$DOTFILES_DIR/config/herdr/config.toml|$HOME/.config/herdr/config.toml"
@@ -155,6 +156,15 @@ if command -v nvim >/dev/null 2>&1 \
   pass "Thin-profile Snacks dashboard, explorer, and buffer picker"
 else
   fail "Thin-profile Snacks dashboard, explorer, or buffer picker is unavailable"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && DOTFILES_NVIM_PROFILE=thin nvim --headless \
+    "+lua local Snacks=require('snacks'); assert(not vim.tbl_contains(Snacks.config.image.formats,'pdf'),'Snacks would rasterize PDFs'); assert(vim.fn.exists('#BookokratPdfLauncher#BufReadCmd')==1,'Bookokrat PDF launcher missing'); local mapping=vim.fn.maparg(' oe','n',false,true); assert(mapping.desc=='Open file externally','Space o e is not mapped to the PDF launcher')" \
+    '+qa!' >/dev/null 2>&1; then
+  pass "Thin-profile Bookokrat PDF launcher"
+else
+  fail "Thin-profile PDFs are not routed to Bookokrat"
 fi
 
 if command -v nvim >/dev/null 2>&1 \

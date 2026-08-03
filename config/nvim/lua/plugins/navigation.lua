@@ -54,7 +54,9 @@ local function profile_snacks_opts(opts)
     opts.bigfile = nil
     opts.words = nil
     opts.indent = nil
-    opts.image = nil
+    -- Picker previews load image support on demand. Keep the configured formats
+    -- so PDFs remain excluded even though inline image rendering stays disabled.
+    opts.image.enabled = false
     opts.lazygit = nil
   end
 
@@ -144,7 +146,7 @@ return {
       words = { enabled = true },
       indent = { enabled = true },
       -- Render image files in supported terminals such as Ghostty. PDFs are
-      -- intentionally excluded and opened in the full Bookokrat reader instead.
+      -- intentionally excluded and opened in the Bookokrat reader instead.
       image = {
         enabled = true,
         -- Translate Obsidian embeds such as ![[image.png]] into the attachment's
