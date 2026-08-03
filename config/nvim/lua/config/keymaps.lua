@@ -311,6 +311,11 @@ map("n", "<leader>W=", "<C-w>=", { desc = "Equalize window sizes" })
 map("n", "<leader>W>", "<C-w>>", { desc = "Increase window width" })
 map("n", "<leader>W_", "<C-w>_", { desc = "Maximize window height" })
 
+map("n", "<leader>uw", function()
+  vim.wo.wrap = not vim.wo.wrap
+  vim.notify("Word wrap " .. (vim.wo.wrap and "on" or "off"))
+end, { desc = "Toggle word wrap" })
+
 map("n", "<leader>w", "<cmd>write<cr>", { desc = "Save" })
 map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Quit" })
 map("n", "<leader>x", "<cmd>x<cr>", { desc = "Save and quit" })
