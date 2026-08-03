@@ -868,7 +868,7 @@ EOF
   assert_file_contains "$case_dir/commands.log" "mise self-update -y"
   assert_file_contains "$case_dir/commands.log" "mise install node@24.18.0 go@1.26.5 python@3.14.6 bun@1.3.14"
   assert_file_contains "$case_dir/commands.log" "mise install"
-  assert_file_contains "$case_dir/commands.log" "mise upgrade"
+  assert_file_contains "$case_dir/commands.log" "mise upgrade --minimum-release-age 0s"
   assert_file_contains "$case_dir/commands.log" "mise reshim"
   assert_file_contains "$case_dir/commands.log" "mdformat==1.0.0"
   assert_file_contains "$case_dir/commands.log" "mdformat-gfm==1.0.0"

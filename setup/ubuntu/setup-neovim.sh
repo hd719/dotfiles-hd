@@ -130,7 +130,7 @@ install_tools() {
   "$MISE_BIN" install
 
   log "Updating unpinned tools"
-  "$MISE_BIN" upgrade
+  "$MISE_BIN" upgrade --minimum-release-age 0s
   "$MISE_BIN" reshim
 
   log "Installing pinned Markdown formatter"
