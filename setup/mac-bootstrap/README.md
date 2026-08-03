@@ -99,10 +99,10 @@ separate approved maintenance window with runtime status and doctor checks.
 Never remove the Mac mini's Homebrew Node or pnpm fallback during bootstrap.
 Use the preflight, dry-run, doctor, and runtime checks above as the full gate.
 
-### Himalaya two-account email beta
+### Himalaya one-or-two-account email beta
 
 The Mac mini profile declares Himalaya in `setup/mac-mini/Brewfile`. The beta
-supports exactly two Gmail or Google Workspace accounts over IMAP. It does not
+supports one or two Gmail or Google Workspace accounts over IMAP. It does not
 configure SMTP, send mail, download attachments, or authorize automated mailbox
 changes.
 
@@ -126,8 +126,9 @@ committed.
 
 Google app passwords require 2-Step Verification. If an account cannot create
 one, stop and use a separately reviewed OAuth flow instead of entering the main
-account password. Do not enable the notification automation until both accounts
-pass `--check` and the read-only mailbox QA is green.
+account password. Do not enable notification automation until each configured
+account passes `--check` and the read-only mailbox QA is green. The check fails
+closed when Himalaya reports a backend authentication failure.
 
 ## What `--apply` Owns
 
