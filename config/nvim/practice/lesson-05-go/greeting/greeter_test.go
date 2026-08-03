@@ -20,3 +20,10 @@ func TestGreeterGreet(t *testing.T) {
 		})
 	}
 }
+
+func TestGreeterGoodbye(t *testing.T) {
+	greeter := New("Hello")
+	if got, want := greeter.Goodbye("Grace"), "Goodbye, Grace!"; got != want {
+		t.Fatalf("Goodbye(%q) = %q; want %q", "Grace", got, want)
+	}
+}

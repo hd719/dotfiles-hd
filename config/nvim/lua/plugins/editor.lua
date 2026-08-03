@@ -63,6 +63,8 @@ local which_key_spec = {
   { "<leader>m", group = "Markdown" },
   { "<leader>o", group = "Obsidian" },
   { "<leader>om", group = "Marksman" },
+  { "<leader>u", group = "UI" },
+  { "<leader>W", group = "Windows" },
 }
 
 return {

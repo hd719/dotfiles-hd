@@ -3585,3 +3585,316 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   remains the explicit menu-close key.
 - The thin profile now keeps the existing bottom and floating Snacks terminals.
 - Automated thin-profile checks cover the leader behavior and both mappings.
+
+## 2026-07-29 — Session 045: Safe Oil Practice Setup
+
+### Isolated Practice Directory Confirmed
+
+- Hamel created `/tmp/nvim-oil-practice` before beginning any Oil file
+  operations.
+- Hamel opened the directory with `:Oil /tmp/nvim-oil-practice` and shared a
+  screenshot confirming the `oil:///tmp/nvim-oil-practice/` buffer.
+- The directory was empty except for Oil's `../` parent-directory entry. No
+  file operation had been attempted.
+- **Curriculum 9.1 complete:** the remaining create, rename, move, and delete
+  drills are isolated from repositories and real files.
+- Best next core lesson: Curriculum 9.2 — distinguish Oil's local `Ctrl-h` and
+  `Ctrl-l` mappings from normal window-focus navigation.
+
+### Leader-Based Window Navigation Added
+
+- Hamel recognized that `Ctrl-w` is Neovim's Normal-mode window-command prefix
+  and asked to move frequent window navigation away from Control.
+- Added `Space W h/j/k/l` as a complete left/down/up/right window-focus group.
+  Uppercase `W` means Windows; lowercase `Space w` remains Save and `Space h`
+  remains Oil.
+- Existing `Ctrl-h/j/k/l` and `Space j/k/l` mappings remain available.
+- Human verification remains pending, so Curricula 1.D2 and 9.2 stay open.
+
+### Full Window Leader Menu Added
+
+- After viewing Neovim's native `Ctrl-w` WhichKey menu, Hamel asked for every
+  displayed operation to be available without the Control prefix.
+- Expanded `Space W` to cover diagnostic detail, directional focus, moving a
+  window to an edge, horizontal and vertical splits, moving a window to a new
+  tab, quitting or closing other windows, switching or swapping windows, and
+  resizing, equalizing, or maximizing height.
+- Native `Ctrl-w` commands remain as a harmless fallback, but the complete
+  displayed workflow is now available from the leader-based Windows menu.
+- Human verification remains pending.
+
+### Oil-Local and Window Navigation Confirmed
+
+- In the isolated Oil directory, Hamel confirmed that `Ctrl-l` refreshed Oil
+  and `Ctrl-h` on `../` opened `/tmp` in a horizontal split.
+- Hamel closed that split with `Space W q`, created a vertical split, moved
+  between its windows with `Space W h/l`, and closed the extra window.
+- **Curriculum 9.2 complete:** Oil's local Control mappings were distinguished
+  from the leader-based Windows menu.
+- Optional Curriculum 1.D2 remains open until `Space W j/k` are also practiced.
+- Best next core lesson: Curriculum 9.3 — create a file and directory through
+  Oil.
+
+### Pending Oil Operation Safely Discarded
+
+- Hamel entered pending CREATE operations for `hello.txt` and `archive/` and
+  reached Oil's confirmation preview without approving it.
+- Filesystem inspection confirmed that neither entry existed on disk while the
+  Oil buffer showed `[+]`.
+- Hamel chose not to apply the operations, then used `:edit!`; both pending
+  entries disappeared and the modified marker cleared.
+- **Curriculum 9.9 complete:** an unintended pending operation was recovered
+  from without changing the filesystem.
+- Curriculum 9.3 remains open because the CREATE operations were deliberately
+  not applied.
+
+### Oil Positioned as an Optional Batch Tool
+
+- Hamel asked why he would use Oil after safely declining the pending CREATE
+  operations.
+- Oil's useful niche was clarified: edit a directory listing with Vim motions,
+  preview a batch of creates, renames, or moves, and apply the reviewed actions
+  together.
+- For ordinary navigation and opening files, Hamel can continue using
+  `Space f f` or the `Space e` explorer instead.
+- Hamel asked to preserve this distinction and move to the next lesson.
+  Curricula 9.3–9.8 and Lesson 9 core remain deliberately incomplete.
+- By Hamel's explicit choice, the active checkpoint advances to Curriculum
+  10.1 — named registers.
+
+### Lesson 9 Resumed
+
+- After checking the Lesson 9 status, Hamel chose to return and complete the
+  remaining Oil core drills before starting Lesson 10.
+- Filesystem inspection reconfirmed that `/tmp/nvim-oil-practice` was empty.
+- The active checkpoint returns to Curriculum 9.3 — create a file and
+  directory through Oil.
+
+### Oil Creation Applied
+
+- Hamel re-entered `hello.txt` and `archive/`, reviewed Oil's two CREATE
+  actions, approved them, and confirmed that the operation worked.
+- **Curriculum 9.3 complete:** a file and directory were created through Oil
+  inside the isolated playground.
+
+### Correction: Runtime-Local `/tmp`
+
+- The agent shell has no Neovim process and its `/tmp` is not authoritative for
+  the separate runtime visible in Hamel's Neovim session.
+- Earlier agent-side `/tmp` checks supported the pending-buffer explanation but
+  must not be treated as verification of Hamel's applied Oil operations.
+- Curriculum 9.8 remains open until filesystem state is verified from a
+  terminal opened inside Hamel's Neovim runtime.
+- Best next core lesson: Curriculum 9.4 — rename a file and distinguish the
+  pending Oil buffer from applied filesystem state.
+
+### Oil Rename and Pending State Confirmed
+
+- With the cursor on `hello` in `hello.txt`, Hamel used `ciw` to change only
+  the filename stem to `greeting`, leaving `.txt` intact.
+- Hamel observed `[+]` before writing, reviewed the proposed rename, approved
+  it, refreshed Oil, and confirmed that `greeting.txt` remained.
+- Mental model: editing an Oil line changes only the pending directory buffer;
+  `:w` previews and applies the corresponding filesystem operation.
+- **Curriculum 9.4 complete:** a rename and Oil's pending-change state were
+  practiced and confirmed.
+- Best next core lesson: Curriculum 9.5 — move the renamed file into the
+  practice directory's `archive/` folder.
+
+### Oil Move Confirmed
+
+- Hamel changed the `greeting.txt` entry to `archive/greeting.txt`, observed the
+  pending `[+]` state, reviewed the proposed operation, and approved it.
+- After refreshing, the parent showed only `archive/`. Hamel entered that
+  directory, confirmed that `greeting.txt` was inside, and returned with `-`.
+- **Curriculum 9.5 complete:** a file was moved between directories through
+  Oil and verified from both sides.
+- Best next core lesson: Curriculum 9.6 — understand this configuration's
+  permanent-delete behavior before attempting the isolated deletion drill.
+
+### Permanent-Deletion Safety Understood
+
+- Before any deletion, Hamel was told that this Oil configuration uses
+  `delete_to_trash = false`.
+- Hamel correctly confirmed that an approved Oil deletion cannot be recovered
+  from Trash; Vim undo can only reverse pending buffer edits, not an applied
+  filesystem deletion.
+- **Curriculum 9.6 complete:** permanent-delete behavior was understood before
+  selecting a target.
+- Best next core lesson: Curriculum 9.7 — explicitly confirm and delete only
+  `/tmp/nvim-oil-practice/archive/greeting.txt`.
+
+### Crosshair Toggle Added
+
+- Hamel found the editor crosshair distracting at times and asked for a
+  leader-based menu.
+- Clarified that the effect is Neovim's built-in `cursorline` plus
+  `cursorcolumn`, not a plugin.
+- Added a `Space C` Crosshair menu: `c` toggles both directions, and `v`
+  toggles only the vertical line while keeping the row highlighted.
+- The crosshair remains enabled at startup; the toggle is window-local because
+  both Neovim options are window-local.
+- The full toggle restores both directions when switching from row-only mode.
+- Headless checks confirmed both mappings and their toggle directions in the
+  `full` and `thin` profiles. Human visual confirmation remains pending.
+- Best next core lesson remains Curriculum 9.7 — delete only the isolated
+  practice file with explicit confirmation.
+
+## 2026-08-03 — Session 046: Word-Wrap Toggle
+
+### Leader-Based Word Wrap Added
+
+- Hamel asked for an easier alternative to `:set wrap!`.
+- The config already enables `wrap` and `linebreak`, so prose wraps at word
+  boundaries by default.
+- Added `Space u w` under a new `Space u` UI menu. It toggles `wrap` only in
+  the current window and reports whether word wrap is on or off.
+- Formatting, startup, mapping-presence, and two-window toggle checks passed.
+  Curriculum 10.6 stays open until Hamel uses and confirms the intentional
+  keymap change.
+- Best next core lesson remains Curriculum 9.7 — delete only the isolated
+  practice file with explicit confirmation.
+
+## 2026-08-03 — Session 047: Verified Oil Deletion
+
+### Isolated Deletion Applied
+
+- Hamel explicitly confirmed the exact target
+  `/tmp/nvim-oil-practice/archive/greeting.txt` before deletion.
+- In Oil, Hamel removed only that entry, reviewed the pending DELETE action,
+  and approved the permanent filesystem operation.
+- From a terminal in the same Neovim runtime, Hamel verified that the target no
+  longer existed and received `deleted successfully`.
+- **Curriculum 9.7 and 9.8 complete:** the isolated deletion was confirmed,
+  applied, and independently verified.
+- **Lesson 9 core complete.** Best next core lesson: Curriculum 10.1 — use
+  named registers without clobbering important yanks.
+
+## 2026-08-03 — Session 048: Named Registers
+
+### Clipboard-Variable Mental Model
+
+- Hamel recognized that a named register works like a Vim variable or
+  dedicated clipboard slot.
+- `"ayy` copies the current line into register `a`; `"ap` pastes from that
+  register later without depending on the default register.
+- Vim provides named registers `a` through `z`.
+- Curriculum 10.1 remains open until Hamel proves that register `a` survives a
+  separate deletion and pastes its saved value successfully.
+
+## 2026-08-03 — Session 049: Named Register Verified
+
+### Protected Yank Confirmed
+
+- Hamel stored the `alpha` line in register `a` with `"ayy`.
+- He then deleted the separate `beta` line with `dd`, changing the default
+  delete register.
+- `"ap` still pasted `alpha`, proving that the named register preserved its
+  value independently.
+- **Curriculum 10.1 complete.** Best next core lesson: Curriculum 10.2 — set
+  and revisit marks and understand the jump list.
+
+## 2026-08-03 — Session 050: Marks as Bookmarks
+
+### Local Mark Practiced
+
+- Hamel set local mark `a` with `ma` and confirmed it in `:marks` at line 1,
+  column 0.
+- After moving to the end of the line, he used `` `a `` to return to the
+  mark's exact line and column.
+- Mental model: marks are named bookmarks for returning to important editing
+  positions; `'a` returns to the marked line, while `` `a `` returns to the
+  exact position.
+- Curriculum 10.2 remains open until the related jump-list navigation is
+  practiced and understood.
+
+## 2026-08-03 — Session 051: Marks and Jump List Verified
+
+### Cursor History Practiced
+
+- After returning to local mark `a`, Hamel used `Ctrl-o` to revisit the prior
+  cursor position.
+- He then used `Ctrl-i` to move forward through cursor history to the mark
+  again.
+- Mental model: marks are explicit bookmarks, while the jump list behaves like
+  backward and forward browser history for significant cursor jumps.
+- **Curriculum 10.2 complete.** Best next core lesson: Curriculum 10.3 —
+  record, inspect, and replay a safe macro.
+
+## 2026-08-03 — Session 052: Safe Macro Replay
+
+### Macro Recorded and Inspected
+
+- In a disposable buffer, Hamel recorded macro `m` with `qm`, appending a
+  semicolon to a line and moving down before stopping with `q`.
+- He inspected the stored keystrokes with `:reg m` and recognized `^[` as the
+  recorded `Escape` key.
+- `2@m` replayed the macro twice, changing `banana` and `cherry` without
+  repeating the edits manually.
+- **Curriculum 10.3 complete.** Best next core lesson: Curriculum 10.4 —
+  perform confirmed project search-and-replace.
+
+## 2026-08-03 — Session 053: Confirmed Project Replacement
+
+### Two-File Replacement Practiced
+
+- Hamel created an isolated project at `/tmp/nvim-replace-project` with four
+  standalone `red` matches across `one.txt` and `two.txt`.
+- In Grug Far, he entered `red` as the search, `orange` as the replacement,
+  and the isolated directory as the path.
+- He reviewed all four proposed changes across both files before applying them
+  with `Space r`.
+- A terminal check confirmed four `orange` results with no `red` remaining.
+- **Curriculum 10.4 complete.** Best next core lesson: Curriculum 10.5 —
+  explain the Lua configuration structure and plugin ownership.
+
+## 2026-08-03 — Session 054: Configuration Ownership Map
+
+### Lua Structure Understood
+
+- Hamel traced startup from `init.lua` through `config/lazy.lua` into the
+  capability-based modules under `lua/plugins/`.
+- He reviewed navigation, language tooling, editor structure, colors, Git,
+  buffer and status lines, editing helpers, and Markdown rendering.
+- The review covered the roles required by Curriculum 10.5, including Lazy,
+  Nord, Snacks, Oil, Tree-sitter, Blink, friendly-snippets, mini.icons,
+  mini.pairs, mini.surround, bufferline, lualine, render-markdown,
+  SchemaStore, LSPConfig, Conform, and Gitsigns.
+- **Curriculum 10.5 complete.** Best next core lesson: Curriculum 10.6 —
+  verify the intentional word-wrap keymap change.
+
+## 2026-08-03 — Session 055: Word-Wrap Change Verified
+
+### Intentional Option Toggle Confirmed
+
+- Hamel used `Space u w` in a prose buffer and confirmed that it toggles the
+  current window between wrapped and unwrapped text.
+- The mapping reports `Word wrap off` and `Word wrap on`, making the option
+  state explicit.
+- **Curriculum 10.6 complete.** Best next core lesson: Curriculum 10.7 — use
+  Neovim's plugin, health, LSP, formatter, and Tree-sitter troubleshooting
+  views.
+
+## 2026-08-03 — Session 056: Troubleshooting Views Reviewed
+
+### Built-In Diagnostics Confirmed
+
+- Hamel confirmed prior familiarity with `:Lazy`, `:checkhealth`,
+  `:checkhealth vim.lsp`, `:ConformInfo`, and `:TSStatus`.
+- He understands their distinct scopes: plugin state, overall environment,
+  language servers, formatters, and structural parsers.
+- **Curriculum 10.7 complete.** Best next core lesson: Curriculum 10.8 —
+  complete and reflect on one real coding task primarily in Neovim.
+
+## 2026-08-03 — Session 057: Observed Go Test Edit
+
+### Demonstration Completed
+
+- At Hamel's request, the agent added `TestGreeterGoodbye` to the existing Go
+  practice module while Hamel watched the edit.
+- The test checks the public `Goodbye("Grace")` behavior and expects
+  `Goodbye, Grace!`.
+- `gofmt` completed without further changes, and `go test -count=1 ./...`
+  passed.
+- Curriculum 10.8 remains open because Hamel chose to observe this edit and
+  practice the hands-on coding workflow later.
