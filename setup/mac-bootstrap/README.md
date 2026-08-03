@@ -99,10 +99,10 @@ separate approved maintenance window with runtime status and doctor checks.
 Never remove the Mac mini's Homebrew Node or pnpm fallback during bootstrap.
 Use the preflight, dry-run, doctor, and runtime checks above as the full gate.
 
-### Himalaya one-or-two-account email beta
+### Himalaya one-or-N-account email
 
 The Mac mini profile declares Himalaya in `setup/mac-mini/Brewfile`. The beta
-supports one or two Gmail or Google Workspace accounts over IMAP. It does not
+supports one or more Gmail or Google Workspace accounts over IMAP. It does not
 configure SMTP, send mail, download attachments, or authorize automated mailbox
 changes.
 
