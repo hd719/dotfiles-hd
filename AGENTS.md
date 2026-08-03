@@ -50,6 +50,9 @@ machine policy. Profile link inventories live in their matching runbooks.
   thin Mac. Use Ubuntu by default, or the Mac mini when Hamel explicitly selects
   it or the repo is Mac-mini-owned. Agent PRs use `arbiter-hd` from Ubuntu or
   `cortana-hd` from the Mac mini.
+- Coding prompt rules should have one canonical source in the thin Mac vault and
+  be synced or symlinked to machines from there. Do not create independent
+  machine-local rule copies that can drift.
 
 If Hamel explicitly asks for one link, create it safely. Do not expand that
 request into a full-machine migration.
