@@ -65,8 +65,8 @@ add_result FAIL core "Core failure" "down" "Recover"
 pass "readiness aggregation"
 
 hermes_release_payload=""
-ssh_capture() {
-  hermes_release_payload="$2"
+ssh_bash_capture() {
+  hermes_release_payload="$(/bin/cat)"
   LAST_STATUS=0
   LAST_OUTPUT='reviewed=v2026.7.30 installed=v2026.7.30 official_latest=v2026.8.3 report_only=yes'
 }

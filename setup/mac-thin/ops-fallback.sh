@@ -70,6 +70,17 @@ ssh_capture() {
   capture "$SSH_BIN" "${SSH_OPTIONS[@]}" "$host" "$payload"
 }
 
+ssh_bash_capture() {
+  local host="$1"
+  local output_file
+
+  output_file="$(mktemp -t ops-fallback-output.XXXXXX)" || return 1
+  "$SSH_BIN" "${SSH_OPTIONS[@]}" "$host" /bin/bash -s >"$output_file" 2>&1
+  LAST_STATUS=$?
+  LAST_OUTPUT="$(<"$output_file")"
+  /bin/rm -f "$output_file"
+}
+
 ssh_python_capture() {
   local host="$1"
   local program="$2"
@@ -530,8 +541,7 @@ check_postgres() {
 }
 
 check_hermes_release_pin() {
-  local payload
-  IFS= read -r -d '' payload <<'SH' || true
+  ssh_bash_capture "$MAC_HOST" <<'BASH'
 manifest=/Users/h/.hermes/skills/home-lab-maintenance/references/hermes-reviewed-stable.json
 repo=/Users/h/.hermes/hermes-agent
 test -r "$manifest" || exit 10
@@ -565,9 +575,7 @@ else
 fi
 printf 'reviewed=%s installed=%s official_latest=%s report_only=%s\n' \
   "$reviewed_tag" "$reviewed_tag" "$official_tag" "$report_only"
-SH
-
-  ssh_capture "$MAC_HOST" "$payload"
+BASH
   if ((LAST_STATUS == 0)); then
     add_result PASS secondary "Hermes release pin" "$LAST_OUTPUT" "None"
   else
