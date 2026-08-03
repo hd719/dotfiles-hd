@@ -3740,7 +3740,7 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
 - Best next core lesson remains Curriculum 9.7 — delete only the isolated
   practice file with explicit confirmation.
 
-## 2026-08-03 — Session 038: Word-Wrap Toggle
+## 2026-08-03 — Session 046: Word-Wrap Toggle
 
 ### Leader-Based Word Wrap Added
 
