@@ -171,6 +171,31 @@ path remains Mac-local and is not readable inside Ubuntu.
 The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
 Forgejo. No Git private key is copied from the Mac.
 
+## No-Agent Operations Fallback
+
+If Codex, Claude, or another interactive agent is unavailable, run the tracked
+fallback directly from the canonical dotfiles checkout:
+
+```bash
+~/Developer/dotfiles-hd/setup/mac-thin/ops-fallback.sh personal-ready
+~/Developer/dotfiles-hd/setup/mac-thin/ops-fallback.sh home-lab-ready
+~/Developer/dotfiles-hd/setup/mac-thin/ops-fallback.sh home-lab-ready 2026-08-10 2026-08-17
+~/Developer/dotfiles-hd/setup/mac-thin/ops-fallback.sh home-lab-recover
+```
+
+The commands run unattended and save timestamped Markdown reports under
+`~/Desktop/Ops Fallback Reports/`. Home-lab readiness also saves its existing
+Mac mini brief with a `-manual.md` suffix. Recovery automatically performs only
+the documented service starts and verified PostgreSQL repairs. It stops for
+credentials, router settings, HomeKit pairing, ACLs, firmware, destructive
+actions, and unknown states.
+
+Run the focused offline test after changing the fallback:
+
+```bash
+bash setup/mac-thin/tests/ops-fallback-test.sh
+```
+
 This is an explicit allowlist. Node/Bun/Go, Docker, Kubernetes, project
 toolchains, VS Code, tmux, other language servers, and development aliases
 remain inside the Linux VMs.
