@@ -437,10 +437,12 @@ mise reshim
 mise exec -- COMMAND
 ```
 
-Do not install a second Homebrew/Linuxbrew toolchain on this VM. Add a pinned
-tool to the mise manifest or use APT when the tool is system-integrated.
+Do not install a second Homebrew/Linuxbrew toolchain on this VM. Add tools to
+the mise manifest or use APT when the tool is system-integrated.
 
-Codex CLI is pinned in the manifest. Authenticate it once after setup:
+Node, Go, Python, and Bun stay on reviewed exact versions. Other mise-managed
+tools use their latest available releases, and `update-system.sh` upgrades
+them on every maintenance run. Authenticate Codex once after setup:
 
 ```bash
 codex login --device-auth

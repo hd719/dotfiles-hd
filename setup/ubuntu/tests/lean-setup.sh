@@ -483,9 +483,6 @@ test_ubuntu_mise_toolchain_is_exact() {
   local actual expected
 
   [[ -f "$MISE_CONFIG" ]] || fail "Ubuntu mise config is missing"
-  if grep -Eq '=[[:space:]]*"latest"' "$MISE_CONFIG"; then
-    fail "Ubuntu mise config contains an unpinned latest version"
-  fi
   assert_file_contains "$MISE_CONFIG" 'min_version = "2026.7.5"'
 
   actual="$(
@@ -500,31 +497,31 @@ node = "24.18.0"
 go = "1.26.5"
 python = "3.14.6"
 bun = "1.3.14"
-"aqua:pnpm/pnpm" = "11.13.0"
-"aqua:neovim/neovim" = "0.12.4"
-"aqua:BurntSushi/ripgrep" = "15.1.0"
-"aqua:sharkdp/fd" = "10.4.2"
-"aqua:junegunn/fzf" = "0.74.0"
-"aqua:jesseduffield/lazygit" = "0.63.0"
-"aqua:tree-sitter/tree-sitter" = "0.26.11"
-"aqua:LuaLS/lua-language-server" = "3.18.2"
-"aqua:artempyanykh/marksman" = "2026-02-08"
-"aqua:JohnnyMorganz/StyLua" = "2.5.2"
-"aqua:astral-sh/uv" = "0.11.28"
-"aqua:astral-sh/ruff" = "0.15.21"
-"aqua:starship/starship" = "1.26.0"
-"aqua:ajeetdsouza/zoxide" = "0.10.0"
-"aqua:koalaman/shellcheck" = "0.11.0"
-"aqua:fastfetch-cli/fastfetch" = "2.66.0"
-"aqua:ogulcancelik/herdr" = "0.7.5"
-"github:bugzmanov/bookokrat" = "0.3.12"
-"go:golang.org/x/tools/gopls" = { version = "0.23.0", depends = ["go"] }
-"npm:hunkdiff" = { version = "0.17.3", depends = ["node"] }
-"npm:@openai/codex" = { version = "0.145.0", depends = ["node"] }
-"npm:@vtsls/language-server" = { version = "0.3.0", depends = ["node"] }
-"npm:vscode-langservers-extracted" = { version = "4.10.0", depends = ["node"] }
-"npm:bash-language-server" = { version = "5.6.0", depends = ["node"] }
-"npm:graphql-language-service-cli" = { version = "3.5.0", depends = ["node"] }
+"aqua:pnpm/pnpm" = "latest"
+"aqua:neovim/neovim" = "latest"
+"aqua:BurntSushi/ripgrep" = "latest"
+"aqua:sharkdp/fd" = "latest"
+"aqua:junegunn/fzf" = "latest"
+"aqua:jesseduffield/lazygit" = "latest"
+"aqua:tree-sitter/tree-sitter" = "latest"
+"aqua:LuaLS/lua-language-server" = "latest"
+"aqua:artempyanykh/marksman" = "latest"
+"aqua:JohnnyMorganz/StyLua" = "latest"
+"aqua:astral-sh/uv" = "latest"
+"aqua:astral-sh/ruff" = "latest"
+"aqua:starship/starship" = "latest"
+"aqua:ajeetdsouza/zoxide" = "latest"
+"aqua:koalaman/shellcheck" = "latest"
+"aqua:fastfetch-cli/fastfetch" = "latest"
+"aqua:ogulcancelik/herdr" = "latest"
+"github:bugzmanov/bookokrat" = "latest"
+"go:golang.org/x/tools/gopls" = { version = "latest", depends = ["go"] }
+"npm:hunkdiff" = { version = "latest", depends = ["node"] }
+"npm:@openai/codex" = { version = "latest", depends = ["node"] }
+"npm:@vtsls/language-server" = { version = "latest", depends = ["node"] }
+"npm:vscode-langservers-extracted" = { version = "latest", depends = ["node"] }
+"npm:bash-language-server" = { version = "latest", depends = ["node"] }
+"npm:graphql-language-service-cli" = { version = "latest", depends = ["node"] }
 EOF
 )"
 
@@ -871,6 +868,7 @@ EOF
   assert_file_contains "$case_dir/commands.log" "mise self-update -y"
   assert_file_contains "$case_dir/commands.log" "mise install node@24.18.0 go@1.26.5 python@3.14.6 bun@1.3.14"
   assert_file_contains "$case_dir/commands.log" "mise install"
+  assert_file_contains "$case_dir/commands.log" "mise upgrade"
   assert_file_contains "$case_dir/commands.log" "mise reshim"
   assert_file_contains "$case_dir/commands.log" "mdformat==1.0.0"
   assert_file_contains "$case_dir/commands.log" "mdformat-gfm==1.0.0"
@@ -897,8 +895,8 @@ EOF
   assert_file_contains "$case_dir/commands.log" "mise which graphql-lsp"
   assert_file_contains "$case_dir/commands.log" "vim.go.loadplugins = true"
   [[ -e "$case_dir/config-loaded" ]] || fail "Neovim --check did not validate the real editor config"
-  if grep -Fq "mise install" "$case_dir/commands.log"; then
-    fail "Neovim --check attempted to install tools"
+  if grep -Eq "mise (install|upgrade)" "$case_dir/commands.log"; then
+    fail "Neovim --check attempted to install or upgrade tools"
   fi
 
   blink_commit="$(sed -n 's/^  "blink.cmp":.*"commit": "\([^"]*\)".*/\1/p' "$ROOT_DIR/config/nvim/lazy-lock.json")"
@@ -954,8 +952,8 @@ EOF
 
   ((status != 0)) || fail "Neovim --check ignored a config startup failure"
   [[ -e "$case_dir/config-loaded" ]] || fail "config failure test did not load the editor config"
-  if grep -Fq "mise install" "$case_dir/commands.log"; then
-    fail "config failure check attempted to install tools"
+  if grep -Eq "mise (install|upgrade)" "$case_dir/commands.log"; then
+    fail "config failure check attempted to install or upgrade tools"
   fi
 
   : > "$case_dir/commands.log"
@@ -976,8 +974,8 @@ EOF
   [[ ! -e "$case_dir/home/.cache/nvim-empty-check" ]] || fail "Neovim --check wrote to an empty cache directory"
   [[ ! -e "$case_dir/home/.local/share/nvim-empty-check" ]] || fail "Neovim --check wrote to an empty data directory"
   [[ ! -e "$case_dir/config-loaded" ]] || fail "empty-state Neovim --check loaded the mutating editor config"
-  if grep -Fq "mise install" "$case_dir/commands.log"; then
-    fail "empty-state Neovim --check attempted to install tools"
+  if grep -Eq "mise (install|upgrade)" "$case_dir/commands.log"; then
+    fail "empty-state Neovim --check attempted to install or upgrade tools"
   fi
 
   fresh_home="$case_dir/fresh-home"

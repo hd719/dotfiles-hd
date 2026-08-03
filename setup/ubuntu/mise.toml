@@ -5,28 +5,28 @@ node = "24.18.0"
 go = "1.26.5"
 python = "3.14.6"
 bun = "1.3.14"
-"aqua:pnpm/pnpm" = "11.13.0"
-"aqua:neovim/neovim" = "0.12.4"
-"aqua:BurntSushi/ripgrep" = "15.1.0"
-"aqua:sharkdp/fd" = "10.4.2"
-"aqua:junegunn/fzf" = "0.74.0"
-"aqua:jesseduffield/lazygit" = "0.63.0"
-"aqua:tree-sitter/tree-sitter" = "0.26.11"
-"aqua:LuaLS/lua-language-server" = "3.18.2"
-"aqua:artempyanykh/marksman" = "2026-02-08"
-"aqua:JohnnyMorganz/StyLua" = "2.5.2"
-"aqua:astral-sh/uv" = "0.11.28"
-"aqua:astral-sh/ruff" = "0.15.21"
-"aqua:starship/starship" = "1.26.0"
-"aqua:ajeetdsouza/zoxide" = "0.10.0"
-"aqua:koalaman/shellcheck" = "0.11.0"
-"aqua:fastfetch-cli/fastfetch" = "2.66.0"
-"aqua:ogulcancelik/herdr" = "0.7.5"
-"github:bugzmanov/bookokrat" = "0.3.12"
-"go:golang.org/x/tools/gopls" = { version = "0.23.0", depends = ["go"] }
-"npm:hunkdiff" = { version = "0.17.3", depends = ["node"] }
-"npm:@openai/codex" = { version = "0.145.0", depends = ["node"] }
-"npm:@vtsls/language-server" = { version = "0.3.0", depends = ["node"] }
-"npm:vscode-langservers-extracted" = { version = "4.10.0", depends = ["node"] }
-"npm:bash-language-server" = { version = "5.6.0", depends = ["node"] }
-"npm:graphql-language-service-cli" = { version = "3.5.0", depends = ["node"] }
+"aqua:pnpm/pnpm" = "latest"
+"aqua:neovim/neovim" = "latest"
+"aqua:BurntSushi/ripgrep" = "latest"
+"aqua:sharkdp/fd" = "latest"
+"aqua:junegunn/fzf" = "latest"
+"aqua:jesseduffield/lazygit" = "latest"
+"aqua:tree-sitter/tree-sitter" = "latest"
+"aqua:LuaLS/lua-language-server" = "latest"
+"aqua:artempyanykh/marksman" = "latest"
+"aqua:JohnnyMorganz/StyLua" = "latest"
+"aqua:astral-sh/uv" = "latest"
+"aqua:astral-sh/ruff" = "latest"
+"aqua:starship/starship" = "latest"
+"aqua:ajeetdsouza/zoxide" = "latest"
+"aqua:koalaman/shellcheck" = "latest"
+"aqua:fastfetch-cli/fastfetch" = "latest"
+"aqua:ogulcancelik/herdr" = "latest"
+"github:bugzmanov/bookokrat" = "latest"
+"go:golang.org/x/tools/gopls" = { version = "latest", depends = ["go"] }
+"npm:hunkdiff" = { version = "latest", depends = ["node"] }
+"npm:@openai/codex" = { version = "latest", depends = ["node"] }
+"npm:@vtsls/language-server" = { version = "latest", depends = ["node"] }
+"npm:vscode-langservers-extracted" = { version = "latest", depends = ["node"] }
+"npm:bash-language-server" = { version = "latest", depends = ["node"] }
+"npm:graphql-language-service-cli" = { version = "latest", depends = ["node"] }
