@@ -38,8 +38,10 @@ file_mode() {
 fake_bin="$TMP_ROOT/bin"
 home_dir="$TMP_ROOT/home"
 config="$home_dir/.config/himalaya/config.toml"
+keychain="$home_dir/Library/Keychains/login.keychain-db"
 command_log="$TMP_ROOT/commands.log"
-mkdir -p "$fake_bin" "$home_dir"
+mkdir -p "$fake_bin" "$home_dir" "$(dirname "$keychain")"
+touch "$keychain"
 
 cat > "$fake_bin/himalaya" <<'EOF'
 #!/usr/bin/env bash
@@ -77,6 +79,7 @@ run_configure() {
       COMMAND_LOG="$command_log" \
       HIMALAYA_BIN="$fake_bin/himalaya" \
       SECURITY_BIN="$fake_bin/security" \
+      HIMALAYA_KEYCHAIN_PATH="$keychain" \
       HIMALAYA_CONFIG_PATH="$config" \
       HIMALAYA_BETA_ALLOW_NONINTERACTIVE=1 \
       "$SCRIPT" --configure >/dev/null
@@ -91,6 +94,7 @@ assert_contains "$config" '[accounts.work]'
 assert_contains "$config" 'imap.sasl.plain.username = "personal@example.com"'
 assert_contains "$config" 'hd.himalaya.personal'
 assert_contains "$config" 'hd.himalaya.work'
+assert_contains "$config" "imap.sasl.plain.password.command = [\"/usr/bin/security\", \"find-generic-password\", \"-w\", \"-s\", \"hd.himalaya.personal\", \"-a\", \"personal@example.com\", \"$keychain\"]"
 assert_not_contains "$config" 'first-test-password'
 assert_not_contains "$config" 'second-test-password'
 assert_not_contains "$config" 'smtp.'
