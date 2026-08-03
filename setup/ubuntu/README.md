@@ -14,6 +14,21 @@ Prerequisites on the thin Mac:
 - The tailnet policy defines `tag:ubuntu-dev` and lets `hd719@github` connect
   to that tag as the `hamel` user.
 
+The Forgejo Tailscale route also requires ordinary network access from Ubuntu
+to TrueNAS. Add this rule to the tailnet policy's `acls` array:
+
+```json
+{
+  "action": "accept",
+  "src": ["tag:ubuntu-dev"],
+  "proto": "tcp",
+  "dst": ["tag:truenas-scale:30143"],
+}
+```
+
+This does not belong in the `ssh` section: Forgejo uses normal SSH on TCP
+`30143`. Keep `forgejo-truenas-lan` as the fallback route.
+
 Create an optional one-time, preauthorized Tailscale auth key. Enter it without
 putting it in shell history:
 
