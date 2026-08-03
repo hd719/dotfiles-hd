@@ -674,6 +674,22 @@ EOF
   )"
   [[ "$output" == "nvim|xterm-test|$TEST_ROOT/zsh-home/.local/bin|fg=#9399b2" ]] || fail "Ubuntu zsh config did not load cleanly with the readable autosuggestion color"
 
+  output="$(
+    HOME="$TEST_ROOT/zsh-home" \
+      PATH="/usr/bin:/bin" \
+      SSH_TTY="/dev/pts/0" \
+      TERM="xterm-256color" \
+      zsh -f -c '
+        unset COLORTERM
+        source "$1"
+        printf "%s|" "$COLORTERM"
+        COLORTERM=24bit
+        source "$1"
+        printf "%s" "$COLORTERM"
+      ' _ "$ZSH_CONFIG"
+  )"
+  [[ "$output" == "truecolor|24bit" ]] || fail "Ubuntu SSH shells did not preserve Ghostty truecolor support"
+
   HOME="$TEST_ROOT/zsh-home" \
     PATH="/usr/bin:/bin" \
     GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' \
