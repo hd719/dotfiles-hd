@@ -40,19 +40,21 @@ machine policy. Profile link inventories live in their matching runbooks.
 - Never start, stop, restart, reload, or migrate production services without
   explicit approval.
 - Do not commit or push unless Hamel asks.
-- Agent-authored dotfiles changes from the thin Mac or Ubuntu must use
-  `arbiter-hd`, push only to the `arbiter-hd/dotfiles-hd` fork through
-  `github.com-arbiter`, and open a PR to `hd719/dotfiles-hd`. The Mac mini may
-  use `cortana-hd` only for explicitly approved Mac-mini-scoped dotfiles work;
-  otherwise it syncs reviewed `master` only. Never commit or push agent work as
+- Agent-authored dotfiles changes use `arbiter-hd` from Ubuntu or `cortana-hd`
+  from the Mac mini. From Ubuntu, push only to the `arbiter-hd/dotfiles-hd`
+  fork through `github.com-arbiter`. From the Mac mini, use `cortana-hd` only
+  for explicitly approved Mac-mini-scoped work; otherwise sync reviewed
+  `master` only. Never commit or push agent work from the thin Mac or as
   `hd719`.
 - New development repositories must not be created, cloned, or worked from the
   thin Mac. Use Ubuntu by default, or the Mac mini when Hamel explicitly selects
   it or the repo is Mac-mini-owned. Agent PRs use `arbiter-hd` from Ubuntu or
   `cortana-hd` from the Mac mini.
-- Coding prompt rules should have one canonical source in the thin Mac vault and
-  be synced or symlinked to machines from there. Do not create independent
-  machine-local rule copies that can drift.
+- Canonical coding prompt sources live under
+  `/Users/hameldesai/Developer/hd/Knowledge/prompts/coding/` in the thin Mac
+  vault. Edit them there, then run the vault's `sync-coding-prompts` workflow.
+  Managed thin-Mac rules and remote prompt trees are deployment targets; do not
+  edit them as independent machine-local copies.
 
 If Hamel explicitly asks for one link, create it safely. Do not expand that
 request into a full-machine migration.
