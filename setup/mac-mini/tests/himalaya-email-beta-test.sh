@@ -38,6 +38,7 @@ file_mode() {
 fake_bin="$TMP_ROOT/bin"
 home_dir="$TMP_ROOT/home"
 config="$home_dir/.config/himalaya/config.toml"
+single_config="$home_dir/.config/himalaya/single.toml"
 keychain="$home_dir/Library/Keychains/login.keychain-db"
 command_log="$TMP_ROOT/commands.log"
 mkdir -p "$fake_bin" "$home_dir" "$(dirname "$keychain")"
@@ -50,6 +51,13 @@ if [[ "${1:-}" == '--version' ]]; then
   exit 0
 fi
 printf 'himalaya %s\n' "$*" >> "${COMMAND_LOG:?}"
+if [[ " $* " == *' account check '* ]]; then
+  if [[ "${HIMALAYA_FAKE_AUTH_OK:-1}" == '1' ]]; then
+    printf '{"account":"test","backends":[{"backend":"imap","ok":true,"error":null}]}\n'
+  else
+    printf '{"account":"test","backends":[{"backend":"imap","ok":false,"error":"test auth failure"}]}\n'
+  fi
+fi
 EOF
 chmod +x "$fake_bin/himalaya"
 
@@ -70,8 +78,9 @@ printf 'security account=%s service=%s\n' "$account" "$service" >> "${COMMAND_LO
 EOF
 chmod +x "$fake_bin/security"
 
-run_configure() {
+run_configure_two() {
   printf '%s\n' \
+    2 \
     personal personal@example.com \
     work work@example.com \
     first-test-password second-test-password \
@@ -85,7 +94,22 @@ run_configure() {
       "$SCRIPT" --configure >/dev/null
 }
 
-run_configure
+run_configure_one() {
+  printf '%s\n' \
+    1 \
+    personal personal@example.com \
+    first-test-password \
+    | HOME="$home_dir" \
+      COMMAND_LOG="$command_log" \
+      HIMALAYA_BIN="$fake_bin/himalaya" \
+      SECURITY_BIN="$fake_bin/security" \
+      HIMALAYA_KEYCHAIN_PATH="$keychain" \
+      HIMALAYA_CONFIG_PATH="$single_config" \
+      HIMALAYA_BETA_ALLOW_NONINTERACTIVE=1 \
+      "$SCRIPT" --configure >/dev/null
+}
+
+run_configure_two
 config_mode="$(file_mode "$config")"
 assert_eq '600' "$config_mode" 'config is private'
 assert_eq '2' "$(grep -c '^\[accounts\.' "$config")" 'config has exactly two accounts'
@@ -106,14 +130,36 @@ if [[ -n "${REAL_HIMALAYA_BIN:-}" ]]; then
   TESTS=$((TESTS + 1))
 fi
 
+run_configure_one
+assert_eq '1' "$(grep -c '^\[accounts\.' "$single_config")" 'single config has one account'
+assert_contains "$single_config" '[accounts.personal]'
+assert_not_contains "$single_config" '[accounts.work]'
+assert_not_contains "$single_config" 'second-test-password'
+if [[ -n "${REAL_HIMALAYA_BIN:-}" ]]; then
+  "$REAL_HIMALAYA_BIN" -c "$single_config" account list >/dev/null
+  TESTS=$((TESTS + 1))
+fi
+
 HOME="$home_dir" \
   COMMAND_LOG="$command_log" \
   HIMALAYA_BIN="$fake_bin/himalaya" \
   HIMALAYA_CONFIG_PATH="$config" \
   "$SCRIPT" --check >/dev/null
-assert_contains "$command_log" '--backend imap account check'
+assert_contains "$command_log" '--backend imap account check --json'
 
-run_configure
+auth_failure_log="$TMP_ROOT/auth-failure.log"
+if HOME="$home_dir" \
+  COMMAND_LOG="$command_log" \
+  HIMALAYA_BIN="$fake_bin/himalaya" \
+  HIMALAYA_CONFIG_PATH="$config" \
+  HIMALAYA_FAKE_AUTH_OK=0 \
+  "$SCRIPT" --check >"$auth_failure_log" 2>&1; then
+  fail 'expected failed backend auth to fail --check'
+fi
+TESTS=$((TESTS + 1))
+assert_contains "$auth_failure_log" 'IMAP authentication failed'
+
+run_configure_two
 assert_eq '1' "$(find "$(dirname "$config")" -maxdepth 1 -name 'config.toml.backup-*' | wc -l | tr -d ' ')" \
   'reconfigure creates one backup'
 
