@@ -16,6 +16,32 @@ local function adjacent_day(context, offset)
   )
 end
 
+local function export_pdf()
+  local path = vim.api.nvim_buf_get_name(0)
+  local relative_path = vim.fs.relpath(vault, path)
+
+  if vim.bo.filetype ~= "markdown" or relative_path == nil then
+    vim.notify("Open a Markdown note in the hd vault before exporting to PDF", vim.log.levels.WARN)
+    return
+  end
+
+  if vim.bo.modified then
+    local ok, err = pcall(vim.cmd.update)
+    if not ok then
+      vim.notify(err, vim.log.levels.ERROR)
+      return
+    end
+  end
+
+  local uri = ("obsidian://adv-uri?vault=hd&filepath=%s&commandid=workspace%%3Aexport-pdf"):format(
+    vim.uri_encode(relative_path, "rfc2396")
+  )
+  local _, err = vim.ui.open(uri)
+  if err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end
+
 return {
   {
     "obsidian-nvim/obsidian.nvim",
@@ -83,6 +109,7 @@ return {
       { "<leader>od", "<cmd>Obsidian today<cr>", desc = "Today's daily note" },
       { "<leader>oo", "<cmd>Obsidian open<cr>", desc = "Open note in Obsidian" },
       { "<leader>ot", "<cmd>Obsidian tags<cr>", desc = "Tags" },
+      { "<leader>op", export_pdf, desc = "Export note to PDF" },
       { "<leader>oc", "<cmd>Obsidian toc<cr>", desc = "Table of contents" },
       { "<leader>oma", vim.lsp.buf.code_action, desc = "Marksman actions" },
       {

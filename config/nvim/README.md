@@ -229,6 +229,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space o q/s/b/l`                        | Quick switch / search / backlinks / links from this note                      |
 | `Space o d`                              | Open or create today's private daily note                                     |
 | `Space o o/t/c`                          | Open in Obsidian / tags / table of contents                                   |
+| `Space o p`                              | Export the current vault note to PDF through Obsidian                         |
 | `Space o m`                              | Open the Marksman menu                                                        |
 | `Space o m a/d/h`                        | Marksman actions / definition / hover                                         |
 | `Space o m m/n`                          | Toggle Marksman diagnostics / rename                                          |
