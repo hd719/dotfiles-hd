@@ -300,7 +300,7 @@ unexplained magic.
 
 ## Lesson 9 — Safe File Operations with Oil
 
-- [ ] **Core lesson complete**
+- [x] **Core lesson complete** — Session 047
 
 ### Core Sub-Lessons
 
@@ -316,8 +316,10 @@ unexplained magic.
 - [x] **9.6** Explain before deletion that this config has
   `delete_to_trash = false`, so an applied Oil deletion is permanent.
   — Session 045
-- [ ] **9.7** Delete only an isolated practice file with explicit confirmation.
-- [ ] **9.8** Apply Oil changes and verify the resulting filesystem state.
+- [x] **9.7** Delete only an isolated practice file with explicit confirmation.
+  — Session 047
+- [x] **9.8** Apply Oil changes and verify the resulting filesystem state. —
+  Session 047
 - [x] **9.9** Recover safely from an unintended pending operation. — Session
   045
 
@@ -336,7 +338,8 @@ unexplained magic.
 
 ### Core Sub-Lessons
 
-- [ ] **10.1** Use named registers without clobbering important yanks.
+- [x] **10.1** Use named registers without clobbering important yanks. —
+  Session 049
 - [ ] **10.2** Set and revisit marks and understand the jump list.
 - [ ] **10.3** Record, inspect, and replay a safe macro.
 - [ ] **10.4** Perform confirmed project search-and-replace.

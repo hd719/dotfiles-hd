@@ -3754,3 +3754,42 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   keymap change.
 - Best next core lesson remains Curriculum 9.7 — delete only the isolated
   practice file with explicit confirmation.
+
+## 2026-08-03 — Session 047: Verified Oil Deletion
+
+### Isolated Deletion Applied
+
+- Hamel explicitly confirmed the exact target
+  `/tmp/nvim-oil-practice/archive/greeting.txt` before deletion.
+- In Oil, Hamel removed only that entry, reviewed the pending DELETE action,
+  and approved the permanent filesystem operation.
+- From a terminal in the same Neovim runtime, Hamel verified that the target no
+  longer existed and received `deleted successfully`.
+- **Curriculum 9.7 and 9.8 complete:** the isolated deletion was confirmed,
+  applied, and independently verified.
+- **Lesson 9 core complete.** Best next core lesson: Curriculum 10.1 — use
+  named registers without clobbering important yanks.
+
+## 2026-08-03 — Session 048: Named Registers
+
+### Clipboard-Variable Mental Model
+
+- Hamel recognized that a named register works like a Vim variable or
+  dedicated clipboard slot.
+- `"ayy` copies the current line into register `a`; `"ap` pastes from that
+  register later without depending on the default register.
+- Vim provides named registers `a` through `z`.
+- Curriculum 10.1 remains open until Hamel proves that register `a` survives a
+  separate deletion and pastes its saved value successfully.
+
+## 2026-08-03 — Session 049: Named Register Verified
+
+### Protected Yank Confirmed
+
+- Hamel stored the `alpha` line in register `a` with `"ayy`.
+- He then deleted the separate `beta` line with `dd`, changing the default
+  delete register.
+- `"ap` still pasted `alpha`, proving that the named register preserved its
+  value independently.
+- **Curriculum 10.1 complete.** Best next core lesson: Curriculum 10.2 — set
+  and revisit marks and understand the jump list.
