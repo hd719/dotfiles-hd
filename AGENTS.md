@@ -43,7 +43,7 @@ machine policy. Profile link inventories live in their matching runbooks.
 - Agent-authored dotfiles changes use `arbiter-hd` from Ubuntu or `cortana-hd`
   from the Mac mini. From Ubuntu, push only to the `arbiter-hd/dotfiles-hd`
   fork through `github.com-arbiter`. From the Mac mini, use `cortana-hd` only
-  for explicitly approved Mac-mini-scoped work; otherwise sync reviewed
+  for explicitly selected or Mac-mini-owned work; otherwise sync reviewed
   `master` only. Never commit or push agent work from the thin Mac or as
   `hd719`.
 - New development repositories must not be created, cloned, or worked from the
