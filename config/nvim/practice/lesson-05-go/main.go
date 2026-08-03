@@ -9,7 +9,6 @@ import (
 func main() {
 	greeter := greeting.New("Hello")
 
-	fmt.Println(greeter.Greet("Test"))
 	fmt.Println(greeter.Greet("Ada"))
 	fmt.Println(greeter.Greet("Gopher"))
 	fmt.Println(greeter.Goodbye("Grace"))
