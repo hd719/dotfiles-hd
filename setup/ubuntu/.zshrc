@@ -9,6 +9,11 @@ export GIT_EDITOR="nvim"
 export STARSHIP_CONFIG="$HOME/.config/starship.toml"
 unset GIT_PAGER
 
+# Tailscale SSH keeps TERM but drops Ghostty's truecolor capability.
+if [[ -n "${SSH_TTY:-}" && -z "${COLORTERM:-}" ]]; then
+  export COLORTERM=truecolor
+fi
+
 # Keep history suggestions readable over the shared Ghostty Nord background.
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#9399b2'
 
