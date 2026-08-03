@@ -33,12 +33,29 @@ for repo_dir in "$THIN" "$UBUNTU" "$MINI"; do
   git -C "$repo_dir" config user.email test@example.com
 done
 
-git -C "$THIN" switch -q -c agent/test
+git -C "$THIN" switch -q -c agent/thin-merged
 printf 'feature\n' > "$THIN/feature.txt"
 git -C "$THIN" add feature.txt
-git -C "$THIN" commit -qm feature
-git -C "$THIN" push -q -u origin agent/test
+git -C "$THIN" commit -qm 'thin feature'
+git -C "$THIN" push -q -u origin agent/thin-merged
 
+git -C "$UBUNTU" switch -q -c agent/ubuntu-merged
+printf 'ubuntu feature\n' > "$UBUNTU/ubuntu.txt"
+git -C "$UBUNTU" add ubuntu.txt
+git -C "$UBUNTU" commit -qm 'ubuntu feature'
+git -C "$UBUNTU" push -q -u origin agent/ubuntu-merged
+
+git -C "$MINI" switch -q -c agent/mini-merged
+printf 'mini feature\n' > "$MINI/mini.txt"
+git -C "$MINI" add mini.txt
+git -C "$MINI" commit -qm 'mini feature'
+git -C "$MINI" push -q -u origin agent/mini-merged
+
+git -C "$SEED" fetch -q origin \
+  agent/thin-merged agent/ubuntu-merged agent/mini-merged
+git -C "$SEED" merge -q --no-ff origin/agent/thin-merged -m 'merge thin feature'
+git -C "$SEED" merge -q --no-ff origin/agent/ubuntu-merged -m 'merge ubuntu feature'
+git -C "$SEED" merge -q --no-ff origin/agent/mini-merged -m 'merge mini feature'
 printf 'merged\n' >> "$SEED/tracked.txt"
 git -C "$SEED" commit -qam merged
 git -C "$SEED" push -q origin master
@@ -121,5 +138,37 @@ fi
 [[ "$(git -C "$UBUNTU" rev-parse HEAD)" == "$ubuntu_before" ]]
 [[ "$(git -C "$MINI" rev-parse HEAD)" == "$mini_before" ]]
 grep -Fq 'Ubuntu repo is dirty' "$TEST_ROOT/dirty-guard.out"
+
+git -C "$UBUNTU" restore tracked.txt
+git -C "$THIN" switch -q master
+git -C "$THIN" pull -q --ff-only origin master
+git -C "$UBUNTU" switch -q -c agent/remote-unmerged
+printf 'unmerged\n' > "$UBUNTU/unmerged.txt"
+git -C "$UBUNTU" add unmerged.txt
+git -C "$UBUNTU" commit -qm unmerged
+git -C "$UBUNTU" push -q -u origin agent/remote-unmerged
+
+thin_before="$(git -C "$THIN" rev-parse HEAD)"
+ubuntu_before="$(git -C "$UBUNTU" rev-parse HEAD)"
+mini_before="$(git -C "$MINI" rev-parse HEAD)"
+
+if DOTFILES_SYNC_THIN_REPO="$THIN" \
+  DOTFILES_SYNC_UBUNTU_REPO="$UBUNTU" \
+  DOTFILES_SYNC_MINI_REPO="$MINI" \
+  DOTFILES_SYNC_SSH_BIN="$FAKE_SSH" \
+  DOTFILES_TEST_SSH_LOG="$SSH_LOG" \
+    "$SYNC_SCRIPT" > "$TEST_ROOT/unmerged-guard.out" 2>&1; then
+  printf 'Expected unmerged Ubuntu branch preflight to fail\n' >&2
+  exit 1
+fi
+
+[[ "$(git -C "$THIN" branch --show-current)" == master ]]
+[[ "$(git -C "$UBUNTU" branch --show-current)" == agent/remote-unmerged ]]
+[[ "$(git -C "$THIN" rev-parse HEAD)" == "$thin_before" ]]
+[[ "$(git -C "$UBUNTU" rev-parse HEAD)" == "$ubuntu_before" ]]
+[[ "$(git -C "$MINI" rev-parse HEAD)" == "$mini_before" ]]
+grep -Fq \
+  'Ubuntu branch agent/remote-unmerged is not merged into origin/master' \
+  "$TEST_ROOT/unmerged-guard.out"
 
 printf 'sync-dotfiles tests passed.\n'
