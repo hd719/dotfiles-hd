@@ -3807,3 +3807,94 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   exact position.
 - Curriculum 10.2 remains open until the related jump-list navigation is
   practiced and understood.
+
+## 2026-08-03 — Session 051: Marks and Jump List Verified
+
+### Cursor History Practiced
+
+- After returning to local mark `a`, Hamel used `Ctrl-o` to revisit the prior
+  cursor position.
+- He then used `Ctrl-i` to move forward through cursor history to the mark
+  again.
+- Mental model: marks are explicit bookmarks, while the jump list behaves like
+  backward and forward browser history for significant cursor jumps.
+- **Curriculum 10.2 complete.** Best next core lesson: Curriculum 10.3 —
+  record, inspect, and replay a safe macro.
+
+## 2026-08-03 — Session 052: Safe Macro Replay
+
+### Macro Recorded and Inspected
+
+- In a disposable buffer, Hamel recorded macro `m` with `qm`, appending a
+  semicolon to a line and moving down before stopping with `q`.
+- He inspected the stored keystrokes with `:reg m` and recognized `^[` as the
+  recorded `Escape` key.
+- `2@m` replayed the macro twice, changing `banana` and `cherry` without
+  repeating the edits manually.
+- **Curriculum 10.3 complete.** Best next core lesson: Curriculum 10.4 —
+  perform confirmed project search-and-replace.
+
+## 2026-08-03 — Session 053: Confirmed Project Replacement
+
+### Two-File Replacement Practiced
+
+- Hamel created an isolated project at `/tmp/nvim-replace-project` with four
+  standalone `red` matches across `one.txt` and `two.txt`.
+- In Grug Far, he entered `red` as the search, `orange` as the replacement,
+  and the isolated directory as the path.
+- He reviewed all four proposed changes across both files before applying them
+  with `Space r`.
+- A terminal check confirmed four `orange` results with no `red` remaining.
+- **Curriculum 10.4 complete.** Best next core lesson: Curriculum 10.5 —
+  explain the Lua configuration structure and plugin ownership.
+
+## 2026-08-03 — Session 054: Configuration Ownership Map
+
+### Lua Structure Understood
+
+- Hamel traced startup from `init.lua` through `config/lazy.lua` into the
+  capability-based modules under `lua/plugins/`.
+- He reviewed navigation, language tooling, editor structure, colors, Git,
+  buffer and status lines, editing helpers, and Markdown rendering.
+- The review covered the roles required by Curriculum 10.5, including Lazy,
+  Nord, Snacks, Oil, Tree-sitter, Blink, friendly-snippets, mini.icons,
+  mini.pairs, mini.surround, bufferline, lualine, render-markdown,
+  SchemaStore, LSPConfig, Conform, and Gitsigns.
+- **Curriculum 10.5 complete.** Best next core lesson: Curriculum 10.6 —
+  verify the intentional word-wrap keymap change.
+
+## 2026-08-03 — Session 055: Word-Wrap Change Verified
+
+### Intentional Option Toggle Confirmed
+
+- Hamel used `Space u w` in a prose buffer and confirmed that it toggles the
+  current window between wrapped and unwrapped text.
+- The mapping reports `Word wrap off` and `Word wrap on`, making the option
+  state explicit.
+- **Curriculum 10.6 complete.** Best next core lesson: Curriculum 10.7 — use
+  Neovim's plugin, health, LSP, formatter, and Tree-sitter troubleshooting
+  views.
+
+## 2026-08-03 — Session 056: Troubleshooting Views Reviewed
+
+### Built-In Diagnostics Confirmed
+
+- Hamel confirmed prior familiarity with `:Lazy`, `:checkhealth`,
+  `:checkhealth vim.lsp`, `:ConformInfo`, and `:TSStatus`.
+- He understands their distinct scopes: plugin state, overall environment,
+  language servers, formatters, and structural parsers.
+- **Curriculum 10.7 complete.** Best next core lesson: Curriculum 10.8 —
+  complete and reflect on one real coding task primarily in Neovim.
+
+## 2026-08-03 — Session 057: Observed Go Test Edit
+
+### Demonstration Completed
+
+- At Hamel's request, the agent added `TestGreeterGoodbye` to the existing Go
+  practice module while Hamel watched the edit.
+- The test checks the public `Goodbye("Grace")` behavior and expects
+  `Goodbye, Grace!`.
+- `gofmt` completed without further changes, and `go test -count=1 ./...`
+  passed.
+- Curriculum 10.8 remains open because Hamel chose to observe this edit and
+  practice the hands-on coding workflow later.

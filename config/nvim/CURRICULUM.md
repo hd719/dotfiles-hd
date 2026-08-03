@@ -340,16 +340,19 @@ unexplained magic.
 
 - [x] **10.1** Use named registers without clobbering important yanks. —
   Session 049
-- [ ] **10.2** Set and revisit marks and understand the jump list.
-- [ ] **10.3** Record, inspect, and replay a safe macro.
-- [ ] **10.4** Perform confirmed project search-and-replace.
-- [ ] **10.5** Explain the Lua config structure and the roles of Lazy, Nord,
+- [x] **10.2** Set and revisit marks and understand the jump list. — Session
+  051
+- [x] **10.3** Record, inspect, and replay a safe macro. — Session 052
+- [x] **10.4** Perform confirmed project search-and-replace. — Session 053
+- [x] **10.5** Explain the Lua config structure and the roles of Lazy, Nord,
   Snacks, Oil, Tree-sitter, Blink, friendly-snippets, mini.icons, mini.pairs,
   mini.surround, bufferline, lualine, render-markdown, SchemaStore, LSPConfig,
-  Conform, and Gitsigns.
-- [ ] **10.6** Make and verify one intentional keymap or option change.
-- [ ] **10.7** Use `:Lazy`, `:checkhealth`, `:checkhealth vim.lsp`,
+  Conform, and Gitsigns. — Session 054
+- [x] **10.6** Make and verify one intentional keymap or option change. —
+  Session 055
+- [x] **10.7** Use `:Lazy`, `:checkhealth`, `:checkhealth vim.lsp`,
   `:ConformInfo`, and `:TSStatus` to troubleshoot independently.
+  — Session 056
 - [ ] **10.8** Complete a real coding task primarily in Neovim and record the
   workflow improvements still needed.
 
