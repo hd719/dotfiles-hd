@@ -3793,3 +3793,17 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   value independently.
 - **Curriculum 10.1 complete.** Best next core lesson: Curriculum 10.2 — set
   and revisit marks and understand the jump list.
+
+## 2026-08-03 — Session 050: Marks as Bookmarks
+
+### Local Mark Practiced
+
+- Hamel set local mark `a` with `ma` and confirmed it in `:marks` at line 1,
+  column 0.
+- After moving to the end of the line, he used `` `a `` to return to the
+  mark's exact line and column.
+- Mental model: marks are named bookmarks for returning to important editing
+  positions; `'a` returns to the marked line, while `` `a `` returns to the
+  exact position.
+- Curriculum 10.2 remains open until the related jump-list navigation is
+  practiced and understood.
