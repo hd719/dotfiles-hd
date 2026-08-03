@@ -217,6 +217,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space W s/v/T`                          | Split horizontally / vertically / move the window to a new tab                |
 | `Space W q/o/w/x`                        | Quit / close others / switch / swap windows                                   |
 | `Space W +/-/</>/=/_`                    | Resize, equalize, or maximize window height                                   |
+| `Space u w`                              | Toggle word-aware wrapping in the current window                              |
 | `Ctrl-h/j/k/l`                           | Focus window left / down / up / right                                         |
 | `Ctrl-o` / `Ctrl-i`                      | Jump-history Back / Forward                                                   |
 | `Space q`                                | Close the current window                                                      |

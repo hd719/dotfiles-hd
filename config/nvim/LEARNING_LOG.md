@@ -3739,3 +3739,18 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   `full` and `thin` profiles. Human visual confirmation remains pending.
 - Best next core lesson remains Curriculum 9.7 — delete only the isolated
   practice file with explicit confirmation.
+
+## 2026-08-03 — Session 038: Word-Wrap Toggle
+
+### Leader-Based Word Wrap Added
+
+- Hamel asked for an easier alternative to `:set wrap!`.
+- The config already enables `wrap` and `linebreak`, so prose wraps at word
+  boundaries by default.
+- Added `Space u w` under a new `Space u` UI menu. It toggles `wrap` only in
+  the current window and reports whether word wrap is on or off.
+- Formatting, startup, mapping-presence, and two-window toggle checks passed.
+  Curriculum 10.6 stays open until Hamel uses and confirms the intentional
+  keymap change.
+- Best next core lesson remains Curriculum 9.7 — delete only the isolated
+  practice file with explicit confirmation.
