@@ -408,6 +408,15 @@ EOF
 #!/usr/bin/env bash
 [[ "$*" == "api user --jq .login" ]] && printf 'arbiter-hd\n'
 EOF
+  mkdir -p "$case_dir/mise-installs" "$case_dir/home/.local/bin"
+  printf '#!/usr/bin/env bash\nprintf "herdr 0.8.0\\n"\n' \
+    > "$case_dir/mise-installs/herdr"
+  cp "$case_dir/mise-installs/herdr" "$case_dir/home/.local/bin/herdr"
+  chmod +x "$case_dir/mise-installs/herdr" "$case_dir/home/.local/bin/herdr"
+  cat > "$case_dir/bin/mise" <<EOF
+#!/usr/bin/env bash
+[[ "\$*" == "which herdr" ]] && printf '%s\n' '$case_dir/mise-installs/herdr'
+EOF
   cat > "$case_dir/bin/ssh" <<'EOF'
 #!/usr/bin/env bash
 if [[ "${1:-}" == "-G" ]]; then
@@ -446,6 +455,7 @@ EOF
       PATH="$case_dir/bin:/usr/bin:/bin" \
       DOTFILES_DIR="$case_dir/home/Developer/dotfiles-hd" \
       DOTFILES_OS_RELEASE_FILE="$case_dir/os-release" \
+      DOTFILES_MISE_BIN="$case_dir/bin/mise" \
       DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/neovim-check.sh" \
       bash "$DOCTOR_SCRIPT"
   } 2>&1)"
@@ -459,6 +469,7 @@ EOF
   assert_contains "$output" "graphical VMware desktop"
   assert_contains "$output" "root filesystem has at least 200 GiB"
   assert_contains "$output" "Maple Mono NF is the Ghostty default"
+  assert_contains "$output" "remote Herdr client matches mise"
 
   rm "$case_dir/home/.config/hunk/config.toml"
   set +e
@@ -467,6 +478,7 @@ EOF
       PATH="$case_dir/bin:/usr/bin:/bin" \
       DOTFILES_DIR="$case_dir/home/Developer/dotfiles-hd" \
       DOTFILES_OS_RELEASE_FILE="$case_dir/os-release" \
+      DOTFILES_MISE_BIN="$case_dir/bin/mise" \
       DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/neovim-check.sh" \
       bash "$DOCTOR_SCRIPT" --offline
   } 2>&1)"
@@ -1088,6 +1100,13 @@ EOF
   cat > "$case_dir/bin/mise" <<EOF
 #!/usr/bin/env bash
 printf 'mise %s\n' "\$*" >> "$case_dir/commands.log"
+if [[ "\$*" == "which herdr" ]]; then
+  printf '%s\n' '$case_dir/mise-herdr'
+fi
+EOF
+  cat > "$case_dir/mise-herdr" <<'EOF'
+#!/usr/bin/env bash
+printf 'herdr 0.8.0\n'
 EOF
   cat > "$case_dir/fake-neovim-setup.sh" <<EOF
 #!/usr/bin/env bash
@@ -1098,6 +1117,7 @@ EOF
     "$case_dir/bin/git" \
     "$case_dir/bin/sudo" \
     "$case_dir/bin/mise" \
+    "$case_dir/mise-herdr" \
     "$case_dir/fake-neovim-setup.sh"
 
   output="$({
@@ -1117,7 +1137,10 @@ EOF
   assert_file_contains "$case_dir/commands.log" \
     "-n /usr/bin/apt-get autoclean"
   assert_file_contains "$case_dir/commands.log" "mise self-update -y"
+  assert_file_contains "$case_dir/commands.log" "mise which herdr"
   assert_file_contains "$case_dir/commands.log" "neovim"
+  cmp -s "$case_dir/mise-herdr" "$case_dir/home/.local/bin/herdr" \
+    || fail "updater did not refresh the remote Herdr client"
   self_update_count="$(grep -Fxc "mise self-update -y" "$case_dir/commands.log")"
   [[ "$self_update_count" == "1" ]] || fail "updater refreshed mise $self_update_count times instead of once"
 

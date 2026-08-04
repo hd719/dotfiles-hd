@@ -71,7 +71,6 @@ for command_name in bookokrat hunk lsd marksman nvim rg starship tree-sitter zox
 done
 
 for plugin_path in \
-  "$HOMEBREW_PREFIX/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" \
   "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
   "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"; do
   if [[ -r "$plugin_path" ]]; then

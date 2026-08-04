@@ -324,7 +324,7 @@ check_ubuntu_forgejo_routes() {
 }
 
 run_personal_ready() {
-  local vm_output vm_host="ubuntu-vm-ts" outdated_count
+  local vm_output vm_host="ubuntu-vm-ts"
   reset_results
 
   capture "$DOTFILES_ROOT/setup/mac-thin/doctor.sh"
@@ -356,28 +356,23 @@ run_personal_ready() {
         "Run: brew trust --json=v1"
     fi
 
-    capture /usr/bin/env HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" outdated
+    capture "$BREW_BIN" update
     if ((LAST_STATUS != 0)); then
-      add_result FAIL thin-mac "Homebrew updates" "brew outdated failed" \
-        "HOMEBREW_NO_AUTO_UPDATE=1 brew outdated"
+      add_result FAIL thin-mac "Homebrew updates" "brew update failed; upgrade not attempted" \
+        "Review the Homebrew error and do not change trust automatically"
     else
-      outdated_count="$(printf '%s\n' "$LAST_OUTPUT" | /usr/bin/awk 'NF {count++} END {print count+0}')"
-      if ((outdated_count > 0)); then
-        capture /usr/bin/env HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" upgrade
-        if ((LAST_STATUS == 0)); then
-          capture /usr/bin/env HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" outdated
-          if ((LAST_STATUS == 0)) && [[ -z "$LAST_OUTPUT" ]]; then
-            add_result PASS thin-mac "Homebrew updates" "outdated packages upgraded" "None"
-          else
-            add_result WARN thin-mac "Homebrew updates" "upgrade completed; packages remain outdated" \
-              "HOMEBREW_NO_AUTO_UPDATE=1 brew outdated"
-          fi
+      capture /usr/bin/env HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" upgrade
+      if ((LAST_STATUS == 0)); then
+        capture /usr/bin/env HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" outdated
+        if ((LAST_STATUS == 0)) && [[ -z "$LAST_OUTPUT" ]]; then
+          add_result PASS thin-mac "Homebrew updates" "metadata refreshed and packages upgraded" "None"
         else
-          add_result FAIL thin-mac "Homebrew updates" "brew upgrade failed; tap trust was not changed" \
-            "Review the Homebrew error and do not change trust automatically"
+          add_result WARN thin-mac "Homebrew updates" "upgrade completed; packages remain outdated" \
+            "HOMEBREW_NO_AUTO_UPDATE=1 brew outdated"
         fi
       else
-        add_result PASS thin-mac "Homebrew updates" "nothing outdated" "None"
+        add_result FAIL thin-mac "Homebrew updates" "brew upgrade failed; tap trust was not changed" \
+          "Review the Homebrew error and do not change trust automatically"
       fi
     fi
   else

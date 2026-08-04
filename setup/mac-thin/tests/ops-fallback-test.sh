@@ -32,6 +32,23 @@ for python_block in "$python_blocks"/*.py; do
 done
 pass "embedded Python syntax"
 
+personal_ready_body="$(
+  /usr/bin/awk '/^run_personal_ready\(\)/,/^}/' \
+    "$REPO_ROOT/setup/mac-thin/ops-fallback.sh"
+)"
+printf '%s\n' "$personal_ready_body" \
+  | /usr/bin/grep -Fq 'capture "$BREW_BIN" update' \
+  || fail "personal readiness must run brew update"
+printf '%s\n' "$personal_ready_body" \
+  | /usr/bin/grep -Fq 'HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" upgrade' \
+  || fail "personal readiness must run brew upgrade"
+update_line="$(printf '%s\n' "$personal_ready_body" | /usr/bin/grep -nF 'capture "$BREW_BIN" update' | /usr/bin/cut -d: -f1)"
+upgrade_line="$(printf '%s\n' "$personal_ready_body" | /usr/bin/grep -nF 'HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" upgrade' | /usr/bin/cut -d: -f1)"
+((update_line < upgrade_line)) || fail "brew update must run before brew upgrade"
+[[ "$personal_ready_body" != *outdated_count* ]] \
+  || fail "Homebrew upgrade must not be conditional on outdated output"
+pass "unconditional Homebrew update and upgrade contract"
+
 exact_reply OK OK || fail "exact model reply should pass"
 if exact_reply 'OK ' OK; then
   fail "model reply with extra text should fail"

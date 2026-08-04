@@ -5,14 +5,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
 OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
 NEOVIM_SETUP_SCRIPT="${DOTFILES_NEOVIM_SETUP_SCRIPT:-$SCRIPT_DIR/setup-neovim.sh}"
+MISE_BIN="${DOTFILES_MISE_BIN:-$HOME/.local/bin/mise}"
 EXPECTED_DOTFILES_ORIGIN="git@github.com:hd719/dotfiles-hd.git"
 
 print_usage() {
   cat <<'EOF'
 Usage: update-system.sh
 
-Update the lean Ubuntu workstation through APT, refresh pinned runtimes and
-locked Neovim plugins, and upgrade unpinned mise tools.
+Update all declared Ubuntu workstation dependencies through APT and mise,
+refresh locked Neovim plugins, and reconcile remote client binaries.
 EOF
 }
 
@@ -60,6 +61,23 @@ sync_dotfiles() {
   git -C "$DOTFILES_DIR" pull --ff-only origin master
 }
 
+refresh_remote_clients() {
+  local herdr_source herdr_target="$HOME/.local/bin/herdr"
+
+  herdr_source="$("$MISE_BIN" which herdr)" || {
+    printf 'mise could not resolve Herdr.\n' >&2
+    return 1
+  }
+  if [[ ! -x "$herdr_source" ]]; then
+    printf 'mise Herdr binary is not executable: %s\n' "$herdr_source" >&2
+    return 1
+  fi
+
+  mkdir -p "$(dirname "$herdr_target")"
+  install -m 0755 "$herdr_source" "$herdr_target"
+  printf 'Refreshed remote Herdr client: %s\n' "$herdr_target"
+}
+
 main() {
   if (($# > 1)); then
     print_usage >&2
@@ -97,8 +115,11 @@ main() {
     /usr/bin/apt-get autoremove -y
   sudo -n /usr/bin/apt-get autoclean
 
-  log "Refreshing the pinned Neovim setup"
+  log "Refreshing workstation-managed mise and Neovim dependencies"
   bash "$NEOVIM_SETUP_SCRIPT"
+
+  log "Refreshing remote workstation clients"
+  refresh_remote_clients
 
   printf '\nUbuntu update complete.\n'
   if [[ -f /var/run/reboot-required ]]; then

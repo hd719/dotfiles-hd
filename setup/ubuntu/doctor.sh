@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd -P)"
 REPO_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
 OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
 NEOVIM_SETUP_SCRIPT="${DOTFILES_NEOVIM_SETUP_SCRIPT:-$SCRIPT_DIR/setup-neovim.sh}"
+MISE_BIN="${DOTFILES_MISE_BIN:-$HOME/.local/bin/mise}"
 EXPECTED_DOTFILES_ORIGIN="git@github.com:hd719/dotfiles-hd.git"
 EXPECTED_DOTFILES_HTTPS_ORIGIN="https://github.com/hd719/dotfiles-hd.git"
 EXPECTED_DOTFILES_BRANCH="${DOTFILES_EXPECTED_BRANCH:-master}"
@@ -211,6 +212,15 @@ LINK_SPECS=(
 for spec in "${LINK_SPECS[@]}"; do
   check_link "${spec%%|*}" "${spec#*|}"
 done
+
+mise_herdr="$("$MISE_BIN" which herdr 2>/dev/null || true)"
+if [[ -x "$mise_herdr" ]] \
+  && [[ -x "$HOME/.local/bin/herdr" ]] \
+  && cmp -s "$mise_herdr" "$HOME/.local/bin/herdr"; then
+  pass "remote Herdr client matches mise"
+else
+  fail "remote Herdr client must match the mise-managed binary"
+fi
 
 if systemctl is-enabled docker >/dev/null 2>&1 \
   && systemctl is-active docker >/dev/null 2>&1; then

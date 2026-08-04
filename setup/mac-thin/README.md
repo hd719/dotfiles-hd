@@ -38,7 +38,7 @@ The host installs only:
 - VMware Fusion
 - Zoom
 - Zoxide
-- Zsh Autocomplete, Autosuggestions, and Syntax Highlighting
+- Zsh Autosuggestions and Syntax Highlighting
 - macOS SSH
 
 Do not install project repositories, Docker, databases, project compilers,
@@ -191,6 +191,9 @@ Mac mini brief with a `-manual.md` suffix. Recovery automatically performs only
 the documented service starts and verified PostgreSQL repairs. It stops for
 credentials, router settings, HomeKit pairing, ACLs, firmware, destructive
 actions, and unknown states.
+
+`personal-ready` inspects Homebrew tap trust without changing it, then always
+runs `brew update` followed by `brew upgrade` and reruns the thin-Mac doctor.
 
 Run the focused offline test after changing the fallback:
 

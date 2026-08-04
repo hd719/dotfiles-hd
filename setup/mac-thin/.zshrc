@@ -17,10 +17,6 @@ unset GIT_PAGER
 typeset mac_thin_brew_prefix="${HOMEBREW_PREFIX:-/opt/homebrew}"
 
 if [[ -o interactive ]]; then
-  if [[ -r "$mac_thin_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
-    source "$mac_thin_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
-  fi
-
   if (( $+commands[zoxide] )); then
     eval "$(zoxide init --cmd cd zsh)"
   fi

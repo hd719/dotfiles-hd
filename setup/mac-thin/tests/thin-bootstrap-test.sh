@@ -13,7 +13,6 @@ mkdir -p \
   "$TEST_ROOT/home/.config/herdr" \
   "$TEST_ROOT/home/.config/hunk" \
   "$TEST_ROOT/home/.ssh" \
-  "$TEST_ROOT/homebrew/share/zsh-autocomplete" \
   "$TEST_ROOT/homebrew/share/zsh-autosuggestions" \
   "$TEST_ROOT/homebrew/share/zsh-syntax-highlighting" \
   "$TEST_ROOT/apps"
@@ -45,6 +44,11 @@ if [ "$*" = "reinstall --cask vagrant" ]; then
   cp "$DOTFILES_TEST_VAGRANT_STUB" "$DOTFILES_TEST_BIN/vagrant"
   chmod +x "$DOTFILES_TEST_BIN/vagrant"
 fi
+exit 0
+EOF
+
+cat > "$TEST_ROOT/bin/bookokrat" <<'EOF'
+#!/bin/sh
 exit 0
 EOF
 
@@ -117,10 +121,6 @@ if [ "${1:-}" = "init" ]; then
 fi
 EOF
 
-cat > "$TEST_ROOT/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" <<'EOF'
-_autocomplete__main() { :; }
-EOF
-
 cat > "$TEST_ROOT/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh" <<'EOF'
 _zsh_autosuggest_start() { :; }
 EOF
@@ -160,6 +160,7 @@ cp "$TEST_ROOT/vagrant-stub" "$TEST_ROOT/bin/vagrant"
 
 touch "$TEST_ROOT/vagrant-vmware-utility"
 chmod +x \
+  "$TEST_ROOT/bin/bookokrat" \
   "$TEST_ROOT/bin/brew" \
   "$TEST_ROOT/bin/herdr" \
   "$TEST_ROOT/bin/hunk" \
@@ -292,7 +293,6 @@ grep -Fxq 'brew "ripgrep"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "starship"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "tree-sitter-cli"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "zoxide"' "$REPO_DIR/setup/mac-thin/Brewfile"
-grep -Fxq 'brew "zsh-autocomplete"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "zsh-autosuggestions"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'brew "zsh-syntax-highlighting"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "codex"' "$REPO_DIR/setup/mac-thin/Brewfile"
@@ -300,5 +300,10 @@ grep -Fxq 'cask "vagrant"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "zoom"' "$REPO_DIR/setup/mac-thin/Brewfile"
 ! grep -Fq 'diff-so-fancy' "$REPO_DIR/setup/mac-thin/Brewfile"
+! grep -Fq 'zsh-autocomplete' \
+  "$REPO_DIR/setup/mac-thin/Brewfile" \
+  "$REPO_DIR/setup/mac-thin/.zshrc" \
+  "$REPO_DIR/setup/mac-thin/doctor.sh" \
+  "$REPO_DIR/setup/mac-thin/README.md"
 
 printf 'Thin Mac bootstrap tests passed.\n'
