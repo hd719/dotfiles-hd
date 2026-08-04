@@ -100,7 +100,6 @@ check_ubuntu_forgejo_routes() {
 
 run_personal_ready() {
   local vm_output vm_host="ubuntu-vm-ts"
-  local mac_mini_failed=0
   reset_results
 
   capture "$DOTFILES_ROOT/setup/mac-thin/doctor.sh"
@@ -156,7 +155,7 @@ run_personal_ready() {
       "Install Homebrew through the supported thin-Mac bootstrap"
   fi
 
-  run_personal_mac_mini_updates || mac_mini_failed=1
+  run_personal_mac_mini_updates || true
 
   capture "$ZSH_BIN" -c "source '$DOTFILES_ROOT/setup/mac-thin/vm.zsh'; uvm-status"
   vm_output="$LAST_OUTPUT"
@@ -244,5 +243,5 @@ run_personal_ready() {
   fi
 
   write_personal_report
-  ((mac_mini_failed == 0))
+  personal_is_ready
 }

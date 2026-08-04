@@ -61,6 +61,28 @@ count_readiness_warnings() {
   printf '%s\n' "$count"
 }
 
+# Return success only when personal readiness has no blockers. Ordinary notes
+# stay nonblocking, but a required Ubuntu reboot needs the operator to act.
+personal_is_ready() {
+  local index
+  for ((index = 0; index < ${#RESULT_STATUS[@]}; index++)); do
+    if [[ "${RESULT_STATUS[$index]}" == "FAIL" ]] \
+      || [[ "${RESULT_STATUS[$index]}" == "WARN" \
+        && "${RESULT_AREA[$index]}" == "Ubuntu reboot" ]]; then
+      return 1
+    fi
+  done
+  return 0
+}
+
+# Secondary failures intentionally produce READY WITH WARNINGS. Only a core
+# failure makes the readiness or recovery command fail at the shell boundary.
+home_lab_is_ready() {
+  local core_failures
+  core_failures="$(count_core_failures)"
+  ((core_failures == 0))
+}
+
 home_lab_overall() {
   local core_failures warnings failures
   core_failures="$(count_core_failures)"

@@ -1573,6 +1573,8 @@ test_personal_goodmorning_mac_mini_maintenance() {
   local fake_bin="$root/bin"
   local brew_log="$root/brew.log"
   local cleanup_log="$root/cleanup.log"
+  local git_head_state="$root/git-head-state"
+  local reload_log="$root/reload.log"
 
   mkdir -p "$runner_dir" "$fake_bin"
   cat > "$runner" <<'EOF'
@@ -1587,8 +1589,16 @@ if [ "$FAKE_MAINTENANCE_STATE" = "blocked" ]; then
   exit 2
 fi
 status="current"
+category="homebrew"
+item="packages"
 [ "$FAKE_MAINTENANCE_STATE" = "available" ] && status="available"
-printf '{"verdict":"ready","failed":[],"warnings":[],"updated":[],"events":[{"category":"homebrew","item":"packages","status":"%s"}]}\n' "$status"
+if [ "$FAKE_MAINTENANCE_STATE" = "git-available" ]; then
+  status="available"
+  category="git"
+  item="cortana_services"
+fi
+printf '{"verdict":"ready","failed":[],"warnings":[],"updated":[],"events":[{"category":"%s","item":"%s","status":"%s"}]}\n' \
+  "$category" "$item" "$status"
 EOF
   chmod +x "$runner"
   cat > "$fake_bin/brew" <<'EOF'
@@ -1608,6 +1618,14 @@ EOF
   : > "$runner_log"
   HOME="$home_dir" PATH="$PATH" \
     FAKE_MAINTENANCE_LOG="$runner_log" FAKE_MAINTENANCE_STATE=available \
+    /bin/zsh -dfc 'source "$1"; _goodmorning_run_mac_mini_maintenance' \
+    zsh "$personal_functions" >/dev/null
+  assert_contains "$runner_log" "--dry-run"
+  assert_contains "$runner_log" "--apply"
+
+  : > "$runner_log"
+  HOME="$home_dir" PATH="$PATH" \
+    FAKE_MAINTENANCE_LOG="$runner_log" FAKE_MAINTENANCE_STATE=git-available \
     /bin/zsh -dfc 'source "$1"; _goodmorning_run_mac_mini_maintenance' \
     zsh "$personal_functions" >/dev/null
   assert_contains "$runner_log" "--dry-run"
@@ -1636,6 +1654,31 @@ EOF
   assert_contains "$brew_log" "update"
   assert_contains "$runner_log" "--dry-run"
   assert_no_path "$cleanup_log"
+
+  cat > "$fake_bin/git" <<'EOF'
+#!/bin/sh
+count="$(cat "$GIT_HEAD_STATE" 2>/dev/null || printf 0)"
+if [ "$count" -eq 0 ]; then
+  printf 'before\n'
+else
+  printf 'after\n'
+fi
+printf '%s\n' "$((count + 1))" > "$GIT_HEAD_STATE"
+EOF
+  chmod +x "$fake_bin/git"
+  cat > "$home_dir/.zshrc" <<'EOF'
+goodMorning() {
+  print -r -- "${DOTFILES_GOODMORNING_RELOADED:-0}|$*" >> "$RELOAD_LOG"
+}
+EOF
+  HOME="$home_dir" PATH="$fake_bin:$PATH" DOTFILES_MAC_PROFILE=mac-mini \
+    GIT_HEAD_STATE="$git_head_state" RELOAD_LOG="$reload_log" \
+    /bin/zsh -dfc '
+      source "$1"
+      _goodmorning_sync_dotfiles() { return 0 }
+      goodMorning --updates-only
+    ' zsh "$personal_functions" >/dev/null
+  assert_contains "$reload_log" "1|--updates-only"
 }
 
 test_resilience_goodmorning_guards() {

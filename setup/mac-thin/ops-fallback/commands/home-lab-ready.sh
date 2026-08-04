@@ -68,14 +68,17 @@ write_home_lab_report() {
   } >>"$report"
 
   if [[ -n "$MAC_HOST" ]]; then
-    local remote_date remote_report
+    local remote_content remote_date remote_report
     ssh_capture "$MAC_HOST" 'date +%F'
     remote_date="$LAST_OUTPUT"
     [[ "$remote_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || remote_date="$report_date"
     remote_report="/Users/h/Desktop/Home Lab Readiness Briefs/home-lab-readiness-${remote_date}-manual.md"
     ssh_capture "$MAC_HOST" 'mkdir -p "/Users/h/Desktop/Home Lab Readiness Briefs"'
     if ((LAST_STATUS == 0)); then
-      capture_with_input "$(<"$report")" "$SSH_BIN" "${SSH_OPTIONS[@]}" "$MAC_HOST" \
+      # The local and remote copies need paths that are valid on their own host.
+      remote_content="$(/usr/bin/sed \
+        "s|^- Report: .*|- Report: $remote_report|" "$report")"
+      capture_with_input "$remote_content" "$SSH_BIN" "${SSH_OPTIONS[@]}" "$MAC_HOST" \
         "umask 077; /bin/cat > '$remote_report'"
       if ((LAST_STATUS != 0)); then
         printf 'Warning: local report saved, but Mac mini report copy failed.\n' >&2
@@ -106,4 +109,5 @@ run_home_lab_ready() {
   check_home_assistant
   check_secondary_providers "$away_end"
   write_home_lab_report "$away_start" "$away_end"
+  home_lab_is_ready
 }

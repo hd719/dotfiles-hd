@@ -173,4 +173,5 @@ run_home_lab_recover() {
   check_truenas
   check_home_assistant
   write_recovery_report
+  home_lab_is_ready
 }

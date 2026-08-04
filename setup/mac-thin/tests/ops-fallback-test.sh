@@ -57,8 +57,8 @@ printf '%s\n' "$personal_ready_body" \
   | /usr/bin/grep -Fq 'run_personal_mac_mini_updates' \
   || fail "personal readiness must run Mac mini goodMorning"
 printf '%s\n' "$personal_ready_body" \
-  | /usr/bin/grep -Fq '((mac_mini_failed == 0))' \
-  || fail "personal readiness must return nonzero after Mac mini failure"
+  | /usr/bin/grep -Fq 'personal_is_ready' \
+  || fail "personal readiness must return its aggregate readiness status"
 mac_mini_update_body="$(
   /usr/bin/awk '/^run_personal_mac_mini_updates\(\)/,/^}/' \
     "$REPO_ROOT/setup/mac-thin/ops-fallback/commands/personal-ready.sh"
@@ -113,6 +113,23 @@ goodmorning_calls="$(printf '%s\n' "${mac_mini_calls[@]}" | /usr/bin/grep -c 'go
 [[ "${RESULT_STATUS[0]}" == FAIL ]] || fail "failed Mac mini maintenance should be reported"
 pass "Mac mini failure is not replayed"
 
+reset_results
+add_result PASS thin-mac "Thin Mac" "ready" "None"
+personal_is_ready || fail "all-pass personal readiness should return success"
+add_result FAIL ubuntu-vm "Ubuntu updater" "failed" "Rerun updater"
+if personal_is_ready; then
+  fail "a failed personal check should return nonzero"
+fi
+reset_results
+add_result WARN ubuntu-vm "Ubuntu reboot" "required" "Restart VM"
+if personal_is_ready; then
+  fail "a required Ubuntu reboot should return nonzero"
+fi
+reset_results
+add_result WARN thin-mac "Thin-Mac disk" "review soon" "Inspect storage"
+personal_is_ready || fail "an ordinary personal note should stay nonblocking"
+pass "personal readiness exit contract"
+
 exact_reply OK OK || fail "exact model reply should pass"
 if exact_reply 'OK ' OK; then
   fail "model reply with extra text should fail"
@@ -150,6 +167,12 @@ add_result WARN secondary "Secondary" "warning" "Inspect"
 [[ "$(home_lab_overall)" == 'READY WITH WARNINGS' ]] || fail "warning readiness classification"
 add_result FAIL core "Core failure" "down" "Recover"
 [[ "$(home_lab_overall)" == 'NOT READY' ]] || fail "core failure readiness classification"
+if home_lab_is_ready; then
+  fail "core failure should return nonzero"
+fi
+reset_results
+add_result FAIL secondary "Secondary failure" "reauth" "Repair manually"
+home_lab_is_ready || fail "secondary failure should stay nonblocking"
 pass "readiness aggregation"
 
 hermes_release_payload=""
@@ -212,6 +235,30 @@ grep -Fq -- '- Invocation: Manual fallback CLI' "$report" || fail "manual invoca
 grep -Fq -- '- Overall: READY' "$report" || fail "fixture report should be READY"
 grep -Fq -- '- Away window: 2026-08-10 to 2026-08-17' "$report" || fail "away window missing"
 pass "manual readiness report"
+
+remote_report_body=""
+ssh_capture() {
+  local payload="$2"
+  LAST_STATUS=0
+  if [[ "$payload" == 'date +%F' ]]; then
+    LAST_OUTPUT=2026-08-04
+  else
+    LAST_OUTPUT=""
+  fi
+}
+capture_with_input() {
+  remote_report_body="$1"
+  LAST_STATUS=0
+}
+reset_results
+add_result PASS core "Fixture" "healthy" "None"
+MAC_HOST=mac-mini-ts
+write_home_lab_report "" "" >/dev/null
+[[ "$remote_report_body" == *'- Report: /Users/h/Desktop/Home Lab Readiness Briefs/home-lab-readiness-2026-08-04-manual.md'* ]] \
+  || fail "Mac mini report should contain its remote path"
+[[ "$remote_report_body" != *'/Users/hameldesai/Desktop/Ops Fallback Reports/'* ]] \
+  || fail "Mac mini report must not contain the thin-Mac report path"
+pass "host-correct readiness report paths"
 
 mock_ownership_calls=0
 mock_payloads=()

@@ -34,6 +34,8 @@ ops-fallback.sh
   and never retries a failed update through another route.
 - `home-lab-ready` is inspection only.
 - `home-lab-recover` contains only the documented unattended recovery branches.
+- Command exit status matches the report: personal blockers and core home-lab
+  failures return nonzero; notes and secondary-service warnings stay nonblocking.
 - Full scheduled maintenance remains in the separately deployed
   `home-lab-maintenance` skill. It is not copied into this fallback.
 - Fallback-owned logic is Bash plus `curl` and `jq`. External systems may still
