@@ -1214,6 +1214,7 @@ test_shared_zsh_interface() {
     "$personal_codex" \
     "$REPO_DIR/config/zsh/shared/development-aliases.zsh" \
     "$REPO_DIR/config/zsh/shared/functions.zsh" \
+    "$REPO_DIR/config/zsh/shared/herdr.zsh" \
     "$shared_dir/init.zsh" \
     "$shared_dir/aliases.zsh" \
     "$shared_dir/prompt.zsh" \
@@ -1242,6 +1243,8 @@ test_shared_zsh_interface() {
   done
   assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
+  assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/shared/herdr.zsh'
+  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Mac mini shared Herdr reset'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'export DOTFILES_MAC_PROFILE="mac-mini"'
   assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal/'
   assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-aliases.zsh"'
@@ -1389,6 +1392,17 @@ test_shared_zsh_interface() {
     )"
     assert_eq profile-ok "$actual" "$(basename "$(dirname "$zsh_file")") profile loads personal Mac zsh interface"
   done
+
+  actual="$(
+    HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
+      source "$1"
+      (( $+functions[herdr] )) || exit 1
+      (( $+functions[_dotfiles_herdr_reset] )) || exit 1
+      (( _dotfiles_herdr_route_plain == 0 )) || exit 1
+      print -r -- herdr-ok
+    ' zsh "$REPO_DIR/setup/mac-mini/.zshrc" 2>/dev/null
+  )"
+  assert_eq herdr-ok "$actual" "Mac mini loads the shared Herdr reset wrapper"
 
   actual="$(
     HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
@@ -1942,6 +1956,12 @@ EOF
   TESTS=$((TESTS + 1))
 }
 
+test_resilience_hd_stop() {
+  bash "$REPO_DIR/setup/mac-pro-resilience/herdr/tests/hd-stop-test.sh" \
+    >/dev/null || fail "Resilience hd-stop did not reuse the shared Herdr reset"
+  TESTS=$((TESTS + 1))
+}
+
 test_link_helper
 test_zprofile_helper
 test_neovim_lock_guard
@@ -1958,5 +1978,6 @@ test_goodmorning_timeout_helper
 test_goodmorning_dotfiles_sync
 test_personal_goodmorning_mac_mini_maintenance
 test_resilience_goodmorning_guards
+test_resilience_hd_stop
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"

@@ -296,8 +296,8 @@ if /bin/zsh -dfc "
   [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
   [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
   [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
-  [[ \"\$(whence -w _thin_herdr_route_cwd)\" == '_thin_herdr_route_cwd: function' ]]
-  [[ \"\$(whence -w _thin_herdr_reset)\" == '_thin_herdr_reset: function' ]]
+  [[ \"\$(whence -w _dotfiles_herdr_route_cwd)\" == '_dotfiles_herdr_route_cwd: function' ]]
+  [[ \"\$(whence -w _dotfiles_herdr_reset)\" == '_dotfiles_herdr_reset: function' ]]
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
   ! alias ubuntu >/dev/null 2>&1
