@@ -60,7 +60,7 @@ run_personal_mac_mini_updates() {
     return 1
   fi
 
-  ssh_capture "$mac_host" 'zsh -lic "goodMorning --updates-only"'
+  ssh_capture "$mac_host" 'zsh -lic "goodMorning"'
   if ((LAST_STATUS != 0)); then
     add_result FAIL mac-mini "Mac mini goodMorning" \
       "guarded update command failed and was not replayed" \
@@ -69,7 +69,7 @@ run_personal_mac_mini_updates() {
   fi
 
   add_result PASS mac-mini "Mac mini goodMorning" \
-    "guarded package and runtime updates completed" "None"
+    "guarded updates and personal cleanup completed" "None"
 }
 
 check_ubuntu_forgejo_routes() {

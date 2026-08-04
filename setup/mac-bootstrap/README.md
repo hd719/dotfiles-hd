@@ -89,12 +89,15 @@ The `mac-mini` shell profile marks the host explicitly. Its personal
 the deployed `home-lab-maintenance` Mac mini runner in dry-run mode. It enters
 apply mode only when Homebrew or a tracked runtime repository has updates.
 Apply mode keeps the runner's production health gates and verified PostgreSQL
-backup. Repeated no-op runs do not apply or create another backup. It never
-restarts services, advances Hermes, or changes macOS.
+backup. Repeated no-op runs do not apply or create another backup. If Cortana
+Services advances, the repo-owned `runtime:post-merge` reloads or restarts only
+affected Cortana services. It never performs a broad service restart, advances
+Hermes, or changes macOS.
 
-`personal-ready` calls `goodMorning --updates-only`, which stops before Zoom,
-Downloads, and `.DS_Store` cleanup. A normal interactive `goodMorning` retains
-that personal cleanup behavior.
+`personal-ready` calls normal `goodMorning`, so it removes the Zoom folder and
+runs the cooldown-protected cleanup for Downloads files older than 30 days and
+`.DS_Store` files. Use `goodMorning --updates-only` only when that personal
+cleanup must be skipped.
 
 Do not run `--apply` until all four gates pass:
 

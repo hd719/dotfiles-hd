@@ -30,8 +30,10 @@ ops-fallback.sh
 ## Boundaries
 
 - `personal-ready` owns the thin Mac, Ubuntu VM, and guarded Mac mini
-  `goodMorning --updates-only` lane. It selects one SSH route before mutation
-  and never retries a failed update through another route.
+  `goodMorning` lane. It selects one SSH route before mutation and never
+  retries a failed update through another route. Normal `goodMorning` also
+  removes the Zoom folder and runs the cooldown-protected Downloads and
+  `.DS_Store` cleanup.
 - `home-lab-ready` is inspection only.
 - `home-lab-recover` contains only the documented unattended recovery branches.
 - Command exit status matches the report: personal blockers and core home-lab

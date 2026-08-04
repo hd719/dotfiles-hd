@@ -84,7 +84,7 @@ ssh_capture() {
 reset_results
 run_personal_mac_mini_updates || fail "Mac mini LAN fallback should complete"
 [[ "${mac_mini_calls[*]}" == \
-  'mac-mini-ts|true mac-mini-lan|true mac-mini-lan|zsh -lic "_goodmorning_sync_dotfiles" mac-mini-lan|zsh -lic "goodMorning --updates-only"' ]] \
+  'mac-mini-ts|true mac-mini-lan|true mac-mini-lan|zsh -lic "_goodmorning_sync_dotfiles" mac-mini-lan|zsh -lic "goodMorning"' ]] \
   || fail "Mac mini update lane should try Tailscale before LAN"
 [[ "${RESULT_STATUS[0]}" == WARN && "${RESULT_STATUS[1]}" == PASS ]] \
   || fail "Mac mini LAN fallback should be a note with a passing update"
@@ -96,7 +96,7 @@ ssh_capture() {
   local payload="$2"
   mac_mini_calls[${#mac_mini_calls[@]}]="$host|$payload"
   LAST_OUTPUT=""
-  if [[ "$payload" == *"goodMorning --updates-only"* ]]; then
+  if [[ "$payload" == *'zsh -lic "goodMorning"'* ]]; then
     LAST_STATUS=1
   else
     LAST_STATUS=0
@@ -108,7 +108,7 @@ if run_personal_mac_mini_updates; then
 fi
 [[ "${mac_mini_calls[*]}" != *mac-mini-lan* ]] \
   || fail "failed maintenance must not replay through LAN"
-goodmorning_calls="$(printf '%s\n' "${mac_mini_calls[@]}" | /usr/bin/grep -c 'goodMorning --updates-only')"
+goodmorning_calls="$(printf '%s\n' "${mac_mini_calls[@]}" | /usr/bin/grep -c 'zsh -lic "goodMorning"')"
 [[ "$goodmorning_calls" == 1 ]] || fail "Mac mini maintenance should run exactly once"
 [[ "${RESULT_STATUS[0]}" == FAIL ]] || fail "failed Mac mini maintenance should be reported"
 pass "Mac mini failure is not replayed"

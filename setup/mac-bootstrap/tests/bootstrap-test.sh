@@ -1655,6 +1655,23 @@ EOF
   assert_contains "$runner_log" "--dry-run"
   assert_no_path "$cleanup_log"
 
+  : > "$runner_log"
+  : > "$cleanup_log"
+  HOME="$home_dir" PATH="$fake_bin:$PATH" DOTFILES_MAC_PROFILE=mac-mini \
+    FAKE_MAINTENANCE_LOG="$runner_log" FAKE_MAINTENANCE_STATE=current \
+    FAKE_BREW_LOG="$brew_log" CLEANUP_LOG="$cleanup_log" \
+    /bin/zsh -dfc '
+      source "$1"
+      _goodmorning_sync_dotfiles() { return 0 }
+      rm() { print -r -- "$*" >> "$CLEANUP_LOG" }
+      _run_with_timeout() { print -r -- "$*" >> "$CLEANUP_LOG"; return 0 }
+      _write_marker_last_run_epoch_ms() { return 0 }
+      goodMorning
+    ' zsh "$personal_functions" >/dev/null
+  assert_contains "$cleanup_log" "-rf $home_dir/Documents/Zoom"
+  assert_contains "$cleanup_log" "$home_dir/Downloads -type f -mtime +30 -delete"
+  assert_contains "$cleanup_log" "$home_dir -name .DS_Store -type f -delete"
+
   cat > "$fake_bin/git" <<'EOF'
 #!/bin/sh
 count="$(cat "$GIT_HEAD_STATE" 2>/dev/null || printf 0)"

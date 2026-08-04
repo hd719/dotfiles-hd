@@ -193,10 +193,12 @@ credentials, router settings, HomeKit pairing, ACLs, firmware, destructive
 actions, and unknown states.
 
 `personal-ready` inspects Homebrew tap trust without changing it, always runs
-`brew update` followed by `brew upgrade`, runs the Mac mini
-`goodMorning --updates-only` guarded lane, and reruns the thin-Mac doctor. It
-selects Tailscale or LAN before updating and never replays a failed maintenance
-command. Service restarts and Hermes upgrades remain excluded.
+`brew update` followed by `brew upgrade`, runs normal `goodMorning` on the Mac
+mini, and reruns the thin-Mac doctor. Normal mode also removes the Zoom folder
+and runs the cooldown-protected Downloads and `.DS_Store` cleanup. It selects
+Tailscale or LAN before updating and never replays a failed maintenance command.
+Cortana updates may restart only affected Cortana services through the repo-owned
+`runtime:post-merge`; broad restarts and Hermes upgrades remain excluded.
 
 Run the focused offline test after changing the fallback:
 
