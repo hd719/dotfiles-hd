@@ -43,7 +43,7 @@ carchive() {
         cwd
       FROM threads
       WHERE archived = 0
-        AND source = 'vscode'
+        AND source IN ('vscode', 'cli')
         AND preview <> ''
       ORDER BY recency_at_ms DESC;
     "

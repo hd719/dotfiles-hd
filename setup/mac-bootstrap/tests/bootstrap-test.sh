@@ -1315,6 +1315,12 @@ test_shared_zsh_interface() {
     INSERT INTO threads VALUES (
       'session-old', 100, 100000, 'Older chat', '/tmp/old', 0, 'vscode', 'preview'
     );
+    INSERT INTO threads VALUES (
+      'session-cli', 300, 300000, 'CLI chat', '/tmp/cli', 0, 'cli', 'preview'
+    );
+    INSERT INTO threads VALUES (
+      'session-exec', 400, 400000, 'Exec task', '/tmp/exec', 0, 'exec', 'preview'
+    );
   "
   : > "$root/codex.log"
   printf '1\ny\n' | CODEX_LOG="$root/codex.log" \
@@ -1326,7 +1332,7 @@ test_shared_zsh_interface() {
       coda
     ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
     >/dev/null
-  assert_contains "$root/codex.log" "archive session-new"
+  assert_contains "$root/codex.log" "archive session-cli"
 
   CODEX_LOG="$root/codex.log" \
     HOME="$home_dir" \
@@ -1364,7 +1370,7 @@ test_shared_zsh_interface() {
       coda
     ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
     >/dev/null
-  assert_contains "$root/codex.log" "archive session-new"
+  assert_contains "$root/codex.log" "archive session-cli"
 
   for zsh_file in \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
