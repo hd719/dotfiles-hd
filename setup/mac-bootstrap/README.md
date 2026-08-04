@@ -84,6 +84,18 @@ search, navigation, zoom, and the opaque document canvas.
 
 ## Existing Production Mac mini
 
+The `mac-mini` shell profile marks the host explicitly. Its personal
+`goodMorning` function syncs clean dotfiles, runs `brew update`, and executes
+the deployed `home-lab-maintenance` Mac mini runner in dry-run mode. It enters
+apply mode only when Homebrew or a tracked runtime repository has updates.
+Apply mode keeps the runner's production health gates and verified PostgreSQL
+backup. Repeated no-op runs do not apply or create another backup. It never
+restarts services, advances Hermes, or changes macOS.
+
+`personal-ready` calls `goodMorning --updates-only`, which stops before Zoom,
+Downloads, and `.DS_Store` cleanup. A normal interactive `goodMorning` retains
+that personal cleanup behavior.
+
 Do not run `--apply` until all four gates pass:
 
 1. The reviewed change is merged.

@@ -1237,6 +1237,7 @@ test_shared_zsh_interface() {
   done
   assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
+  assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'export DOTFILES_MAC_PROFILE="mac-mini"'
   assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal/'
   assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-aliases.zsh"'
   assert_contains "$shared_init" 'source "$zsh_shared_dir/completions.zsh"'
@@ -1562,6 +1563,81 @@ EOF
   assert_contains "$resilience_profile" "goodmorning.zsh"
 }
 
+test_personal_goodmorning_mac_mini_maintenance() {
+  local personal_functions="$REPO_DIR/config/zsh/mac/personal/development-functions.zsh"
+  local root="$TMP_ROOT/personal-goodmorning-mac-mini"
+  local home_dir="$root/home"
+  local runner_dir="$home_dir/.hermes/skills/home-lab-maintenance/scripts"
+  local runner="$runner_dir/mac-mini-maintenance.sh"
+  local runner_log="$root/runner.log"
+  local fake_bin="$root/bin"
+  local brew_log="$root/brew.log"
+  local cleanup_log="$root/cleanup.log"
+
+  mkdir -p "$runner_dir" "$fake_bin"
+  cat > "$runner" <<'EOF'
+#!/bin/sh
+printf '%s\n' "$1" >> "$FAKE_MAINTENANCE_LOG"
+if [ "$1" = "--apply" ]; then
+  printf '%s\n' '{"verdict":"success","failed":[],"warnings":[],"updated":[{"message":"Applied updates."}],"events":[]}'
+  exit 0
+fi
+if [ "$FAKE_MAINTENANCE_STATE" = "blocked" ]; then
+  printf '%s\n' '{"verdict":"blocked","failed":[{"message":"Preflight blocked."}],"warnings":[],"updated":[],"events":[]}'
+  exit 2
+fi
+status="current"
+[ "$FAKE_MAINTENANCE_STATE" = "available" ] && status="available"
+printf '{"verdict":"ready","failed":[],"warnings":[],"updated":[],"events":[{"category":"homebrew","item":"packages","status":"%s"}]}\n' "$status"
+EOF
+  chmod +x "$runner"
+  cat > "$fake_bin/brew" <<'EOF'
+#!/bin/sh
+printf '%s\n' "$*" >> "$FAKE_BREW_LOG"
+exit 0
+EOF
+  chmod +x "$fake_bin/brew"
+
+  HOME="$home_dir" PATH="$PATH" \
+    FAKE_MAINTENANCE_LOG="$runner_log" FAKE_MAINTENANCE_STATE=current \
+    /bin/zsh -dfc 'source "$1"; _goodmorning_run_mac_mini_maintenance' \
+    zsh "$personal_functions" >/dev/null
+  assert_contains "$runner_log" "--dry-run"
+  assert_not_contains "$runner_log" "--apply"
+
+  : > "$runner_log"
+  HOME="$home_dir" PATH="$PATH" \
+    FAKE_MAINTENANCE_LOG="$runner_log" FAKE_MAINTENANCE_STATE=available \
+    /bin/zsh -dfc 'source "$1"; _goodmorning_run_mac_mini_maintenance' \
+    zsh "$personal_functions" >/dev/null
+  assert_contains "$runner_log" "--dry-run"
+  assert_contains "$runner_log" "--apply"
+
+  : > "$runner_log"
+  if HOME="$home_dir" PATH="$PATH" \
+    FAKE_MAINTENANCE_LOG="$runner_log" FAKE_MAINTENANCE_STATE=blocked \
+    /bin/zsh -dfc 'source "$1"; _goodmorning_run_mac_mini_maintenance' \
+    zsh "$personal_functions" >/dev/null; then
+    fail "blocked Mac mini preflight should fail goodMorning maintenance"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_not_contains "$runner_log" "--apply"
+
+  : > "$runner_log"
+  HOME="$home_dir" PATH="$fake_bin:$PATH" DOTFILES_MAC_PROFILE=mac-mini \
+    FAKE_MAINTENANCE_LOG="$runner_log" FAKE_MAINTENANCE_STATE=current \
+    FAKE_BREW_LOG="$brew_log" CLEANUP_LOG="$cleanup_log" \
+    /bin/zsh -dfc '
+      source "$1"
+      _goodmorning_sync_dotfiles() { return 0 }
+      rm() { print -r -- "$*" >> "$CLEANUP_LOG" }
+      goodMorning --updates-only
+    ' zsh "$personal_functions" >/dev/null
+  assert_contains "$brew_log" "update"
+  assert_contains "$runner_log" "--dry-run"
+  assert_no_path "$cleanup_log"
+}
+
 test_resilience_goodmorning_guards() {
   local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
   local resilience_module="$REPO_DIR/setup/mac-pro-resilience/goodmorning.zsh"
@@ -1726,6 +1802,7 @@ test_shared_zsh_interface
 test_ubuntu_vagrant_lifecycle
 test_goodmorning_timeout_helper
 test_goodmorning_dotfiles_sync
+test_personal_goodmorning_mac_mini_maintenance
 test_resilience_goodmorning_guards
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"

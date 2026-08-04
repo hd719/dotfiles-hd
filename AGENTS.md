@@ -40,12 +40,13 @@ machine policy. Profile link inventories live in their matching runbooks.
 - Never start, stop, restart, reload, or migrate production services without
   explicit approval.
 - Do not commit or push unless Hamel asks.
-- Agent-authored dotfiles changes use `arbiter-hd` from Ubuntu or `cortana-hd`
-  from the Mac mini. From Ubuntu, push only to the `arbiter-hd/dotfiles-hd`
-  fork through `github.com-arbiter`. From the Mac mini, use `cortana-hd` only
-  for explicitly selected or Mac-mini-owned work; otherwise sync reviewed
-  `master` only. Never commit or push agent work from the thin Mac or as
-  `hd719`.
+- `dotfiles-hd` is the thin-Mac PR exception: agent-authored dotfiles changes
+  may be committed and pushed from a thin-Mac branch or worktree only as
+  `arbiter-hd`, through `github.com-arbiter` directly to `hd719/dotfiles-hd`.
+  Never push agent work as `hd719`.
+- Other development repositories remain Ubuntu-first and use `arbiter-hd`.
+  From the Mac mini, use `cortana-hd` only for explicitly selected or
+  Mac-mini-owned work; otherwise sync reviewed `master` only.
 - New development repositories must not be created, cloned, or worked from the
   thin Mac. Use Ubuntu by default, or the Mac mini when Hamel explicitly selects
   it or the repo is Mac-mini-owned. Agent PRs use `arbiter-hd` from Ubuntu or
@@ -181,8 +182,8 @@ commands aligned with the supported workstation.
   and never copy Git private keys from the Mac.
 - Keep plain `github.com` pinned to the local `hd719` key and reserve
   `github.com-arbiter` for the local Arbiter key.
-- Keep GitHub CLI authenticated as `arbiter-hd`; agent branches push only
-  through the `github.com-arbiter` fork route.
+- Keep GitHub CLI authenticated as `arbiter-hd`; dotfiles agent branches push
+  through `github.com-arbiter` directly to `hd719/dotfiles-hd`.
 - Use `ubuntu-vm-ts` as the primary Codex route to Tailscale node `ubuntu-dev`.
   Keep `ubuntu-vm` as the loopback-only Vagrant fallback. Both must disable Mac
   agent forwarding and enforce SSH host-key checking.

@@ -192,14 +192,23 @@ the documented service starts and verified PostgreSQL repairs. It stops for
 credentials, router settings, HomeKit pairing, ACLs, firmware, destructive
 actions, and unknown states.
 
-`personal-ready` inspects Homebrew tap trust without changing it, then always
-runs `brew update` followed by `brew upgrade` and reruns the thin-Mac doctor.
+`personal-ready` inspects Homebrew tap trust without changing it, always runs
+`brew update` followed by `brew upgrade`, runs the Mac mini
+`goodMorning --updates-only` guarded lane, and reruns the thin-Mac doctor. It
+selects Tailscale or LAN before updating and never replays a failed maintenance
+command. Service restarts and Hermes upgrades remain excluded.
 
 Run the focused offline test after changing the fallback:
 
 ```bash
 bash setup/mac-thin/tests/ops-fallback-test.sh
 ```
+
+The implementation is split into commented Bash modules under
+`setup/mac-thin/ops-fallback/`. Start with
+[`ops-fallback/README.md`](ops-fallback/README.md) for the command-to-module
+map. The public commands stay in `ops-fallback.sh`; fallback-owned parsing uses
+Bash, `curl`, and `jq` rather than embedded Python.
 
 This is an explicit allowlist. Node/Bun/Go, Docker, Kubernetes, project
 toolchains, VS Code, tmux, other language servers, and development aliases
