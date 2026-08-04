@@ -2,6 +2,8 @@
 # ZSH Configuration (Mac mini - Hermes)
 # =============================================================================
 
+export DOTFILES_MAC_PROFILE="mac-mini"
+
 _source_zsh_config() {
   local file="$1"
   [[ -r "$file" ]] && source "$file"

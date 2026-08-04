@@ -20,21 +20,25 @@ pass() {
   printf 'PASS  %s\n' "$1"
 }
 
-python_blocks="$TEST_REPORT_ROOT/python-blocks"
-/bin/mkdir -p "$python_blocks"
-/usr/bin/awk -v destination="$python_blocks" '
-  /<<'"'"'PY'"'"'/ { block += 1; capture = 1; next }
-  capture && $0 == "PY" { capture = 0; next }
-  capture { print > (destination "/block-" block ".py") }
-' "$REPO_ROOT/setup/mac-thin/ops-fallback.sh"
-for python_block in "$python_blocks"/*.py; do
-  /usr/bin/python3 -m py_compile "$python_block" || fail "embedded Python syntax"
+module_files=(
+  "$REPO_ROOT/setup/mac-thin/ops-fallback.sh"
+  "$REPO_ROOT/setup/mac-thin/ops-fallback/lib/"*.sh
+  "$REPO_ROOT/setup/mac-thin/ops-fallback/commands/"*.sh
+  "$REPO_ROOT/setup/mac-thin/ops-fallback/checks/"*.sh
+)
+for module_file in "${module_files[@]}"; do
+  /bin/bash -n "$module_file" || fail "Bash syntax: $module_file"
 done
-pass "embedded Python syntax"
+if /usr/bin/grep -R -E "PYTHON_BIN|ssh_python_capture|<<'PY'" \
+  "$REPO_ROOT/setup/mac-thin/ops-fallback.sh" \
+  "$REPO_ROOT/setup/mac-thin/ops-fallback" >/dev/null; then
+  fail "fallback-owned logic must not embed Python"
+fi
+pass "modular Bash syntax and no embedded Python"
 
 personal_ready_body="$(
   /usr/bin/awk '/^run_personal_ready\(\)/,/^}/' \
-    "$REPO_ROOT/setup/mac-thin/ops-fallback.sh"
+    "$REPO_ROOT/setup/mac-thin/ops-fallback/commands/personal-ready.sh"
 )"
 printf '%s\n' "$personal_ready_body" \
   | /usr/bin/grep -Fq 'capture "$BREW_BIN" update' \
@@ -48,6 +52,66 @@ upgrade_line="$(printf '%s\n' "$personal_ready_body" | /usr/bin/grep -nF 'HOMEBR
 [[ "$personal_ready_body" != *outdated_count* ]] \
   || fail "Homebrew upgrade must not be conditional on outdated output"
 pass "unconditional Homebrew update and upgrade contract"
+
+printf '%s\n' "$personal_ready_body" \
+  | /usr/bin/grep -Fq 'run_personal_mac_mini_updates' \
+  || fail "personal readiness must run Mac mini goodMorning"
+printf '%s\n' "$personal_ready_body" \
+  | /usr/bin/grep -Fq '((mac_mini_failed == 0))' \
+  || fail "personal readiness must return nonzero after Mac mini failure"
+mac_mini_update_body="$(
+  /usr/bin/awk '/^run_personal_mac_mini_updates\(\)/,/^}/' \
+    "$REPO_ROOT/setup/mac-thin/ops-fallback/commands/personal-ready.sh"
+)"
+[[ "$mac_mini_update_body" == *mac-mini-ts* && "$mac_mini_update_body" == *mac-mini-lan* ]] \
+  || fail "Mac mini update lane must retain Tailscale and LAN routes"
+[[ "$mac_mini_update_body" == *goodMorning* ]] \
+  || fail "Mac mini update lane must invoke goodMorning"
+pass "Mac mini goodMorning fallback contract"
+
+mac_mini_calls=()
+ssh_capture() {
+  local host="$1"
+  local payload="$2"
+  mac_mini_calls[${#mac_mini_calls[@]}]="$host|$payload"
+  LAST_OUTPUT=""
+  if [[ "$host" == "mac-mini-ts" && "$payload" == true ]]; then
+    LAST_STATUS=1
+  else
+    LAST_STATUS=0
+  fi
+}
+reset_results
+run_personal_mac_mini_updates || fail "Mac mini LAN fallback should complete"
+[[ "${mac_mini_calls[*]}" == \
+  'mac-mini-ts|true mac-mini-lan|true mac-mini-lan|zsh -lic "_goodmorning_sync_dotfiles" mac-mini-lan|zsh -lic "goodMorning --updates-only"' ]] \
+  || fail "Mac mini update lane should try Tailscale before LAN"
+[[ "${RESULT_STATUS[0]}" == WARN && "${RESULT_STATUS[1]}" == PASS ]] \
+  || fail "Mac mini LAN fallback should be a note with a passing update"
+pass "Mac mini goodMorning LAN fallback"
+
+mac_mini_calls=()
+ssh_capture() {
+  local host="$1"
+  local payload="$2"
+  mac_mini_calls[${#mac_mini_calls[@]}]="$host|$payload"
+  LAST_OUTPUT=""
+  if [[ "$payload" == *"goodMorning --updates-only"* ]]; then
+    LAST_STATUS=1
+  else
+    LAST_STATUS=0
+  fi
+}
+reset_results
+if run_personal_mac_mini_updates; then
+  fail "failed Mac mini maintenance should return nonzero"
+fi
+[[ "${mac_mini_calls[*]}" != *mac-mini-lan* ]] \
+  || fail "failed maintenance must not replay through LAN"
+goodmorning_calls="$(printf '%s\n' "${mac_mini_calls[@]}" | /usr/bin/grep -c 'goodMorning --updates-only')"
+[[ "$goodmorning_calls" == 1 ]] || fail "Mac mini maintenance should run exactly once"
+[[ "${RESULT_STATUS[0]}" == FAIL ]] || fail "failed Mac mini maintenance should be reported"
+pass "Mac mini failure is not replayed"
 
 exact_reply OK OK || fail "exact model reply should pass"
 if exact_reply 'OK ' OK; then
@@ -64,6 +128,13 @@ if validate_away_window 2026-02-30 2026-03-01; then
   fail "invalid calendar date should fail"
 fi
 pass "away-window validation"
+
+z_epoch="$(iso8601_to_epoch 2026-08-04T12:34:56.789Z)"
+offset_epoch="$(iso8601_to_epoch 2026-08-04T08:34:56-04:00)"
+[[ "$z_epoch" == "$offset_epoch" ]] || fail "equivalent ISO-8601 offsets should match"
+[[ "$(epoch_to_iso8601 "$z_epoch")" == 2026-08-04T12:34:56+00:00 ]] \
+  || fail "epoch should format as canonical UTC"
+pass "Bash-only ISO-8601 helpers"
 
 canonical_output=$'postgresql@17 started\n127.0.0.1:5432 - accepting connections\n123 /opt/homebrew/var/postgresql@17/postgres'
 classify_postgres_ownership "$canonical_output" || fail "canonical PostgreSQL owner should pass"
