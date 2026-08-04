@@ -287,6 +287,8 @@ if /bin/zsh -dfc "
   ! alias gdiff >/dev/null 2>&1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
+  [[ \"\$(whence -w coda)\" == 'coda: function' ]]
+  [[ \"\$(whence -w carchive)\" == 'carchive: function' ]]
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]

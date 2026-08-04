@@ -135,7 +135,8 @@ hwatch       Watch changes with Hunk
 gpull        Pull the current repository
 gpush        Push the current repository
 cod          Codex CLI
-codr, codrl  Resume a Codex session
+coda          Choose and archive a Codex session
+codr, codrl   Resume a Codex session
 dots         Enter the Mac dotfiles repository
 vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
@@ -223,6 +224,8 @@ The shell is assembled from scoped modules:
 - `config/zsh/shared/` provides portable Git, navigation, SSH, and reload helpers.
 - `config/zsh/shared/codex-aliases.zsh` provides personal Mac and Linux Codex
   shortcuts.
+- `config/zsh/mac/personal/codex-functions.zsh` provides the interactive Codex
+  archive picker on personal Macs.
 - `config/zsh/mac/aliases.zsh` adds safe macOS controls.
 - `config/zsh/mac/personal/aliases.zsh` adds the vault control.
 - `setup/mac-thin/vm.zsh` stays host-specific and owns VMware shortcuts.

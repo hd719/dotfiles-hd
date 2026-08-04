@@ -1,9 +1,6 @@
 # [Personal Mac Development Aliases]
 # --------------------------------------------------------------------------------------------------------
 
-## Codex extras
-alias coda='carchive'
-
 ## SSH
 alias blaze="ssh hamels-macbook-pro-2"
 

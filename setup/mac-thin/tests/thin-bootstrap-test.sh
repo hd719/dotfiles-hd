@@ -240,6 +240,8 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   ! alias gdiff >/dev/null 2>&1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
+  [[ \"\$(whence -w coda)\" == 'coda: function' ]]
+  [[ \"\$(whence -w carchive)\" == 'carchive: function' ]]
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
@@ -299,6 +301,8 @@ grep -Fxq 'cask "codex"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/setup/mac-thin/Brewfile"
 grep -Fxq 'cask "zoom"' "$REPO_DIR/setup/mac-thin/Brewfile"
+grep -Fq 'config/zsh/mac/personal/codex-functions.zsh' \
+  "$REPO_DIR/setup/mac-thin/.zshrc"
 ! grep -Fq 'diff-so-fancy' "$REPO_DIR/setup/mac-thin/Brewfile"
 ! grep -Fq 'zsh-autocomplete' \
   "$REPO_DIR/setup/mac-thin/Brewfile" \
