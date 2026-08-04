@@ -106,7 +106,10 @@ carchive() {
 
     while true; do
       printf "Select a chat number, or q to cancel: "
-      read -r selection
+      if ! read -r selection; then
+        printf '\nCancelled.\n'
+        return 0
+      fi
       [[ "$selection" == [qQ] ]] && return 0
       if [[ "$selection" == <-> ]] \
         && (( selection >= 1 && selection <= ${#session_rows} )); then

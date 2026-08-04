@@ -1191,6 +1191,8 @@ test_shared_zsh_interface() {
   local cache_file="$root/tool-completion.zsh"
   local fake_bin="$root/bin"
   local actual
+  local attempt
+  local coda_pid
   local zsh_file
 
   mkdir -p \
@@ -1316,6 +1318,44 @@ test_shared_zsh_interface() {
   "
   : > "$root/codex.log"
   printf '1\ny\n' | CODEX_LOG="$root/codex.log" \
+    HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      coda
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
+    >/dev/null
+  assert_contains "$root/codex.log" "archive session-new"
+
+  CODEX_LOG="$root/codex.log" \
+    HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      coda
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
+    </dev/null > "$root/codex-eof.log" &
+  coda_pid=$!
+  for attempt in {1..20}; do
+    ! kill -0 "$coda_pid" 2>/dev/null && break
+    sleep 0.1
+  done
+  if kill -0 "$coda_pid" 2>/dev/null; then
+    kill "$coda_pid"
+    wait "$coda_pid" 2>/dev/null || true
+    fail "Codex picker did not exit after stdin closed"
+  fi
+  wait "$coda_pid" || fail "Codex picker failed after stdin closed"
+  assert_contains "$root/codex-eof.log" "Cancelled."
+  assert_not_contains "$root/codex-eof.log" "Invalid selection."
+
+  printf '#!/bin/sh\nIFS= read -r first\nprintf "%%s\\n" "$first"\n' \
+    > "$fake_bin/fzf"
+  chmod +x "$fake_bin/fzf"
+  : > "$root/codex.log"
+  printf 'y\n' | CODEX_LOG="$root/codex.log" \
     HOME="$home_dir" \
     PATH="$fake_bin:/usr/bin:/bin" \
     /bin/zsh -dfc '
