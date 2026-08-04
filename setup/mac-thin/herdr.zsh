@@ -1,6 +1,6 @@
 # Thin-Mac local Herdr lifecycle helpers.
 
-_thin_herdr_clean_stop() {
+_thin_herdr_reset() {
   emulate -L zsh
 
   local workspace_json workspace_ids_text
@@ -9,13 +9,13 @@ _thin_herdr_clean_stop() {
   local -i close_failed=0
 
   if [[ -n "${HERDR_ENV:-}" ]]; then
-    echo "Run 'herdr server stop' from a regular terminal, not inside Herdr." >&2
+    echo "Run 'herdr server reset' from a regular terminal, not inside Herdr." >&2
     return 1
   fi
 
   if ! command herdr api snapshot >/dev/null 2>&1; then
-    echo "Herdr server is already stopped."
-    return 0
+    echo "Herdr server is not running; start it before resetting." >&2
+    return 1
   fi
 
   workspace_json="$(command herdr workspace list)" || return 1
@@ -59,12 +59,12 @@ _thin_herdr_clean_stop() {
   echo "Herdr stopped. The next start will open one fresh home workspace."
 }
 
-# Preserve the normal Herdr CLI, changing only the exact local stop command.
+# Preserve the normal Herdr CLI and add one thin-Mac reset subcommand.
 herdr() {
   emulate -L zsh
 
-  if (( $# == 2 )) && [[ "$1" == server && "$2" == stop ]]; then
-    _thin_herdr_clean_stop
+  if (( $# == 2 )) && [[ "$1" == server && "$2" == reset ]]; then
+    _thin_herdr_reset
     return
   fi
 

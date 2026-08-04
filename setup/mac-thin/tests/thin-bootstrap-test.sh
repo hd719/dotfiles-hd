@@ -277,7 +277,7 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
   [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
   [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
-  [[ \"\$(whence -w _thin_herdr_clean_stop)\" == '_thin_herdr_clean_stop: function' ]]
+  [[ \"\$(whence -w _thin_herdr_reset)\" == '_thin_herdr_reset: function' ]]
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
   ! alias ubuntu >/dev/null 2>&1
@@ -299,7 +299,7 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
 : > "$DOTFILES_TEST_HERDR_LOG"
 /bin/zsh -dfc "
   source '$HOME/.zshrc'
-  herdr server stop
+  herdr server reset
 " >/dev/null
 grep -Fxq 'herdr api snapshot' "$DOTFILES_TEST_HERDR_LOG"
 grep -Fxq 'herdr workspace list' "$DOTFILES_TEST_HERDR_LOG"
@@ -314,7 +314,7 @@ grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
 : > "$DOTFILES_TEST_HERDR_LOG"
 if DOTFILES_TEST_HERDR_FAIL_CLOSE=1 /bin/zsh -dfc "
   source '$HOME/.zshrc'
-  herdr server stop
+  herdr server reset
 " >/dev/null 2>&1; then
   echo 'Herdr clean stop should fail when a workspace cannot close' >&2
   exit 1
@@ -324,13 +324,33 @@ fi
 : > "$DOTFILES_TEST_HERDR_LOG"
 if DOTFILES_TEST_HERDR_BAD_LIST=1 /bin/zsh -dfc "
   source '$HOME/.zshrc'
-  herdr server stop
+  herdr server reset
 " >/dev/null 2>&1; then
   echo 'Herdr clean stop should fail for an invalid workspace list' >&2
   exit 1
 fi
 ! grep -Fq 'workspace create' "$DOTFILES_TEST_HERDR_LOG"
 ! grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
+
+: > "$DOTFILES_TEST_HERDR_LOG"
+if DOTFILES_TEST_HERDR_STOPPED=1 /bin/zsh -dfc "
+  source '$HOME/.zshrc'
+  herdr server reset
+" >/dev/null 2>&1; then
+  echo 'Herdr reset should fail when the server is not running' >&2
+  exit 1
+fi
+! grep -Fq 'workspace create' "$DOTFILES_TEST_HERDR_LOG"
+! grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
+
+: > "$DOTFILES_TEST_HERDR_LOG"
+/bin/zsh -dfc "
+  source '$HOME/.zshrc'
+  herdr server stop
+" >/dev/null
+grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
+! grep -Fxq 'herdr api snapshot' "$DOTFILES_TEST_HERDR_LOG"
+! grep -Fq 'workspace create' "$DOTFILES_TEST_HERDR_LOG"
 
 : > "$DOTFILES_TEST_HERDR_LOG"
 /bin/zsh -dfc "
