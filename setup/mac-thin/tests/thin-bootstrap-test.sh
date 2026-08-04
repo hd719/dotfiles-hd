@@ -73,7 +73,33 @@ EOF
 
 cat > "$TEST_ROOT/bin/herdr" <<'EOF'
 #!/bin/sh
-printf 'herdr %s\n' "$*"
+printf 'herdr %s\n' "$*" >> "$DOTFILES_TEST_HERDR_LOG"
+case "$*" in
+  "api snapshot")
+    if [ "${DOTFILES_TEST_HERDR_STOPPED:-0}" = "1" ]; then
+      exit 1
+    fi
+    printf '{"result":{}}\n'
+    ;;
+  "workspace list")
+    if [ "${DOTFILES_TEST_HERDR_BAD_LIST:-0}" = "1" ]; then
+      printf 'invalid json\n'
+    else
+      printf '%s\n' '{"result":{"workspaces":[{"workspace_id":"old-1"},{"workspace_id":"old-2"}]}}'
+    fi
+    ;;
+  "workspace create --label home --focus")
+    printf '%s\n' '{"result":{"workspace":{"workspace_id":"fresh-home"}}}'
+    ;;
+  "workspace close old-2")
+    [ "${DOTFILES_TEST_HERDR_FAIL_CLOSE:-0}" != "1" ]
+    ;;
+  "workspace close old-1"|"server stop")
+    ;;
+  *)
+    printf 'herdr %s\n' "$*"
+    ;;
+esac
 EOF
 
 cat > "$TEST_ROOT/bin/hunk" <<'EOF'
@@ -188,6 +214,7 @@ export DOTFILES_ALLOW_NONCANONICAL=1
 export DOTFILES_APPLICATIONS_DIR="$TEST_ROOT/apps"
 export DOTFILES_DIR="$REPO_DIR"
 export DOTFILES_TEST_BREW_LOG="$TEST_ROOT/brew.log"
+export DOTFILES_TEST_HERDR_LOG="$TEST_ROOT/herdr.log"
 export DOTFILES_TEST_BIN="$TEST_ROOT/bin"
 export DOTFILES_TEST_ROSETTA_STATE="$TEST_ROOT/rosetta-installed"
 export DOTFILES_TEST_VAGRANT_STUB="$TEST_ROOT/vagrant-stub"
@@ -199,6 +226,7 @@ export DOTFILES_SOFTWAREUPDATE="$TEST_ROOT/bin/softwareupdate"
 export DOTFILES_SUDO="$TEST_ROOT/bin/sudo"
 export HOME="$TEST_ROOT/home"
 export PATH="$TEST_ROOT/bin:/usr/bin:/bin"
+: > "$DOTFILES_TEST_HERDR_LOG"
 
 "$REPO_DIR/setup/mac-thin/bootstrap.sh" --dry-run >/dev/null
 [[ ! -e "$HOME/.zshrc" ]]
@@ -248,6 +276,8 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
   [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
   [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
+  [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
+  [[ \"\$(whence -w _thin_herdr_clean_stop)\" == '_thin_herdr_clean_stop: function' ]]
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
   ! alias ubuntu >/dev/null 2>&1
@@ -265,6 +295,47 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   ! alias hm-dev >/dev/null 2>&1
   ! alias docker-nuke >/dev/null 2>&1
 "
+
+: > "$DOTFILES_TEST_HERDR_LOG"
+/bin/zsh -dfc "
+  source '$HOME/.zshrc'
+  herdr server stop
+" >/dev/null
+grep -Fxq 'herdr api snapshot' "$DOTFILES_TEST_HERDR_LOG"
+grep -Fxq 'herdr workspace list' "$DOTFILES_TEST_HERDR_LOG"
+grep -Fxq 'herdr workspace create --label home --focus' "$DOTFILES_TEST_HERDR_LOG"
+grep -Fxq 'herdr workspace close old-1' "$DOTFILES_TEST_HERDR_LOG"
+grep -Fxq 'herdr workspace close old-2' "$DOTFILES_TEST_HERDR_LOG"
+grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
+! grep -Fq 'workspace close fresh-home' "$DOTFILES_TEST_HERDR_LOG"
+
+: > "$DOTFILES_TEST_HERDR_LOG"
+if DOTFILES_TEST_HERDR_FAIL_CLOSE=1 /bin/zsh -dfc "
+  source '$HOME/.zshrc'
+  herdr server stop
+" >/dev/null 2>&1; then
+  echo 'Herdr clean stop should fail when a workspace cannot close' >&2
+  exit 1
+fi
+! grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
+
+: > "$DOTFILES_TEST_HERDR_LOG"
+if DOTFILES_TEST_HERDR_BAD_LIST=1 /bin/zsh -dfc "
+  source '$HOME/.zshrc'
+  herdr server stop
+" >/dev/null 2>&1; then
+  echo 'Herdr clean stop should fail for an invalid workspace list' >&2
+  exit 1
+fi
+! grep -Fq 'workspace create' "$DOTFILES_TEST_HERDR_LOG"
+! grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
+
+: > "$DOTFILES_TEST_HERDR_LOG"
+/bin/zsh -dfc "
+  source '$HOME/.zshrc'
+  herdr --remote ubuntu-vm
+" >/dev/null
+grep -Fxq 'herdr --remote ubuntu-vm' "$DOTFILES_TEST_HERDR_LOG"
 HOMEBREW_PREFIX="$TEST_ROOT/homebrew" TERM=xterm-256color /bin/zsh -dfic "
   source '$HOME/.zshrc'
   whence -w _zsh_highlight >/dev/null

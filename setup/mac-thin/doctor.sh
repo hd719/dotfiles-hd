@@ -295,6 +295,8 @@ if /bin/zsh -dfc "
   [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
   [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
   [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
+  [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
+  [[ \"\$(whence -w _thin_herdr_clean_stop)\" == '_thin_herdr_clean_stop: function' ]]
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
   ! alias ubuntu >/dev/null 2>&1

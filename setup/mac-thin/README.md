@@ -171,6 +171,10 @@ Finder with `Cmd-C`, or capture directly to the clipboard with
 `Shift-Cmd-Ctrl-4`, then press `Ctrl-V` inside remote Herdr. A dragged Finder
 path remains Mac-local and is not readable inside Ubuntu.
 
+Run `herdr server stop` from a regular thin-Mac terminal to close every local
+Herdr workspace and pane, preserve one fresh `home` workspace, and stop the
+local server. Repositories, worktrees, configuration, and logs are untouched.
+
 The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
 Forgejo. No Git private key is copied from the Mac.
 

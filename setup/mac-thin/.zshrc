@@ -31,6 +31,7 @@ source "$mac_thin_repo/config/zsh/shared/codex-aliases.zsh"
 source "$mac_thin_repo/config/zsh/mac/personal/codex-functions.zsh"
 source "$mac_thin_repo/config/zsh/mac/aliases.zsh"
 source "$mac_thin_repo/config/zsh/mac/personal/aliases.zsh"
+source "$mac_thin_dir/herdr.zsh"
 source "$mac_thin_dir/vm.zsh"
 
 if [[ -o interactive ]]; then
