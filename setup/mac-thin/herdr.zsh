@@ -29,7 +29,7 @@ _thin_herdr_clean_stop() {
   workspace_ids=("${(@f)workspace_ids_text}")
 
   landing_json="$(
-    command herdr workspace create --label home --focus
+    command herdr workspace create --label home --cwd "$HOME" --focus
   )" || return 1
   landing_id="$(
     print -r -- "$landing_json" \

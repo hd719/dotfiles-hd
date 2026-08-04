@@ -88,7 +88,7 @@ case "$*" in
       printf '%s\n' '{"result":{"workspaces":[{"workspace_id":"old-1"},{"workspace_id":"old-2"}]}}'
     fi
     ;;
-  "workspace create --label home --focus")
+  "workspace create --label home --cwd $HOME --focus")
     printf '%s\n' '{"result":{"workspace":{"workspace_id":"fresh-home"}}}'
     ;;
   "workspace close old-2")
@@ -303,7 +303,9 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
 " >/dev/null
 grep -Fxq 'herdr api snapshot' "$DOTFILES_TEST_HERDR_LOG"
 grep -Fxq 'herdr workspace list' "$DOTFILES_TEST_HERDR_LOG"
-grep -Fxq 'herdr workspace create --label home --focus' "$DOTFILES_TEST_HERDR_LOG"
+grep -Fxq \
+  "herdr workspace create --label home --cwd $HOME --focus" \
+  "$DOTFILES_TEST_HERDR_LOG"
 grep -Fxq 'herdr workspace close old-1' "$DOTFILES_TEST_HERDR_LOG"
 grep -Fxq 'herdr workspace close old-2' "$DOTFILES_TEST_HERDR_LOG"
 grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
