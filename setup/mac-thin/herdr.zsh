@@ -1,5 +1,53 @@
 # Thin-Mac local Herdr lifecycle helpers.
 
+_thin_herdr_route_cwd() {
+  emulate -L zsh
+
+  local current_cwd="${PWD:A}"
+  local workspace_label="${${PWD:A}:t}"
+  local snapshot workspace_id
+  local -i attempt
+
+  [[ -n "$workspace_label" ]] || workspace_label=/
+
+  if ! command herdr api snapshot >/dev/null 2>&1; then
+    (command herdr server >/dev/null 2>&1 &)
+    for attempt in {1..50}; do
+      command herdr api snapshot >/dev/null 2>&1 && break
+      sleep 0.1
+    done
+  fi
+
+  snapshot="$(command herdr api snapshot)" || {
+    echo "Herdr server did not become ready." >&2
+    return 1
+  }
+  workspace_id="$(
+    print -r -- "$snapshot" \
+      | /usr/bin/jq -r --arg cwd "$current_cwd" '
+          first(
+            .result.snapshot.panes[]?
+            | select(.cwd == $cwd or .foreground_cwd == $cwd)
+            | .workspace_id
+          ) // empty
+        '
+  )" || {
+    echo "Herdr returned an invalid session snapshot." >&2
+    return 1
+  }
+
+  if [[ -n "$workspace_id" ]]; then
+    command herdr workspace focus "$workspace_id" >/dev/null
+    return
+  fi
+
+  command herdr workspace create \
+    --label "$workspace_label" \
+    --cwd "$current_cwd" \
+    --focus \
+    >/dev/null
+}
+
 _thin_herdr_reset() {
   emulate -L zsh
 
@@ -62,6 +110,12 @@ _thin_herdr_reset() {
 # Preserve the normal Herdr CLI and add one thin-Mac reset subcommand.
 herdr() {
   emulate -L zsh
+
+  if (( $# == 0 )) && [[ -z "${HERDR_ENV:-}" ]]; then
+    _thin_herdr_route_cwd || return 1
+    command herdr
+    return
+  fi
 
   if (( $# == 2 )) && [[ "$1" == server && "$2" == reset ]]; then
     _thin_herdr_reset

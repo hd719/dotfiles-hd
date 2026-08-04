@@ -79,7 +79,12 @@ case "$*" in
     if [ "${DOTFILES_TEST_HERDR_STOPPED:-0}" = "1" ]; then
       exit 1
     fi
-    printf '{"result":{}}\n'
+    if [ -n "${DOTFILES_TEST_HERDR_EXISTING_CWD:-}" ]; then
+      printf '%s\n' \
+        "{\"result\":{\"snapshot\":{\"panes\":[{\"workspace_id\":\"existing-workspace\",\"cwd\":\"$DOTFILES_TEST_HERDR_EXISTING_CWD\"}]}}}"
+    else
+      printf '{"result":{"snapshot":{"panes":[]}}}\n'
+    fi
     ;;
   "workspace list")
     if [ "${DOTFILES_TEST_HERDR_BAD_LIST:-0}" = "1" ]; then
@@ -94,7 +99,7 @@ case "$*" in
   "workspace close old-2")
     [ "${DOTFILES_TEST_HERDR_FAIL_CLOSE:-0}" != "1" ]
     ;;
-  "workspace close old-1"|"server stop")
+  "workspace close old-1"|"workspace focus existing-workspace"|"server stop")
     ;;
   *)
     printf 'herdr %s\n' "$*"
@@ -277,6 +282,7 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
   [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
   [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
+  [[ \"\$(whence -w _thin_herdr_route_cwd)\" == '_thin_herdr_route_cwd: function' ]]
   [[ \"\$(whence -w _thin_herdr_reset)\" == '_thin_herdr_reset: function' ]]
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
@@ -358,6 +364,32 @@ grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
   herdr --remote ubuntu-vm
 " >/dev/null
 grep -Fxq 'herdr --remote ubuntu-vm' "$DOTFILES_TEST_HERDR_LOG"
+
+mkdir -p "$HOME/Developer/project"
+PROJECT_CWD="$(cd "$HOME/Developer/project" && pwd -P)"
+: > "$DOTFILES_TEST_HERDR_LOG"
+(
+  cd "$PROJECT_CWD"
+  /bin/zsh -dfc "
+    source '$HOME/.zshrc'
+    herdr
+  "
+) >/dev/null
+grep -Fxq \
+  "herdr workspace create --label project --cwd $PROJECT_CWD --focus" \
+  "$DOTFILES_TEST_HERDR_LOG"
+
+: > "$DOTFILES_TEST_HERDR_LOG"
+(
+  cd "$PROJECT_CWD"
+  DOTFILES_TEST_HERDR_EXISTING_CWD="$PROJECT_CWD" \
+    /bin/zsh -dfc "
+      source '$HOME/.zshrc'
+      herdr
+    "
+) >/dev/null
+grep -Fxq 'herdr workspace focus existing-workspace' "$DOTFILES_TEST_HERDR_LOG"
+! grep -Fq 'workspace create' "$DOTFILES_TEST_HERDR_LOG"
 HOMEBREW_PREFIX="$TEST_ROOT/homebrew" TERM=xterm-256color /bin/zsh -dfic "
   source '$HOME/.zshrc'
   whence -w _zsh_highlight >/dev/null
