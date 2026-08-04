@@ -130,6 +130,17 @@ add_result WARN thin-mac "Thin-Mac disk" "review soon" "Inspect storage"
 personal_is_ready || fail "an ordinary personal note should stay nonblocking"
 pass "personal readiness exit contract"
 
+reset_results
+add_result PASS thin-mac "Thin Mac" "ready" "None"
+add_result PASS ubuntu-vm "Ubuntu VM" "ready" "None"
+add_result PASS mac-mini "Mac mini" "ready" "None"
+write_personal_report >/dev/null
+personal_report="$(find "$TEST_REPORT_ROOT" -type f -name 'personal-readiness-*-manual.md' -print -quit)"
+[[ -n "$personal_report" ]] || fail "personal readiness report was not created"
+grep -Fq -- '- Invocation: Canonical personal-ready runner' "$personal_report" \
+  || fail "canonical personal-ready invocation marker missing"
+pass "canonical personal readiness report"
+
 exact_reply OK OK || fail "exact model reply should pass"
 if exact_reply 'OK ' OK; then
   fail "model reply with extra text should fail"

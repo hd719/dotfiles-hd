@@ -199,6 +199,8 @@ and runs the cooldown-protected Downloads and `.DS_Store` cleanup. It selects
 Tailscale or LAN before updating and never replays a failed maintenance command.
 Cortana updates may restart only affected Cortana services through the repo-owned
 `runtime:post-merge`; broad restarts and Hermes upgrades remain excluded.
+The `personal-mac-ops` skill uses this same command as its canonical Default
+Readiness runner, so agent and direct CLI runs share one implementation.
 
 Run the focused offline test after changing the fallback:
 

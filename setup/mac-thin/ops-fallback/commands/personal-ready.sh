@@ -12,7 +12,7 @@ write_personal_report() {
   {
     printf '# Personal Readiness - %s\n\n' "$report_date"
     printf '## Summary\n\n'
-    printf -- '- Invocation: Manual fallback CLI\n'
+    printf -- '- Invocation: Canonical personal-ready runner\n'
     printf -- '- Thin Mac: %s\n' "$thin_verdict"
     printf -- '- Ubuntu development VM: %s\n' "$ubuntu_verdict"
     printf -- '- Mac mini: %s\n' "$mac_mini_verdict"
