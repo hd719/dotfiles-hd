@@ -59,16 +59,25 @@ if [[ -n "${HD_DRY_RUN:-}" ]]; then
     "$RESET_SCRIPT" --allow-inside-herdr --dry-run
 else
   teardown_log="${TMPDIR:-/tmp}/hd-stop-$$.log"
+  reset_label="com.hd.herdr-reset.$$"
+  # Run the reset as a launchd job so it survives closing the workspace that
+  # launched hd-stop. `launchctl submit` always sets KeepAlive, which would
+  # otherwise respawn reset-server.sh forever and repeatedly kill any freshly
+  # started server. To keep it strictly one-shot, the job removes its own
+  # launchd label after the reset finishes (runs even if the reset fails).
   launchctl submit \
-    -l "com.hd.herdr-reset.$$" \
+    -l "$reset_label" \
     -o "$teardown_log" \
     -e "$teardown_log" \
-    -- /usr/bin/env \
-      "HOME=$HOME" \
-      "HERDR_BIN=$HERDR_BIN" \
-      "JQ_BIN=$JQ_BIN" \
+    -- /bin/sh -c '
+      HOME="$1" HERDR_BIN="$2" JQ_BIN="$3" "$4" --allow-inside-herdr
+      launchctl remove "$5"
+    ' hd-herdr-reset \
+      "$HOME" \
+      "$HERDR_BIN" \
+      "$JQ_BIN" \
       "$RESET_SCRIPT" \
-      --allow-inside-herdr
+      "$reset_label"
   echo "Herdr reset started; details: $teardown_log"
 fi
 

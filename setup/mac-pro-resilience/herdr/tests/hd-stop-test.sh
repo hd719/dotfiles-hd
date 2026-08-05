@@ -40,9 +40,14 @@ cat > "$BIN_DIR/launchctl" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 printf 'launchctl %s\n' "$*" >> "$HD_STOP_TEST_LOG"
-while [[ "$1" != -- ]]; do shift; done
-shift
-"$@"
+# Only `submit` carries a `-- <program> ...` payload to execute. Every other
+# subcommand (e.g. the job's self-removal via `remove`) is a logged no-op so the
+# reset job stays strictly one-shot in the test just like in production.
+if [[ "${1:-}" == submit ]]; then
+  while [[ $# -gt 0 && "$1" != -- ]]; do shift; done
+  [[ $# -gt 0 ]] && shift
+  "$@"
+fi
 EOF
 
 cat > "$BIN_DIR/lsof" <<'EOF'
@@ -65,6 +70,9 @@ grep -Fxq 'herdr workspace create --label home --cwd '"$HOME_DIR"' --focus' "$LO
 grep -Fxq 'herdr workspace close w1' "$LOG_FILE"
 grep -Fxq 'herdr workspace close w2' "$LOG_FILE"
 grep -Fxq 'herdr server stop' "$LOG_FILE"
+# The reset job must remove its own launchd label so KeepAlive cannot respawn it
+# (regression guard for the runaway-reset shutdown bug).
+grep -Fq 'launchctl remove com.hd.herdr-reset.' "$LOG_FILE"
 
 : > "$LOG_FILE"
 HOME="$HOME_DIR" \
