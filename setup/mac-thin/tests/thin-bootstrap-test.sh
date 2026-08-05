@@ -86,20 +86,7 @@ case "$*" in
       printf '{"result":{"snapshot":{"panes":[]}}}\n'
     fi
     ;;
-  "workspace list")
-    if [ "${DOTFILES_TEST_HERDR_BAD_LIST:-0}" = "1" ]; then
-      printf 'invalid json\n'
-    else
-      printf '%s\n' '{"result":{"workspaces":[{"workspace_id":"old-1"},{"workspace_id":"old-2"}]}}'
-    fi
-    ;;
-  "workspace create --label home --cwd $HOME --focus")
-    printf '%s\n' '{"result":{"workspace":{"workspace_id":"fresh-home"}}}'
-    ;;
-  "workspace close old-2")
-    [ "${DOTFILES_TEST_HERDR_FAIL_CLOSE:-0}" != "1" ]
-    ;;
-  "workspace close old-1"|"workspace focus existing-workspace"|"server stop")
+  "workspace focus existing-workspace"|"server stop")
     ;;
   *)
     printf 'herdr %s\n' "$*"
@@ -283,7 +270,8 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
   [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
   [[ \"\$(whence -w _dotfiles_herdr_route_cwd)\" == '_dotfiles_herdr_route_cwd: function' ]]
-  [[ \"\$(whence -w _dotfiles_herdr_reset)\" == '_dotfiles_herdr_reset: function' ]]
+  [[ \"\$(whence -w _dotfiles_herdr_reset)\" != '_dotfiles_herdr_reset: function' ]]
+  (( _dotfiles_herdr_reset_enabled == 0 ))
   (( _dotfiles_herdr_route_plain == 1 ))
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
@@ -308,57 +296,9 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   source '$HOME/.zshrc'
   herdr server reset
 " >/dev/null
-grep -Fxq 'herdr api snapshot' "$DOTFILES_TEST_HERDR_LOG"
-grep -Fxq 'herdr workspace list' "$DOTFILES_TEST_HERDR_LOG"
-grep -Fxq \
-  "herdr workspace create --label home --cwd $HOME --focus" \
-  "$DOTFILES_TEST_HERDR_LOG"
-grep -Fxq 'herdr workspace close old-1' "$DOTFILES_TEST_HERDR_LOG"
-grep -Fxq 'herdr workspace close old-2' "$DOTFILES_TEST_HERDR_LOG"
-grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
-! grep -Fq 'workspace close fresh-home' "$DOTFILES_TEST_HERDR_LOG"
-
-: > "$DOTFILES_TEST_HERDR_LOG"
-if HERDR_ENV=inside /bin/zsh -dfc "
-  source '$HOME/.zshrc'
-  herdr server reset
-" >/dev/null 2>&1; then
-  echo 'Herdr reset should reject calls from inside Herdr' >&2
-  exit 1
-fi
-! grep -Fq 'herdr ' "$DOTFILES_TEST_HERDR_LOG"
-
-: > "$DOTFILES_TEST_HERDR_LOG"
-if DOTFILES_TEST_HERDR_FAIL_CLOSE=1 /bin/zsh -dfc "
-  source '$HOME/.zshrc'
-  herdr server reset
-" >/dev/null 2>&1; then
-  echo 'Herdr clean stop should fail when a workspace cannot close' >&2
-  exit 1
-fi
-! grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
-
-: > "$DOTFILES_TEST_HERDR_LOG"
-if DOTFILES_TEST_HERDR_BAD_LIST=1 /bin/zsh -dfc "
-  source '$HOME/.zshrc'
-  herdr server reset
-" >/dev/null 2>&1; then
-  echo 'Herdr clean stop should fail for an invalid workspace list' >&2
-  exit 1
-fi
+grep -Fxq 'herdr server reset' "$DOTFILES_TEST_HERDR_LOG"
+! grep -Fxq 'herdr api snapshot' "$DOTFILES_TEST_HERDR_LOG"
 ! grep -Fq 'workspace create' "$DOTFILES_TEST_HERDR_LOG"
-! grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
-
-: > "$DOTFILES_TEST_HERDR_LOG"
-if DOTFILES_TEST_HERDR_STOPPED=1 /bin/zsh -dfc "
-  source '$HOME/.zshrc'
-  herdr server reset
-" >/dev/null 2>&1; then
-  echo 'Herdr reset should fail when the server is not running' >&2
-  exit 1
-fi
-! grep -Fq 'workspace create' "$DOTFILES_TEST_HERDR_LOG"
-! grep -Fxq 'herdr server stop' "$DOTFILES_TEST_HERDR_LOG"
 
 : > "$DOTFILES_TEST_HERDR_LOG"
 /bin/zsh -dfc "
