@@ -1244,6 +1244,8 @@ test_shared_zsh_interface() {
   assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/shared/herdr.zsh'
+  assert_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/shared/herdr.zsh'
+  assert_contains "$REPO_DIR/setup/mac-pro-resilience/Brewfile" 'brew "jq"'
   assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Mac mini shared Herdr reset'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'export DOTFILES_MAC_PROFILE="mac-mini"'
   assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal/'
@@ -1416,6 +1418,9 @@ test_shared_zsh_interface() {
       alias vault >/dev/null 2>&1 && exit 1
       alias opdash >/dev/null 2>&1 && exit 1
       alias hm-dev >/dev/null 2>&1 && exit 1
+      (( $+functions[herdr] )) || exit 1
+      (( $+functions[_dotfiles_herdr_route_cwd] )) || exit 1
+      (( _dotfiles_herdr_route_plain == 1 )) || exit 1
       print -r -- resilience-ok
     ' zsh "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 2>/dev/null
   )"
