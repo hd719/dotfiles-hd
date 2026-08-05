@@ -70,8 +70,12 @@ else
     -o "$teardown_log" \
     -e "$teardown_log" \
     -- /bin/sh -c '
+      reset_label="$5"
+      remove_reset_job() {
+        launchctl remove "$reset_label" >/dev/null 2>&1 || true
+      }
+      trap remove_reset_job EXIT HUP INT TERM
       HOME="$1" HERDR_BIN="$2" JQ_BIN="$3" "$4" --allow-inside-herdr
-      launchctl remove "$5"
     ' hd-herdr-reset \
       "$HOME" \
       "$HERDR_BIN" \

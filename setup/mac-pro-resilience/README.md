@@ -214,9 +214,10 @@ Plain `herdr` focuses an existing workspace for the current directory or creates
 one there. Herdr subcommands keep their native behavior.
 
 `hd-stop` frees the documented development ports, then runs the shared Herdr
-server reset from a detached launchd job. It leaves Docker running and preserves
-one fresh `home` workspace for the next Herdr start. Use `HD_DRY_RUN=1 hd-stop`
-to preview it.
+server reset from a detached launchd job. The job unregisters itself after one
+attempt so launchd cannot keep stopping later Herdr sessions. It leaves Docker
+running and preserves one fresh `home` workspace for the next Herdr start. Use
+`HD_DRY_RUN=1 hd-stop` to preview it.
 
 In exactly one fresh Ghostty window, confirm:
 
