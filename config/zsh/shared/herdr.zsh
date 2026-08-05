@@ -1,4 +1,4 @@
-# Portable Herdr lifecycle wrapper for personal hosts.
+# Portable Herdr lifecycle wrapper for supported hosts.
 
 typeset -g _dotfiles_herdr_module="${${(%):-%N}:A}"
 typeset -g _dotfiles_herdr_reset_script="${_dotfiles_herdr_module:h:h:h}/herdr/reset-server.sh"
@@ -67,8 +67,8 @@ _dotfiles_herdr_reset() {
 herdr() {
   emulate -L zsh
 
-  # Current-directory routing is enabled only by the thin-Mac shim. Other hosts
-  # preserve native plain-Herdr behavior and receive only the reset subcommand.
+  # Current-directory routing is enabled only by profile-specific opt-in.
+  # Other hosts preserve native plain-Herdr behavior and receive only reset.
   if (( $# == 0 && _dotfiles_herdr_route_plain == 1 )) \
     && [[ -z "${HERDR_ENV:-}" ]]; then
     _dotfiles_herdr_route_cwd || return 1

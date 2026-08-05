@@ -7,6 +7,11 @@
 # -----------------------------------------------------------------------------
 source "$HOME/Developer/dotfiles-hd/config/zsh/mac/init.zsh"
 
+# Keep work-machine ownership while opting into the shared Herdr behavior.
+typeset -g DOTFILES_HERDR_ROUTE_CWD=1
+source "$HOME/Developer/dotfiles-hd/config/zsh/shared/herdr.zsh"
+unset DOTFILES_HERDR_ROUTE_CWD
+
 # Work-owned shortcut so this profile can stay independent of shared aliases.
 alias v='nvim'
 

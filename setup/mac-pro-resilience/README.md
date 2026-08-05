@@ -17,9 +17,10 @@ Keep the work `~/.zshrc`, `config/mise`, Git identity, credentials,
 certificates, Docker state, Karabiner, and company-managed applications
 machine-owned. Never use the personal Mac bootstrap or Mac mini Brewfile here.
 
-`setup/mac-pro-resilience/.zshrc` loads the full Mac development interface and
-work-specific behavior, but not `config/zsh/mac/personal/init.zsh`. This runbook
-repairs an existing work shell; it never replaces or links `~/.zshrc`.
+`setup/mac-pro-resilience/.zshrc` loads the full Mac development interface,
+shared Herdr current-directory routing, and work-specific behavior, but not
+`config/zsh/mac/personal/init.zsh`. This runbook repairs an existing work shell;
+it never replaces or links `~/.zshrc`.
 
 ## 1. Preflight
 
@@ -135,7 +136,7 @@ Verify the existing login shell already loads the current profile:
 
 ```bash
 zsh -lic \
-  'alias hwatch && alias hdiff && alias hstaged && alias hshow && whence -w goodMorning _resilience_update_repo _resilience_brew_cooldown_seconds'
+  'alias hwatch && alias hdiff && alias hstaged && alias hshow && whence -w herdr _dotfiles_herdr_route_cwd goodMorning _resilience_update_repo _resilience_brew_cooldown_seconds'
 ```
 
 If an alias or Resilience function is missing, report the stale shell instead
@@ -168,7 +169,7 @@ Never reset local changes or repeatedly retry a failed stage.
     --file="$HOME/Developer/dotfiles-hd/setup/mac-pro-resilience/Brewfile"
 
   for cmd in \
-    bash-language-server bookokrat fd fzf gopls herdr hunk lazygit \
+    bash-language-server bookokrat fd fzf gopls herdr hunk jq lazygit \
     lua-language-server magick marksman nvim rg stylua tree-sitter uv \
     vscode-eslint-language-server vscode-json-language-server vtsls \
     mdformat ruff
@@ -208,6 +209,9 @@ If Herdr is already running:
 herdr server reload-config
 herdr status
 ```
+
+Plain `herdr` focuses an existing workspace for the current directory or creates
+one there. Herdr subcommands keep their native behavior.
 
 `hd-stop` frees the documented development ports, then runs the shared Herdr
 server reset from a detached launchd job. It leaves Docker running and preserves
