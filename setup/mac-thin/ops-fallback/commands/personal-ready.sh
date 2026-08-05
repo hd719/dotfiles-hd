@@ -1,6 +1,22 @@
 # Personal readiness owns the thin Mac, Ubuntu VM, and the guarded Mac mini
 # goodMorning lane. It does not run general home-lab recovery or maintenance.
 
+ubuntu_update_failure_evidence() {
+  local output="$1"
+
+  printf '%s\n' "$output" | /usr/bin/awk '
+    /^Neovim setup failed during:/ { neovim = $0 }
+    /^Ubuntu update failed during:/ { ubuntu = $0 }
+    NF { fallback = $0 }
+    END {
+      if (neovim != "") print neovim
+      else if (ubuntu != "") print ubuntu
+      else if (fallback != "") print fallback
+      else print "supported updater failed with no output"
+    }
+  '
+}
+
 write_personal_report() {
   local report_date report thin_verdict ubuntu_verdict mac_mini_verdict
   report_date="$(/bin/date +%F)"
@@ -206,9 +222,14 @@ run_personal_ready() {
   fi
 
   ssh_capture "$vm_host" 'cd /home/hamel/Developer/dotfiles-hd && bash setup/ubuntu/update-system.sh'
-  record_command_result PASS FAIL ubuntu-vm "Ubuntu updater" \
-    "supported updater completed" "supported updater failed" \
-    "Verify narrow unattended sudo and rerun setup/ubuntu/update-system.sh"
+  if ((LAST_STATUS == 0)); then
+    add_result PASS ubuntu-vm "Ubuntu updater" \
+      "supported updater completed" "None"
+  else
+    add_result FAIL ubuntu-vm "Ubuntu updater" \
+      "$(ubuntu_update_failure_evidence "$LAST_OUTPUT")" \
+      "Review the named stage, then rerun setup/ubuntu/update-system.sh"
+  fi
 
   ssh_capture "$vm_host" 'cd /home/hamel/Developer/dotfiles-hd && bash setup/ubuntu/doctor.sh'
   record_command_result PASS FAIL ubuntu-vm "Ubuntu doctor" \

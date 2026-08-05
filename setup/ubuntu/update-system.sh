@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
+
+UPDATE_STAGE="initialization"
+
+report_update_failure() {
+  local status=$?
+
+  trap - ERR
+  printf '\nUbuntu update failed during: %s (exit %d).\n' \
+    "$UPDATE_STAGE" "$status" >&2
+  exit "$status"
+}
+
+trap report_update_failure ERR
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
@@ -97,6 +110,7 @@ main() {
     esac
   fi
 
+  UPDATE_STAGE="Ubuntu environment validation"
   require_ubuntu
 
   log "Syncing hd719 dotfiles"
@@ -107,18 +121,24 @@ main() {
   fi
 
   log "Updating Ubuntu packages"
+  UPDATE_STAGE="APT package index update"
   sudo -n /usr/bin/env DEBIAN_FRONTEND=noninteractive \
     /usr/bin/apt-get update
+  UPDATE_STAGE="APT full upgrade"
   sudo -n /usr/bin/env DEBIAN_FRONTEND=noninteractive \
     /usr/bin/apt-get full-upgrade -y
+  UPDATE_STAGE="APT autoremove"
   sudo -n /usr/bin/env DEBIAN_FRONTEND=noninteractive \
     /usr/bin/apt-get autoremove -y
+  UPDATE_STAGE="APT autoclean"
   sudo -n /usr/bin/apt-get autoclean
 
   log "Refreshing workstation-managed mise and Neovim dependencies"
+  UPDATE_STAGE="mise and Neovim dependency refresh"
   bash "$NEOVIM_SETUP_SCRIPT"
 
   log "Refreshing remote workstation clients"
+  UPDATE_STAGE="remote Herdr client refresh"
   refresh_remote_clients
 
   printf '\nUbuntu update complete.\n'

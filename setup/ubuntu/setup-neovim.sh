@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
+
+NEOVIM_STAGE="initialization"
+
+report_neovim_failure() {
+  local status=$?
+
+  trap - ERR
+  printf '\nNeovim setup failed during: %s (exit %d).\n' \
+    "$NEOVIM_STAGE" "$status" >&2
+  exit "$status"
+}
+
+trap report_neovim_failure ERR
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
@@ -95,6 +108,7 @@ install_mise() {
     # Only ask mise to update itself after it proves that it can start.
     if "$MISE_BIN" version >/dev/null 2>&1; then
       log "Updating mise"
+      NEOVIM_STAGE="mise self-update"
       "$MISE_BIN" self-update -y
       return
     fi
@@ -104,9 +118,11 @@ install_mise() {
     log "Installing mise"
   fi
 
+  NEOVIM_STAGE="mise installation or repair"
   mkdir -p "$(dirname "$MISE_BIN")"
   curl -fsSL https://mise.run |
     MISE_INSTALL_PATH="$MISE_BIN" MISE_INSTALL_HELP=0 sh
+  NEOVIM_STAGE="mise installation verification"
   [[ -x "$MISE_BIN" ]] || {
     printf 'mise was not installed at %s.\n' "$MISE_BIN" >&2
     exit 1
@@ -115,6 +131,7 @@ install_mise() {
 
 link_configs() {
   log "Linking mise and Neovim configuration"
+  NEOVIM_STAGE="mise and Neovim configuration links"
   ensure_directory "$HOME/.config/mise"
   safe_link "$MISE_SOURCE" "$MISE_TARGET"
   safe_link "$NVIM_SOURCE" "$NVIM_TARGET"
@@ -123,17 +140,23 @@ link_configs() {
 
 install_tools() {
   log "Installing pinned runtimes"
+  NEOVIM_STAGE="mise configuration trust"
   "$MISE_BIN" trust "$MISE_TARGET"
+  NEOVIM_STAGE="pinned runtime installation"
   "$MISE_BIN" install node@24.18.0 go@1.26.5 python@3.14.6 bun@1.3.14
 
   log "Installing configured editor tools"
+  NEOVIM_STAGE="configured editor tool installation"
   "$MISE_BIN" install
 
   log "Updating unpinned tools"
+  NEOVIM_STAGE="unpinned mise tool upgrade"
   "$MISE_BIN" upgrade --minimum-release-age 0s
+  NEOVIM_STAGE="mise reshim"
   "$MISE_BIN" reshim
 
   log "Installing pinned Markdown formatter"
+  NEOVIM_STAGE="pinned Markdown formatter installation"
   "$MISE_BIN" exec -- uv tool install --force \
     'mdformat==1.0.0' \
     --with 'mdformat-gfm==1.0.0' \
@@ -145,6 +168,7 @@ install_tools() {
 
 restore_plugins() {
   log "Restoring locked Neovim plugins"
+  NEOVIM_STAGE="locked Neovim plugin restore"
   DOTFILES_NVIM_RESTORE_ALL=1 \
     "$MISE_BIN" exec -- nvim --headless "+Lazy! restore" +qa
 }
@@ -159,6 +183,7 @@ locked_plugin_commit() {
 pin_lazy_manager() {
   local lazy_commit lazy_dir nvim_data
 
+  NEOVIM_STAGE="lazy.nvim manager pin"
   lazy_commit="$(locked_plugin_commit lazy.nvim)"
   [[ -n "$lazy_commit" ]] || {
     printf 'The Neovim lockfile has no lazy.nvim commit.\n' >&2
@@ -197,6 +222,7 @@ install_tree_sitter_parsers() {
   done
 
   log "Installing Tree-sitter parsers"
+  NEOVIM_STAGE="Tree-sitter parser installation"
   "$MISE_BIN" exec -- nvim --headless \
     "+lua local parsers = { $lua_languages }; assert(require('nvim-treesitter').install(parsers):wait(), 'Tree-sitter parser installation failed')" \
     +qa
@@ -431,6 +457,7 @@ main() {
   export PATH="$HOME/.local/bin:$PATH"
 
   if [[ "$mode" == "check" ]]; then
+    NEOVIM_STAGE="Neovim daily-driver validation"
     check_daily_driver
     return
   fi
@@ -441,6 +468,7 @@ main() {
   pin_lazy_manager
   restore_plugins
   install_tree_sitter_parsers
+  NEOVIM_STAGE="Neovim daily-driver validation"
   check_daily_driver
 }
 
