@@ -245,6 +245,8 @@ The updater accepts only the SSH dotfiles origin, pulls `master` with
 runtimes, upgrades every unpinned mise tool, restores locked Neovim plugins,
 and updates `~/.local/bin/herdr` for the remote Mac client. Project manifests
 and lockfiles are intentionally excluded.
+On failure, the updater prints a stable stage and exit code. Nested mise and
+Neovim failures identify their more precise stage as well.
 Provisioning installs a scoped sudo rule for only the updater's exact APT
 commands. Every other `sudo` command still requires authentication.
 If it reports that a reboot is required, leave the SSH session and use

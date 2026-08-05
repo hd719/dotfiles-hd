@@ -59,6 +59,9 @@ printf '%s\n' "$personal_ready_body" \
 printf '%s\n' "$personal_ready_body" \
   | /usr/bin/grep -Fq 'personal_is_ready' \
   || fail "personal readiness must return its aggregate readiness status"
+printf '%s\n' "$personal_ready_body" \
+  | /usr/bin/grep -Fq 'ubuntu_update_failure_evidence "$LAST_OUTPUT"' \
+  || fail "personal readiness must preserve Ubuntu updater failure evidence"
 mac_mini_update_body="$(
   /usr/bin/awk '/^run_personal_mac_mini_updates\(\)/,/^}/' \
     "$REPO_ROOT/setup/mac-thin/ops-fallback/commands/personal-ready.sh"
@@ -112,6 +115,13 @@ goodmorning_calls="$(printf '%s\n' "${mac_mini_calls[@]}" | /usr/bin/grep -c 'zs
 [[ "$goodmorning_calls" == 1 ]] || fail "Mac mini maintenance should run exactly once"
 [[ "${RESULT_STATUS[0]}" == FAIL ]] || fail "failed Mac mini maintenance should be reported"
 pass "Mac mini failure is not replayed"
+
+ubuntu_failure="$(ubuntu_update_failure_evidence $'mise download failed\nNeovim setup failed during: mise self-update (exit 73).\nUbuntu update failed during: mise and Neovim dependency refresh (exit 73).')"
+[[ "$ubuntu_failure" == 'Neovim setup failed during: mise self-update (exit 73).' ]] \
+  || fail "Ubuntu updater evidence did not preserve the precise nested stage"
+[[ "$(ubuntu_update_failure_evidence "")" == 'supported updater failed with no output' ]] \
+  || fail "Ubuntu updater evidence should handle empty SSH output"
+pass "Ubuntu updater failure evidence"
 
 reset_results
 add_result PASS thin-mac "Thin Mac" "ready" "None"

@@ -785,6 +785,9 @@ test_neovim_setup_installs_and_checks_daily_driver() {
   cat > "$case_dir/bin/mise" <<EOF
 #!/usr/bin/env bash
 printf 'mise %s\n' "\$*" >> "$case_dir/commands.log"
+if [[ "\$*" == "self-update -y" && "\${FAIL_MISE_SELF_UPDATE:-0}" == "1" ]]; then
+  exit 73
+fi
 if [[ "\${1:-}" == "exec" ]]; then
   shift
   [[ "\${1:-}" == "--" ]] && shift
@@ -914,6 +917,20 @@ EOF
   assert_file_contains "$case_dir/commands.log" "nvim --headless +Lazy! restore +qa"
   assert_file_contains "$case_dir/commands.log" "restore-all=1"
   [[ -f "$case_dir/parsers-complete" ]] || fail "fresh Neovim setup returned before Tree-sitter parsers completed"
+
+  set +e
+  output="$({
+    HOME="$case_dir/home" \
+      PATH="$case_dir/bin:/usr/bin:/bin" \
+      FAIL_MISE_SELF_UPDATE=1 \
+      DOTFILES_MISE_BIN="$case_dir/bin/mise" \
+      bash "$NEOVIM_SCRIPT"
+  } 2>&1)"
+  status=$?
+  set -e
+
+  [[ "$status" == 73 ]] || fail "Neovim setup did not preserve the mise failure status"
+  assert_contains "$output" "Neovim setup failed during: mise self-update (exit 73)."
 
   : > "$case_dir/commands.log"
   rm -f "$case_dir/config-loaded"
@@ -1075,6 +1092,8 @@ EOF
 
   ((status != 0)) || fail "Neovim setup ignored a failed fresh mise installation"
   assert_contains "$output" "mise was not installed"
+  assert_contains "$output" \
+    "Neovim setup failed during: mise installation verification (exit 1)."
   [[ ! -e "$failed_home/.config/nvim" ]] || fail "failed mise installation continued to Neovim linking"
 }
 
@@ -1100,6 +1119,9 @@ EOF
   cat > "$case_dir/bin/sudo" <<EOF
 #!/usr/bin/env bash
 printf 'sudo %s\n' "\$*" >> "$case_dir/commands.log"
+if [[ "\${FAIL_APT_FULL_UPGRADE:-0}" == "1" && "\$*" == *"full-upgrade -y"* ]]; then
+  exit 42
+fi
 EOF
   cat > "$case_dir/bin/mise" <<EOF
 #!/usr/bin/env bash
@@ -1147,6 +1169,48 @@ EOF
     || fail "updater did not refresh the remote Herdr client"
   self_update_count="$(grep -Fxc "mise self-update -y" "$case_dir/commands.log")"
   [[ "$self_update_count" == "1" ]] || fail "updater refreshed mise $self_update_count times instead of once"
+
+  : > "$case_dir/commands.log"
+  set +e
+  output="$({
+    HOME="$case_dir/home" \
+      PATH="$case_dir/bin:/usr/bin:/bin" \
+      FAIL_APT_FULL_UPGRADE=1 \
+      DOTFILES_DIR="$case_dir/dotfiles" \
+      DOTFILES_OS_RELEASE_FILE="$case_dir/os-release" \
+      DOTFILES_MISE_BIN="$case_dir/bin/mise" \
+      DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/fake-neovim-setup.sh" \
+      bash "$UPDATE_SCRIPT"
+  } 2>&1)"
+  status=$?
+  set -e
+
+  [[ "$status" == 42 ]] || fail "updater did not preserve the APT failure status"
+  assert_contains "$output" "Ubuntu update failed during: APT full upgrade (exit 42)."
+  if grep -Fq "neovim" "$case_dir/commands.log"; then
+    fail "updater continued after the failed APT stage"
+  fi
+
+  : > "$case_dir/commands.log"
+  printf 'ID=debian\nVERSION_ID=13\n' > "$case_dir/os-release"
+  set +e
+  output="$({
+    HOME="$case_dir/home" \
+      PATH="$case_dir/bin:/usr/bin:/bin" \
+      DOTFILES_DIR="$case_dir/dotfiles" \
+      DOTFILES_OS_RELEASE_FILE="$case_dir/os-release" \
+      DOTFILES_MISE_BIN="$case_dir/bin/mise" \
+      DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/fake-neovim-setup.sh" \
+      bash "$UPDATE_SCRIPT"
+  } 2>&1)"
+  status=$?
+  set -e
+
+  [[ "$status" == 1 ]] || fail "updater did not reject an unsupported OS"
+  assert_contains "$output" \
+    "Ubuntu update failed during: Ubuntu environment validation (exit 1)."
+  [[ ! -s "$case_dir/commands.log" ]] \
+    || fail "unsupported OS validation continued into maintenance"
 
   for forbidden in snap flatpak rustup 'pnpm update' 'uv self update' npm npx; do
     if grep -Fq -- "$forbidden" "$UPDATE_SCRIPT"; then
