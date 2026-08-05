@@ -46,7 +46,9 @@ fi
 
 # Tab 1: Platform Backend (required dependency).
 # Check if Docker containers are actually running (not just a stale workspace).
-BACKEND_RUNNING=$(docker ps --filter "name=rsw-" --format "{{.Names}}" 2>/dev/null | wc -l | tr -d ' ')
+# A stopped Docker daemon exits nonzero; under pipefail that must not abort setup.
+BACKEND_RUNNING=$(docker ps --filter "name=rsw-" --format "{{.Names}}" 2>/dev/null | wc -l | tr -d ' ' || true)
+BACKEND_RUNNING="${BACKEND_RUNNING:-0}"
 BACKEND_STARTED=0
 hd_rename_tab "$TAB1" plat-backend
 if [ "$BACKEND_RUNNING" -gt 0 ]; then
@@ -61,7 +63,9 @@ fi
 
 # Tab 2: Platform Proxy (required dependency).
 # Check if proxy process is running on port 9001 (workbench) or 9002 (client portal).
-PROXY_RUNNING=$(lsof -ti:9001,9002 2>/dev/null | wc -l | tr -d ' ')
+# lsof exits nonzero when nothing is listening, which is the normal cold start.
+PROXY_RUNNING=$(lsof -ti:9001,9002 2>/dev/null | wc -l | tr -d ' ' || true)
+PROXY_RUNNING="${PROXY_RUNNING:-0}"
 PROXY_STARTED=0
 PANE_PROXY="$(hd_tab "$WS" plat-proxy)"
 if [ "$PROXY_RUNNING" -gt 0 ]; then
