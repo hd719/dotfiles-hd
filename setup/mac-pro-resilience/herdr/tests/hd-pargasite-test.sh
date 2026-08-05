@@ -46,14 +46,15 @@ case "${1:-} ${2:-}" in
 esac
 EOF
 
+# Both exit nonzero on a cold start: no Docker daemon and no listening proxy.
 cat > "$BIN_DIR/docker" <<'EOF'
 #!/usr/bin/env bash
-exit 0
+exit 1
 EOF
 
 cat > "$BIN_DIR/lsof" <<'EOF'
 #!/usr/bin/env bash
-exit 0
+exit 1
 EOF
 
 chmod +x "$BIN_DIR/herdr" "$BIN_DIR/docker" "$BIN_DIR/lsof"
