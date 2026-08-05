@@ -1088,6 +1088,8 @@ EOF
 
   ((status != 0)) || fail "Neovim setup ignored a failed fresh mise installation"
   assert_contains "$output" "mise was not installed"
+  assert_contains "$output" \
+    "Neovim setup failed during: mise installation verification (exit 1)."
   [[ ! -e "$failed_home/.config/nvim" ]] || fail "failed mise installation continued to Neovim linking"
 }
 
@@ -1184,6 +1186,27 @@ EOF
   if grep -Fq "neovim" "$case_dir/commands.log"; then
     fail "updater continued after the failed APT stage"
   fi
+
+  : > "$case_dir/commands.log"
+  printf 'ID=debian\nVERSION_ID=13\n' > "$case_dir/os-release"
+  set +e
+  output="$({
+    HOME="$case_dir/home" \
+      PATH="$case_dir/bin:/usr/bin:/bin" \
+      DOTFILES_DIR="$case_dir/dotfiles" \
+      DOTFILES_OS_RELEASE_FILE="$case_dir/os-release" \
+      DOTFILES_MISE_BIN="$case_dir/bin/mise" \
+      DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/fake-neovim-setup.sh" \
+      bash "$UPDATE_SCRIPT"
+  } 2>&1)"
+  status=$?
+  set -e
+
+  [[ "$status" == 1 ]] || fail "updater did not reject an unsupported OS"
+  assert_contains "$output" \
+    "Ubuntu update failed during: Ubuntu environment validation (exit 1)."
+  [[ ! -s "$case_dir/commands.log" ]] \
+    || fail "unsupported OS validation continued into maintenance"
 
   for forbidden in snap flatpak rustup 'pnpm update' 'uv self update' npm npx; do
     if grep -Fq -- "$forbidden" "$UPDATE_SCRIPT"; then

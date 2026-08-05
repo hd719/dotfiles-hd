@@ -37,14 +37,14 @@ log() {
 require_ubuntu() {
   [[ -r "$OS_RELEASE_FILE" ]] || {
     printf 'Cannot read %s.\n' "$OS_RELEASE_FILE" >&2
-    exit 1
+    return 1
   }
 
   # shellcheck disable=SC1090
   source "$OS_RELEASE_FILE"
   if [[ "${ID:-}" != "ubuntu" ]]; then
     printf 'This updater supports Ubuntu only (detected: %s).\n' "${ID:-unknown}" >&2
-    exit 1
+    return 1
   fi
 }
 

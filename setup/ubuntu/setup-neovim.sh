@@ -125,7 +125,7 @@ install_mise() {
   NEOVIM_STAGE="mise installation verification"
   [[ -x "$MISE_BIN" ]] || {
     printf 'mise was not installed at %s.\n' "$MISE_BIN" >&2
-    exit 1
+    return 1
   }
 }
 

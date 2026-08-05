@@ -201,6 +201,8 @@ Cortana updates may restart only affected Cortana services through the repo-owne
 `runtime:post-merge`; broad restarts and Hermes upgrades remain excluded.
 The `personal-mac-ops` skill uses this same command as its canonical Default
 Readiness runner, so agent and direct CLI runs share one implementation.
+If the Ubuntu updater fails, the saved report preserves its most precise named
+failure stage and exit code.
 
 Run the focused offline test after changing the fallback:
 
