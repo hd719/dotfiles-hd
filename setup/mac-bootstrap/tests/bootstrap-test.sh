@@ -1969,6 +1969,12 @@ test_resilience_hd_stop() {
   TESTS=$((TESTS + 1))
 }
 
+test_resilience_hd_pargasite() {
+  bash "$REPO_DIR/setup/mac-pro-resilience/herdr/tests/hd-pargasite-test.sh" \
+    >/dev/null || fail "Resilience hd-parg cannot safely replace its current workspace"
+  TESTS=$((TESTS + 1))
+}
+
 test_link_helper
 test_zprofile_helper
 test_neovim_lock_guard
@@ -1986,5 +1992,6 @@ test_goodmorning_dotfiles_sync
 test_personal_goodmorning_mac_mini_maintenance
 test_resilience_goodmorning_guards
 test_resilience_hd_stop
+test_resilience_hd_pargasite
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"
