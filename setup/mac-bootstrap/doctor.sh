@@ -197,6 +197,17 @@ else
   fail "active shell checks skipped because pinned mise runtimes are missing"
 fi
 
+if [[ "$PROFILE" == mac-mini ]]; then
+  if /bin/zsh -lic '
+    test "$(whence -w herdr)" = "herdr: function"
+    test "$(whence -w _dotfiles_herdr_reset)" = "_dotfiles_herdr_reset: function"
+  ' >/dev/null 2>&1; then
+    pass "Mac mini shared Herdr reset"
+  else
+    fail "Mac mini shared Herdr reset is unavailable"
+  fi
+fi
+
 ruff_output="$("${XDG_BIN_HOME:-$HOME/.local/bin}/ruff" --version 2>/dev/null || true)"
 if [[ "$ruff_output" == "ruff 0.15.21" ]]; then
   pass "Ruff 0.15.21"

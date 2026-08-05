@@ -34,6 +34,7 @@ typeset ubuntu_repo="${ubuntu_zshrc:h:h:h}"
 source_if_exists "$ubuntu_repo/config/zsh/shared/functions.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/aliases.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/codex-aliases.zsh"
+source_if_exists "$ubuntu_repo/config/zsh/shared/herdr.zsh"
 
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"

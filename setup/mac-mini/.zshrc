@@ -14,6 +14,7 @@ _source_zsh_config() {
 # -----------------------------------------------------------------------------
 _source_zsh_config "$HOME/Developer/dotfiles-hd/config/zsh/mac/init.zsh"
 _source_zsh_config "$HOME/Developer/dotfiles-hd/config/zsh/mac/personal/init.zsh"
+_source_zsh_config "$HOME/Developer/dotfiles-hd/config/zsh/shared/herdr.zsh"
 
 # -----------------------------------------------------------------------------
 # Plugins
