@@ -1420,7 +1420,9 @@ test_shared_zsh_interface() {
       alias hm-dev >/dev/null 2>&1 && exit 1
       (( $+functions[herdr] )) || exit 1
       (( $+functions[_dotfiles_herdr_route_cwd] )) || exit 1
+      (( $+functions[_dotfiles_herdr_reset] )) && exit 1
       (( _dotfiles_herdr_route_plain == 1 )) || exit 1
+      (( _dotfiles_herdr_reset_enabled == 0 )) || exit 1
       print -r -- resilience-ok
     ' zsh "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 2>/dev/null
   )"
@@ -1963,7 +1965,7 @@ EOF
 
 test_resilience_hd_stop() {
   bash "$REPO_DIR/setup/mac-pro-resilience/herdr/tests/hd-stop-test.sh" \
-    >/dev/null || fail "Resilience hd-stop did not reuse the shared Herdr reset"
+    >/dev/null || fail "Resilience hd-stop did not preserve native Herdr stop behavior"
   TESTS=$((TESTS + 1))
 }
 
