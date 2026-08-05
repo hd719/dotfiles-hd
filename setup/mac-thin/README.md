@@ -135,7 +135,8 @@ hwatch       Watch changes with Hunk
 gpull        Pull the current repository
 gpush        Push the current repository
 cod          Codex CLI
-codr, codrl  Resume a Codex session
+coda          Choose and archive a Codex session
+codr, codrl   Resume a Codex session
 dots         Enter the Mac dotfiles repository
 vault        Enter the Obsidian vault repository
 hosts        List configured SSH hosts
@@ -169,6 +170,15 @@ locally or offline and `hut` through Tailscale. To send an image, copy it in
 Finder with `Cmd-C`, or capture directly to the clipboard with
 `Shift-Cmd-Ctrl-4`, then press `Ctrl-V` inside remote Herdr. A dragged Finder
 path remains Mac-local and is not readable inside Ubuntu.
+
+Running plain `herdr` on the thin Mac focuses an existing local workspace for
+the current directory or creates one there when needed. Repeated launches from
+the same directory reuse its workspace.
+
+Run `herdr server reset` from a regular thin-Mac terminal to close every local
+Herdr workspace and pane, preserve one fresh `home` workspace rooted at `~`,
+and stop the local server. The native `herdr server stop` behavior is unchanged.
+Repositories, worktrees, configuration, and logs are untouched.
 
 The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
 Forgejo. No Git private key is copied from the Mac.
@@ -223,6 +233,8 @@ The shell is assembled from scoped modules:
 - `config/zsh/shared/` provides portable Git, navigation, SSH, and reload helpers.
 - `config/zsh/shared/codex-aliases.zsh` provides personal Mac and Linux Codex
   shortcuts.
+- `config/zsh/mac/personal/codex-functions.zsh` provides the interactive Codex
+  archive picker on personal Macs.
 - `config/zsh/mac/aliases.zsh` adds safe macOS controls.
 - `config/zsh/mac/personal/aliases.zsh` adds the vault control.
 - `setup/mac-thin/vm.zsh` stays host-specific and owns VMware shortcuts.

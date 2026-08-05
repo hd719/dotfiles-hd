@@ -637,6 +637,7 @@ alias dc='docker compose'
 source_if_exists "$ubuntu_repo/config/zsh/shared/functions.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/aliases.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/codex-aliases.zsh"
+source_if_exists "$ubuntu_repo/config/zsh/shared/herdr.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/development-aliases.zsh"
 EOF
 
@@ -727,6 +728,9 @@ EOF
       [[ "$(alias v)" == "v=nvim" ]]
       [[ "$(alias tm)" == "tm=tmux" ]]
       [[ "$(whence -w reload)" == "reload: function" ]]
+      [[ "$(whence -w herdr)" == "herdr: function" ]]
+      [[ "$(whence -w _dotfiles_herdr_reset)" == "_dotfiles_herdr_reset: function" ]]
+      (( _dotfiles_herdr_route_plain == 0 ))
     ' _ "$ZSH_CONFIG" || fail "Ubuntu did not load the portable shell layer"
 
   case_dir="$TEST_ROOT/zsh-shared-aliases"

@@ -263,6 +263,8 @@ if zsh -lic '
   alias hstaged >/dev/null
   alias hshow >/dev/null
   alias npb >/dev/null
+  test "$(whence -w herdr)" = "herdr: function"
+  test "$(whence -w _dotfiles_herdr_reset)" = "_dotfiles_herdr_reset: function"
   whence -w _zsh_autosuggest_start >/dev/null
   whence -w _zsh_highlight >/dev/null
   test -z "${GIT_PAGER+x}"

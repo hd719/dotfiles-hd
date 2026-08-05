@@ -99,6 +99,10 @@ runs the cooldown-protected cleanup for Downloads files older than 30 days and
 `.DS_Store` files. Use `goodMorning --updates-only` only when that personal
 cleanup must be skipped.
 
+From a regular Mac mini terminal, `herdr server reset` closes every Herdr
+workspace, preserves one fresh `home` workspace rooted at `~`, and stops the
+server. The next `herdr` starts from that clean state.
+
 Do not run `--apply` until all four gates pass:
 
 1. The reviewed change is merged.

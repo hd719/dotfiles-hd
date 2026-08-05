@@ -287,12 +287,17 @@ if /bin/zsh -dfc "
   ! alias gdiff >/dev/null 2>&1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
+  [[ \"\$(whence -w coda)\" == 'coda: function' ]]
+  [[ \"\$(whence -w carchive)\" == 'carchive: function' ]]
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
   [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
   [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
   [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
+  [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
+  [[ \"\$(whence -w _dotfiles_herdr_route_cwd)\" == '_dotfiles_herdr_route_cwd: function' ]]
+  [[ \"\$(whence -w _dotfiles_herdr_reset)\" == '_dotfiles_herdr_reset: function' ]]
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
   ! alias ubuntu >/dev/null 2>&1

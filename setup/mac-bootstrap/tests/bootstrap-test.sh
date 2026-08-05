@@ -1182,6 +1182,7 @@ test_shared_zsh_interface() {
   local shared_dir="$REPO_DIR/config/zsh/mac"
   local shared_init="$shared_dir/init.zsh"
   local personal_init="$shared_dir/personal/init.zsh"
+  local personal_codex="$shared_dir/personal/codex-functions.zsh"
   local root="$TMP_ROOT/shared-zsh-completions"
   local home_dir="$root/home"
   local completion_dir="$root/docker-completions"
@@ -1190,6 +1191,8 @@ test_shared_zsh_interface() {
   local cache_file="$root/tool-completion.zsh"
   local fake_bin="$root/bin"
   local actual
+  local attempt
+  local coda_pid
   local zsh_file
 
   mkdir -p \
@@ -1201,14 +1204,17 @@ test_shared_zsh_interface() {
   : > "$home_dir/.local/bin/env"
   printf '#!/bin/sh\nexit 0\n' > "$fake_bin/lsd"
   printf '#!/bin/sh\nexit 0\n' > "$fake_bin/hunk"
-  chmod +x "$fake_bin/lsd" "$fake_bin/hunk"
+  printf '#!/bin/sh\nprintf "%%s\\n" "$*" >> "$CODEX_LOG"\n' > "$fake_bin/codex"
+  chmod +x "$fake_bin/lsd" "$fake_bin/hunk" "$fake_bin/codex"
 
   for zsh_file in \
     "$module" \
     "$REPO_DIR/config/zsh/shared/aliases.zsh" \
     "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" \
+    "$personal_codex" \
     "$REPO_DIR/config/zsh/shared/development-aliases.zsh" \
     "$REPO_DIR/config/zsh/shared/functions.zsh" \
+    "$REPO_DIR/config/zsh/shared/herdr.zsh" \
     "$shared_dir/init.zsh" \
     "$shared_dir/aliases.zsh" \
     "$shared_dir/prompt.zsh" \
@@ -1237,9 +1243,12 @@ test_shared_zsh_interface() {
   done
   assert_contains "$REPO_DIR/setup/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
+  assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'config/zsh/shared/herdr.zsh'
+  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Mac mini shared Herdr reset'
   assert_contains "$REPO_DIR/setup/mac-mini/.zshrc" 'export DOTFILES_MAC_PROFILE="mac-mini"'
   assert_not_contains "$REPO_DIR/setup/mac-pro-resilience/.zshrc" 'config/zsh/mac/personal/'
   assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-aliases.zsh"'
+  assert_contains "$personal_init" 'source "$zsh_personal_dir/codex-functions.zsh"'
   assert_contains "$shared_init" 'source "$zsh_shared_dir/completions.zsh"'
 
   actual="$(
@@ -1268,6 +1277,7 @@ test_shared_zsh_interface() {
       source "$2"
       (( $+functions[goodMorning] )) || exit 1
       (( $+functions[carchive] )) || exit 1
+      (( $+functions[coda] )) || exit 1
       (( $+functions[opmission] )) || exit 1
       alias cod >/dev/null || exit 1
       [[ "$(alias codu)" == "codu='\''codex update'\''" ]] || exit 1
@@ -1279,6 +1289,92 @@ test_shared_zsh_interface() {
   )"
   assert_eq personal-ok "$actual" "personal Mac zsh interface adds personal workflows"
 
+  : > "$root/codex.log"
+  CODEX_LOG="$root/codex.log" \
+    HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      coda named-session
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex"
+  assert_contains "$root/codex.log" "archive named-session"
+
+  mkdir -p "$home_dir/.codex"
+  /usr/bin/sqlite3 "$home_dir/.codex/state_5.sqlite" "
+    CREATE TABLE threads (
+      id TEXT,
+      recency_at INTEGER,
+      recency_at_ms INTEGER,
+      title TEXT,
+      cwd TEXT,
+      archived INTEGER,
+      source TEXT,
+      preview TEXT
+    );
+    INSERT INTO threads VALUES (
+      'session-new', 200, 200000, 'Newest chat', '/tmp/new', 0, 'vscode', 'preview'
+    );
+    INSERT INTO threads VALUES (
+      'session-old', 100, 100000, 'Older chat', '/tmp/old', 0, 'vscode', 'preview'
+    );
+    INSERT INTO threads VALUES (
+      'session-cli', 300, 300000, 'CLI chat', '/tmp/cli', 0, 'cli', 'preview'
+    );
+    INSERT INTO threads VALUES (
+      'session-exec', 400, 400000, 'Exec task', '/tmp/exec', 0, 'exec', 'preview'
+    );
+  "
+  : > "$root/codex.log"
+  printf '1\ny\n' | CODEX_LOG="$root/codex.log" \
+    HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      coda
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
+    >/dev/null
+  assert_contains "$root/codex.log" "archive session-cli"
+
+  CODEX_LOG="$root/codex.log" \
+    HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      coda
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
+    </dev/null > "$root/codex-eof.log" &
+  coda_pid=$!
+  for attempt in {1..20}; do
+    ! kill -0 "$coda_pid" 2>/dev/null && break
+    sleep 0.1
+  done
+  if kill -0 "$coda_pid" 2>/dev/null; then
+    kill "$coda_pid"
+    wait "$coda_pid" 2>/dev/null || true
+    fail "Codex picker did not exit after stdin closed"
+  fi
+  wait "$coda_pid" || fail "Codex picker failed after stdin closed"
+  assert_contains "$root/codex-eof.log" "Cancelled."
+  assert_not_contains "$root/codex-eof.log" "Invalid selection."
+
+  printf '#!/bin/sh\nIFS= read -r first\nprintf "%%s\\n" "$first"\n' \
+    > "$fake_bin/fzf"
+  chmod +x "$fake_bin/fzf"
+  : > "$root/codex.log"
+  printf 'y\n' | CODEX_LOG="$root/codex.log" \
+    HOME="$home_dir" \
+    PATH="$fake_bin:/usr/bin:/bin" \
+    /bin/zsh -dfc '
+      source "$1"
+      source "$2"
+      coda
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
+    >/dev/null
+  assert_contains "$root/codex.log" "archive session-cli"
+
   for zsh_file in \
     "$REPO_DIR/setup/mac-pro/.zshrc" \
     "$REPO_DIR/setup/mac-mini/.zshrc"; do
@@ -1287,6 +1383,7 @@ test_shared_zsh_interface() {
         source "$1"
         (( $+functions[goodMorning] )) || exit 1
         (( $+functions[carchive] )) || exit 1
+        (( $+functions[coda] )) || exit 1
         alias cod >/dev/null || exit 1
         alias vault >/dev/null || exit 1
         alias hwatch >/dev/null || exit 1
@@ -1295,6 +1392,17 @@ test_shared_zsh_interface() {
     )"
     assert_eq profile-ok "$actual" "$(basename "$(dirname "$zsh_file")") profile loads personal Mac zsh interface"
   done
+
+  actual="$(
+    HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
+      source "$1"
+      (( $+functions[herdr] )) || exit 1
+      (( $+functions[_dotfiles_herdr_reset] )) || exit 1
+      (( _dotfiles_herdr_route_plain == 0 )) || exit 1
+      print -r -- herdr-ok
+    ' zsh "$REPO_DIR/setup/mac-mini/.zshrc" 2>/dev/null
+  )"
+  assert_eq herdr-ok "$actual" "Mac mini loads the shared Herdr reset wrapper"
 
   actual="$(
     HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
@@ -1848,6 +1956,12 @@ EOF
   TESTS=$((TESTS + 1))
 }
 
+test_resilience_hd_stop() {
+  bash "$REPO_DIR/setup/mac-pro-resilience/herdr/tests/hd-stop-test.sh" \
+    >/dev/null || fail "Resilience hd-stop did not reuse the shared Herdr reset"
+  TESTS=$((TESTS + 1))
+}
+
 test_link_helper
 test_zprofile_helper
 test_neovim_lock_guard
@@ -1864,5 +1978,6 @@ test_goodmorning_timeout_helper
 test_goodmorning_dotfiles_sync
 test_personal_goodmorning_mac_mini_maintenance
 test_resilience_goodmorning_guards
+test_resilience_hd_stop
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"
