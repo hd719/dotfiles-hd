@@ -1,5 +1,0 @@
-#!/bin/sh
-set -eu
-aliases="$HOME/.config/git/aliases.gitconfig"
-git config --global --get-all include.path 2>/dev/null | grep -Fxq "$aliases" \
-  || git config --global --add include.path "$aliases"

@@ -42,6 +42,11 @@ For Mac-to-Linux learning, use the
 
 ## Common Paths
 
+The reviewed chezmoi migration candidate lives in [`chezmoi/`](chezmoi/README.md).
+Until a host completes its separately approved cutover, the existing setup
+command below remains that host's active writer. Previewing chezmoi does not
+change VM lifecycle, services, or target configuration.
+
 After a reviewed change is merged, sync canonical `master` from the thin Mac:
 
 ```bash
@@ -113,6 +118,8 @@ the approval gate in the Mac bootstrap runbook before `--apply`.
 
 - `config/` contains portable application and tool configuration, not package
   inventories.
+- `chezmoi/` declares profile-aware delivery into `config/`; it does not own
+  lifecycle, services, secrets, or mutable state.
 - `setup/` contains platform installers, machine overlays, tests, and runbooks.
 - Each Mac profile declares its package policy in its own `setup/*/Brewfile`.
 - Each profile owns its `.zshrc`, plugin timing, runtimes, credentials, and

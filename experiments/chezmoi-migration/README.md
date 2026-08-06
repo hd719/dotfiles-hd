@@ -1,7 +1,8 @@
 # Chezmoi Migration Experiment
 
-Status: disposable canary only. This folder does not authorize changes to any
-live host.
+Status: accepted disposable-canary evidence and production rollout plan. This
+folder does not authorize changes to any live host. The consolidated production
+implementation candidate lives in [`../../chezmoi/`](../../chezmoi/README.md).
 
 ## Destination
 
@@ -30,20 +31,12 @@ symlink is inappropriate.
 - The work Mac is last and optional. It remains untouched until every personal
   host works cleanly and Hamel explicitly approves it.
 
-## Planned Shape
+## Production Result
 
-The prototype ticket may add these paths later:
-
-```text
-experiments/chezmoi-migration/
-├── source/       # experimental chezmoi source state
-├── evidence/     # sanitized diffs, checks, and rollback results
-└── bootstrap.sh  # roughly 15-25 lines
-```
-
-The bootstrap entrypoint may only detect the OS, install chezmoi when missing,
-and run the reviewed init/apply flow. Package lists, link logic, maintenance,
-and VM lifecycle do not belong in that script.
+The disposable source copies and per-canary bootstrap scripts were removed
+after acceptance. `../../chezmoi/` now provides one source, explicit profiles,
+canonical repository symlinks, a tiny bootstrap, preview, guarded apply,
+backup, rollback, and doctors. Sanitized canary evidence remains here.
 
 ## Route
 
@@ -53,8 +46,8 @@ ownership inventory
   -> Orka compatibility gate
   -> one disposable macOS VM: thin profile
   -> erase/rebuild the same VM: Mac mini profile
-  -> production runbook
-  -> later, separately approved production rollout
+  -> production implementation and runbook
+  -> later, separately approved host rollout
 ```
 
 See [OWNERSHIP-INVENTORY.md](OWNERSHIP-INVENTORY.md),

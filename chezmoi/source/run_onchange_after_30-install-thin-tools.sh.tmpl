@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+{{- $repo := joinPath .chezmoi.sourceDir ".." ".." }}
+# brew: {{ output "git" "-C" $repo "hash-object" "setup/mac-thin/Brewfile" | trim }}
+# nvim: {{ output "git" "-C" $repo "hash-object" "config/nvim/lazy-lock.json" | trim }}
+brewfile="$HOME/.config/homebrew/Brewfile"
+lockfile="$HOME/.config/nvim/lazy-lock.json"
+backup="$(mktemp "${TMPDIR:-/tmp}/chezmoi-thin-lazy-lock.XXXXXX")"
+
+HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$brewfile"
+cp -p "$lockfile" "$backup"
+restore_lockfile() {
+  if ! cmp -s "$lockfile" "$backup"; then
+    cp -p "$backup" "$lockfile"
+  fi
+  rm -f "$backup"
+}
+trap restore_lockfile EXIT
+
+DOTFILES_NVIM_PROFILE=thin DOTFILES_NVIM_RESTORE_ALL=1 \
+  nvim --headless '+Lazy! restore' '+qa'
+DOTFILES_NVIM_PROFILE=thin nvim --headless \
+  "+lua assert(require('nvim-treesitter').install({'markdown','markdown_inline'}):wait())" \
+  '+qa'
+
+restore_lockfile
+trap - EXIT

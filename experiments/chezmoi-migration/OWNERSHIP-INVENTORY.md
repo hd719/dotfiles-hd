@@ -74,6 +74,7 @@ Chezmoi owns these target paths:
 - `~/.config/hunk/config.toml`
 - `~/.config/nvim/` for declarative files and the lockfile
 - `~/.config/starship.toml`
+- `~/.terminfo/78/xterm-ghostty` as a symlink to Ghostty's bundled terminfo
 - the portable Git-alias include, without owning `~/.gitconfig`
 
 Chezmoi owns the thin-Mac Brewfile as a first-install manifest and may perform
@@ -100,7 +101,9 @@ The first live Mac mini cutover is configuration-only. Chezmoi owns:
 - `~/.config/hunk/config.toml`
 - `~/.config/mise/config.toml`
 - `~/.config/nvim/` for declarative files and the lockfile
+- `~/.config/starship.toml`
 - `~/.hermes/skins/hamel-nord.yaml`
+- `~/.terminfo/78/xterm-ghostty` as a symlink to Ghostty's bundled terminfo
 - the portable Git-alias include, without owning `~/.gitconfig`
 
 Neither the shared Mac Brewfile nor `setup/mac-mini/Brewfile` transfers in the

@@ -1,0 +1,10 @@
+.zshrc|setup/mac-thin/.zshrc
+.config/zsh|config/zsh
+.config/bookokrat|config/bookokrat
+Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
+.config/herdr/config.toml|config/herdr/config.toml
+.config/hunk/config.toml|config/hunk/config.toml
+.config/homebrew/Brewfile|setup/mac-thin/Brewfile
+.config/nvim|config/nvim
+.config/starship.toml|config/starship/starship.toml
+.terminfo/78/xterm-ghostty|@absolute:/Applications/Ghostty.app/Contents/Resources/terminfo/78/xterm-ghostty

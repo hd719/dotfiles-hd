@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+repo={{ joinPath .chezmoi.sourceDir ".." ".." | quote }}
+DOTFILES_BACKUP_SEPARATOR=. "$repo/config/git/configure-aliases.sh" --apply

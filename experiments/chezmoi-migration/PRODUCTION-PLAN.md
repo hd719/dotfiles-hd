@@ -38,9 +38,10 @@ No host may start until one reviewed implementation PR has all of these:
 - no ownership of VM lifecycle, recurring maintenance, macOS preferences,
   services, launchd jobs, credentials, enrollment, or runtime state.
 
-Draft PR #90 is prototype evidence and must not merge as-is. Its copied Ubuntu
-source must be replaced by the symlink-first production shape before this gate
-can pass.
+Draft PR #90 now contains the symlink-first implementation candidate under
+`../../chezmoi/`. The copied per-canary source trees are removed. This gate
+passes only after the implementation diff and isolated validation are reviewed;
+merging it still does not authorize a host apply.
 
 ## Gate 1: Shared Preconditions
 
