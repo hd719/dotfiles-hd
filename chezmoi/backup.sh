@@ -27,8 +27,9 @@ if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
   active_state=present
   cp -p "$ACTIVE_MARKER" "$backup_dir/activation-marker"
 fi
-printf 'profile\t%s\ncommit\t%s\nactive\t%s\n' \
-  "$PROFILE" "$(git -C "$REPO_DIR" rev-parse HEAD)" "$active_state" \
+printf 'profile\t%s\nhost\t%s\ncommit\t%s\nactive\t%s\n' \
+  "$PROFILE" "$(hostname)" "$(git -C "$REPO_DIR" rev-parse HEAD)" \
+  "$active_state" \
   > "$backup_dir/metadata.tsv"
 
 while IFS='|' read -r relative _source; do

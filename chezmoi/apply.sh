@@ -14,6 +14,7 @@ require_canonical_checkout
   || die "work Mac requires DOTFILES_WORK_MAC_OPT_IN=1"
 
 backup_dir="$($script_dir/backup.sh "$PROFILE")"
+"$script_dir/rollback.sh" "$PROFILE" "$backup_dir" --preview
 printf 'rollback command: %s/rollback.sh %s %s\n' \
   "$script_dir" "$PROFILE" "$backup_dir"
 

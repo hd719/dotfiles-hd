@@ -99,8 +99,9 @@ configuration in evidence.
   destination when applicable, permissions, and checksum for regular files.
 - Verify the archive is readable and the manifest covers the entire profile
   allowlist.
-- Dry-run the rollback command against the manifest. It must target only that
-  host and backup.
+- Run `./chezmoi/rollback.sh PROFILE BACKUP_DIRECTORY --preview`. It must
+  validate the exact profile allowlist, saved state, host, and backup without
+  changing a target. The guarded apply runs this preview again automatically.
 
 The backup stays host-local and is never committed or copied to another host.
 

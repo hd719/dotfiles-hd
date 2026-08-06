@@ -10,6 +10,7 @@ DEST_DIR="${CHEZMOI_DESTINATION:-$HOME}"
 STATE_DIR="${CHEZMOI_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-hd/chezmoi}"
 BACKUP_ROOT="${CHEZMOI_BACKUP_ROOT:-${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-hd/chezmoi-backups}"
 CHEZMOI_BIN="${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}"
+EXPECTED_REPO_ORIGIN="git@github.com:hd719/dotfiles-hd.git"
 
 die() {
   printf 'error: %s\n' "$*" >&2
@@ -54,10 +55,18 @@ require_canonical_checkout() {
   [[ "$DEST_DIR" == "$HOME" ]] || die "apply destination must be HOME"
   [[ "$BACKUP_ROOT" == "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-hd/chezmoi-backups" ]] \
     || die "apply backup root must use the documented host-local path"
+  [[ "$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null)" == \
+    "$EXPECTED_REPO_ORIGIN" ]] \
+    || die "apply requires canonical origin $EXPECTED_REPO_ORIGIN"
   [[ "$(git -C "$REPO_DIR" branch --show-current)" == master ]] \
     || die "apply requires reviewed master"
   [[ -z "$(git -C "$REPO_DIR" status --porcelain)" ]] \
     || die "apply requires a clean checkout"
+  git -C "$REPO_DIR" show-ref --verify --quiet refs/remotes/origin/master \
+    || die "origin/master is missing; run scripts/sync-dotfiles.sh first"
+  [[ "$(git -C "$REPO_DIR" rev-parse HEAD)" == \
+    "$(git -C "$REPO_DIR" rev-parse origin/master)" ]] \
+    || die "master does not match origin/master; run scripts/sync-dotfiles.sh first"
 }
 
 cm() {

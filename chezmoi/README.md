@@ -50,6 +50,9 @@ runs the profile doctor. A successful Ubuntu apply then activates a host-local
 ownership marker. The existing link scripts become no-ops while recurring
 package and Neovim maintenance continues unchanged.
 
+Before target writes, apply also validates the exact generated backup with the
+non-mutating rollback preview.
+
 Never apply an unmerged branch. Promotion order remains Ubuntu, thin Mac, Mac
 mini, then the optional work Mac. Each host needs its own approval.
 
@@ -60,6 +63,14 @@ Apply prints the exact command. It has this form:
 ```bash
 ./chezmoi/rollback.sh PROFILE \
   "$HOME/.local/state/dotfiles-hd/chezmoi-backups/TIMESTAMP-PROFILE"
+```
+
+Validate the same backup without changing anything:
+
+```bash
+./chezmoi/rollback.sh PROFILE \
+  "$HOME/.local/state/dotfiles-hd/chezmoi-backups/TIMESTAMP-PROFILE" \
+  --preview
 ```
 
 Rollback accepts only a backup under the guarded backup root and only targets

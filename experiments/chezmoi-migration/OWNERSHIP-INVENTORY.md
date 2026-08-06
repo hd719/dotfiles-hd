@@ -16,8 +16,9 @@ authorize changes to a live host.
 - The existing repository `config/` tree remains canonical. Chezmoi owns
   profile-aware symlinks into it and renders files only when a symlink is not
   appropriate.
-- A path has one writer. The old linker stops writing a transferred path before
-  the first chezmoi apply.
+- A path has one active writer. During the controlled Ubuntu cutover, the old
+  linker is not run; the verified apply then activates a host-local marker that
+  makes its future link operations no-ops.
 
 ## Ubuntu Profile
 
@@ -151,12 +152,12 @@ or any generated Neovim state.
 
 For each path, the prototype must prove this order:
 
-1. Back up the existing target.
-1. Disable the current linker for that target.
-1. Review `chezmoi diff`, then apply.
+1. Back up the existing target and validate the rollback preview.
+1. Review `chezmoi diff`, then apply while the old linker remains idle.
 1. Require a second apply to be a no-op.
-1. Roll back by stopping chezmoi applies, restoring the backup, and restoring
-   the previous linker when applicable.
+1. Activate chezmoi ownership so the previous Ubuntu link writers become
+   no-ops.
+1. Roll back by restoring the backup and the previous ownership-marker state.
 
 Package rollback does not uninstall packages automatically. It stops future
 chezmoi install actions and returns recurring ownership to the existing
