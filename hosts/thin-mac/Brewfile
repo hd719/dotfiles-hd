@@ -1,6 +1,7 @@
 # macOS control-plane applications only. Development tooling belongs in the VMs.
 
 brew "bookokrat"
+brew "fastfetch"
 brew "gh"
 brew "herdr"
 brew "hunk"

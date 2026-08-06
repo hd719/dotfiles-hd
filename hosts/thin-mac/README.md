@@ -14,6 +14,7 @@ The host installs only:
 - ChatGPT desktop app
 - Codex CLI
 - DaisyDisk
+- Fastfetch for system summaries
 - Ghostty
 - Ghostty fonts
 - Herdr as a remote Ubuntu client
@@ -67,9 +68,22 @@ hosts/thin-mac/doctor.sh
 
 The bootstrap installs the policy packages, including the Codex CLI, and pins
 the `vagrant-vmware-desktop` provider to `3.0.5`. Chezmoi delivers Bookokrat,
-the thin `.zshrc`, Ghostty, Herdr, Hunk, the shared Neovim config, and the
-shared Starship config. Replaced paths are captured in the timestamped Chezmoi
-backup printed during apply.
+Fastfetch, the thin `.zshrc`, Ghostty, Herdr, Hunk, the shared Neovim config,
+and the shared Starship config. Replaced paths are captured in the timestamped
+Chezmoi backup printed during apply.
+
+## Adding Another CLI Tool
+
+Fastfetch is the reference pattern:
+
+1. Add the formula to `hosts/thin-mac/Brewfile`.
+2. Keep declarative configuration under `config/`.
+3. Add only approved child files to `chezmoi/profiles/mac-thin.paths`.
+4. Adjust `.chezmoiignore.tmpl` for the `mac-thin` profile.
+5. Update the doctor, focused tests, and this package inventory.
+
+Do not link a whole configuration directory when it contains mutable or legacy
+state. After merge, sync `master`, preview, apply twice, and run the doctor.
 
 Neovim uses the shared `config/nvim` and `lazy-lock.json`, but
 `DOTFILES_NVIM_PROFILE=thin` restores only the approved thin plugin set and the

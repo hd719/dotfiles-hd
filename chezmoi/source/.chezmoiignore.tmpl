@@ -14,8 +14,10 @@
 .local
 20-install-ubuntu-tools.sh
 {{- end }}
-{{- if and (and (ne .profile "ubuntu") (ne .profile "mac-mini")) (ne .profile "mac-pro") }}
+{{- if or (eq .profile "mac-thin") (eq .profile "work-mac") }}
 .config/btop
+{{- end }}
+{{- if eq .profile "work-mac" }}
 .config/fastfetch
 {{- end }}
 {{- if or (eq .profile "mac-thin") (eq .profile "work-mac") }}
