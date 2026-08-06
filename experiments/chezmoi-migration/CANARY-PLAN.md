@@ -64,6 +64,10 @@ technical and interactive QA, the disposable Mac mini canary still requires
 preview, apply, no-op, doctor, exclusion, and rollback checks, but does not
 repeat the same interactive shell and editor QA.
 
+The approved delta proof reused the same disposable VM after the tested
+thin-Mac rollback instead of performing a second clean-room build. This
+exception does not authorize a live Mac mini apply.
+
 ## Acceptance Gate
 
 A canary passes only when all of these are true:
@@ -103,3 +107,4 @@ Recorded evidence:
 - [Orka compatibility, 2026-08-06](evidence/orka-compatibility-2026-08-06.md)
 - [Ubuntu canary, 2026-08-06](evidence/ubuntu-canary-2026-08-06.md)
 - [Thin-Mac canary, 2026-08-06](evidence/macos-thin-canary-2026-08-06.md)
+- [Mac mini delta canary, 2026-08-06](evidence/mac-mini-canary-2026-08-06.md)
