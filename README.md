@@ -36,7 +36,6 @@ dotfiles-hd/
 │   ├── mac-pro/             standalone development MacBook policy
 │   ├── mac-mini/            production runtime Mac policy
 │   └── work-mac/resilience/ current work-Mac setup
-└── scripts/                 repository-wide sync utilities
 ```
 
 `config/` stays canonical and is not reorganized. Chezmoi delivers only the
@@ -49,7 +48,7 @@ preferences, or project repositories.
 Sync reviewed `master` across the three personal hosts:
 
 ```bash
-scripts/sync-dotfiles.sh
+hosts/thin-mac/sync-dotfiles.sh
 ```
 
 Thin Mac and Ubuntu VM:
@@ -85,12 +84,11 @@ gates pass.
 ## Ownership
 
 - `chezmoi/` owns approved user configuration links and timestamped rollback.
-- `hosts/thin-mac/` owns the Vagrant and VMware lifecycle.
+- `hosts/thin-mac/` owns control-plane sync and the Vagrant and VMware lifecycle.
 - `hosts/ubuntu-dev/` owns guest provisioning and workstation maintenance.
 - `hosts/shared/macos/` owns common full-Mac packages and operational setup.
 - `hosts/mac-pro/` and `hosts/mac-mini/` own profile package overlays and shell entry points.
 - `hosts/work-mac/resilience/` keeps its current scoped linker until a separate work-Mac rollout.
-- `scripts/` owns repository sync, not host provisioning.
 
 Every production apply requires preview, a timestamped Chezmoi backup, a
 no-op second apply, doctor success, and a verified rollback path. Packages are

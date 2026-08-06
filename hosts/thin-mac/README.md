@@ -72,6 +72,13 @@ Fastfetch, the thin `.zshrc`, Ghostty, Herdr, Hunk, the shared Neovim config,
 and the shared Starship config. Replaced paths are captured in the timestamped
 Chezmoi backup printed during apply.
 
+Sync reviewed `master` across the thin Mac, Ubuntu VM, and Mac mini from this
+control plane:
+
+```bash
+hosts/thin-mac/sync-dotfiles.sh
+```
+
 ## Adding Another CLI Tool
 
 Fastfetch is the reference pattern:
