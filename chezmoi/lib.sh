@@ -24,8 +24,19 @@ load_profile() {
   esac
   PROFILE_CONFIG="$PROFILES_DIR/$PROFILE.toml"
   PROFILE_MANIFEST="$PROFILES_DIR/$PROFILE.paths"
+  ACTIVE_MARKER="$STATE_DIR/$PROFILE-active"
   [[ -f "$PROFILE_CONFIG" && -f "$PROFILE_MANIFEST" ]] \
     || die "incomplete profile: $PROFILE"
+}
+
+activate_profile() {
+  local temporary_marker="$ACTIVE_MARKER.tmp.$$"
+
+  mkdir -p "$STATE_DIR"
+  printf 'profile=%s\ncommit=%s\n' \
+    "$PROFILE" "$(git -C "$REPO_DIR" rev-parse HEAD)" > "$temporary_marker"
+  chmod 600 "$temporary_marker"
+  mv "$temporary_marker" "$ACTIVE_MARKER"
 }
 
 validate_profile_os() {

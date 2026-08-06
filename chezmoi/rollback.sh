@@ -14,6 +14,12 @@ case "$backup_dir/" in
 esac
 grep -Fqx $'profile\t'"$PROFILE" "$backup_dir/metadata.tsv" \
   || die "backup profile mismatch"
+active_state="$(awk -F $'\t' '$1 == "active" { print $2 }' \
+  "$backup_dir/metadata.tsv")"
+case "$active_state" in
+  absent|present) ;;
+  *) die "backup activation state is invalid" ;;
+esac
 
 replaced="$backup_dir/replaced-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$replaced"
@@ -45,6 +51,24 @@ while IFS='|' read -r relative type link mode checksum; do
     || die "restored mode mismatch: $target"
 done < "$backup_dir/manifest.tsv"
 
+if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
+  mkdir -p "$replaced/activation"
+  mv "$ACTIVE_MARKER" "$replaced/activation/$PROFILE-active"
+fi
+if [[ "$active_state" == present ]]; then
+  saved_marker="$backup_dir/activation-marker"
+  [[ -f "$saved_marker" && ! -L "$saved_marker" ]] \
+    || die "missing saved activation marker"
+  mkdir -p "$STATE_DIR"
+  cp -p "$saved_marker" "$ACTIVE_MARKER"
+  cmp -s "$saved_marker" "$ACTIVE_MARKER" \
+    || die "activation marker restore verification failed"
+fi
+
 printf 'rollback restored: %s\n' "$backup_dir"
 printf 'displaced chezmoi state retained at: %s\n' "$replaced"
-printf 'chezmoi applies are now stopped; re-enable the previous writer only after review.\n'
+if [[ "$active_state" == present ]]; then
+  printf 'chezmoi ownership restored to its pre-apply active state.\n'
+else
+  printf 'chezmoi ownership stopped; the previous writer is active again.\n'
+fi

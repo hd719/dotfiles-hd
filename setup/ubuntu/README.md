@@ -189,10 +189,16 @@ Small Bash boundaries remain:
   machine-owned Git identity.
 - `bootstrap-ansible.sh` installs only Ubuntu's `ansible-core`.
 - `grow-root-filesystem.sh` grows Bento's partition to the Vagrant disk.
-- `link-dotfiles.sh` preserves backup-safe symlink behavior.
-- `setup-neovim.sh` manages the existing mise and Neovim workflow.
+- `link-dotfiles.sh` preserves backup-safe symlink behavior until chezmoi owns
+  the Ubuntu links, then exits without writing.
+- `setup-neovim.sh` keeps mise and Neovim maintenance but skips its link step
+  after chezmoi activation.
 - `update-system.sh` performs later Ubuntu and tool updates.
 - `doctor.sh` verifies the finished workstation.
+
+The ownership switch is the host-local
+`~/.local/state/dotfiles-hd/chezmoi/ubuntu-active` marker. Chezmoi creates it
+only after a verified production apply. Rollback restores its prior state.
 
 Ansible installs Caskaydia Cove Nerd Font, Hasklug Nerd Font, and Maple Mono NF
 for the Ubuntu user. Maple Mono NF is the first Ghostty font family, so it is

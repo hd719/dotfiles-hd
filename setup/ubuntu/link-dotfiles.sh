@@ -3,6 +3,17 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
+CHEZMOI_ACTIVE_MARKER="${DOTFILES_CHEZMOI_ACTIVE_MARKER:-${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-hd/chezmoi/ubuntu-active}"
+
+if [[ -e "$CHEZMOI_ACTIVE_MARKER" || -L "$CHEZMOI_ACTIVE_MARKER" ]]; then
+  if [[ -f "$CHEZMOI_ACTIVE_MARKER" && ! -L "$CHEZMOI_ACTIVE_MARKER" ]]; then
+    printf 'Chezmoi owns Ubuntu user links; legacy linker skipped.\n'
+    exit 0
+  fi
+  printf 'Invalid chezmoi ownership marker: %s\n' \
+    "$CHEZMOI_ACTIVE_MARKER" >&2
+  exit 1
+fi
 
 backup_path() {
   local target="$1"

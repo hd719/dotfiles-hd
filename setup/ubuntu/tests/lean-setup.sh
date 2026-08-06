@@ -68,6 +68,29 @@ test_neovim_help_is_read_only() {
   assert_contains "$output" "--check"
 }
 
+test_chezmoi_activation_gates_legacy_linker() {
+  local case_dir="$TEST_ROOT/chezmoi-link-ownership"
+  local output
+
+  mkdir -p "$case_dir/home" "$case_dir/state/dotfiles-hd/chezmoi"
+  printf 'keep me\n' > "$case_dir/home/.zshrc"
+  printf 'profile=ubuntu\n' \
+    > "$case_dir/state/dotfiles-hd/chezmoi/ubuntu-active"
+
+  output="$(
+    HOME="$case_dir/home" \
+      XDG_STATE_HOME="$case_dir/state" \
+      bash "$LINK_SCRIPT"
+  )"
+
+  assert_contains "$output" \
+    "Chezmoi owns Ubuntu user links; legacy linker skipped."
+  [[ ! -L "$case_dir/home/.zshrc" ]] \
+    || fail "legacy linker replaced a chezmoi-owned target"
+  grep -Fxq 'keep me' "$case_dir/home/.zshrc" \
+    || fail "legacy linker changed a chezmoi-owned target"
+}
+
 test_codex_wrapper_stabilizes_forwarded_agent() {
   local case_dir="$TEST_ROOT/codex-forwarded-agent"
   local agent_pid output socket stable_socket
@@ -918,6 +941,20 @@ EOF
   assert_file_contains "$case_dir/commands.log" "restore-all=1"
   [[ -f "$case_dir/parsers-complete" ]] || fail "fresh Neovim setup returned before Tree-sitter parsers completed"
 
+  mkdir -p "$case_dir/home/.local/state/dotfiles-hd/chezmoi"
+  printf 'profile=ubuntu\n' \
+    > "$case_dir/home/.local/state/dotfiles-hd/chezmoi/ubuntu-active"
+  : > "$case_dir/commands.log"
+  output="$(
+    HOME="$case_dir/home" \
+      PATH="$case_dir/bin:/usr/bin:/bin" \
+      DOTFILES_MISE_BIN="$case_dir/bin/mise" \
+      bash "$NEOVIM_SCRIPT"
+  )"
+  assert_contains "$output" \
+    "Chezmoi owns Ubuntu user links; legacy Neovim linker skipped"
+  assert_file_contains "$case_dir/commands.log" "mise install"
+
   set +e
   output="$({
     HOME="$case_dir/home" \
@@ -1220,6 +1257,7 @@ EOF
 }
 
 test_neovim_help_is_read_only
+test_chezmoi_activation_gates_legacy_linker
 test_codex_wrapper_stabilizes_forwarded_agent
 test_portable_git_aliases
 test_vagrant_ansible_contract

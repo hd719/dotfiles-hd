@@ -15,6 +15,12 @@ status_args=()
 cm verify --exclude=scripts >/dev/null \
   && pass 'managed targets verified' || fail 'managed targets differ'
 
+if [[ "${DOTFILES_CHEZMOI_TEST:-0}" != 1 && "$PROFILE" == ubuntu ]]; then
+  [[ -f "$ACTIVE_MARKER" && ! -L "$ACTIVE_MARKER" ]] \
+    && pass 'Ubuntu chezmoi ownership active' \
+    || fail 'Ubuntu chezmoi ownership marker missing'
+fi
+
 while IFS='|' read -r relative source; do
   [[ -n "$relative" ]] || continue
   target="$(target_path "$relative")"

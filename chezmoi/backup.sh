@@ -20,8 +20,16 @@ files_dir="$backup_dir/files"
 manifest="$backup_dir/manifest.tsv"
 mkdir -p "$files_dir"
 chmod 700 "$backup_dir" "$files_dir"
-printf 'profile\t%s\ncommit\t%s\n' \
-  "$PROFILE" "$(git -C "$REPO_DIR" rev-parse HEAD)" > "$backup_dir/metadata.tsv"
+active_state=absent
+if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
+  [[ -f "$ACTIVE_MARKER" && ! -L "$ACTIVE_MARKER" ]] \
+    || die "activation marker is not a regular file: $ACTIVE_MARKER"
+  active_state=present
+  cp -p "$ACTIVE_MARKER" "$backup_dir/activation-marker"
+fi
+printf 'profile\t%s\ncommit\t%s\nactive\t%s\n' \
+  "$PROFILE" "$(git -C "$REPO_DIR" rev-parse HEAD)" "$active_state" \
+  > "$backup_dir/metadata.tsv"
 
 while IFS='|' read -r relative _source; do
   [[ -n "$relative" ]] || continue

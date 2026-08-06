@@ -53,8 +53,8 @@ Before each host, confirm all items again:
 - The [ownership inventory](OWNERSHIP-INVENTORY.md) matches the selected
   profile. No new path is added during the cutover.
 - The existing doctor passes before any change.
-- The current linker/bootstrap is available for rollback but will stop writing
-  every transferred path before the first chezmoi apply.
+- The current linker/bootstrap is available for rollback. A successful Ubuntu
+  apply activates the ownership marker that stops its transferred-path writes.
 - VM lifecycle and recurring maintenance commands have no planned diff.
 - Hamel approves this host, profile, commit, scope, and maintenance window.
 
@@ -93,7 +93,8 @@ configuration in evidence.
 
 - Create a mode-`0700` timestamped directory under
   `~/.local/state/dotfiles-hd/chezmoi-backups/`.
-- Save every transferring target before disabling its old writer.
+- Save every transferring target and the prior ownership-marker state before
+  changing writers.
 - Create a manifest containing each target path, original type, symlink
   destination when applicable, permissions, and checksum for regular files.
 - Verify the archive is readable and the manifest covers the entire profile
@@ -122,10 +123,11 @@ machine state and stay local.
 
 ### 4. Transfer Ownership and Apply
 
-- Disable the previous writer for only the approved paths. Do not archive it.
 - Apply the reviewed profile once.
 - Apply it again and require zero output and zero target changes.
 - Require empty chezmoi status.
+- Activate the host-local ownership marker only after those checks pass. The
+  previous Ubuntu link writers must then exit without writing.
 - Do not run a general package upgrade or maintenance command during cutover.
 
 If the second apply changes anything, stop and roll back.
@@ -241,7 +243,8 @@ change, broken normal workflow, or direct request from Hamel.
 1. Remove only targets listed in the backup manifest; refuse paths outside the
    user's home and the exact profile allowlist.
 1. Restore the timestamped backup with original types and permissions.
-1. Re-enable the prior writer only for the restored paths.
+1. Restore the prior ownership-marker state, which re-enables the Ubuntu link
+   writers after the initial cutover rollback.
 1. Run the existing host doctor and repeat the host-specific baseline checks.
 1. On the Mac mini, rerun read-only home-lab readiness and require the original
    runtime state without restarting anything.

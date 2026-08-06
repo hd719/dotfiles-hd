@@ -53,6 +53,18 @@ for profile in ubuntu mac-thin mac-mini work-mac; do
   diff -u "$case_dir/$profile.expected-scripts" \
     "$case_dir/$profile.managed-scripts"
 
+  rendered_git_script="$case_dir/$profile.configure-git.sh"
+  "$CHEZMOI_BIN" "${common[@]}" execute-template \
+    < "$CHEZMOI_DIR/source/run_once_after_10-configure-git.sh.tmpl" \
+    > "$rendered_git_script"
+  sh -n "$rendered_git_script"
+  if [[ "$profile" == ubuntu ]]; then
+    grep -Fq 'git config --global core.editor nvim' "$rendered_git_script"
+    grep -Fq 'git config --global core.excludesfile' "$rendered_git_script"
+  else
+    ! grep -Fq 'git config --global core.editor' "$rendered_git_script"
+  fi
+
   "$CHEZMOI_BIN" "${common[@]}" apply \
     --exclude=scripts --force --no-tty
   [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status)" ]]
@@ -100,6 +112,61 @@ grep -Fxq 'original herdr' "$rollback_home/.config/herdr/config.toml"
 [[ "$(readlink "$rollback_home/.config/hunk/config.toml")" == \
   "$rollback_home/original-hunk.toml" ]]
 [[ ! -e "$rollback_home/.zshrc" && ! -L "$rollback_home/.zshrc" ]]
+
+activation_home="$case_dir/activation/home"
+activation_state="$case_dir/activation/state"
+activation_backups="$case_dir/activation/backups"
+mkdir -p "$activation_home" "$activation_state"
+activation_backup="$({
+  DOTFILES_CHEZMOI_TEST=1 \
+    CHEZMOI_BIN="$CHEZMOI_BIN" \
+    CHEZMOI_DESTINATION="$activation_home" \
+    CHEZMOI_STATE_DIR="$activation_state" \
+    CHEZMOI_BACKUP_ROOT="$activation_backups" \
+    bash "$CHEZMOI_DIR/backup.sh" ubuntu
+})"
+grep -Fqx $'active\tabsent' "$activation_backup/metadata.tsv"
+HOME="$activation_home" \
+  DOTFILES_CHEZMOI_TEST=1 \
+  CHEZMOI_BIN="$CHEZMOI_BIN" \
+  CHEZMOI_DESTINATION="$activation_home" \
+  CHEZMOI_STATE_DIR="$activation_state" \
+  CHEZMOI_BACKUP_ROOT="$activation_backups" \
+  bash -c 'source "$1/lib.sh"; load_profile ubuntu; activate_profile' \
+  _ "$CHEZMOI_DIR"
+[[ -f "$activation_state/ubuntu-active" ]]
+DOTFILES_CHEZMOI_TEST=1 \
+  CHEZMOI_BIN="$CHEZMOI_BIN" \
+  CHEZMOI_DESTINATION="$activation_home" \
+  CHEZMOI_STATE_DIR="$activation_state" \
+  CHEZMOI_BACKUP_ROOT="$activation_backups" \
+  bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$activation_backup" \
+  > "$case_dir/activation-rollback.log"
+[[ ! -e "$activation_state/ubuntu-active" ]]
+grep -Fq 'the previous writer is active again' \
+  "$case_dir/activation-rollback.log"
+
+printf 'profile=ubuntu\ncommit=original\n' \
+  > "$activation_state/ubuntu-active"
+active_backup="$({
+  DOTFILES_CHEZMOI_TEST=1 \
+    CHEZMOI_BIN="$CHEZMOI_BIN" \
+    CHEZMOI_DESTINATION="$activation_home" \
+    CHEZMOI_STATE_DIR="$activation_state" \
+    CHEZMOI_BACKUP_ROOT="$activation_backups" \
+    bash "$CHEZMOI_DIR/backup.sh" ubuntu
+})"
+grep -Fqx $'active\tpresent' "$active_backup/metadata.tsv"
+printf 'profile=ubuntu\ncommit=changed\n' \
+  > "$activation_state/ubuntu-active"
+DOTFILES_CHEZMOI_TEST=1 \
+  CHEZMOI_BIN="$CHEZMOI_BIN" \
+  CHEZMOI_DESTINATION="$activation_home" \
+  CHEZMOI_STATE_DIR="$activation_state" \
+  CHEZMOI_BACKUP_ROOT="$activation_backups" \
+  bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$active_backup" >/dev/null
+cmp -s "$active_backup/activation-marker" \
+  "$activation_state/ubuntu-active"
 
 apply_home="$case_dir/apply/home"
 mkdir -p "$apply_home"

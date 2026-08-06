@@ -46,7 +46,9 @@ DOTFILES_CHEZMOI_APPROVED=1 \
 The Mac mini also requires `DOTFILES_MAC_MINI_CONFIG_ONLY=1`. The work Mac also
 requires `DOTFILES_WORK_MAC_OPT_IN=1`. Apply creates a mode-`0700` host-local
 backup, applies once, requires a no-op second apply, verifies empty status, and
-runs the profile doctor.
+runs the profile doctor. A successful Ubuntu apply then activates a host-local
+ownership marker. The existing link scripts become no-ops while recurring
+package and Neovim maintenance continues unchanged.
 
 Never apply an unmerged branch. Promotion order remains Ubuntu, thin Mac, Mac
 mini, then the optional work Mac. Each host needs its own approval.
@@ -63,7 +65,9 @@ Apply prints the exact command. It has this form:
 Rollback accepts only a backup under the guarded backup root and only targets
 from the selected profile manifest. It moves current chezmoi state aside,
 restores original types, links, modes, and file checksums, and retains both
-copies for review. It never uninstalls packages.
+copies for review. It also restores the prior ownership-marker state, so an
+initial Ubuntu rollback automatically re-enables the legacy link writers. It
+never uninstalls packages.
 
 ## Validate
 
