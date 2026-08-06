@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# aliases: {{ include "dot_config/git/aliases.gitconfig" | sha256sum }}
+aliases="$HOME/.config/git/aliases.gitconfig"
+
+git config --global core.editor nvim
+git config --global core.excludesfile "$HOME/.gitignore_global"
+if ! git config --global --get-all include.path 2>/dev/null | grep -Fxq "$aliases"; then
+  git config --global --add include.path "$aliases"
+fi

@@ -1,0 +1,77 @@
+# frozen_string_literal: true
+
+Vagrant.configure("2") do |config|
+  canary_dir = __dir__
+  canary_hostname = "chezmoi-ubuntu-canary"
+
+  config.vm.box = "bento/ubuntu-26.04"
+  config.vm.box_version = "202606.01.0"
+  config.vm.box_architecture = "arm64"
+  config.vm.box_check_update = false
+  config.vm.hostname = canary_hostname
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.network "forwarded_port",
+                    guest: 22,
+                    host: 2223,
+                    host_ip: "127.0.0.1",
+                    id: "ssh",
+                    auto_correct: false
+  config.vm.disk :disk, size: 80 * 1024**3, primary: true
+  config.ssh.insert_key = true
+
+  config.vm.provision "shell",
+                      inline: <<~SHELL
+                        set -eu
+                        export DEBIAN_FRONTEND=noninteractive
+                        apt-get update
+                        apt-get install -y --no-install-recommends ansible-core
+                      SHELL
+  config.vm.provision "file",
+                      source: File.join(canary_dir, "ansible"),
+                      destination: "/tmp/chezmoi-canary-ansible"
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.install = false
+    ansible.compatibility_mode = "2.0"
+    ansible.provisioning_path = "/tmp/chezmoi-canary-ansible"
+    ansible.playbook = "playbook.yml"
+  end
+  config.vm.provision "shell",
+                      inline: "rm -rf /tmp/chezmoi-source"
+  config.vm.provision "file",
+                      source: File.join(canary_dir, "source"),
+                      destination: "/tmp/chezmoi-source"
+  config.vm.provision "file",
+                      source: File.join(canary_dir, "bootstrap.sh"),
+                      destination: "/tmp/chezmoi-bootstrap.sh"
+  config.vm.provision "file",
+                      source: File.join(canary_dir, "prepare-home.sh"),
+                      destination: "/tmp/chezmoi-prepare-home.sh"
+  config.vm.provision "file",
+                      source: File.join(canary_dir, "doctor.sh"),
+                      destination: "/tmp/chezmoi-doctor.sh"
+  config.vm.provision "file",
+                      source: File.join(canary_dir, "rollback.sh"),
+                      destination: "/tmp/chezmoi-rollback.sh"
+  config.vm.provision "shell",
+                      inline: <<~SHELL
+                        set -eu
+                        chown -R hamel:hamel /tmp/chezmoi-source
+                        install -o hamel -g hamel -m 0755 /tmp/chezmoi-bootstrap.sh /home/hamel/bootstrap.sh
+                        install -o hamel -g hamel -m 0755 /tmp/chezmoi-prepare-home.sh /home/hamel/prepare-home.sh
+                        install -o hamel -g hamel -m 0755 /tmp/chezmoi-doctor.sh /home/hamel/doctor.sh
+                        install -o hamel -g hamel -m 0755 /tmp/chezmoi-rollback.sh /home/hamel/rollback.sh
+                      SHELL
+
+  config.vm.provider "vmware_desktop" do |vmware|
+    vmware.gui = false
+    vmware.linked_clone = false
+    # Keep the canary distinct from the production VM's Bento adapter identity.
+    vmware.base_mac = "00:0C:29:10:D0:E7"
+    vmware.clone_directory = File.expand_path(
+      "~/Virtual Machines.localized/VMWIsoImages"
+    )
+    vmware.vmx["displayName"] = canary_hostname
+    vmware.vmx["numvcpus"] = "4"
+    vmware.vmx["memsize"] = "8192"
+  end
+end

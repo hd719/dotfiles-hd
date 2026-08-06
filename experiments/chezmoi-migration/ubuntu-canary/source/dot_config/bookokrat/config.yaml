@@ -1,0 +1,38 @@
+version: 3
+theme: "Hamel Nord"
+margin: 0
+transparent_background: true
+pdf_scale: 1
+pdf_pan_shift: 0
+pdf_render_mode: scroll
+pdf_page_layout_mode: single
+epub_column_mode: single
+pdf_enabled: true
+pdf_settings_configured: true
+justify_text: false
+invert_scroll_direction: false
+book_sort_order: by_name
+nav_panel_width: 34
+lookup_command: null
+lookup_display: popup
+synctex_editor: null
+
+custom_themes:
+  - scheme: "Hamel Nord"
+    author: "Hamel Desai"
+    base00: "434C5E"
+    base01: "434C5E"
+    base02: "4C566A"
+    base03: "A0AEC8"
+    base04: "D8DEE9"
+    base05: "D8DEE9"
+    base06: "E5E9F0"
+    base07: "ECEFF4"
+    base08: "BF616A"
+    base09: "D08770"
+    base0A: "EBCB8B"
+    base0B: "A3BE8C"
+    base0C: "ADD3D2"
+    base0D: "88C0D0"
+    base0E: "B48EAD"
+    base0F: "88C0D0"

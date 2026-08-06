@@ -1,0 +1,29 @@
+#!/bin/sh
+
+real_codex="$HOME/.local/share/mise/shims/codex"
+forwarded_socket="${SSH_AUTH_SOCK:-}"
+agent_dir="$HOME/.ssh/agent"
+stable_socket="$agent_dir/codex-forwarded"
+
+if [ ! -x "$real_codex" ]; then
+  printf 'Codex mise shim is missing: %s\n' "$real_codex" >&2
+  exit 127
+fi
+
+if [ -n "$forwarded_socket" ] && [ -S "$forwarded_socket" ]; then
+  if [ "$forwarded_socket" != "$stable_socket" ]; then
+    temporary_socket="$agent_dir/.codex-forwarded.$$"
+    umask 077
+    if mkdir -p "$agent_dir" \
+      && chmod 700 "$agent_dir" \
+      && ln -s "$forwarded_socket" "$temporary_socket" \
+      && mv -f "$temporary_socket" "$stable_socket"; then
+      SSH_AUTH_SOCK="$stable_socket"
+      export SSH_AUTH_SOCK
+    else
+      rm -f "$temporary_socket"
+    fi
+  fi
+fi
+
+exec "$real_codex" "$@"
