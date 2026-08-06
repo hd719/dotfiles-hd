@@ -12,6 +12,8 @@ approval from Hamel.
 - Chezmoi preview shows only the approved paths.
 - The current bootstrap remains available for rollback and is not a concurrent
   writer for transferred paths.
+- The checked-out repository `config/` tree is the canonical configuration;
+  chezmoi owns only the approved profile-aware links and exceptions.
 - VM lifecycle and recurring maintenance behavior remain unchanged.
 
 ## Promotion Order

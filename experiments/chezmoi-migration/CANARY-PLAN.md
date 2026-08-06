@@ -35,9 +35,9 @@ Classify every currently managed path and package manifest as one of:
 - machine-owned mutable or secret state; or
 - excluded from the migration.
 
-Choose rendered files by default. Use explicit symlinks only where editing the
-repository through the live path is genuinely useful. Record the rollback
-source for every transferred path.
+Keep the existing repository `config/` tree canonical. Use chezmoi to declare
+profile-aware symlinks into it, and render a file only when the target cannot
+safely be a symlink. Record the rollback source for every transferred path.
 
 ## Phase 2: Disposable Ubuntu Canary
 
@@ -53,9 +53,16 @@ identities, personal state, and external enrollment.
 
 Use one Orka VM. Apply and validate the thin-Mac profile first. After that
 result is accepted, erase or rebuild the same VM and test the Mac mini profile.
+Reuse the thin-Mac implementation as the base, then add only Mac-mini-specific
+configuration links and package-manifest entries.
 
 The Mac mini simulation is user-config-only. It must not install, start, stop,
 or alter production services, launchd jobs, or runtime connections.
+
+Mac-mini delta decision recorded on 2026-08-06: because the thin-Mac base passed
+technical and interactive QA, the disposable Mac mini canary still requires
+preview, apply, no-op, doctor, exclusion, and rollback checks, but does not
+repeat the same interactive shell and editor QA.
 
 ## Acceptance Gate
 
@@ -76,6 +83,10 @@ Ubuntu canary exception recorded on 2026-08-06: after extensive interactive QA,
 Hamel explicitly accepted that prototype and waived its remaining three-day
 soak. This does not waive soak or approval gates for any later host.
 
+Thin-Mac canary result recorded on 2026-08-06: Hamel completed interactive QA
+in the disposable Orka VM, accepted the result, and requested the next gated
+step. This does not authorize a live-host apply.
+
 ## Evidence
 
 Keep only sanitized evidence under a future `evidence/` directory:
@@ -91,3 +102,4 @@ Recorded evidence:
 
 - [Orka compatibility, 2026-08-06](evidence/orka-compatibility-2026-08-06.md)
 - [Ubuntu canary, 2026-08-06](evidence/ubuntu-canary-2026-08-06.md)
+- [Thin-Mac canary, 2026-08-06](evidence/macos-thin-canary-2026-08-06.md)

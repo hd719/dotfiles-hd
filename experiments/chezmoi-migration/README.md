@@ -1,6 +1,7 @@
 # Chezmoi Migration Experiment
 
-Status: planning only. This folder does not authorize changes to any live host.
+Status: disposable canary only. This folder does not authorize changes to any
+live host.
 
 ## Destination
 
@@ -11,6 +12,10 @@ thin Mac, the Mac mini, and the work Mac.
 The experiment aims to replace most link and bootstrap orchestration with
 chezmoi. Vagrant and Ansible keep their existing VM lifecycle and system setup
 roles. Existing maintenance commands keep their public behavior.
+
+The existing repository `config/` tree remains canonical. Chezmoi owns the
+profile-aware symlinks into that tree and uses rendered files only where a
+symlink is inappropriate.
 
 ## Guardrails
 

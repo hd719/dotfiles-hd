@@ -13,8 +13,9 @@ authorize changes to a live host.
   lifecycle. Ansible keeps Ubuntu system setup.
 - Services, launchd jobs, production runtimes, mutable application data,
   credentials, identities, enrollment, and secrets remain outside chezmoi.
-- Target files are rendered by default. No profile uses live-repository
-  symlinks in the prototype.
+- The existing repository `config/` tree remains canonical. Chezmoi owns
+  profile-aware symlinks into it and renders files only when a symlink is not
+  appropriate.
 - A path has one writer. The old linker stops writing a transferred path before
   the first chezmoi apply.
 
@@ -81,7 +82,7 @@ install. Homebrew upgrades and cleanup remain maintenance-owned.
 
 Rosetta, the Vagrant VMware provider and service, `vm.zsh`, Ubuntu lifecycle,
 ops fallback, doctors, manual applications, sign-ins, permissions, and
-Tailscale enrollment remain outside chezmoi. The rendered shell entrypoint may
+Tailscale enrollment remain outside chezmoi. The managed shell entrypoint may
 source the existing VM lifecycle module, but chezmoi does not rewrite or absorb
 that module.
 
@@ -138,7 +139,8 @@ Docker data, databases, projects, shell history, Herdr sessions, Hunk state,
 Neovim data/cache/state/undo, tmux plugins, application databases, logs, or
 backup files.
 
-Whole-directory source links must be narrowed. In particular, do not render
+Whole-directory links must contain only approved declarative state. In
+particular, do not expose
 `config/btop/btop.log`, Bookokrat backups, Fastfetch legacy files, tmux plugins,
 or any generated Neovim state.
 

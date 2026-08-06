@@ -5,12 +5,13 @@ This language separates disposable proof from changes to Hamel's real machines.
 ## Language
 
 **Source state**:
-The reviewed, canonical user configuration that chezmoi can render for a
-specific profile.
+The reviewed instructions and profile data that chezmoi uses to realize the
+canonical repository configuration on a specific host.
 _Avoid_: Live dotfiles, home-directory source
 
 **Target state**:
-The user files rendered on a particular machine from the source state.
+The user files and symlinks realized on a particular machine from the source
+state.
 _Avoid_: Source files
 
 **User environment**:
