@@ -63,7 +63,7 @@ else
   fail "Herdr remote client missing"
 fi
 
-for command_name in bookokrat hunk lsd marksman nvim rg starship tree-sitter zoxide; do
+for command_name in bookokrat fastfetch hunk lsd marksman nvim rg starship tree-sitter zoxide; do
   if command -v "$command_name" >/dev/null 2>&1; then
     pass "$command_name available"
   else

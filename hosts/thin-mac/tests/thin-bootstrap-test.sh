@@ -105,6 +105,11 @@ cat > "$TEST_ROOT/bin/hunk" <<'EOF'
 exit 0
 EOF
 
+cat > "$TEST_ROOT/bin/fastfetch" <<'EOF'
+#!/bin/sh
+exit 0
+EOF
+
 cat > "$TEST_ROOT/bin/lsd" <<'EOF'
 #!/bin/sh
 exit 0
@@ -186,6 +191,7 @@ touch "$TEST_ROOT/vagrant-vmware-utility"
 chmod +x \
   "$TEST_ROOT/bin/bookokrat" \
   "$TEST_ROOT/bin/brew" \
+  "$TEST_ROOT/bin/fastfetch" \
   "$TEST_ROOT/bin/herdr" \
   "$TEST_ROOT/bin/hunk" \
   "$TEST_ROOT/bin/launchctl" \
@@ -249,6 +255,13 @@ fi
 [[ -f "$DOTFILES_TEST_ROSETTA_STATE" ]]
 [[ "$(git config --global --includes --get alias.st)" == "status" ]]
 [[ "$(readlink "$HOME/.config/bookokrat")" == "$REPO_DIR/config/bookokrat" ]]
+[[ "$(readlink "$HOME/.config/fastfetch/config.jsonc")" \
+  == "$REPO_DIR/config/fastfetch/config.jsonc" ]]
+[[ "$(readlink "$HOME/.config/fastfetch/logo-anon-glitch.txt")" \
+  == "$REPO_DIR/config/fastfetch/logo-anon-glitch.txt" ]]
+[[ "$(readlink "$HOME/.config/fastfetch/logo-anon.txt")" \
+  == "$REPO_DIR/config/fastfetch/logo-anon.txt" ]]
+[[ ! -e "$HOME/.config/fastfetch/legacy" ]]
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/hosts/thin-mac/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]
@@ -383,6 +396,7 @@ grep -Fq \
 grep -Fq 'nvim --headless +Lazy! restore +qa' "$TEST_ROOT/brew.log"
 grep -Fq "markdown_inline" "$TEST_ROOT/brew.log"
 grep -Fxq 'brew "bookokrat"' "$REPO_DIR/hosts/thin-mac/Brewfile"
+grep -Fxq 'brew "fastfetch"' "$REPO_DIR/hosts/thin-mac/Brewfile"
 grep -Fxq 'brew "gh"' "$REPO_DIR/hosts/thin-mac/Brewfile"
 grep -Fxq 'brew "herdr"' "$REPO_DIR/hosts/thin-mac/Brewfile"
 grep -Fxq 'brew "hunk"' "$REPO_DIR/hosts/thin-mac/Brewfile"
