@@ -81,6 +81,9 @@ for spec in "${LINK_SPECS[@]}"; do
   destination="${spec#*|}"
   if link_matches "$source_path" "$destination"; then
     pass "$destination -> $source_path"
+  elif chezmoi_child_links_match \
+    "$PROFILE" "$DOTFILES_DIR" "$HOME" "$source_path" "$destination"; then
+    pass "$destination uses approved chezmoi child links"
   else
     fail "link mismatch: $destination"
   fi
