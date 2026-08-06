@@ -14,7 +14,11 @@ while IFS='|' read -r relative source; do
 done < "$PROFILE_MANIFEST"
 
 printf '\nchezmoi dry run:\n'
-cm apply --dry-run --verbose --no-pager --no-tty
+if [[ "$PROFILE" == mac-mini ]]; then
+  cm apply --exclude=dirs --dry-run --verbose --no-pager --no-tty
+else
+  cm apply --dry-run --verbose --no-pager --no-tty
+fi
 
 printf '\nmissing package actions:\n'
 case "$PROFILE" in

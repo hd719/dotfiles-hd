@@ -13,6 +13,17 @@ require_canonical_checkout
 [[ "$PROFILE" != work-mac || "${DOTFILES_WORK_MAC_OPT_IN:-0}" == 1 ]] \
   || die "work Mac requires DOTFILES_WORK_MAC_OPT_IN=1"
 
+if [[ "$PROFILE" == mac-mini ]]; then
+  while IFS='|' read -r relative _source; do
+    parent="$(dirname "$(target_path "$relative")")"
+    while [[ "$parent" != "$DEST_DIR" ]]; do
+      [[ -d "$parent" && ! -L "$parent" ]] \
+        || die "Mac mini requires an existing real parent directory: $parent"
+      parent="$(dirname "$parent")"
+    done
+  done < "$PROFILE_MANIFEST"
+fi
+
 backup_dir="$($script_dir/backup.sh "$PROFILE")"
 "$script_dir/rollback.sh" "$PROFILE" "$backup_dir" --preview
 printf 'rollback command: %s/rollback.sh %s %s\n' \
@@ -25,14 +36,26 @@ if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
   activation_preexisting=1
 fi
 
-cm apply --force --no-tty
-second_apply="$(cm apply --force --no-tty --verbose 2>&1)"
+if [[ "$PROFILE" == mac-mini ]]; then
+  cm apply --exclude=dirs --force --no-tty
+  second_apply="$(cm apply --exclude=dirs --force --no-tty --verbose 2>&1)"
+else
+  cm apply --force --no-tty
+  second_apply="$(cm apply --force --no-tty --verbose 2>&1)"
+fi
 [[ -z "$second_apply" ]] || {
   printf '%s\n' "$second_apply" >&2
   die "second apply was not a no-op; roll back with $backup_dir"
 }
-[[ -z "$(cm status)" ]] || die "chezmoi reports drift; roll back with $backup_dir"
-cm verify --exclude=scripts
+if [[ "$PROFILE" == mac-mini ]]; then
+  [[ -z "$(cm status --exclude=dirs)" ]] \
+    || die "chezmoi reports drift; roll back with $backup_dir"
+  cm verify --exclude=scripts,dirs
+else
+  [[ -z "$(cm status)" ]] \
+    || die "chezmoi reports drift; roll back with $backup_dir"
+  cm verify --exclude=scripts
+fi
 
 if [[ "$PROFILE" == ubuntu ]]; then
   activate_profile

@@ -94,18 +94,19 @@ The first live Mac mini cutover is configuration-only. Chezmoi owns:
 
 - `~/.zshrc`
 - `~/.config/zsh/` for portable, non-runtime shell modules
-- `~/.config/btop/` for configuration and themes only
-- `~/.config/fastfetch/` for active configuration and assets only
 - `~/.config/bookokrat/` for declarative files only
 - `~/Library/Application Support/com.mitchellh.ghostty/config`
 - `~/.config/herdr/config.toml`
 - `~/.config/hunk/config.toml`
-- `~/.config/mise/config.toml`
 - `~/.config/nvim/` for declarative files and the lockfile
 - `~/.config/starship.toml`
 - `~/.hermes/skins/hamel-nord.yaml`
-- `~/.terminfo/78/xterm-ghostty` as a symlink to Ghostty's bundled terminfo
 - the portable Git-alias include, without owning `~/.gitconfig`
+
+The first live cutover leaves the existing whole-directory Btop, Fastfetch,
+and mise links plus terminfo under their previous owner. Moving those paths
+requires ancestor-aware rollback and is deferred from this configuration-only
+stage.
 
 Neither the shared Mac Brewfile nor `setup/mac-mini/Brewfile` transfers in the
 first live cutover. The Mac mini manifest mixes user applications with

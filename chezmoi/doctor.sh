@@ -8,11 +8,23 @@ failures=0
 pass() { printf 'PASS  %s\n' "$*"; }
 fail() { printf 'FAIL  %s\n' "$*" >&2; failures=$((failures + 1)); }
 
-status_args=()
-[[ "${DOTFILES_CHEZMOI_TEST:-0}" == 1 ]] && status_args=(--exclude=scripts)
-[[ -z "$(cm status "${status_args[@]}")" ]] \
+if [[ "$PROFILE" == mac-mini ]]; then
+  status_exclude=dirs
+  verify_exclude=scripts,dirs
+  [[ "${DOTFILES_CHEZMOI_TEST:-0}" == 1 ]] && status_exclude=scripts,dirs
+else
+  status_exclude=''
+  verify_exclude=scripts
+  [[ "${DOTFILES_CHEZMOI_TEST:-0}" == 1 ]] && status_exclude=scripts
+fi
+if [[ -n "$status_exclude" ]]; then
+  status_output="$(cm status --exclude="$status_exclude")"
+else
+  status_output="$(cm status)"
+fi
+[[ -z "$status_output" ]] \
   && pass 'chezmoi status clean' || fail 'chezmoi reports drift'
-cm verify --exclude=scripts >/dev/null \
+cm verify --exclude="$verify_exclude" >/dev/null \
   && pass 'managed targets verified' || fail 'managed targets differ'
 
 if [[ "${DOTFILES_CHEZMOI_TEST:-0}" != 1 && "$PROFILE" == ubuntu ]]; then

@@ -18,6 +18,24 @@ esac
 case_dir="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-chezmoi-test.XXXXXX")"
 trap 'rm -rf "$case_dir"' EXIT
 
+prepare_mac_mini_home() {
+  local home_dir="$1"
+  mkdir -p \
+    "$home_dir/.config/herdr" \
+    "$home_dir/.config/hunk" \
+    "$home_dir/.hermes/skins" \
+    "$home_dir/Library/Application Support/com.mitchellh.ghostty"
+  chmod 700 "$home_dir/.config" "$home_dir/.hermes"
+}
+
+path_mode() {
+  if [[ "$(uname -s)" == Darwin ]]; then
+    stat -f '%Lp' "$1"
+  else
+    stat -c '%a' "$1"
+  fi
+}
+
 for script in "$CHEZMOI_DIR"/*.sh; do
   bash -n "$script"
 done
@@ -99,6 +117,7 @@ for profile in ubuntu mac-thin mac-mini work-mac; do
   home_dir="$case_dir/$profile/home"
   state_dir="$case_dir/$profile/state"
   mkdir -p "$home_dir" "$state_dir"
+  [[ "$profile" != mac-mini ]] || prepare_mac_mini_home "$home_dir"
   common=(
     --source "$CHEZMOI_DIR/source"
     --config "$CHEZMOI_DIR/profiles/$profile.toml"
@@ -137,10 +156,19 @@ for profile in ubuntu mac-thin mac-mini work-mac; do
     ! grep -Fq 'git config --global core.editor' "$rendered_git_script"
   fi
 
-  "$CHEZMOI_BIN" "${common[@]}" apply \
-    --exclude=scripts --force --no-tty
-  [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts)" ]]
-  "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts
+  if [[ "$profile" == mac-mini ]]; then
+    "$CHEZMOI_BIN" "${common[@]}" apply \
+      --exclude=scripts,dirs --force --no-tty
+    [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts,dirs)" ]]
+    "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts,dirs
+    [[ "$(path_mode "$home_dir/.config")" == 700 ]]
+    [[ "$(path_mode "$home_dir/.hermes")" == 700 ]]
+  else
+    "$CHEZMOI_BIN" "${common[@]}" apply \
+      --exclude=scripts --force --no-tty
+    [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts)" ]]
+    "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts
+  fi
   DOTFILES_CHEZMOI_TEST=1 \
     CHEZMOI_BIN="$CHEZMOI_BIN" \
     CHEZMOI_DESTINATION="$home_dir" \
@@ -152,6 +180,7 @@ rollback_home="$case_dir/rollback/home"
 rollback_state="$case_dir/rollback/state"
 rollback_backups="$case_dir/rollback/backups"
 mkdir -p "$rollback_home/.config/herdr" "$rollback_home/.config/hunk"
+prepare_mac_mini_home "$rollback_home"
 printf 'original herdr\n' > "$rollback_home/.config/herdr/config.toml"
 printf 'original hunk\n' > "$rollback_home/original-hunk.toml"
 ln -s "$rollback_home/original-hunk.toml" \
@@ -172,7 +201,7 @@ rollback_common=(
   --persistent-state "$rollback_state/mac-mini.boltdb"
 )
 "$CHEZMOI_BIN" "${rollback_common[@]}" apply \
-  --exclude=scripts --force --no-tty
+  --exclude=scripts,dirs --force --no-tty
 
 wrong_host_backup="$rollback_backups/wrong-host-mac-mini"
 cp -a "$backup_dir" "$wrong_host_backup"
@@ -331,6 +360,7 @@ cmp -s "$active_backup/activation-marker" \
 
 apply_home="$case_dir/apply/home"
 mkdir -p "$apply_home"
+prepare_mac_mini_home "$apply_home"
 HOME="$apply_home" \
   DOTFILES_CHEZMOI_TEST=1 \
   DOTFILES_CHEZMOI_APPROVED=1 \
@@ -344,5 +374,7 @@ HOME="$apply_home" \
 grep -Fq 'PASS  mac-mini production chezmoi profile' \
   "$case_dir/apply.log"
 grep -Fq 'rollback preview passed' "$case_dir/apply.log"
+[[ "$(path_mode "$apply_home/.config")" == 700 ]]
+[[ "$(path_mode "$apply_home/.hermes")" == 700 ]]
 
 printf 'chezmoi_production_tests=ok\n'
