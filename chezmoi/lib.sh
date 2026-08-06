@@ -25,6 +25,8 @@ load_profile() {
   esac
   PROFILE_CONFIG="$PROFILES_DIR/$PROFILE.toml"
   PROFILE_MANIFEST="$PROFILES_DIR/$PROFILE.paths"
+  PROFILE_ANCESTORS="$PROFILES_DIR/$PROFILE.ancestors"
+  [[ -f "$PROFILE_ANCESTORS" ]] || PROFILE_ANCESTORS=''
   ACTIVE_MARKER="$STATE_DIR/$PROFILE-active"
   [[ -f "$PROFILE_CONFIG" && -f "$PROFILE_MANIFEST" ]] \
     || die "incomplete profile: $PROFILE"

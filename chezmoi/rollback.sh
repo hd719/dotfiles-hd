@@ -37,6 +37,40 @@ if ! diff -q \
   die "backup manifest does not match the $PROFILE allowlist"
 fi
 
+ancestor_manifest=''
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
+  ancestor_manifest="$backup_dir/ancestors.tsv"
+  [[ -r "$ancestor_manifest" ]] \
+    || die "missing ancestor backup manifest"
+  if ! diff -q \
+    <(cut -d '|' -f 1 "$PROFILE_ANCESTORS" | LC_ALL=C sort) \
+    <(cut -d '|' -f 1 "$ancestor_manifest" | LC_ALL=C sort) \
+    >/dev/null; then
+    die "ancestor backup does not match the $PROFILE allowlist"
+  fi
+  while IFS='|' read -r relative type link mode; do
+    saved="$backup_dir/ancestor-links/$relative"
+    case "$type" in
+      symlink)
+        [[ -n "$link" && -z "$mode" && -L "$saved" ]] \
+          || die "invalid ancestor symlink backup: $relative"
+        [[ "$(readlink "$saved")" == "$link" ]] \
+          || die "saved ancestor link mismatch: $relative"
+        ;;
+      directory)
+        [[ -z "$link" && "$mode" =~ ^[0-7]{3,4}$ \
+          && ! -e "$saved" && ! -L "$saved" ]] \
+          || die "invalid ancestor directory backup: $relative"
+        ;;
+      *) die "unsupported ancestor backup type: $type" ;;
+    esac
+    if [[ "$rollback_mode" == --preview ]]; then
+      printf 'would restore ancestor: %s (%s)\n' \
+        "$(target_path "$relative")" "$type"
+    fi
+  done < "$ancestor_manifest"
+fi
+
 while IFS='|' read -r relative type link mode checksum; do
   target="$(target_path "$relative")"
   saved="$backup_dir/files/$relative"
@@ -86,7 +120,38 @@ fi
 
 replaced="$backup_dir/replaced-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$replaced"
+
+under_saved_symlink_ancestor() {
+  local relative="$1" ancestor type _link _mode
+  [[ -n "$ancestor_manifest" ]] || return 1
+  while IFS='|' read -r ancestor type _link _mode; do
+    [[ "$type" == symlink ]] || continue
+    case "$relative" in
+      "$ancestor"/*) return 0 ;;
+    esac
+  done < "$ancestor_manifest"
+  return 1
+}
+
+if [[ -n "$ancestor_manifest" ]]; then
+  while IFS='|' read -r relative type link _mode; do
+    [[ "$type" == symlink ]] || continue
+    target="$(target_path "$relative")"
+    displaced="$replaced/ancestor-state/$relative"
+    if [[ -e "$target" || -L "$target" ]]; then
+      mkdir -p "$(dirname "$displaced")"
+      mv "$target" "$displaced"
+    fi
+    saved="$backup_dir/ancestor-links/$relative"
+    mkdir -p "$(dirname "$target")"
+    cp -a "$saved" "$target"
+    [[ -L "$target" && "$(readlink "$target")" == "$link" ]] \
+      || die "ancestor restore verification failed: $target"
+  done < "$ancestor_manifest"
+fi
+
 while IFS='|' read -r relative type link mode checksum; do
+  under_saved_symlink_ancestor "$relative" && continue
   target="$(target_path "$relative")"
   displaced="$replaced/$relative"
   if [[ -e "$target" || -L "$target" ]]; then
@@ -113,6 +178,18 @@ while IFS='|' read -r relative type link mode checksum; do
   [[ "$type" == absent || "$type" == symlink || "$(path_mode "$target")" == "$mode" ]] \
     || die "restored mode mismatch: $target"
 done < "$backup_dir/manifest.tsv"
+
+if [[ -n "$ancestor_manifest" ]]; then
+  while IFS='|' read -r relative type _link mode; do
+    [[ "$type" == directory ]] || continue
+    target="$(target_path "$relative")"
+    [[ -d "$target" && ! -L "$target" ]] \
+      || die "ancestor directory restore failed: $target"
+    chmod "$mode" "$target"
+    [[ "$(path_mode "$target")" == "$mode" ]] \
+      || die "ancestor directory mode restore failed: $target"
+  done < "$ancestor_manifest"
+fi
 
 if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
   mkdir -p "$replaced/activation"

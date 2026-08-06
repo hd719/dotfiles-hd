@@ -9,8 +9,6 @@
 Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
 .config/herdr/config.toml|config/herdr/config.toml
 .config/hunk/config.toml|config/hunk/config.toml
-.config/mise/config.toml|config/mise/config.toml
 .config/nvim|config/nvim
 .config/starship.toml|config/starship/starship.toml
 .hermes/skins/hamel-nord.yaml|config/hermes/skins/hamel-nord.yaml
-.terminfo/78/xterm-ghostty|@absolute:/Applications/Ghostty.app/Contents/Resources/terminfo/78/xterm-ghostty

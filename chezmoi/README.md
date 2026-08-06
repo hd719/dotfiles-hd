@@ -20,6 +20,8 @@ identity, enrollment, macOS preferences, and mutable state stay unchanged.
 
 Each `profiles/*.paths` file is the exact backup, apply, doctor, and rollback
 allowlist. `source/.chezmoiignore.tmpl` selects only that profile's entries.
+The Mac mini's reviewed `profiles/mac-mini.ancestors` file additionally records
+whole-directory links that must be restored exactly by rollback.
 
 ## Preview
 

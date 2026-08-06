@@ -63,5 +63,42 @@ done < "$PROFILE_MANIFEST"
 
 [[ -r "$manifest" && "$(wc -l < "$manifest" | tr -d ' ')" -gt 0 ]] \
   || die "backup manifest is empty"
+
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
+  ancestor_manifest="$backup_dir/ancestors.tsv"
+  ancestor_files="$backup_dir/ancestor-links"
+  mkdir -p "$ancestor_files"
+  chmod 700 "$ancestor_files"
+  while IFS='|' read -r relative source managed_mode; do
+    [[ -n "$relative" && "$managed_mode" =~ ^[0-7]{3,4}$ ]] \
+      || die "invalid ancestor allowlist entry: $relative"
+    target="$(target_path "$relative")"
+    expected="$(expected_source "$source")"
+    type=''
+    link=''
+    original_mode=''
+    if [[ -L "$target" ]]; then
+      type=symlink
+      link="$(readlink "$target")"
+      [[ "$link" == "$expected" ]] \
+        || die "unexpected ancestor link: $target"
+      saved="$ancestor_files/$relative"
+      mkdir -p "$(dirname "$saved")"
+      cp -a "$target" "$saved"
+    elif [[ -d "$target" ]]; then
+      type=directory
+      original_mode="$(path_mode "$target")"
+    else
+      die "ancestor must be a symlink or directory: $target"
+    fi
+    printf '%s|%s|%s|%s\n' \
+      "$relative" "$type" "$link" "$original_mode" \
+      >> "$ancestor_manifest"
+  done < "$PROFILE_ANCESTORS"
+  [[ -r "$ancestor_manifest" \
+    && "$(wc -l < "$ancestor_manifest" | tr -d ' ')" -gt 0 ]] \
+    || die "ancestor backup manifest is empty"
+fi
+
 printf 'backup ready: %s\n' "$backup_dir" >&2
 printf '%s\n' "$backup_dir"

@@ -14,7 +14,43 @@ while IFS='|' read -r relative source; do
 done < "$PROFILE_MANIFEST"
 
 printf '\nchezmoi dry run:\n'
-cm apply --dry-run --verbose --no-pager --no-tty
+if [[ "$PROFILE" == mac-mini ]]; then
+  while IFS='|' read -r ancestor source _mode; do
+    ancestor_target="$(target_path "$ancestor")"
+    if [[ -L "$ancestor_target" ]]; then
+      [[ "$(readlink "$ancestor_target")" == "$(expected_source "$source")" ]] \
+        || die "unexpected Mac mini ancestor link: $ancestor_target"
+      printf '  would replace parent link with managed directory: %s\n' \
+        "$ancestor_target"
+    elif [[ ! -d "$ancestor_target" ]]; then
+      die "Mac mini ancestor must be a symlink or directory: $ancestor_target"
+    fi
+  done < "$PROFILE_ANCESTORS"
+
+  preview_targets=()
+  while IFS='|' read -r relative _source; do
+    covered=0
+    while IFS='|' read -r ancestor source _mode; do
+      ancestor_target="$(target_path "$ancestor")"
+      if [[ -L "$ancestor_target" ]]; then
+        [[ "$(readlink "$ancestor_target")" == "$(expected_source "$source")" ]] \
+          || die "unexpected Mac mini ancestor link: $ancestor_target"
+        case "$relative" in
+          "$ancestor"/*) covered=1 ;;
+        esac
+      elif [[ ! -d "$ancestor_target" ]]; then
+        die "Mac mini ancestor must be a symlink or directory: $ancestor_target"
+      fi
+    done < "$PROFILE_ANCESTORS"
+    if ((covered == 0)); then
+      preview_targets+=("$(target_path "$relative")")
+    fi
+  done < "$PROFILE_MANIFEST"
+  cm apply --exclude=dirs --dry-run --verbose --no-pager --no-tty \
+    "${preview_targets[@]}"
+else
+  cm apply --dry-run --verbose --no-pager --no-tty
+fi
 
 printf '\nmissing package actions:\n'
 case "$PROFILE" in
