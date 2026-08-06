@@ -88,8 +88,10 @@ if [[ -n "$PROFILE_ANCESTORS" ]]; then
     elif [[ -d "$target" ]]; then
       type=directory
       original_mode="$(path_mode "$target")"
+    elif [[ ! -e "$target" && ! -L "$target" ]]; then
+      type=absent
     else
-      die "ancestor must be a symlink or directory: $target"
+      die "ancestor must be absent, a symlink, or a directory: $target"
     fi
     printf '%s|%s|%s|%s\n' \
       "$relative" "$type" "$link" "$original_mode" \

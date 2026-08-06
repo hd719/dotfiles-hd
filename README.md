@@ -1,16 +1,18 @@
 # dotfiles-hd
 
-Personal systems repository for Hamel's Macs and Linux workstations.
+Hamel's profile-aware dotfiles, provisioning, and machine operations.
 
-Start here when choosing the right setup path. Automation rules live in
-[`AGENTS.md`](AGENTS.md).
+## Choose a Host
 
-## Start Here
+| Host | Role | Entry point |
+| --- | --- | --- |
+| Thin Mac | Control plane for Codex, SSH, Vagrant, and VMware Fusion | [`hosts/thin-mac/README.md`](hosts/thin-mac/README.md) |
+| Ubuntu dev | Primary VM development workstation | [`hosts/ubuntu-dev/README.md`](hosts/ubuntu-dev/README.md) |
+| Mac Pro | Standalone full-development MacBook; local Brew stack, no VM | [`hosts/mac-pro/README.md`](hosts/mac-pro/README.md) |
+| Mac mini | Production runtime host | [`hosts/mac-mini/README.md`](hosts/mac-mini/README.md) |
+| Work Mac | Company-scoped terminal and editor setup | [`hosts/work-mac/README.md`](hosts/work-mac/README.md) |
 
-Clone once at the canonical path:
-
-GitHub SSH access is required because automated updates verify the exact
-canonical remote.
+Clone at the canonical path:
 
 ```bash
 mkdir -p "$HOME/Developer"
@@ -19,112 +21,77 @@ git clone git@github.com:hd719/dotfiles-hd.git \
 cd "$HOME/Developer/dotfiles-hd"
 ```
 
-If you are on a Mac, choose the Mac profile first:
+## Repository Structure
 
-| Mac                                 | Use this                                              | Runbook                                                                    |
-| ----------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| Thin personal MacBook control plane | `setup/mac-thin/bootstrap.sh`                         | [`setup/mac-thin/README.md`](setup/mac-thin/README.md)                     |
-| Full personal MacBook               | `setup/mac-bootstrap/bootstrap.sh --profile mac-pro`  | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
-| Personal Mac mini                   | `setup/mac-bootstrap/bootstrap.sh --profile mac-mini` | [`setup/mac-bootstrap/README.md`](setup/mac-bootstrap/README.md)           |
-| Resilience work Mac                 | `setup/mac-pro-resilience`                            | [`setup/mac-pro-resilience/README.md`](setup/mac-pro-resilience/README.md) |
+```text
+dotfiles-hd/
+├── AGENTS.md
+├── README.md
+├── chezmoi/                 profile-aware config delivery and rollback
+├── config/                  canonical application configuration
+├── hosts/
+│   ├── shared/macos/        shared full-Mac provisioning and doctor
+│   ├── thin-mac/            control plane, VM lifecycle, and fallback ops
+│   ├── ubuntu-dev/          Vagrant guest provisioning and maintenance
+│   ├── mac-pro/             standalone development MacBook policy
+│   ├── mac-mini/            production runtime Mac policy
+│   └── work-mac/resilience/ current work-Mac setup
+└── scripts/                 repository-wide sync utilities
+```
 
-If you are on Linux, choose the distro path:
+`config/` stays canonical and is not reorganized. Chezmoi delivers only the
+approved profile paths from that directory and each host directory. It does
+not own secrets, mutable application state, services, VM lifecycle, macOS
+preferences, or project repositories.
 
-| Linux              | Use this       | Runbook                                            |
-| ------------------ | -------------- | -------------------------------------------------- |
-| Ubuntu workstation | `setup/ubuntu` | [`setup/ubuntu/README.md`](setup/ubuntu/README.md) |
+## Common Commands
 
-Future Linux distributions should get their own `setup/<distro>/` runbook
-instead of expanding the Ubuntu path.
-
-For Mac-to-Linux learning, use the
-[Ubuntu Field Guide](setup/ubuntu/GUIDE.md).
-
-## Common Paths
-
-The reviewed chezmoi migration candidate lives in [`chezmoi/`](chezmoi/README.md).
-Until a host completes its separately approved cutover, the existing setup
-command below remains that host's active writer. Previewing chezmoi does not
-change VM lifecycle, services, or target configuration.
-
-After a reviewed change is merged, sync canonical `master` from the thin Mac:
+Sync reviewed `master` across the three personal hosts:
 
 ```bash
 scripts/sync-dotfiles.sh
 ```
 
-The helper checks all three canonical repos before the first pull and stops if
-any worktree is dirty. A clean non-`master` branch is returned to `master` only
-when its exact `HEAD` is already merged into current `origin/master`.
-
-Thin Mac plus Ubuntu VM:
+Thin Mac and Ubuntu VM:
 
 ```bash
-setup/mac-thin/bootstrap.sh --apply
+hosts/thin-mac/bootstrap.sh --apply
 uvm-up
 ```
 
-Vagrant creates the VMware ARM64 guest and runs guest-local Ansible, mise,
-dotfile linking, and the offline doctor. Register the three generated Git
-public keys, sign in to Codex, then run the full doctor inside Ubuntu.
-
-For Codex remote development, connect Ubuntu to Tailscale as `ubuntu-dev` and
-add the Mac SSH alias `ubuntu-vm-ts`. Keep `ubuntu-vm` as the local fallback.
-The Ubuntu setup keeps Codex and other mise-managed development tools current;
-run `codex login --device-auth` once inside Ubuntu before enabling the
-connection in Codex desktop.
-
-Thin Mac only:
+Standalone full-development MacBook:
 
 ```bash
-setup/mac-thin/bootstrap.sh --dry-run
-setup/mac-thin/bootstrap.sh --check
-setup/mac-thin/bootstrap.sh --apply
-setup/mac-thin/doctor.sh
+hosts/shared/macos/bootstrap.sh --profile mac-pro --dry-run
+hosts/shared/macos/bootstrap.sh --profile mac-pro --check
+hosts/shared/macos/bootstrap.sh --profile mac-pro --apply
 ```
 
-Development repositories, Docker, databases, project compilers, language
-runtimes, project dependencies, and language servers other than the thin
-profile's Marksman stay inside the Linux VMs. The local Tree-sitter CLI builds
-only Neovim's two Markdown parsers. Thin Neovim is for local configuration and
-Obsidian notes, not project development.
+The `mac-pro` profile installs its complete local package stack through the
+shared and profile Brewfiles. Exact language runtimes stay under the
+Brew-installed mise version manager. It does not install or manage Vagrant,
+VMware Fusion, or an Ubuntu VM.
 
-Full personal Mac:
+Existing production Mac mini:
 
 ```bash
-setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run
-setup/mac-bootstrap/bootstrap.sh --profile mac-pro --check
-setup/mac-bootstrap/bootstrap.sh --profile mac-pro --apply
-zsh -lic \
-  '"$HOME/Developer/dotfiles-hd/setup/mac-bootstrap/doctor.sh" --profile mac-pro'
-exec zsh -l
+hosts/shared/macos/bootstrap.sh --profile mac-mini --dry-run
+hosts/shared/macos/bootstrap.sh --profile mac-mini --check
 ```
 
-Use `mac-mini` for a new Mac mini. The existing production Mac mini requires
-the approval gate in the Mac bootstrap runbook before `--apply`.
+Apply to the Mac mini only after the reviewed change is merged and its runbook
+gates pass.
 
-## System Boundaries
+## Ownership
 
-- Thin Macs are control planes for browsers, Codex, Obsidian, thin-profile
-  Neovim, SSH, the Herdr remote client, Vagrant, and VMware Fusion.
-- Ubuntu VMs own project repositories, Docker, databases, compilers, language
-  runtimes, full-profile Neovim, project language servers, and dependencies.
-- Full personal Macs own their local development toolchain.
-- The production Mac mini has extra approval gates before bootstrap changes.
-- The Resilience work Mac is scoped to terminal and editor repair only.
-- Every shell profile uses Hunk through `hdiff`; no profile owns a Git pager.
+- `chezmoi/` owns approved user configuration links and timestamped rollback.
+- `hosts/thin-mac/` owns the Vagrant and VMware lifecycle.
+- `hosts/ubuntu-dev/` owns guest provisioning and workstation maintenance.
+- `hosts/shared/macos/` owns common full-Mac packages and operational setup.
+- `hosts/mac-pro/` and `hosts/mac-mini/` own profile package overlays and shell entry points.
+- `hosts/work-mac/resilience/` keeps its current scoped linker until a separate work-Mac rollout.
+- `scripts/` owns repository sync, not host provisioning.
 
-## Repository Map
-
-- `config/` contains portable application and tool configuration, not package
-  inventories.
-- `chezmoi/` declares profile-aware delivery into `config/`; it does not own
-  lifecycle, services, secrets, or mutable state.
-- `setup/` contains platform installers, machine overlays, tests, and runbooks.
-- Each Mac profile declares its package policy in its own `setup/*/Brewfile`.
-- Each profile owns its `.zshrc`, plugin timing, runtimes, credentials, and
-  host-specific behavior.
-- Zsh modules are shared where safe and profile-owned where machine behavior
-  differs.
-
-See [`config/nvim/README.md`](config/nvim/README.md) for the editor contract.
+Every production apply requires preview, a timestamped Chezmoi backup, a
+no-op second apply, doctor success, and a verified rollback path. Packages are
+not removed during rollback.

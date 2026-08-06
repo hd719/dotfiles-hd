@@ -14,16 +14,18 @@ while IFS='|' read -r relative source; do
 done < "$PROFILE_MANIFEST"
 
 printf '\nchezmoi dry run:\n'
-if [[ "$PROFILE" == mac-mini ]]; then
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
   while IFS='|' read -r ancestor source _mode; do
     ancestor_target="$(target_path "$ancestor")"
     if [[ -L "$ancestor_target" ]]; then
       [[ "$(readlink "$ancestor_target")" == "$(expected_source "$source")" ]] \
-        || die "unexpected Mac mini ancestor link: $ancestor_target"
+        || die "unexpected $PROFILE ancestor link: $ancestor_target"
       printf '  would replace parent link with managed directory: %s\n' \
         "$ancestor_target"
+    elif [[ ! -e "$ancestor_target" && ! -L "$ancestor_target" ]]; then
+      printf '  would create managed directory: %s\n' "$ancestor_target"
     elif [[ ! -d "$ancestor_target" ]]; then
-      die "Mac mini ancestor must be a symlink or directory: $ancestor_target"
+      die "$PROFILE ancestor must be absent, a symlink, or a directory: $ancestor_target"
     fi
   done < "$PROFILE_ANCESTORS"
 
@@ -34,12 +36,12 @@ if [[ "$PROFILE" == mac-mini ]]; then
       ancestor_target="$(target_path "$ancestor")"
       if [[ -L "$ancestor_target" ]]; then
         [[ "$(readlink "$ancestor_target")" == "$(expected_source "$source")" ]] \
-          || die "unexpected Mac mini ancestor link: $ancestor_target"
+          || die "unexpected $PROFILE ancestor link: $ancestor_target"
         case "$relative" in
           "$ancestor"/*) covered=1 ;;
         esac
-      elif [[ ! -d "$ancestor_target" ]]; then
-        die "Mac mini ancestor must be a symlink or directory: $ancestor_target"
+      elif [[ -e "$ancestor_target" && ! -d "$ancestor_target" ]]; then
+        die "$PROFILE ancestor must be absent, a symlink, or a directory: $ancestor_target"
       fi
     done < "$PROFILE_ANCESTORS"
     if ((covered == 0)); then
@@ -56,10 +58,10 @@ printf '\nmissing package actions:\n'
 case "$PROFILE" in
   ubuntu)
     if [[ -x "$HOME/.local/bin/mise" ]]; then
-      MISE_CONFIG_FILE="$REPO_DIR/setup/ubuntu/mise.toml" \
+      MISE_CONFIG_FILE="$REPO_DIR/hosts/ubuntu-dev/mise.toml" \
         "$HOME/.local/bin/mise" ls --missing || true
     else
-      printf '  install mise, then install tools from setup/ubuntu/mise.toml\n'
+      printf '  install mise, then install tools from hosts/ubuntu-dev/mise.toml\n'
     fi
     command -v mdformat >/dev/null 2>&1 \
       || printf '  install pinned mdformat bundle\n'
@@ -67,7 +69,7 @@ case "$PROFILE" in
   mac-thin)
     if command -v brew >/dev/null 2>&1; then
       HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
-        --file "$REPO_DIR/setup/mac-thin/Brewfile" || true
+        --file "$REPO_DIR/hosts/thin-mac/Brewfile" || true
     else
       printf '  Homebrew is required before the approved apply\n'
     fi
@@ -75,10 +77,20 @@ case "$PROFILE" in
   mac-mini)
     printf '  none; the first Mac mini cutover is configuration-only\n'
     ;;
+  mac-pro)
+    if command -v brew >/dev/null 2>&1; then
+      HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
+        --file "$REPO_DIR/hosts/shared/macos/Brewfile" || true
+      HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
+        --file "$REPO_DIR/hosts/mac-pro/Brewfile" || true
+    else
+      printf '  Homebrew is required before the approved apply\n'
+    fi
+    ;;
   work-mac)
     if command -v brew >/dev/null 2>&1; then
       HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
-        --file "$REPO_DIR/setup/mac-pro-resilience/Brewfile" || true
+        --file "$REPO_DIR/hosts/work-mac/resilience/Brewfile" || true
     else
       printf '  Homebrew is required before the approved apply\n'
     fi

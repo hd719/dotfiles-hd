@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 source "$script_dir/lib.sh"
@@ -13,18 +14,18 @@ require_canonical_checkout
 [[ "$PROFILE" != work-mac || "${DOTFILES_WORK_MAC_OPT_IN:-0}" == 1 ]] \
   || die "work Mac requires DOTFILES_WORK_MAC_OPT_IN=1"
 
-if [[ "$PROFILE" == mac-mini ]]; then
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
   while IFS='|' read -r relative source managed_mode; do
     target="$(target_path "$relative")"
     expected="$(expected_source "$source")"
     [[ "$managed_mode" =~ ^[0-7]{3,4}$ ]] \
-      || die "invalid Mac mini ancestor mode: $relative"
+      || die "invalid $PROFILE ancestor mode: $relative"
     if [[ -L "$target" ]]; then
       [[ "$(readlink "$target")" == "$expected" ]] \
-        || die "unexpected Mac mini ancestor link: $target"
-    else
+        || die "unexpected $PROFILE ancestor link: $target"
+    elif [[ -e "$target" ]]; then
       [[ -d "$target" ]] \
-        || die "Mac mini ancestor must be a symlink or directory: $target"
+        || die "$PROFILE ancestor must be absent, a symlink, or a directory: $target"
     fi
   done < "$PROFILE_ANCESTORS"
 
@@ -35,10 +36,18 @@ if [[ "$PROFILE" == mac-mini ]]; then
         parent_relative="${parent#"$DEST_DIR/"}"
         cut -d '|' -f 1 "$PROFILE_ANCESTORS" \
           | grep -Fqx "$parent_relative" \
-          || die "unapproved Mac mini symlink parent: $parent"
-      else
+          || die "unapproved $PROFILE symlink parent: $parent"
+      elif [[ -e "$parent" ]]; then
         [[ -d "$parent" ]] \
-          || die "Mac mini requires an existing parent directory: $parent"
+          || die "$PROFILE requires an existing parent directory: $parent"
+      else
+        parent_relative="${parent#"$DEST_DIR/"}"
+        if cut -d '|' -f 1 "$PROFILE_ANCESTORS" \
+          | grep -Fqx "$parent_relative"; then
+          :
+        elif [[ "$PROFILE" == mac-mini ]]; then
+          die "$PROFILE requires an approved parent directory: $parent"
+        fi
       fi
       parent="$(dirname "$parent")"
     done
@@ -57,15 +66,21 @@ if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
   activation_preexisting=1
 fi
 
-if [[ "$PROFILE" == mac-mini ]]; then
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
   while IFS='|' read -r relative _source managed_mode; do
     target="$(target_path "$relative")"
-    [[ -L "$target" ]] || continue
-    prepared="$backup_dir/prepared-ancestors/$relative"
-    mkdir -p "$(dirname "$prepared")"
-    mv "$target" "$prepared"
-    mkdir -m "$managed_mode" "$target"
+    if [[ -L "$target" ]]; then
+      prepared="$backup_dir/prepared-ancestors/$relative"
+      mkdir -p "$(dirname "$prepared")"
+      mv "$target" "$prepared"
+      mkdir -m "$managed_mode" "$target"
+    elif [[ ! -e "$target" ]]; then
+      mkdir -m "$managed_mode" "$target"
+    fi
   done < "$PROFILE_ANCESTORS"
+  while IFS='|' read -r relative _source; do
+    mkdir -p "$(dirname "$(target_path "$relative")")"
+  done < "$PROFILE_MANIFEST"
   cm apply --exclude=dirs --force --no-tty
   second_apply="$(cm apply --exclude=dirs --force --no-tty --verbose 2>&1)"
 else
@@ -76,7 +91,7 @@ fi
   printf '%s\n' "$second_apply" >&2
   die "second apply was not a no-op; roll back with $backup_dir"
 }
-if [[ "$PROFILE" == mac-mini ]]; then
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
   [[ -z "$(cm status --exclude=dirs)" ]] \
     || die "chezmoi reports drift; roll back with $backup_dir"
   cm verify --exclude=scripts,dirs

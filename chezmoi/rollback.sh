@@ -62,6 +62,10 @@ if [[ -n "$PROFILE_ANCESTORS" ]]; then
           && ! -e "$saved" && ! -L "$saved" ]] \
           || die "invalid ancestor directory backup: $relative"
         ;;
+      absent)
+        [[ -z "$link$mode" && ! -e "$saved" && ! -L "$saved" ]] \
+          || die "invalid absent ancestor backup: $relative"
+        ;;
       *) die "unsupported ancestor backup type: $type" ;;
     esac
     if [[ "$rollback_mode" == --preview ]]; then
@@ -150,6 +154,19 @@ if [[ -n "$ancestor_manifest" ]]; then
   done < "$ancestor_manifest"
 fi
 
+if [[ -n "$ancestor_manifest" ]]; then
+  while IFS='|' read -r relative type _link _mode; do
+    [[ "$type" == absent ]] || continue
+    target="$(target_path "$relative")"
+    [[ ! -e "$target" && ! -L "$target" ]] && continue
+    displaced="$replaced/ancestor-state/$relative"
+    mkdir -p "$(dirname "$displaced")"
+    mv "$target" "$displaced"
+    [[ ! -e "$target" && ! -L "$target" ]] \
+      || die "absent ancestor restore failed: $target"
+  done < "$ancestor_manifest"
+fi
+
 while IFS='|' read -r relative type link mode checksum; do
   under_saved_symlink_ancestor "$relative" && continue
   target="$(target_path "$relative")"
@@ -202,19 +219,10 @@ if [[ "$active_state" == present ]]; then
     || die "activation marker restore verification failed"
 fi
 
-if [[ "$PROFILE" == ubuntu && "$active_state" == absent ]]; then
-  legacy_linker="$REPO_DIR/setup/ubuntu/link-dotfiles.sh"
-  [[ -x "$legacy_linker" ]] || die "missing Ubuntu legacy linker: $legacy_linker"
-  HOME="$DEST_DIR" \
-    DOTFILES_CHEZMOI_ACTIVE_MARKER="$ACTIVE_MARKER" \
-    "$legacy_linker"
-  printf 'Ubuntu legacy links restored.\n'
-fi
-
 printf 'rollback restored: %s\n' "$backup_dir"
 printf 'displaced chezmoi state retained at: %s\n' "$replaced"
 if [[ "$active_state" == present ]]; then
   printf 'chezmoi ownership restored to its pre-apply active state.\n'
 else
-  printf 'chezmoi ownership stopped; the previous writer is active again.\n'
+  printf 'chezmoi ownership stopped; the timestamped backup state is active.\n'
 fi

@@ -8,7 +8,7 @@ failures=0
 pass() { printf 'PASS  %s\n' "$*"; }
 fail() { printf 'FAIL  %s\n' "$*" >&2; failures=$((failures + 1)); }
 
-if [[ "$PROFILE" == mac-mini ]]; then
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
   status_exclude=dirs
   verify_exclude=scripts,dirs
   [[ "${DOTFILES_CHEZMOI_TEST:-0}" == 1 ]] && status_exclude=scripts,dirs
