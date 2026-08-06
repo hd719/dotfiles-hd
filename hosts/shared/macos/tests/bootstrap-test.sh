@@ -986,6 +986,7 @@ test_profile_and_failure_guards() {
   local log="$root/commands.log"
   local profile_target="$root/profile-target"
   local drift_config="$root/drift-config.toml"
+  local failed_chezmoi="$root/failed-chezmoi.sh"
 
   mkdir -p "$home_dir/Developer"
   ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
@@ -1090,6 +1091,20 @@ test_profile_and_failure_guards() {
   fi
   TESTS=$((TESTS + 1))
   assert_eq '' "$(cat "$log")" "unapproved pin stops before package managers"
+  assert_no_path "$home_dir/.zshrc"
+
+  printf '#!/bin/sh\nexit 71\n' > "$failed_chezmoi"
+  chmod +x "$failed_chezmoi"
+  : > "$log"
+  if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" DOTFILES_DIR="$REPO_DIR" \
+    DOTFILES_ALLOW_DIRTY=1 DOTFILES_ALLOW_NONCANONICAL=1 \
+    DOTFILES_CHEZMOI_BOOTSTRAP="$failed_chezmoi" \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-pro --apply >/dev/null 2>&1; then
+    fail "Chezmoi preflight failure should stop bootstrap"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_eq '' "$(cat "$log")" "Chezmoi preflight stops before package managers"
+  assert_no_path "$home_dir/.zprofile"
   assert_no_path "$home_dir/.zshrc"
 
   : > "$log"

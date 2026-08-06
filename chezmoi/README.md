@@ -39,9 +39,12 @@ DOTFILES_CHEZMOI_APPROVED=1 \
 Mac mini also requires `DOTFILES_MAC_MINI_CONFIG_ONLY=1`. Work Mac requires
 `DOTFILES_WORK_MAC_OPT_IN=1` and remains deferred.
 
-Apply requires reviewed, clean canonical `master`. It creates a mode-`0700`
-timestamped backup, validates rollback, applies the profile, requires a no-op
-second apply, verifies clean status, and runs the profile doctor.
+Apply requires a clean canonical checkout exactly matching its reviewed remote
+branch. Production defaults to `master`. The disposable Ubuntu Vagrant canary
+may set `DOTFILES_GIT_REF`; provisioning passes that reviewed branch through to
+Chezmoi without weakening normal host applies. Apply creates a mode-`0700`
+timestamped backup, validates rollback, requires a no-op second apply, verifies
+clean status, and runs the profile doctor.
 
 The host bootstraps are the normal entry points. They retain provisioning,
 packages, VM lifecycle, maintenance, and doctor logic while delegating managed

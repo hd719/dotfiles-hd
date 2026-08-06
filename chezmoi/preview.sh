@@ -5,6 +5,14 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/lib.sh"
 load_profile "${1:-}"
 validate_profile_os
 [[ -x "$CHEZMOI_BIN" ]] || die "chezmoi is missing: run bootstrap.sh"
+[[ "${DOTFILES_CHEZMOI_REQUIRE_REVIEWED:-0}" != 1 ]] \
+  || require_canonical_checkout
+validate_profile_layout
+
+preview_state_dir="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-chezmoi-preview.XXXXXX")"
+STATE_DIR="$preview_state_dir"
+ACTIVE_MARKER="$STATE_DIR/$PROFILE-active"
+trap 'rm -rf -- "$preview_state_dir"' EXIT
 
 printf 'profile: %s\nsource: %s\ndestination: %s\n\nmanaged links:\n' \
   "$PROFILE" "$SOURCE_DIR" "$DEST_DIR"
@@ -54,45 +62,49 @@ else
   cm apply --dry-run --verbose --no-pager --no-tty
 fi
 
-printf '\nmissing package actions:\n'
-case "$PROFILE" in
-  ubuntu)
-    if [[ -x "$HOME/.local/bin/mise" ]]; then
-      MISE_CONFIG_FILE="$REPO_DIR/hosts/ubuntu-dev/mise.toml" \
-        "$HOME/.local/bin/mise" ls --missing || true
-    else
-      printf '  install mise, then install tools from hosts/ubuntu-dev/mise.toml\n'
-    fi
-    command -v mdformat >/dev/null 2>&1 \
-      || printf '  install pinned mdformat bundle\n'
-    ;;
-  mac-thin)
-    if command -v brew >/dev/null 2>&1; then
-      HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
-        --file "$REPO_DIR/hosts/thin-mac/Brewfile" || true
-    else
-      printf '  Homebrew is required before the approved apply\n'
-    fi
-    ;;
-  mac-mini)
-    printf '  none; the first Mac mini cutover is configuration-only\n'
-    ;;
-  mac-pro)
-    if command -v brew >/dev/null 2>&1; then
-      HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
-        --file "$REPO_DIR/hosts/shared/macos/Brewfile" || true
-      HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
-        --file "$REPO_DIR/hosts/mac-pro/Brewfile" || true
-    else
-      printf '  Homebrew is required before the approved apply\n'
-    fi
-    ;;
-  work-mac)
-    if command -v brew >/dev/null 2>&1; then
-      HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
-        --file "$REPO_DIR/hosts/work-mac/resilience/Brewfile" || true
-    else
-      printf '  Homebrew is required before the approved apply\n'
-    fi
-    ;;
-esac
+if [[ "${DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW:-0}" != 1 ]]; then
+  printf '\nmissing package actions:\n'
+  case "$PROFILE" in
+    ubuntu)
+      if [[ -x "$HOME/.local/bin/mise" ]]; then
+        MISE_CONFIG_FILE="$REPO_DIR/hosts/ubuntu-dev/mise.toml" \
+          "$HOME/.local/bin/mise" ls --missing || true
+      else
+        printf '  install mise, then install tools from hosts/ubuntu-dev/mise.toml\n'
+      fi
+      command -v mdformat >/dev/null 2>&1 \
+        || printf '  install pinned mdformat bundle\n'
+      ;;
+    mac-thin)
+      if command -v brew >/dev/null 2>&1; then
+        HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
+          --file "$REPO_DIR/hosts/thin-mac/Brewfile" || true
+      else
+        printf '  Homebrew is required before the approved apply\n'
+      fi
+      ;;
+    mac-mini)
+      printf '  none; the first Mac mini cutover is configuration-only\n'
+      ;;
+    mac-pro)
+      if command -v brew >/dev/null 2>&1; then
+        HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
+          --file "$REPO_DIR/hosts/shared/macos/Brewfile" || true
+        HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
+          --file "$REPO_DIR/hosts/mac-pro/Brewfile" || true
+      else
+        printf '  Homebrew is required before the approved apply\n'
+      fi
+      ;;
+    work-mac)
+      if command -v brew >/dev/null 2>&1; then
+        HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
+          --file "$REPO_DIR/hosts/work-mac/resilience/Brewfile" || true
+      else
+        printf '  Homebrew is required before the approved apply\n'
+      fi
+      ;;
+  esac
+else
+  printf '\npackage checks: skipped (configuration-only preview)\n'
+fi

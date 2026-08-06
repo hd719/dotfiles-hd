@@ -13,46 +13,7 @@ require_canonical_checkout
   || die "Mac mini requires DOTFILES_MAC_MINI_CONFIG_ONLY=1"
 [[ "$PROFILE" != work-mac || "${DOTFILES_WORK_MAC_OPT_IN:-0}" == 1 ]] \
   || die "work Mac requires DOTFILES_WORK_MAC_OPT_IN=1"
-
-if [[ -n "$PROFILE_ANCESTORS" ]]; then
-  while IFS='|' read -r relative source managed_mode; do
-    target="$(target_path "$relative")"
-    expected="$(expected_source "$source")"
-    [[ "$managed_mode" =~ ^[0-7]{3,4}$ ]] \
-      || die "invalid $PROFILE ancestor mode: $relative"
-    if [[ -L "$target" ]]; then
-      [[ "$(readlink "$target")" == "$expected" ]] \
-        || die "unexpected $PROFILE ancestor link: $target"
-    elif [[ -e "$target" ]]; then
-      [[ -d "$target" ]] \
-        || die "$PROFILE ancestor must be absent, a symlink, or a directory: $target"
-    fi
-  done < "$PROFILE_ANCESTORS"
-
-  while IFS='|' read -r relative _source; do
-    parent="$(dirname "$(target_path "$relative")")"
-    while [[ "$parent" != "$DEST_DIR" ]]; do
-      if [[ -L "$parent" ]]; then
-        parent_relative="${parent#"$DEST_DIR/"}"
-        cut -d '|' -f 1 "$PROFILE_ANCESTORS" \
-          | grep -Fqx "$parent_relative" \
-          || die "unapproved $PROFILE symlink parent: $parent"
-      elif [[ -e "$parent" ]]; then
-        [[ -d "$parent" ]] \
-          || die "$PROFILE requires an existing parent directory: $parent"
-      else
-        parent_relative="${parent#"$DEST_DIR/"}"
-        if cut -d '|' -f 1 "$PROFILE_ANCESTORS" \
-          | grep -Fqx "$parent_relative"; then
-          :
-        elif [[ "$PROFILE" == mac-mini ]]; then
-          die "$PROFILE requires an approved parent directory: $parent"
-        fi
-      fi
-      parent="$(dirname "$parent")"
-    done
-  done < "$PROFILE_MANIFEST"
-fi
+validate_profile_layout
 
 backup_dir="$($script_dir/backup.sh "$PROFILE")"
 "$script_dir/rollback.sh" "$PROFILE" "$backup_dir" --preview

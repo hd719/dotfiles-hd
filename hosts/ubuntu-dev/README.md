@@ -62,7 +62,8 @@ are disabled.
 
 Vagrant provisions the current pushed Git branch. On `master`, the normal
 rebuild stays on `master`. `DOTFILES_GIT_REF` can override this only for an
-intentional test.
+intentional disposable-VM test. Chezmoi still requires the checkout to match
+the same reviewed `origin/<branch>` commit before applying it.
 
 ## First Onboarding
 

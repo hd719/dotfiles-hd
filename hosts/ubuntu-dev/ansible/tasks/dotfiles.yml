@@ -79,5 +79,6 @@
   environment:
     HOME: "{{ workstation_home }}"
     DOTFILES_CHEZMOI_APPROVED: "1"
+    DOTFILES_CHEZMOI_REVIEWED_REF: "{{ dotfiles_git_ref }}"
   when: workstation_chezmoi_check.rc != 0
   changed_when: true

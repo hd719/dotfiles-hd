@@ -6,6 +6,7 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
 BREWFILE="$DOTFILES_DIR/hosts/thin-mac/Brewfile"
 CHEZMOI_BOOTSTRAP="${DOTFILES_CHEZMOI_BOOTSTRAP:-$DOTFILES_DIR/chezmoi/bootstrap.sh}"
+CHEZMOI_PREVIEW="${DOTFILES_CHEZMOI_PREVIEW:-$DOTFILES_DIR/chezmoi/preview.sh}"
 HOST_DOCTOR="${DOTFILES_THIN_DOCTOR:-$SCRIPT_DIR/doctor.sh}"
 MODE="dry-run"
 VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
@@ -59,6 +60,7 @@ git -C "$DOTFILES_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "not a Git checkout: $DOTFILES_DIR"
 [[ -f "$BREWFILE" ]] || die "missing Brewfile: $BREWFILE"
 [[ -x "$CHEZMOI_BOOTSTRAP" ]] || die "missing Chezmoi bootstrap: $CHEZMOI_BOOTSTRAP"
+[[ -f "$CHEZMOI_PREVIEW" ]] || die "missing Chezmoi preview: $CHEZMOI_PREVIEW"
 [[ -x "$HOST_DOCTOR" ]] || die "missing thin-Mac doctor: $HOST_DOCTOR"
 
 if [[ "$MODE" == apply ]]; then
@@ -88,6 +90,12 @@ if [[ "$MODE" == dry-run ]]; then
   say "would apply configuration and packages through Chezmoi: $BREWFILE"
   say "would install Rosetta 2 and vagrant-vmware-desktop when missing"
   say "VMware Fusion, ChatGPT, and Hermes Desktop remain manual installs"
+  if [[ -x "${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}" ]]; then
+    DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
+      bash "$CHEZMOI_PREVIEW" mac-thin
+  else
+    say "would install pinned Chezmoi, then render the configuration preview"
+  fi
   exit 0
 fi
 
@@ -100,6 +108,10 @@ if [[ "$MODE" == check ]]; then
   "$HOST_DOCTOR" || status=1
   exit "$status"
 fi
+
+DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
+  DOTFILES_CHEZMOI_REQUIRE_REVIEWED=1 \
+  "$CHEZMOI_BOOTSTRAP" mac-thin --preview >/dev/null
 
 if ! rosetta_installed; then
   say "Installing Rosetta 2 for the Vagrant VMware utility..."

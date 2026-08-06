@@ -99,11 +99,14 @@ git -C "$checkout_repo" update-ref refs/remotes/origin/master HEAD
 
 require_reviewed_checkout() {
   HOME="$checkout_home" DOTFILES_CHEZMOI_TEST=0 \
+    DOTFILES_CHEZMOI_REVIEWED_REF="${1:-master}" \
+    DOTFILES_TEST_PROFILE="${2:-ubuntu}" \
     bash -c '
       source "$1/lib.sh"
       REPO_DIR="$2"
       DEST_DIR="$HOME"
       BACKUP_ROOT="$HOME/.local/state/dotfiles-hd/chezmoi-backups"
+      PROFILE="$DOTFILES_TEST_PROFILE"
       require_canonical_checkout
     ' _ "$CHEZMOI_DIR" "$checkout_repo"
 }
@@ -126,6 +129,54 @@ checkout_status=$?
 set -e
 ((checkout_status != 0))
 [[ "$checkout_output" == *"master does not match origin/master"* ]]
+
+git -C "$checkout_repo" checkout -q -b canary refs/remotes/origin/master
+git -C "$checkout_repo" commit -q --allow-empty -m reviewed-canary
+git -C "$checkout_repo" update-ref refs/remotes/origin/canary HEAD
+set +e
+checkout_output="$(require_reviewed_checkout 2>&1)"
+checkout_status=$?
+set -e
+((checkout_status != 0))
+[[ "$checkout_output" == *"apply requires reviewed master"* ]]
+require_reviewed_checkout canary
+set +e
+checkout_output="$(require_reviewed_checkout canary mac-thin 2>&1)"
+checkout_status=$?
+set -e
+((checkout_status != 0))
+[[ "$checkout_output" == *"custom reviewed branches are limited to the Ubuntu canary"* ]]
+git -C "$checkout_repo" commit -q --allow-empty -m unreviewed-canary
+set +e
+checkout_output="$(require_reviewed_checkout canary 2>&1)"
+checkout_status=$?
+set -e
+((checkout_status != 0))
+[[ "$checkout_output" == *"canary does not match origin/canary"* ]]
+set +e
+checkout_output="$(require_reviewed_checkout -bad 2>&1)"
+checkout_status=$?
+set -e
+((checkout_status != 0))
+[[ "$checkout_output" == *"invalid reviewed branch: -bad"* ]]
+
+layout_home="$case_dir/layout/home"
+layout_target="$case_dir/layout/config-target"
+mkdir -p "$layout_home" "$layout_target"
+ln -s "$layout_target" "$layout_home/.config"
+set +e
+layout_output="$({
+  HOME="$layout_home" \
+    DOTFILES_CHEZMOI_TEST=1 \
+    DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
+    CHEZMOI_BIN="$CHEZMOI_BIN" \
+    CHEZMOI_DESTINATION="$layout_home" \
+    bash "$CHEZMOI_DIR/preview.sh" mac-thin
+} 2>&1)"
+layout_status=$?
+set -e
+((layout_status != 0))
+[[ "$layout_output" == *"unapproved mac-thin symlink parent"* ]]
 
 for profile in ubuntu mac-thin mac-pro mac-mini work-mac; do
   home_dir="$case_dir/$profile/home"

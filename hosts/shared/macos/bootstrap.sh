@@ -6,6 +6,7 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
 STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 CHEZMOI_BOOTSTRAP="${DOTFILES_CHEZMOI_BOOTSTRAP:-$DOTFILES_DIR/chezmoi/bootstrap.sh}"
+CHEZMOI_PREVIEW="${DOTFILES_CHEZMOI_PREVIEW:-$DOTFILES_DIR/chezmoi/preview.sh}"
 HOST_DOCTOR="${DOTFILES_MAC_DOCTOR:-$SCRIPT_DIR/doctor.sh}"
 PROFILE=""
 MODE="dry-run"
@@ -88,6 +89,7 @@ require_source "$PROFILE_BREWFILE"
 require_source "$MISE_CONFIG"
 require_source "$MISE_FRAGMENT"
 require_source "$CHEZMOI_BOOTSTRAP"
+require_source "$CHEZMOI_PREVIEW"
 require_source "$HOST_DOCTOR"
 load_mise_specs "$MISE_CONFIG"
 validate_approved_mise_pins
@@ -112,6 +114,12 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "would run the verification doctor"
 
   write_zprofile_block "$HOME/.zprofile" "$MISE_FRAGMENT" "$STAMP" 1
+  if [[ -x "${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}" ]]; then
+    DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
+      bash "$CHEZMOI_PREVIEW" "$PROFILE"
+  else
+    say "would install pinned Chezmoi, then render the configuration preview"
+  fi
   exit 0
 fi
 
@@ -141,6 +149,12 @@ if [[ "$MODE" == "check" ]]; then
   "$HOST_DOCTOR" --profile "$PROFILE" || status=1
   exit "$status"
 fi
+
+# Stop before package and shell mutations unless the selected configuration
+# is safe to apply from the reviewed checkout.
+DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
+  DOTFILES_CHEZMOI_REQUIRE_REVIEWED=1 \
+  "$CHEZMOI_BOOTSTRAP" "$PROFILE" --preview >/dev/null
 
 say "Installing shared Homebrew dependencies without broad upgrades..."
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$COMMON_BREWFILE"

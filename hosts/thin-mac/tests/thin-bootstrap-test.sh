@@ -235,6 +235,16 @@ export DOTFILES_CHEZMOI_DOCTOR=/usr/bin/true
 "$REPO_DIR/hosts/thin-mac/bootstrap.sh" --dry-run >/dev/null
 [[ ! -e "$HOME/.zshrc" ]]
 
+printf '#!/bin/sh\nexit 71\n' > "$TEST_ROOT/failed-chezmoi.sh"
+chmod +x "$TEST_ROOT/failed-chezmoi.sh"
+if DOTFILES_CHEZMOI_BOOTSTRAP="$TEST_ROOT/failed-chezmoi.sh" \
+  "$REPO_DIR/hosts/thin-mac/bootstrap.sh" --apply >/dev/null 2>&1; then
+  printf 'Chezmoi preflight failure should stop thin bootstrap.\n' >&2
+  exit 1
+fi
+[[ ! -e "$DOTFILES_TEST_ROSETTA_STATE" ]]
+[[ ! -s "$DOTFILES_TEST_BREW_LOG" ]]
+
 "$REPO_DIR/hosts/thin-mac/bootstrap.sh" --apply >/dev/null
 [[ -f "$DOTFILES_TEST_ROSETTA_STATE" ]]
 [[ "$(git config --global --includes --get alias.st)" == "status" ]]

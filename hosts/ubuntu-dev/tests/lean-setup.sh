@@ -230,6 +230,10 @@ test_vagrant_ansible_contract() {
     'cmd: bash chezmoi/doctor.sh ubuntu'
   assert_file_contains "$ANSIBLE_DIR/tasks/dotfiles.yml" \
     'cmd: bash chezmoi/bootstrap.sh ubuntu --apply'
+  assert_file_contains "$ANSIBLE_DIR/tasks/dotfiles.yml" \
+    'DOTFILES_CHEZMOI_REVIEWED_REF: "{{ dotfiles_git_ref }}"'
+  assert_file_contains "$ANSIBLE_DIR/tasks/verify.yml" \
+    'DOTFILES_EXPECTED_BRANCH: "{{ dotfiles_git_ref }}"'
   [[ ! -e "$ROOT_DIR/hosts/ubuntu-dev/link-dotfiles.sh" ]] \
     || fail "superseded Ubuntu link writer still exists"
 
