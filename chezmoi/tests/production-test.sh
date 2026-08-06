@@ -139,7 +139,7 @@ for profile in ubuntu mac-thin mac-mini work-mac; do
 
   "$CHEZMOI_BIN" "${common[@]}" apply \
     --exclude=scripts --force --no-tty
-  [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status)" ]]
+  [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts)" ]]
   "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts
   DOTFILES_CHEZMOI_TEST=1 \
     CHEZMOI_BIN="$CHEZMOI_BIN" \
@@ -237,6 +237,42 @@ grep -Fxq 'original herdr' "$rollback_home/.config/herdr/config.toml"
 [[ "$(readlink "$rollback_home/.config/hunk/config.toml")" == \
   "$rollback_home/original-hunk.toml" ]]
 [[ ! -e "$rollback_home/.zshrc" && ! -L "$rollback_home/.zshrc" ]]
+
+legacy_home="$case_dir/legacy-rollback/home"
+legacy_state="$case_dir/legacy-rollback/state"
+legacy_backups="$case_dir/legacy-rollback/backups"
+mkdir -p "$legacy_home/.config" "$legacy_state"
+ln -s "$REPO_DIR/config/btop" "$legacy_home/.config/btop"
+ln -s "$REPO_DIR/config/fastfetch" "$legacy_home/.config/fastfetch"
+legacy_backup="$(
+  DOTFILES_CHEZMOI_TEST=1 \
+    CHEZMOI_BIN="$CHEZMOI_BIN" \
+    CHEZMOI_DESTINATION="$legacy_home" \
+    CHEZMOI_STATE_DIR="$legacy_state" \
+    CHEZMOI_BACKUP_ROOT="$legacy_backups" \
+    bash "$CHEZMOI_DIR/backup.sh" ubuntu
+)"
+legacy_common=(
+  --source "$CHEZMOI_DIR/source"
+  --config "$CHEZMOI_DIR/profiles/ubuntu.toml"
+  --destination "$legacy_home"
+  --persistent-state "$legacy_state/ubuntu.boltdb"
+)
+"$CHEZMOI_BIN" "${legacy_common[@]}" apply \
+  --exclude=scripts --force --no-tty
+[[ -d "$legacy_home/.config/btop" && ! -L "$legacy_home/.config/btop" ]]
+[[ -d "$legacy_home/.config/fastfetch" && ! -L "$legacy_home/.config/fastfetch" ]]
+HOME="$legacy_home" \
+  DOTFILES_CHEZMOI_TEST=1 \
+  CHEZMOI_BIN="$CHEZMOI_BIN" \
+  CHEZMOI_DESTINATION="$legacy_home" \
+  CHEZMOI_STATE_DIR="$legacy_state" \
+  CHEZMOI_BACKUP_ROOT="$legacy_backups" \
+  bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$legacy_backup" \
+  > "$case_dir/legacy-rollback.log"
+[[ "$(readlink "$legacy_home/.config/btop")" == "$REPO_DIR/config/btop" ]]
+[[ "$(readlink "$legacy_home/.config/fastfetch")" == \
+  "$REPO_DIR/config/fastfetch" ]]
 
 activation_home="$case_dir/activation/home"
 activation_state="$case_dir/activation/state"

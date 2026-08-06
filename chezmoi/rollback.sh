@@ -125,6 +125,15 @@ if [[ "$active_state" == present ]]; then
     || die "activation marker restore verification failed"
 fi
 
+if [[ "$PROFILE" == ubuntu && "$active_state" == absent ]]; then
+  legacy_linker="$REPO_DIR/setup/ubuntu/link-dotfiles.sh"
+  [[ -x "$legacy_linker" ]] || die "missing Ubuntu legacy linker: $legacy_linker"
+  HOME="$DEST_DIR" \
+    DOTFILES_CHEZMOI_ACTIVE_MARKER="$ACTIVE_MARKER" \
+    "$legacy_linker"
+  printf 'Ubuntu legacy links restored.\n'
+fi
+
 printf 'rollback restored: %s\n' "$backup_dir"
 printf 'displaced chezmoi state retained at: %s\n' "$replaced"
 if [[ "$active_state" == present ]]; then
