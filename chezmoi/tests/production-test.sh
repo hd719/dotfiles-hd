@@ -21,6 +21,8 @@ trap 'rm -rf "$case_dir"' EXIT
 prepare_mac_mini_home() {
   local home_dir="$1"
   mkdir -p \
+    "$home_dir/.config/btop" \
+    "$home_dir/.config/fastfetch" \
     "$home_dir/.config/herdr" \
     "$home_dir/.config/hunk" \
     "$home_dir/.hermes/skins" \
@@ -44,6 +46,7 @@ done
 bootstrap_home="$case_dir/bootstrap/home"
 bootstrap_bin="$case_dir/bootstrap/chezmoi"
 mkdir -p "$bootstrap_home"
+prepare_mac_mini_home "$bootstrap_home"
 cat > "$bootstrap_bin" <<'EOF'
 #!/bin/sh
 if [ "${1:-}" = --version ]; then
@@ -181,6 +184,9 @@ rollback_state="$case_dir/rollback/state"
 rollback_backups="$case_dir/rollback/backups"
 mkdir -p "$rollback_home/.config/herdr" "$rollback_home/.config/hunk"
 prepare_mac_mini_home "$rollback_home"
+rmdir "$rollback_home/.config/btop" "$rollback_home/.config/fastfetch"
+ln -s "$REPO_DIR/config/btop" "$rollback_home/.config/btop"
+ln -s "$REPO_DIR/config/fastfetch" "$rollback_home/.config/fastfetch"
 printf 'original herdr\n' > "$rollback_home/.config/herdr/config.toml"
 printf 'original hunk\n' > "$rollback_home/original-hunk.toml"
 ln -s "$rollback_home/original-hunk.toml" \
@@ -200,6 +206,9 @@ rollback_common=(
   --destination "$rollback_home"
   --persistent-state "$rollback_state/mac-mini.boltdb"
 )
+unlink "$rollback_home/.config/btop"
+unlink "$rollback_home/.config/fastfetch"
+mkdir -m 700 "$rollback_home/.config/btop" "$rollback_home/.config/fastfetch"
 "$CHEZMOI_BIN" "${rollback_common[@]}" apply \
   --exclude=scripts,dirs --force --no-tty
 
@@ -265,6 +274,10 @@ DOTFILES_CHEZMOI_TEST=1 \
 grep -Fxq 'original herdr' "$rollback_home/.config/herdr/config.toml"
 [[ "$(readlink "$rollback_home/.config/hunk/config.toml")" == \
   "$rollback_home/original-hunk.toml" ]]
+[[ "$(readlink "$rollback_home/.config/btop")" == \
+  "$REPO_DIR/config/btop" ]]
+[[ "$(readlink "$rollback_home/.config/fastfetch")" == \
+  "$REPO_DIR/config/fastfetch" ]]
 [[ ! -e "$rollback_home/.zshrc" && ! -L "$rollback_home/.zshrc" ]]
 
 legacy_home="$case_dir/legacy-rollback/home"
@@ -361,6 +374,9 @@ cmp -s "$active_backup/activation-marker" \
 apply_home="$case_dir/apply/home"
 mkdir -p "$apply_home"
 prepare_mac_mini_home "$apply_home"
+rmdir "$apply_home/.config/btop" "$apply_home/.config/fastfetch"
+ln -s "$REPO_DIR/config/btop" "$apply_home/.config/btop"
+ln -s "$REPO_DIR/config/fastfetch" "$apply_home/.config/fastfetch"
 HOME="$apply_home" \
   DOTFILES_CHEZMOI_TEST=1 \
   DOTFILES_CHEZMOI_APPROVED=1 \
@@ -376,5 +392,13 @@ grep -Fq 'PASS  mac-mini production chezmoi profile' \
 grep -Fq 'rollback preview passed' "$case_dir/apply.log"
 [[ "$(path_mode "$apply_home/.config")" == 700 ]]
 [[ "$(path_mode "$apply_home/.hermes")" == 700 ]]
+[[ -d "$apply_home/.config/btop" && ! -L "$apply_home/.config/btop" ]]
+[[ -d "$apply_home/.config/fastfetch" && ! -L "$apply_home/.config/fastfetch" ]]
+[[ "$(path_mode "$apply_home/.config/btop")" == 700 ]]
+[[ "$(path_mode "$apply_home/.config/fastfetch")" == 700 ]]
+[[ "$(readlink "$apply_home/.config/btop/btop.conf")" == \
+  "$REPO_DIR/config/btop/btop.conf" ]]
+[[ "$(readlink "$apply_home/.config/fastfetch/config.jsonc")" == \
+  "$REPO_DIR/config/fastfetch/config.jsonc" ]]
 
 printf 'chezmoi_production_tests=ok\n'

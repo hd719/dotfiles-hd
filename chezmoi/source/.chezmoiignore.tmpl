@@ -11,9 +11,11 @@
 .local
 20-install-ubuntu-tools.sh
 {{- end }}
-{{- if ne .profile "ubuntu" }}
+{{- if and (ne .profile "ubuntu") (ne .profile "mac-mini") }}
 .config/btop
 .config/fastfetch
+{{- end }}
+{{- if ne .profile "ubuntu" }}
 .config/mise
 {{- end }}
 {{- if eq .profile "ubuntu" }}

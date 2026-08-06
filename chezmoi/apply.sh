@@ -14,11 +14,32 @@ require_canonical_checkout
   || die "work Mac requires DOTFILES_WORK_MAC_OPT_IN=1"
 
 if [[ "$PROFILE" == mac-mini ]]; then
+  while IFS='|' read -r relative source managed_mode; do
+    target="$(target_path "$relative")"
+    expected="$(expected_source "$source")"
+    [[ "$managed_mode" =~ ^[0-7]{3,4}$ ]] \
+      || die "invalid Mac mini ancestor mode: $relative"
+    if [[ -L "$target" ]]; then
+      [[ "$(readlink "$target")" == "$expected" ]] \
+        || die "unexpected Mac mini ancestor link: $target"
+    else
+      [[ -d "$target" ]] \
+        || die "Mac mini ancestor must be a symlink or directory: $target"
+    fi
+  done < "$PROFILE_ANCESTORS"
+
   while IFS='|' read -r relative _source; do
     parent="$(dirname "$(target_path "$relative")")"
     while [[ "$parent" != "$DEST_DIR" ]]; do
-      [[ -d "$parent" && ! -L "$parent" ]] \
-        || die "Mac mini requires an existing real parent directory: $parent"
+      if [[ -L "$parent" ]]; then
+        parent_relative="${parent#"$DEST_DIR/"}"
+        cut -d '|' -f 1 "$PROFILE_ANCESTORS" \
+          | grep -Fqx "$parent_relative" \
+          || die "unapproved Mac mini symlink parent: $parent"
+      else
+        [[ -d "$parent" ]] \
+          || die "Mac mini requires an existing parent directory: $parent"
+      fi
       parent="$(dirname "$parent")"
     done
   done < "$PROFILE_MANIFEST"
@@ -37,6 +58,14 @@ if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
 fi
 
 if [[ "$PROFILE" == mac-mini ]]; then
+  while IFS='|' read -r relative _source managed_mode; do
+    target="$(target_path "$relative")"
+    [[ -L "$target" ]] || continue
+    prepared="$backup_dir/prepared-ancestors/$relative"
+    mkdir -p "$(dirname "$prepared")"
+    mv "$target" "$prepared"
+    mkdir -m "$managed_mode" "$target"
+  done < "$PROFILE_ANCESTORS"
   cm apply --exclude=dirs --force --no-tty
   second_apply="$(cm apply --exclude=dirs --force --no-tty --verbose 2>&1)"
 else
