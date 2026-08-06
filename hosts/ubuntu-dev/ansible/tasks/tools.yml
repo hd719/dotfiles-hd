@@ -1,0 +1,130 @@
+---
+- name: Check the mise-owned development toolchain
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: bash hosts/ubuntu-dev/setup-neovim.sh --check
+    chdir: "{{ dotfiles_dir }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+  register: mise_toolchain_check
+  changed_when: false
+  failed_when: false
+
+- name: Install the mise-owned development toolchain
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: bash hosts/ubuntu-dev/setup-neovim.sh
+    chdir: "{{ dotfiles_dir }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+  when: mise_toolchain_check.rc != 0
+  changed_when: true
+
+- name: Create the user font root
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/fonts"
+    state: directory
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0755"
+
+- name: Check installed workstation font versions
+  # Fontconfig resolves ~/.local/share/fonts for the invoking user.
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    argv:
+      - bash
+      - -c
+      - >-
+        grep -Fx "$1" "$2" &&
+        fc-list | grep -F "$3" >/dev/null
+      - check-font
+      - "{{ item.version }}"
+      - "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}/.font-version"
+      - "{{ item.family }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+    XDG_DATA_HOME: "{{ workstation_home }}/.local/share"
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: workstation_font_checks
+  changed_when: false
+  failed_when: false
+
+- name: Download verified workstation font archives
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "/tmp/{{ item.archive }}"
+    checksum: "sha256:{{ item.sha256 }}"
+    mode: "0644"
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
+
+- name: Remove outdated workstation font directories
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}"
+    state: absent
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
+
+- name: Create workstation font directories
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}"
+    state: directory
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0755"
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
+
+- name: Install workstation fonts
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ item.archive }}"
+    dest: "{{ workstation_home }}/.local/share/fonts/{{ item.directory }}"
+    remote_src: true
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
+
+- name: Record installed workstation font versions
+  ansible.builtin.copy:
+    dest: >-
+      {{ workstation_home }}/.local/share/fonts/{{ item.directory }}/.font-version
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0644"
+    content: "{{ item.version }}\n"
+  loop: "{{ workstation_fonts }}"
+  loop_control:
+    index_var: font_index
+    label: "{{ item.name }}"
+  when: workstation_font_checks.results[font_index].rc != 0
+
+- name: Refresh the user font cache
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: "fc-cache -f {{ workstation_home }}/.local/share/fonts"
+  when: >-
+    workstation_font_checks.results
+    | selectattr('rc', 'ne', 0)
+    | list
+    | length > 0
+  changed_when: true

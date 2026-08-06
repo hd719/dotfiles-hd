@@ -18,20 +18,21 @@ constraints, and agent workflow policy here.
 
 | Target                                     | Source of truth                      |
 | ------------------------------------------ | ------------------------------------ |
-| Thin personal MacBook (`mac-thin`)         | `setup/mac-thin/README.md`           |
-| Personal MacBook (`mac-pro`)               | `setup/mac-bootstrap/README.md`      |
-| Personal Mac mini (`mac-mini`)             | `setup/mac-bootstrap/README.md`      |
-| Resilience work Mac (`mac-pro-resilience`) | `setup/mac-pro-resilience/README.md` |
-| Ubuntu workstation                         | `setup/ubuntu/README.md`             |
+| Thin personal MacBook (`mac-thin`)         | `hosts/thin-mac/README.md`           |
+| Standalone development MacBook (`mac-pro`) | `hosts/mac-pro/README.md`             |
+| Personal Mac mini (`mac-mini`)             | `hosts/mac-mini/README.md`            |
+| Resilience work Mac (`work-mac`)           | `hosts/work-mac/README.md`            |
+| Ubuntu workstation                         | `hosts/ubuntu-dev/README.md`          |
 
-`config/` holds portable configuration. `setup/` holds platform installers and
-machine policy. Profile link inventories live in their matching runbooks.
+`config/` holds portable configuration and must not be reorganized casually.
+`chezmoi/` owns approved user-config delivery and rollback. `hosts/` owns
+host-specific provisioning, lifecycle, maintenance, doctors, and runbooks.
 
 ## Change Safety
 
 - Change only the requested profile and files.
-- Back up every replaced file, directory, or dangling link beside the original
-  using that profile's timestamped backup convention.
+- Back up every Chezmoi-managed target in its timestamped, mode-`0700` backup
+  before apply. Keep profile-owned operational backup formats where documented.
 - Verify each link with `readlink` plus `test -e` and `test -L`.
 - Update the matching inventory when link ownership changes.
 - Never copy or replace credentials, Git/SSH/GitHub auth, certificates,
@@ -62,7 +63,8 @@ request into a full-machine migration.
 
 ## Package Ownership
 
-- Mac package policy lives only in the target profile's `setup/*/Brewfile`.
+- Mac package policy lives only in `hosts/shared/macos/Brewfile` and the
+  target profile's `hosts/*/Brewfile`.
   Do not keep generated Homebrew inventories or transitive dependency lists
   under `config/`.
 - Use pnpm for dotfiles-managed global Node tools unless a profile runbook
@@ -86,7 +88,7 @@ request into a full-machine migration.
 - MacBook and Mac mini profiles load both.
 - Resilience loads the shared interface plus work-owned behavior, never the
   personal layer.
-- Ubuntu keeps profile-specific shell behavior under `setup/`.
+- Ubuntu keeps profile-specific shell behavior under `hosts/ubuntu-dev/`.
 - Add `config/zsh/linux/` only when multiple Linux profiles share Linux-only
   modules.
 - Each profile owns plugin timing, runtimes, credentials, and its `.zshrc`
@@ -97,10 +99,10 @@ request into a full-machine migration.
 The restored thin MacBook uses only:
 
 ```bash
-setup/mac-thin/bootstrap.sh --dry-run
-setup/mac-thin/bootstrap.sh --check
-setup/mac-thin/bootstrap.sh --apply
-setup/mac-thin/doctor.sh
+hosts/thin-mac/bootstrap.sh --dry-run
+hosts/thin-mac/bootstrap.sh --check
+hosts/thin-mac/bootstrap.sh --apply
+hosts/thin-mac/doctor.sh
 ```
 
 Keep development repositories, Docker, databases, compilers, language
@@ -128,14 +130,17 @@ server. Do not run the full `mac-pro` bootstrap on the thin host.
   disk. A backup is incomplete until transcript and database parity checks
   pass.
 
-Full-development personal Macs use only:
+Standalone full-development MacBooks use only:
 
 ```bash
-setup/mac-bootstrap/bootstrap.sh --profile mac-pro --dry-run
-setup/mac-bootstrap/bootstrap.sh --profile mac-pro --check
-setup/mac-bootstrap/bootstrap.sh --profile mac-pro --apply
-setup/mac-bootstrap/doctor.sh --profile mac-pro
+hosts/shared/macos/bootstrap.sh --profile mac-pro --dry-run
+hosts/shared/macos/bootstrap.sh --profile mac-pro --check
+hosts/shared/macos/bootstrap.sh --profile mac-pro --apply
+hosts/shared/macos/doctor.sh --profile mac-pro
 ```
+
+`mac-pro` installs the complete local development toolchain through Homebrew
+and mise. It owns no Vagrant, VMware Fusion, or Ubuntu VM lifecycle.
 
 Substitute `mac-mini` for a new mini. Apply only from a clean canonical clone.
 The bootstrap may manage links and one marked `~/.zprofile` block; it must not
@@ -154,8 +159,8 @@ Service lifecycle changes require separate approval.
 
 - Manage only Ghostty, Herdr, Hunk, Neovim, Bookokrat, and the portable Git
   alias include.
-- Use `setup/mac-pro-resilience/Brewfile` and
-  `setup/mac-pro-resilience/link-terminal-editor-config.sh`.
+- Use `hosts/work-mac/resilience/Brewfile` and
+  `hosts/work-mac/resilience/link-terminal-editor-config.sh`.
 - Never run the personal Mac bootstrap or the Mac mini Brewfile.
 - Keep the live work `~/.zshrc`, `config/mise`, Git identity, work runtimes,
   credentials, certificates, and Docker state machine-owned.
@@ -167,9 +172,9 @@ for those five links. Do not replace it with ad hoc `ln -s` commands.
 
 ## Ubuntu
 
-Follow `setup/ubuntu/README.md`. Vagrant owns the VM lifecycle, guest-local
+Follow `hosts/ubuntu-dev/README.md`. Vagrant owns the VM lifecycle, guest-local
 Ansible owns system setup, mise owns development tools, and dotfiles owns user
-links. Use `setup/ubuntu/GUIDE.md` for Mac-to-Ubuntu teaching and keep its
+links. Use `hosts/ubuntu-dev/GUIDE.md` for Mac-to-Ubuntu teaching and keep its
 commands aligned with the supported workstation.
 
 - Keep `~/.gitconfig` machine-owned. Hunk is the shared diff viewer through
@@ -223,9 +228,9 @@ Run checks that match the changed surface:
 ```bash
 git diff --check
 bash scripts/tests/sync-dotfiles-test.sh
-bash setup/mac-bootstrap/tests/bootstrap-test.sh
-bash setup/ubuntu/tests/lean-setup.sh
-bash setup/ubuntu/doctor.sh
+bash hosts/shared/macos/tests/bootstrap-test.sh
+bash hosts/ubuntu-dev/tests/lean-setup.sh
+bash hosts/ubuntu-dev/doctor.sh
 ```
 
 Run `mdformat --check` on changed Markdown files. For shell changes, run

@@ -1,5 +1,5 @@
 {{- if eq .profile "ubuntu" -}}
-{{ joinPath .chezmoi.sourceDir ".." ".." "setup" "ubuntu" "mise.toml" }}
+{{ joinPath .chezmoi.sourceDir ".." ".." "hosts" "ubuntu-dev" "mise.toml" }}
 {{- else -}}
 {{ joinPath .chezmoi.sourceDir ".." ".." "config" "mise" "config.toml" }}
 {{- end -}}

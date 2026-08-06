@@ -1,0 +1,84 @@
+---
+- name: Create the development root
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/Developer"
+    state: directory
+    owner: "{{ workstation_user }}"
+    group: "{{ workstation_user }}"
+    mode: "0755"
+
+- name: Check whether dotfiles are already cloned
+  ansible.builtin.stat:
+    path: "{{ dotfiles_dir }}/.git"
+  register: workstation_dotfiles_checkout
+
+- name: Clone the public dotfiles repository over HTTPS initially
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.git:
+    repo: "{{ dotfiles_repository_https }}"
+    dest: "{{ dotfiles_dir }}"
+    version: "{{ dotfiles_git_ref }}"
+    update: true
+    force: false
+  when: not workstation_dotfiles_checkout.stat.exists
+
+- name: Read the existing dotfiles origin
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    argv:
+      - git
+      - -C
+      - "{{ dotfiles_dir }}"
+      - remote
+      - get-url
+      - origin
+  register: workstation_dotfiles_origin
+  changed_when: false
+
+- name: Verify the dotfiles origin
+  ansible.builtin.assert:
+    that:
+      - >-
+        workstation_dotfiles_origin.stdout in
+        [dotfiles_repository_https, dotfiles_repository_ssh]
+    fail_msg: The existing dotfiles checkout has an unexpected origin.
+
+# Reuse the existing URL so later provisions preserve the SSH switch made
+# during manual key onboarding.
+- name: Synchronize the existing dotfiles checkout
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.git:
+    repo: "{{ workstation_dotfiles_origin.stdout }}"
+    dest: "{{ dotfiles_dir }}"
+    version: "{{ dotfiles_git_ref }}"
+    update: true
+    force: false
+  when: workstation_dotfiles_checkout.stat.exists
+
+- name: Check the Chezmoi-managed user configuration
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: bash chezmoi/doctor.sh ubuntu
+    chdir: "{{ dotfiles_dir }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+  register: workstation_chezmoi_check
+  changed_when: false
+  failed_when: false
+
+- name: Apply the Chezmoi-managed user configuration
+  become: true
+  become_user: "{{ workstation_user }}"
+  ansible.builtin.command:
+    cmd: bash chezmoi/bootstrap.sh ubuntu --apply
+    chdir: "{{ dotfiles_dir }}"
+  environment:
+    HOME: "{{ workstation_home }}"
+    DOTFILES_CHEZMOI_APPROVED: "1"
+    DOTFILES_CHEZMOI_REVIEWED_REF: "{{ dotfiles_git_ref }}"
+  when: workstation_chezmoi_check.rc != 0
+  changed_when: true

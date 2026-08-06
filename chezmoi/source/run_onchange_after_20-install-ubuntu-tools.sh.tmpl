@@ -2,7 +2,7 @@
 set -euo pipefail
 
 {{- $repo := joinPath .chezmoi.sourceDir ".." ".." }}
-# mise: {{ output "git" "-C" $repo "hash-object" "setup/ubuntu/mise.toml" | trim }}
+# mise: {{ output "git" "-C" $repo "hash-object" "hosts/ubuntu-dev/mise.toml" | trim }}
 # nvim: {{ output "git" "-C" $repo "hash-object" "config/nvim/lazy-lock.json" | trim }}
 mise_bin="$HOME/.local/bin/mise"
 

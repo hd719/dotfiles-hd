@@ -25,6 +25,7 @@ prepare_mac_mini_home() {
     "$home_dir/.config/fastfetch" \
     "$home_dir/.config/herdr" \
     "$home_dir/.config/hunk" \
+    "$home_dir/.config/mise" \
     "$home_dir/.hermes/skins" \
     "$home_dir/Library/Application Support/com.mitchellh.ghostty"
   chmod 700 "$home_dir/.config" "$home_dir/.hermes"
@@ -36,6 +37,16 @@ path_mode() {
   else
     stat -c '%a' "$1"
   fi
+}
+
+prepare_profile_parents() {
+  local profile="$1"
+  local home_dir="$2"
+  local relative _source
+
+  while IFS='|' read -r relative _source; do
+    mkdir -p "$(dirname "$home_dir/$relative")"
+  done < "$CHEZMOI_DIR/profiles/$profile.paths"
 }
 
 for script in "$CHEZMOI_DIR"/*.sh; do
@@ -88,11 +99,14 @@ git -C "$checkout_repo" update-ref refs/remotes/origin/master HEAD
 
 require_reviewed_checkout() {
   HOME="$checkout_home" DOTFILES_CHEZMOI_TEST=0 \
+    DOTFILES_CHEZMOI_REVIEWED_REF="${1:-master}" \
+    DOTFILES_TEST_PROFILE="${2:-ubuntu}" \
     bash -c '
       source "$1/lib.sh"
       REPO_DIR="$2"
       DEST_DIR="$HOME"
       BACKUP_ROOT="$HOME/.local/state/dotfiles-hd/chezmoi-backups"
+      PROFILE="$DOTFILES_TEST_PROFILE"
       require_canonical_checkout
     ' _ "$CHEZMOI_DIR" "$checkout_repo"
 }
@@ -116,11 +130,63 @@ set -e
 ((checkout_status != 0))
 [[ "$checkout_output" == *"master does not match origin/master"* ]]
 
-for profile in ubuntu mac-thin mac-mini work-mac; do
+git -C "$checkout_repo" checkout -q -b canary refs/remotes/origin/master
+git -C "$checkout_repo" commit -q --allow-empty -m reviewed-canary
+git -C "$checkout_repo" update-ref refs/remotes/origin/canary HEAD
+set +e
+checkout_output="$(require_reviewed_checkout 2>&1)"
+checkout_status=$?
+set -e
+((checkout_status != 0))
+[[ "$checkout_output" == *"apply requires reviewed master"* ]]
+require_reviewed_checkout canary
+set +e
+checkout_output="$(require_reviewed_checkout canary mac-thin 2>&1)"
+checkout_status=$?
+set -e
+((checkout_status != 0))
+[[ "$checkout_output" == *"custom reviewed branches are limited to the Ubuntu canary"* ]]
+git -C "$checkout_repo" commit -q --allow-empty -m unreviewed-canary
+set +e
+checkout_output="$(require_reviewed_checkout canary 2>&1)"
+checkout_status=$?
+set -e
+((checkout_status != 0))
+[[ "$checkout_output" == *"canary does not match origin/canary"* ]]
+set +e
+checkout_output="$(require_reviewed_checkout -bad 2>&1)"
+checkout_status=$?
+set -e
+((checkout_status != 0))
+[[ "$checkout_output" == *"invalid reviewed branch: -bad"* ]]
+
+layout_home="$case_dir/layout/home"
+layout_target="$case_dir/layout/config-target"
+mkdir -p "$layout_home" "$layout_target"
+ln -s "$layout_target" "$layout_home/.config"
+set +e
+layout_output="$({
+  HOME="$layout_home" \
+    DOTFILES_CHEZMOI_TEST=1 \
+    DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
+    CHEZMOI_BIN="$CHEZMOI_BIN" \
+    CHEZMOI_DESTINATION="$layout_home" \
+    bash "$CHEZMOI_DIR/preview.sh" mac-thin
+} 2>&1)"
+layout_status=$?
+set -e
+((layout_status != 0))
+[[ "$layout_output" == *"unapproved mac-thin symlink parent"* ]]
+
+for profile in ubuntu mac-thin mac-pro mac-mini work-mac; do
   home_dir="$case_dir/$profile/home"
   state_dir="$case_dir/$profile/state"
   mkdir -p "$home_dir" "$state_dir"
-  [[ "$profile" != mac-mini ]] || prepare_mac_mini_home "$home_dir"
+  case "$profile" in
+    ubuntu) mkdir -p "$home_dir/.config/btop" "$home_dir/.config/fastfetch" ;;
+    mac-pro|mac-mini) prepare_mac_mini_home "$home_dir" ;;
+  esac
+  prepare_profile_parents "$profile" "$home_dir"
   common=(
     --source "$CHEZMOI_DIR/source"
     --config "$CHEZMOI_DIR/profiles/$profile.toml"
@@ -138,6 +204,7 @@ for profile in ubuntu mac-thin mac-mini work-mac; do
   case "$profile" in
     ubuntu) printf '%s\n' 10-configure-git.sh 20-install-ubuntu-tools.sh ;;
     mac-thin) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
+    mac-pro) printf '%s\n' 10-configure-git.sh ;;
     mac-mini) printf '%s\n' 10-configure-git.sh ;;
     work-mac) printf '%s\n' 10-configure-git.sh 40-install-work-tools.sh ;;
   esac > "$case_dir/$profile.expected-scripts"
@@ -159,13 +226,15 @@ for profile in ubuntu mac-thin mac-mini work-mac; do
     ! grep -Fq 'git config --global core.editor' "$rendered_git_script"
   fi
 
-  if [[ "$profile" == mac-mini ]]; then
+  if [[ -f "$CHEZMOI_DIR/profiles/$profile.ancestors" ]]; then
     "$CHEZMOI_BIN" "${common[@]}" apply \
       --exclude=scripts,dirs --force --no-tty
     [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts,dirs)" ]]
     "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts,dirs
     [[ "$(path_mode "$home_dir/.config")" == 700 ]]
-    [[ "$(path_mode "$home_dir/.hermes")" == 700 ]]
+    if [[ "$profile" == mac-mini ]]; then
+      [[ "$(path_mode "$home_dir/.hermes")" == 700 ]]
+    fi
   else
     "$CHEZMOI_BIN" "${common[@]}" apply \
       --exclude=scripts --force --no-tty
@@ -184,9 +253,11 @@ rollback_state="$case_dir/rollback/state"
 rollback_backups="$case_dir/rollback/backups"
 mkdir -p "$rollback_home/.config/herdr" "$rollback_home/.config/hunk"
 prepare_mac_mini_home "$rollback_home"
-rmdir "$rollback_home/.config/btop" "$rollback_home/.config/fastfetch"
+rmdir "$rollback_home/.config/btop" "$rollback_home/.config/fastfetch" \
+  "$rollback_home/.config/mise"
 ln -s "$REPO_DIR/config/btop" "$rollback_home/.config/btop"
 ln -s "$REPO_DIR/config/fastfetch" "$rollback_home/.config/fastfetch"
+ln -s "$REPO_DIR/config/mise" "$rollback_home/.config/mise"
 printf 'original herdr\n' > "$rollback_home/.config/herdr/config.toml"
 printf 'original hunk\n' > "$rollback_home/original-hunk.toml"
 ln -s "$rollback_home/original-hunk.toml" \
@@ -208,7 +279,9 @@ rollback_common=(
 )
 unlink "$rollback_home/.config/btop"
 unlink "$rollback_home/.config/fastfetch"
-mkdir -m 700 "$rollback_home/.config/btop" "$rollback_home/.config/fastfetch"
+unlink "$rollback_home/.config/mise"
+mkdir -m 700 "$rollback_home/.config/btop" "$rollback_home/.config/fastfetch" \
+  "$rollback_home/.config/mise"
 "$CHEZMOI_BIN" "${rollback_common[@]}" apply \
   --exclude=scripts,dirs --force --no-tty
 
@@ -278,42 +351,48 @@ grep -Fxq 'original herdr' "$rollback_home/.config/herdr/config.toml"
   "$REPO_DIR/config/btop" ]]
 [[ "$(readlink "$rollback_home/.config/fastfetch")" == \
   "$REPO_DIR/config/fastfetch" ]]
+[[ "$(readlink "$rollback_home/.config/mise")" == \
+  "$REPO_DIR/config/mise" ]]
 [[ ! -e "$rollback_home/.zshrc" && ! -L "$rollback_home/.zshrc" ]]
 
-legacy_home="$case_dir/legacy-rollback/home"
-legacy_state="$case_dir/legacy-rollback/state"
-legacy_backups="$case_dir/legacy-rollback/backups"
-mkdir -p "$legacy_home/.config" "$legacy_state"
-ln -s "$REPO_DIR/config/btop" "$legacy_home/.config/btop"
-ln -s "$REPO_DIR/config/fastfetch" "$legacy_home/.config/fastfetch"
-legacy_backup="$(
+initial_home="$case_dir/initial-rollback/home"
+initial_state="$case_dir/initial-rollback/state"
+initial_backups="$case_dir/initial-rollback/backups"
+mkdir -p "$initial_home/.config" "$initial_state"
+ln -s "$REPO_DIR/config/btop" "$initial_home/.config/btop"
+ln -s "$REPO_DIR/config/fastfetch" "$initial_home/.config/fastfetch"
+initial_backup="$(
   DOTFILES_CHEZMOI_TEST=1 \
     CHEZMOI_BIN="$CHEZMOI_BIN" \
-    CHEZMOI_DESTINATION="$legacy_home" \
-    CHEZMOI_STATE_DIR="$legacy_state" \
-    CHEZMOI_BACKUP_ROOT="$legacy_backups" \
+    CHEZMOI_DESTINATION="$initial_home" \
+    CHEZMOI_STATE_DIR="$initial_state" \
+    CHEZMOI_BACKUP_ROOT="$initial_backups" \
     bash "$CHEZMOI_DIR/backup.sh" ubuntu
 )"
-legacy_common=(
+initial_common=(
   --source "$CHEZMOI_DIR/source"
   --config "$CHEZMOI_DIR/profiles/ubuntu.toml"
-  --destination "$legacy_home"
-  --persistent-state "$legacy_state/ubuntu.boltdb"
+  --destination "$initial_home"
+  --persistent-state "$initial_state/ubuntu.boltdb"
 )
-"$CHEZMOI_BIN" "${legacy_common[@]}" apply \
-  --exclude=scripts --force --no-tty
-[[ -d "$legacy_home/.config/btop" && ! -L "$legacy_home/.config/btop" ]]
-[[ -d "$legacy_home/.config/fastfetch" && ! -L "$legacy_home/.config/fastfetch" ]]
-HOME="$legacy_home" \
+unlink "$initial_home/.config/btop"
+unlink "$initial_home/.config/fastfetch"
+mkdir -m 700 "$initial_home/.config/btop" "$initial_home/.config/fastfetch"
+prepare_profile_parents ubuntu "$initial_home"
+"$CHEZMOI_BIN" "${initial_common[@]}" apply \
+  --exclude=scripts,dirs --force --no-tty
+[[ -d "$initial_home/.config/btop" && ! -L "$initial_home/.config/btop" ]]
+[[ -d "$initial_home/.config/fastfetch" && ! -L "$initial_home/.config/fastfetch" ]]
+HOME="$initial_home" \
   DOTFILES_CHEZMOI_TEST=1 \
   CHEZMOI_BIN="$CHEZMOI_BIN" \
-  CHEZMOI_DESTINATION="$legacy_home" \
-  CHEZMOI_STATE_DIR="$legacy_state" \
-  CHEZMOI_BACKUP_ROOT="$legacy_backups" \
-  bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$legacy_backup" \
-  > "$case_dir/legacy-rollback.log"
-[[ "$(readlink "$legacy_home/.config/btop")" == "$REPO_DIR/config/btop" ]]
-[[ "$(readlink "$legacy_home/.config/fastfetch")" == \
+  CHEZMOI_DESTINATION="$initial_home" \
+  CHEZMOI_STATE_DIR="$initial_state" \
+  CHEZMOI_BACKUP_ROOT="$initial_backups" \
+  bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$initial_backup" \
+  > "$case_dir/initial-rollback.log"
+[[ "$(readlink "$initial_home/.config/btop")" == "$REPO_DIR/config/btop" ]]
+[[ "$(readlink "$initial_home/.config/fastfetch")" == \
   "$REPO_DIR/config/fastfetch" ]]
 
 activation_home="$case_dir/activation/home"
@@ -346,7 +425,7 @@ DOTFILES_CHEZMOI_TEST=1 \
   bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$activation_backup" \
   > "$case_dir/activation-rollback.log"
 [[ ! -e "$activation_state/ubuntu-active" ]]
-grep -Fq 'the previous writer is active again' \
+grep -Fq 'the timestamped backup state is active' \
   "$case_dir/activation-rollback.log"
 
 printf 'profile=ubuntu\ncommit=original\n' \
@@ -374,9 +453,11 @@ cmp -s "$active_backup/activation-marker" \
 apply_home="$case_dir/apply/home"
 mkdir -p "$apply_home"
 prepare_mac_mini_home "$apply_home"
-rmdir "$apply_home/.config/btop" "$apply_home/.config/fastfetch"
+rmdir "$apply_home/.config/btop" "$apply_home/.config/fastfetch" \
+  "$apply_home/.config/mise"
 ln -s "$REPO_DIR/config/btop" "$apply_home/.config/btop"
 ln -s "$REPO_DIR/config/fastfetch" "$apply_home/.config/fastfetch"
+ln -s "$REPO_DIR/config/mise" "$apply_home/.config/mise"
 HOME="$apply_home" \
   DOTFILES_CHEZMOI_TEST=1 \
   DOTFILES_CHEZMOI_APPROVED=1 \
@@ -394,11 +475,15 @@ grep -Fq 'rollback preview passed' "$case_dir/apply.log"
 [[ "$(path_mode "$apply_home/.hermes")" == 700 ]]
 [[ -d "$apply_home/.config/btop" && ! -L "$apply_home/.config/btop" ]]
 [[ -d "$apply_home/.config/fastfetch" && ! -L "$apply_home/.config/fastfetch" ]]
+[[ -d "$apply_home/.config/mise" && ! -L "$apply_home/.config/mise" ]]
 [[ "$(path_mode "$apply_home/.config/btop")" == 700 ]]
 [[ "$(path_mode "$apply_home/.config/fastfetch")" == 700 ]]
+[[ "$(path_mode "$apply_home/.config/mise")" == 700 ]]
 [[ "$(readlink "$apply_home/.config/btop/btop.conf")" == \
   "$REPO_DIR/config/btop/btop.conf" ]]
 [[ "$(readlink "$apply_home/.config/fastfetch/config.jsonc")" == \
   "$REPO_DIR/config/fastfetch/config.jsonc" ]]
+[[ "$(readlink "$apply_home/.config/mise/config.toml")" == \
+  "$REPO_DIR/config/mise/config.toml" ]]
 
 printf 'chezmoi_production_tests=ok\n'

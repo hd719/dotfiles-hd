@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 source "$script_dir/lib.sh"
@@ -12,38 +13,7 @@ require_canonical_checkout
   || die "Mac mini requires DOTFILES_MAC_MINI_CONFIG_ONLY=1"
 [[ "$PROFILE" != work-mac || "${DOTFILES_WORK_MAC_OPT_IN:-0}" == 1 ]] \
   || die "work Mac requires DOTFILES_WORK_MAC_OPT_IN=1"
-
-if [[ "$PROFILE" == mac-mini ]]; then
-  while IFS='|' read -r relative source managed_mode; do
-    target="$(target_path "$relative")"
-    expected="$(expected_source "$source")"
-    [[ "$managed_mode" =~ ^[0-7]{3,4}$ ]] \
-      || die "invalid Mac mini ancestor mode: $relative"
-    if [[ -L "$target" ]]; then
-      [[ "$(readlink "$target")" == "$expected" ]] \
-        || die "unexpected Mac mini ancestor link: $target"
-    else
-      [[ -d "$target" ]] \
-        || die "Mac mini ancestor must be a symlink or directory: $target"
-    fi
-  done < "$PROFILE_ANCESTORS"
-
-  while IFS='|' read -r relative _source; do
-    parent="$(dirname "$(target_path "$relative")")"
-    while [[ "$parent" != "$DEST_DIR" ]]; do
-      if [[ -L "$parent" ]]; then
-        parent_relative="${parent#"$DEST_DIR/"}"
-        cut -d '|' -f 1 "$PROFILE_ANCESTORS" \
-          | grep -Fqx "$parent_relative" \
-          || die "unapproved Mac mini symlink parent: $parent"
-      else
-        [[ -d "$parent" ]] \
-          || die "Mac mini requires an existing parent directory: $parent"
-      fi
-      parent="$(dirname "$parent")"
-    done
-  done < "$PROFILE_MANIFEST"
-fi
+validate_profile_layout
 
 backup_dir="$($script_dir/backup.sh "$PROFILE")"
 "$script_dir/rollback.sh" "$PROFILE" "$backup_dir" --preview
@@ -57,15 +27,21 @@ if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
   activation_preexisting=1
 fi
 
-if [[ "$PROFILE" == mac-mini ]]; then
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
   while IFS='|' read -r relative _source managed_mode; do
     target="$(target_path "$relative")"
-    [[ -L "$target" ]] || continue
-    prepared="$backup_dir/prepared-ancestors/$relative"
-    mkdir -p "$(dirname "$prepared")"
-    mv "$target" "$prepared"
-    mkdir -m "$managed_mode" "$target"
+    if [[ -L "$target" ]]; then
+      prepared="$backup_dir/prepared-ancestors/$relative"
+      mkdir -p "$(dirname "$prepared")"
+      mv "$target" "$prepared"
+      mkdir -m "$managed_mode" "$target"
+    elif [[ ! -e "$target" ]]; then
+      mkdir -m "$managed_mode" "$target"
+    fi
   done < "$PROFILE_ANCESTORS"
+  while IFS='|' read -r relative _source; do
+    mkdir -p "$(dirname "$(target_path "$relative")")"
+  done < "$PROFILE_MANIFEST"
   cm apply --exclude=dirs --force --no-tty
   second_apply="$(cm apply --exclude=dirs --force --no-tty --verbose 2>&1)"
 else
@@ -76,7 +52,7 @@ fi
   printf '%s\n' "$second_apply" >&2
   die "second apply was not a no-op; roll back with $backup_dir"
 }
-if [[ "$PROFILE" == mac-mini ]]; then
+if [[ -n "$PROFILE_ANCESTORS" ]]; then
   [[ -z "$(cm status --exclude=dirs)" ]] \
     || die "chezmoi reports drift; roll back with $backup_dir"
   cm verify --exclude=scripts,dirs

@@ -1,4 +1,4 @@
-.zshrc|setup/mac-mini/.zshrc
+.zshrc|hosts/mac-mini/.zshrc
 .config/zsh|config/zsh
 .config/bookokrat|config/bookokrat
 .config/btop/btop.conf|config/btop/btop.conf
@@ -9,6 +9,7 @@
 Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
 .config/herdr/config.toml|config/herdr/config.toml
 .config/hunk/config.toml|config/hunk/config.toml
+.config/mise/config.toml|config/mise/config.toml
 .config/nvim|config/nvim
 .config/starship.toml|config/starship/starship.toml
 .hermes/skins/hamel-nord.yaml|config/hermes/skins/hamel-nord.yaml

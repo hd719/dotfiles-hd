@@ -3,6 +3,9 @@
 .config/zsh
 .config/starship.toml
 {{- end }}
+{{- if ne .profile "mac-pro" }}
+.config/karabiner
+{{- end }}
 {{- if ne .profile "ubuntu" }}
 .config/ghostty
 .gitignore_global
@@ -11,11 +14,11 @@
 .local
 20-install-ubuntu-tools.sh
 {{- end }}
-{{- if and (ne .profile "ubuntu") (ne .profile "mac-mini") }}
+{{- if and (and (ne .profile "ubuntu") (ne .profile "mac-mini")) (ne .profile "mac-pro") }}
 .config/btop
 .config/fastfetch
 {{- end }}
-{{- if ne .profile "ubuntu" }}
+{{- if or (eq .profile "mac-thin") (eq .profile "work-mac") }}
 .config/mise
 {{- end }}
 {{- if eq .profile "ubuntu" }}
@@ -33,6 +36,14 @@ Library
 {{- end }}
 {{- if eq .profile "mac-mini" }}
 .config/homebrew
+.terminfo
+20-install-ubuntu-tools.sh
+30-install-thin-tools.sh
+40-install-work-tools.sh
+{{- end }}
+{{- if eq .profile "mac-pro" }}
+.config/homebrew
+.hermes
 .terminfo
 20-install-ubuntu-tools.sh
 30-install-thin-tools.sh

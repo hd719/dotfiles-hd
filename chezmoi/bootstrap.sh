@@ -1,19 +1,19 @@
 #!/bin/sh
 set -eu
-
-profile="${1:-}"; mode="${2:---preview}"
-version="v2.72.0"
+profile="${1:-}"; mode="${2:---preview}"; version="v2.72.0"
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
 bin="${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}"
-
 case "$profile:$mode" in
-  ubuntu:--preview|ubuntu:--apply|mac-thin:--preview|mac-thin:--apply|mac-mini:--preview|mac-mini:--apply|work-mac:--preview|work-mac:--apply) ;;
-  *) echo "usage: $0 ubuntu|mac-thin|mac-mini|work-mac --preview|--apply" >&2; exit 2 ;;
+  ubuntu:--preview|ubuntu:--apply|mac-thin:--preview|mac-thin:--apply|mac-pro:--preview|mac-pro:--apply|mac-mini:--preview|mac-mini:--apply|work-mac:--preview|work-mac:--apply) ;;
+  *) echo "usage: $0 ubuntu|mac-thin|mac-pro|mac-mini|work-mac --preview|--apply" >&2; exit 2 ;;
 esac
 case "$profile:$(uname -s)" in
-  ubuntu:Linux|mac-thin:Darwin|mac-mini:Darwin|work-mac:Darwin) ;;
+  ubuntu:Linux|mac-thin:Darwin|mac-pro:Darwin|mac-mini:Darwin|work-mac:Darwin) ;;
   *) [ "${DOTFILES_CHEZMOI_TEST:-0}" = 1 ] || { echo "profile/OS mismatch" >&2; exit 1; } ;;
 esac
+if [ "$mode" = --apply ] || [ "${DOTFILES_CHEZMOI_REQUIRE_REVIEWED:-0}" = 1 ]; then
+  bash "$script_dir/preflight.sh" "$profile"
+fi
 if [ ! -x "$bin" ]; then
   mkdir -p "$(dirname "$bin")"
   sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$(dirname "$bin")" -t "$version"
