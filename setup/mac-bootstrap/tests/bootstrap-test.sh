@@ -171,6 +171,46 @@ test_link_helper() {
   TESTS=$((TESTS + 1))
 }
 
+test_chezmoi_child_link_doctor_compatibility() {
+  local root="$TMP_ROOT/chezmoi-child-links"
+  local home_dir="$root/home"
+
+  mkdir -p "$home_dir/.config/btop" "$home_dir/.config/fastfetch"
+  ln -s "$REPO_DIR/config/btop/btop.conf" \
+    "$home_dir/.config/btop/btop.conf"
+  ln -s "$REPO_DIR/config/btop/themes" \
+    "$home_dir/.config/btop/themes"
+  ln -s "$REPO_DIR/config/fastfetch/config.jsonc" \
+    "$home_dir/.config/fastfetch/config.jsonc"
+  ln -s "$REPO_DIR/config/fastfetch/logo-anon-glitch.txt" \
+    "$home_dir/.config/fastfetch/logo-anon-glitch.txt"
+  ln -s "$REPO_DIR/config/fastfetch/logo-anon.txt" \
+    "$home_dir/.config/fastfetch/logo-anon.txt"
+
+  chezmoi_child_links_match mac-mini "$REPO_DIR" "$home_dir" \
+    "$REPO_DIR/config/btop" "$home_dir/.config/btop" \
+    || fail "Mac mini doctor should accept chezmoi Btop child links"
+  chezmoi_child_links_match mac-mini "$REPO_DIR" "$home_dir" \
+    "$REPO_DIR/config/fastfetch" "$home_dir/.config/fastfetch" \
+    || fail "Mac mini doctor should accept chezmoi Fastfetch child links"
+  TESTS=$((TESTS + 2))
+
+  if chezmoi_child_links_match mac-pro "$REPO_DIR" "$home_dir" \
+    "$REPO_DIR/config/btop" "$home_dir/.config/btop"; then
+    fail "MacBook doctor should still require the legacy parent link"
+  fi
+  TESTS=$((TESTS + 1))
+
+  unlink "$home_dir/.config/fastfetch/config.jsonc"
+  ln -s "$REPO_DIR/config/fastfetch/logo-anon.txt" \
+    "$home_dir/.config/fastfetch/config.jsonc"
+  if chezmoi_child_links_match mac-mini "$REPO_DIR" "$home_dir" \
+    "$REPO_DIR/config/fastfetch" "$home_dir/.config/fastfetch"; then
+    fail "Mac mini doctor should reject a drifted chezmoi child link"
+  fi
+  TESTS=$((TESTS + 1))
+}
+
 test_zprofile_helper() {
   local root="$TMP_ROOT/zprofile-helper"
   local profile="$root/.zprofile"
@@ -1976,6 +2016,7 @@ test_resilience_hd_pargasite() {
 }
 
 test_link_helper
+test_chezmoi_child_link_doctor_compatibility
 test_zprofile_helper
 test_neovim_lock_guard
 test_neovim_plugin_checkout_integrity

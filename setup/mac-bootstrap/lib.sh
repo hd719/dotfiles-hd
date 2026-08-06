@@ -107,6 +107,42 @@ link_matches() {
     && "$(readlink "$destination")" == "$source_path" ]]
 }
 
+chezmoi_child_links_match() {
+  local profile="$1"
+  local dotfiles_dir="$2"
+  local home_dir="$3"
+  local source_path="$4"
+  local destination="$5"
+  local spec child_source child_destination
+  local -a child_specs
+
+  [[ "$profile" == mac-mini && -d "$destination" && ! -L "$destination" ]] \
+    || return 1
+
+  case "$source_path|$destination" in
+    "$dotfiles_dir/config/btop|$home_dir/.config/btop")
+      child_specs=(
+        "$dotfiles_dir/config/btop/btop.conf|$destination/btop.conf"
+        "$dotfiles_dir/config/btop/themes|$destination/themes"
+      )
+      ;;
+    "$dotfiles_dir/config/fastfetch|$home_dir/.config/fastfetch")
+      child_specs=(
+        "$dotfiles_dir/config/fastfetch/config.jsonc|$destination/config.jsonc"
+        "$dotfiles_dir/config/fastfetch/logo-anon-glitch.txt|$destination/logo-anon-glitch.txt"
+        "$dotfiles_dir/config/fastfetch/logo-anon.txt|$destination/logo-anon.txt"
+      )
+      ;;
+    *) return 1 ;;
+  esac
+
+  for spec in "${child_specs[@]}"; do
+    child_source="${spec%%|*}"
+    child_destination="${spec#*|}"
+    link_matches "$child_source" "$child_destination" || return 1
+  done
+}
+
 canonical_profile() {
   case "$1" in
     mac-pro|mac-mini)
