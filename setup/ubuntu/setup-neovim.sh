@@ -23,6 +23,7 @@ NVIM_SOURCE="$ROOT_DIR/config/nvim"
 NVIM_TARGET="$HOME/.config/nvim"
 GRAPHQL_SOURCE="$SCRIPT_DIR/bin/graphql-lsp"
 GRAPHQL_TARGET="$HOME/.local/graphql-lsp/bin/graphql-lsp"
+CHEZMOI_ACTIVE_MARKER="${DOTFILES_CHEZMOI_ACTIVE_MARKER:-${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-hd/chezmoi/ubuntu-active}"
 LAZY_REPOSITORY="https://github.com/folke/lazy.nvim.git"
 TREE_SITTER_LANGUAGES=(
   bash ecma go gomod gosum gowork graphql javascript json jsx lua markdown
@@ -136,6 +137,19 @@ link_configs() {
   safe_link "$MISE_SOURCE" "$MISE_TARGET"
   safe_link "$NVIM_SOURCE" "$NVIM_TARGET"
   safe_link "$GRAPHQL_SOURCE" "$GRAPHQL_TARGET"
+}
+
+link_configs_if_legacy() {
+  if [[ -e "$CHEZMOI_ACTIVE_MARKER" || -L "$CHEZMOI_ACTIVE_MARKER" ]]; then
+    if [[ -f "$CHEZMOI_ACTIVE_MARKER" && ! -L "$CHEZMOI_ACTIVE_MARKER" ]]; then
+      log "Chezmoi owns Ubuntu user links; legacy Neovim linker skipped"
+      return
+    fi
+    printf 'Invalid chezmoi ownership marker: %s\n' \
+      "$CHEZMOI_ACTIVE_MARKER" >&2
+    return 1
+  fi
+  link_configs
 }
 
 install_tools() {
@@ -463,7 +477,7 @@ main() {
   fi
 
   install_mise
-  link_configs
+  link_configs_if_legacy
   install_tools
   pin_lazy_manager
   restore_plugins

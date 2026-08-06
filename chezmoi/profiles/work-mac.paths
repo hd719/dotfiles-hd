@@ -1,0 +1,6 @@
+.config/bookokrat|config/bookokrat
+Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
+.config/herdr/config.toml|config/herdr/config.toml
+.config/hunk/config.toml|config/hunk/config.toml
+.config/homebrew/Brewfile|setup/mac-pro-resilience/Brewfile
+.config/nvim|config/nvim

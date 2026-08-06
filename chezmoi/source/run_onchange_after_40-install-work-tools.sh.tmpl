@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+{{- $repo := joinPath .chezmoi.sourceDir ".." ".." }}
+# brew: {{ output "git" "-C" $repo "hash-object" "setup/mac-pro-resilience/Brewfile" | trim }}
+# nvim: {{ output "git" "-C" $repo "hash-object" "config/nvim/lazy-lock.json" | trim }}
+brewfile="$HOME/.config/homebrew/Brewfile"
+lockfile="$HOME/.config/nvim/lazy-lock.json"
+backup="$(mktemp "${TMPDIR:-/tmp}/chezmoi-work-lazy-lock.XXXXXX")"
+
+HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$brewfile"
+cp -p "$lockfile" "$backup"
+restore_lockfile() {
+  if ! cmp -s "$lockfile" "$backup"; then
+    cp -p "$backup" "$lockfile"
+  fi
+  rm -f "$backup"
+}
+trap restore_lockfile EXIT
+
+DOTFILES_NVIM_RESTORE_ALL=1 nvim --headless '+Lazy! restore' '+qa'
+nvim --headless \
+  "+lua local p={'bash','ecma','go','gomod','gosum','gowork','graphql','javascript','json','jsx','lua','markdown','markdown_inline','python','query','toml','tsx','typescript','vim','vimdoc','yaml'}; assert(require('nvim-treesitter').install(p):wait())" \
+  '+qa'
+
+restore_lockfile
+trap - EXIT

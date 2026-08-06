@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+repo={{ joinPath .chezmoi.sourceDir ".." ".." | quote }}
+DOTFILES_BACKUP_SEPARATOR=. "$repo/config/git/configure-aliases.sh" --apply
+{{ if eq .profile "ubuntu" }}
+git config --global core.editor nvim
+git config --global core.excludesfile "$HOME/.gitignore_global"
+{{ end }}
