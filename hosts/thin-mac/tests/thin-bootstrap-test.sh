@@ -22,6 +22,10 @@ mkdir -p \
   "$TEST_ROOT/homebrew/share/zsh-autosuggestions" \
   "$TEST_ROOT/homebrew/share/zsh-syntax-highlighting" \
   "$TEST_ROOT/apps"
+chmod 700 \
+  "$TEST_ROOT/home/.config" \
+  "$TEST_ROOT/home/.config/herdr" \
+  "$TEST_ROOT/home/.config/hunk"
 cat > "$TEST_ROOT/home/.ssh/config" <<EOF
 Include $REPO_DIR/hosts/thin-mac/ssh/ubuntu-vagrant.conf
 EOF
@@ -261,6 +265,20 @@ fi
   == "$REPO_DIR/config/fastfetch/logo-anon-glitch.txt" ]]
 [[ "$(readlink "$HOME/.config/fastfetch/logo-anon.txt")" \
   == "$REPO_DIR/config/fastfetch/logo-anon.txt" ]]
+for private_dir in \
+  "$HOME/.config" \
+  "$HOME/.config/fastfetch" \
+  "$HOME/.config/herdr" \
+  "$HOME/.config/homebrew" \
+  "$HOME/.config/hunk" \
+  "$HOME/.terminfo" \
+  "$HOME/.terminfo/78"; do
+  [[ "$(stat -f '%Lp' "$private_dir")" == 700 ]]
+done
+(
+  umask 022
+  "$REPO_DIR/chezmoi/doctor.sh" mac-thin >/dev/null
+)
 [[ ! -e "$HOME/.config/fastfetch/legacy" ]]
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/hosts/thin-mac/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \

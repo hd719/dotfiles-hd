@@ -91,6 +91,8 @@ Fastfetch is the reference pattern:
 
 Do not link a whole configuration directory when it contains mutable or legacy
 state. After merge, sync `master`, preview, apply twice, and run the doctor.
+The approved Fastfetch parent stays mode `700` so Chezmoi preserves private
+directory modes across shell umasks.
 
 Neovim uses the shared `config/nvim` and `lazy-lock.json`, but
 `DOTFILES_NVIM_PROFILE=thin` restores only the approved thin plugin set and the
