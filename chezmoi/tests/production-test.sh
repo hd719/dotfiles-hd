@@ -187,6 +187,9 @@ for profile in ubuntu mac-thin mac-pro mac-mini work-mac; do
     mac-pro|mac-mini) prepare_mac_mini_home "$home_dir" ;;
   esac
   prepare_profile_parents "$profile" "$home_dir"
+  if [[ "$profile" == mac-thin ]]; then
+    chmod 700 "$home_dir/.config" "$home_dir/.config/fastfetch"
+  fi
   common=(
     --source "$CHEZMOI_DIR/source"
     --config "$CHEZMOI_DIR/profiles/$profile.toml"
@@ -232,6 +235,9 @@ for profile in ubuntu mac-thin mac-pro mac-mini work-mac; do
     [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts,dirs)" ]]
     "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts,dirs
     [[ "$(path_mode "$home_dir/.config")" == 700 ]]
+    if [[ "$profile" == mac-thin ]]; then
+      [[ "$(path_mode "$home_dir/.config/fastfetch")" == 700 ]]
+    fi
     if [[ "$profile" == mac-mini ]]; then
       [[ "$(path_mode "$home_dir/.hermes")" == 700 ]]
     fi
