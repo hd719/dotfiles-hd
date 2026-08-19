@@ -5,6 +5,7 @@
 .config/fastfetch/logo-anon-glitch.txt|config/fastfetch/logo-anon-glitch.txt
 .config/fastfetch/logo-anon.txt|config/fastfetch/logo-anon.txt
 Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
+Library/Application Support/com.mitchellh.ghostty/host.conf|hosts/thin-mac/ghostty.conf
 .config/herdr/config.toml|config/herdr/config.toml
 .config/hunk/config.toml|config/hunk/config.toml
 .config/homebrew/Brewfile|hosts/thin-mac/Brewfile

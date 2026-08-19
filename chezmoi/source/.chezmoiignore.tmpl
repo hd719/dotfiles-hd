@@ -6,6 +6,9 @@
 {{- if ne .profile "mac-pro" }}
 .config/karabiner
 {{- end }}
+{{- if ne .profile "mac-thin" }}
+Library/Application Support/com.mitchellh.ghostty/host.conf
+{{- end }}
 {{- if ne .profile "ubuntu" }}
 .config/ghostty
 .gitignore_global

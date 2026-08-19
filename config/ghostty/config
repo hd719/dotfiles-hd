@@ -86,3 +86,6 @@ keybind = cmd+s>period=move_tab:1
 # eybind = cmd+s>e=equalize_splits
 # other
 copy-on-select = clipboard
+
+# Load an optional profile-owned override from beside the live config link.
+config-file = ?host.conf

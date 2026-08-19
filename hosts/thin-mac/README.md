@@ -203,6 +203,11 @@ Running plain `herdr` on the thin Mac focuses an existing local workspace for
 the current directory or creates one there when needed. Repeated launches from
 the same directory reuse its workspace.
 
+After a fresh Ghostty launch, the thin-Mac host override opens one window with
+`hu`, `hmini`, and local `herdr` tabs in that order. It disables macOS window
+state restoration and full-screen startup so a prior layout cannot replace this
+control-plane default.
+
 The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
 Forgejo. No Git private key is copied from the Mac.
 
