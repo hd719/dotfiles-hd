@@ -297,7 +297,11 @@ done
 grep -Fxq 'selection-background = #9ABACE' "$REPO_DIR/config/ghostty/config"
 grep -Fxq 'selection-foreground = #000001' "$REPO_DIR/config/ghostty/config"
 grep -Fxq 'config-file = ?host.conf' "$REPO_DIR/config/ghostty/config"
+grep -Fxq 'fullscreen = false' "$REPO_DIR/hosts/thin-mac/ghostty.conf"
 grep -Fxq 'window-save-state = never' "$REPO_DIR/hosts/thin-mac/ghostty.conf"
+grep -Fxq 'window-new-tab-position = end' "$REPO_DIR/hosts/thin-mac/ghostty.conf"
+/usr/bin/osacompile -o /dev/null \
+  "$REPO_DIR/hosts/thin-mac/ghostty-startup.applescript"
 [[ "$(/usr/bin/osascript \
   "$REPO_DIR/hosts/thin-mac/ghostty-startup.applescript" --dry-run)" \
   == $'hu\nhmini\nherdr' ]]

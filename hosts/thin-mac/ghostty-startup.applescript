@@ -11,15 +11,26 @@ on run arguments
     if (count of windows) is 0 then error "Ghostty startup window is unavailable."
 
     set startupWindow to front window
-    set firstStartupTab to missing value
+    set startupTabs to {}
 
-    repeat with startupCommand in my startupCommands
-      set startupConfiguration to new surface configuration from {initial working directory:homeDirectory, initial input:((contents of startupCommand) & linefeed)}
+    repeat with commandIndex from 1 to count of my startupCommands
+      set startupConfiguration to new surface configuration from {initial working directory:homeDirectory}
       set createdTab to new tab in startupWindow with configuration startupConfiguration
-      if firstStartupTab is missing value then set firstStartupTab to createdTab
+      set end of startupTabs to createdTab
       select tab createdTab
     end repeat
 
+    repeat with commandIndex from 1 to count of my startupCommands
+      set createdTab to item commandIndex of startupTabs
+      set startupCommand to item commandIndex of my startupCommands
+      select tab createdTab
+      set createdTerminal to focused terminal of createdTab
+      input text startupCommand to createdTerminal
+      send key "enter" to createdTerminal
+    end repeat
+
+    set firstStartupTab to item 1 of startupTabs
     select tab firstStartupTab
+    focus (focused terminal of firstStartupTab)
   end tell
 end run
