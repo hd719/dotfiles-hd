@@ -283,6 +283,8 @@ done
 [[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/hosts/thin-mac/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]
+[[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/host.conf")" \
+  == "$REPO_DIR/hosts/thin-mac/ghostty.conf" ]]
 [[ "$(readlink "$HOME/.config/herdr/config.toml")" \
   == "$REPO_DIR/config/herdr/config.toml" ]]
 [[ "$(readlink "$HOME/.config/hunk/config.toml")" \
@@ -294,6 +296,11 @@ done
 [[ "$(<"$HOME/.config/hunk/state.json")" == "hunk state" ]]
 grep -Fxq 'selection-background = #9ABACE' "$REPO_DIR/config/ghostty/config"
 grep -Fxq 'selection-foreground = #000001' "$REPO_DIR/config/ghostty/config"
+grep -Fxq 'config-file = ?host.conf' "$REPO_DIR/config/ghostty/config"
+grep -Fxq 'window-save-state = never' "$REPO_DIR/hosts/thin-mac/ghostty.conf"
+[[ "$(/usr/bin/osascript \
+  "$REPO_DIR/hosts/thin-mac/ghostty-startup.applescript" --dry-run)" \
+  == $'hu\nhmini\nherdr' ]]
 GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   source '$HOME/.zshrc'
   [[ -z \"\${GIT_PAGER+x}\" ]] || exit 1
