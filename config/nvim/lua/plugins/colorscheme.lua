@@ -127,6 +127,13 @@ return {
           bg = "#5C6A7D",
         })
 
+        -- Keep Visual selections distinct from Ghostty's transparent background.
+        for _, group in ipairs({ "Visual", "VisualNOS" }) do
+          highlights[group] = vim.tbl_extend("force", highlights[group] or {}, {
+            bg = "#5C6A7D",
+          })
+        end
+
         -- Give rendered Markdown Codex's Catppuccin Mocha accents while the
         -- rest of Neovim keeps its transparent Nord base.
         local markdown_heading_bg = "#45475A"
@@ -172,7 +179,7 @@ return {
 
         -- Keep the Snacks selection visible without overriding icon colors.
         highlights.SnacksPickerListCursorLine = {
-          bg = colors.polar_night.brighter,
+          bg = "#5C6A7D",
           bold = true,
         }
 
