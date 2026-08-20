@@ -13,8 +13,7 @@ return {
         right_pad = 1,
       },
       pipe_table = {
-        style = "normal",
-        cell = "raw",
+        enabled = false,
       },
     },
     keys = {
