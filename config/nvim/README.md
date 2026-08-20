@@ -246,7 +246,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space o e`                              | Open the current file externally; PDFs use Bookokrat                          |
 | `Space m m`                              | Toggle Marksman for the current Markdown file                                 |
 | `Space m r`                              | Toggle Markdown rendering                                                     |
-| `Space z a/o/c`                          | Fold: toggle / open all / close all                                           |
+| `Space u`                                | Built-in `z` actions: folds, viewport, and spelling                           |
 | `gd` / `gh` / `grr`                      | Definition / hover / references                                               |
 | `gsa` / `gsd` / `gsr`                    | Surround add / delete / replace                                               |
 | `H` / `L`                                | Previous / next buffer                                                        |
@@ -383,8 +383,8 @@ The rendered PDF page remains an opaque `#434C5E` canvas because Kitty images
 cannot inherit terminal transparency. Long mouse drags can lag, especially in
 Herdr; use `n`, then `v` / `V` plus motions and `H` for keyboard highlighting.
 
-Folding is Tree-sitter based and files open unfolded. Use `Space z` (toggle /
-open all / close all) or the native `za` / `zR` / `zM`.
+Folding is Tree-sitter based and files open unfolded. Press `Space u` for the
+same fold, viewport, and spelling actions normally reached through `z`.
 
 The cursor line stays vertically centered as you move up and down
 (`scrolloff = 999`). A blue-gray row-and-column crosshair marks the cursor
