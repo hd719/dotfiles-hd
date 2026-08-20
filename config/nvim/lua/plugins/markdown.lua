@@ -30,6 +30,7 @@ return {
     ft = { "markdown" },
     opts = {
       reader = {
+        wrap = true,
         linebreak = true,
       },
     },
