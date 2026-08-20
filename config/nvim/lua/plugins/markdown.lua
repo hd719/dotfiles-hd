@@ -13,7 +13,8 @@ return {
         right_pad = 1,
       },
       pipe_table = {
-        cell = "trimmed",
+        style = "normal",
+        cell = "raw",
       },
     },
     keys = {

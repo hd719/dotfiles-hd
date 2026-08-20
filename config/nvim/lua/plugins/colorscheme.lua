@@ -170,7 +170,7 @@ return {
           bg = "#313244",
         }
         highlights.RenderMarkdownTableHead = { fg = "#89DCEB", bold = true }
-        highlights.RenderMarkdownTableRow = { fg = "#585B70" }
+        highlights.RenderMarkdownTableRow = { fg = "#81A1C1" }
         highlights.RenderMarkdownBullet = { fg = "#94E2D5" }
         highlights.RenderMarkdownLink = { fg = "#89B4FA" }
         highlights.RenderMarkdownLinkTitle = { fg = "#89B4FA" }
