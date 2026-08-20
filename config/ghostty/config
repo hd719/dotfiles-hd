@@ -24,7 +24,7 @@ selection-foreground = #000001
 # Use a 90% Hamel Nord Blur background with a softer blur.
 # Applying opacity to explicit cells keeps Neovim and other full-screen
 # terminal apps blurred.
-background-opacity = 0.90
+background-opacity = 0.95
 background-opacity-cells = true
 background-blur = 20
 
