@@ -3898,3 +3898,15 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   passed.
 - Curriculum 10.8 remains open because Hamel chose to observe this edit and
   practice the hands-on coding workflow later.
+
+## 2026-08-20 — Session 058: Direct File Creation
+
+### Full-Path Workflow Taught
+
+- For a known destination, `:edit {path}` is faster than navigating through
+  the explorer: it opens a new buffer for that path, and `Space w` creates the
+  file on disk.
+- The parent directory must already exist; the requested `athleteledger`
+  directory does exist on the Ubuntu workstation.
+- Curriculum 9.D5 remains open until Hamel creates and saves the file from
+  Neovim and confirms the result.

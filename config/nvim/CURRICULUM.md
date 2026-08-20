@@ -331,6 +331,8 @@ unexplained magic.
   permanent deletion.
 - [x] **9.D4** Toggle a Snacks explorer sidebar with `Space e` for a
   Zed/VSCode-style file tree, kept separate from Oil (`replace_netrw = false`). — Session 008
+- [ ] **9.D5** Create a file quickly by opening its full path with `:edit`, then
+  save it with `Space w`.
 
 ## Lesson 10 — Warrior Techniques and Config Ownership
 
