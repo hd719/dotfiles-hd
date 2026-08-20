@@ -13,7 +13,7 @@ return {
         right_pad = 1,
       },
       pipe_table = {
-        cell = "trimmed",
+        enabled = false,
       },
     },
     keys = {
@@ -23,5 +23,11 @@ return {
         desc = "Toggle Markdown render",
       },
     },
+  },
+  {
+    "ice345/markdown-table-wrap.nvim",
+    version = "v0.3.0",
+    ft = { "markdown" },
+    opts = {},
   },
 }

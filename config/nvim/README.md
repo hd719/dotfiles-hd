@@ -9,7 +9,8 @@ Hamel's existing Zed muscle memory.
   Ubuntu, full personal Macs, and Resilience.
 - `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
   editing behavior, Nord, Bufferline, Lualine, WhichKey, Oil, Mini pairs and
-  surround, Gitsigns, rendered Markdown, Obsidian, slim Snacks pickers and
+  surround, Gitsigns, rendered Markdown with wrapped tables, Obsidian, slim
+  Snacks pickers and
   Explorer, Snacks terminals, Tree-sitter Markdown parsing, Marksman, and
   Bookokrat PDF reading.
 
@@ -77,7 +78,7 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-The full profile installs all 21 plugins below. The thin profile installs only
+The full profile installs all 22 plugins below. The thin profile installs only
 the subset listed above. In `:Lazy`, **Loaded** means a plugin's trigger has
 happened in this session; **Not Loaded** means it is installed and waiting for
 that trigger. `lazy-lock.json` pins exact versions, while the Lua files under
@@ -96,6 +97,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `friendly-snippets`          | Ready-made snippets consumed by Blink                                                            | Immediately before Blink as its dependency               |
 | `lazy.nvim`                  | Installs, pins, restores, and lazy-loads plugins                                                 | Bootstrapped before all managed plugins                  |
 | `lualine.nvim`               | Bottom status line for mode, Git, diagnostics, LSP, and location                                 | Just after startup: `VeryLazy` event                     |
+| `markdown-table-wrap.nvim`   | Reflows wide Markdown table cells in a protected reader without changing the source              | First Markdown buffer                                    |
 | `mini.icons`                 | File and folder icons shared by other plugins                                                    | Immediately before startup-loaded Oil as its dependency  |
 | `nord.nvim`                  | Transparent Nord colors and custom highlights                                                    | Early every startup: `lazy = false`, priority `1000`     |
 | `nvim-lspconfig`             | Connects installed language servers to matching files                                            | Every startup: `lazy = false`                            |
@@ -111,7 +113,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `grug-far.nvim`              | Reviewed, exact-word replacement in the current file                                             | First `Space R`                                          |
 | `mini.pairs`                 | Automatically closes brackets and quotes                                                         | First entry into Insert mode: `InsertEnter`              |
 | `mini.surround`              | Adds, deletes, or replaces quotes, brackets, and tags                                            | First `gsa`, `gsd`, `gsr`, `gsf`, `gsF`, or `gsh`        |
-| `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, tables, and code blocks                          | First Markdown buffer or its profile-specific toggle     |
+| `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, and code blocks                                  | First Markdown buffer or its profile-specific toggle     |
 
 Configuration map:
 
