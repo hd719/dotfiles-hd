@@ -28,6 +28,10 @@ return {
     "ice345/markdown-table-wrap.nvim",
     version = "v0.3.0",
     ft = { "markdown" },
-    opts = {},
+    opts = {
+      reader = {
+        linebreak = true,
+      },
+    },
   },
 }
