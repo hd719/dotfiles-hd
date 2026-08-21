@@ -88,6 +88,54 @@ local function hide_empty_scratch(item)
   return item
 end
 
+-- Only prefill paths, so a clipboard holding copied code is ignored.
+local function clipboard_path()
+  local text = vim.trim(vim.fn.getreg("+"))
+  if text == "" or text:find("%s") or not text:find("/") then
+    return ""
+  end
+  return text
+end
+
+-- Paths copied from a terminal, a stack trace, or another editor are usually
+-- absolute and outside the current project, so the files picker can never list
+-- them. Resolve the text itself instead of fuzzy matching it.
+local function open_path(input)
+  local path = vim.trim(input or ""):gsub("^['\"]", ""):gsub("['\"]$", ""):gsub("^file://", "")
+  if path == "" then
+    return
+  end
+
+  -- Grep, stack trace, and LSP output append file:line or file:line:col.
+  local lnum, col = path:match(":(%d+):(%d+)$")
+  lnum = lnum or path:match(":(%d+)$")
+  if lnum then
+    path = path:gsub(":%d+:?%d*$", "")
+  end
+
+  path = vim.fs.normalize(path)
+  if not vim.startswith(path, "/") then
+    path = vim.fs.joinpath(vim.fn.getcwd(), path)
+  end
+
+  local stat = vim.uv.fs_stat(path)
+  if stat and stat.type == "directory" then
+    Snacks.picker.files({ cwd = path })
+    return
+  end
+  if not stat then
+    Snacks.notify.warn("No such path:\n" .. path)
+    Snacks.picker.files({ pattern = vim.fs.basename(path) })
+    return
+  end
+
+  -- Bypass Vim filename expansion so [clientId] style route segments survive.
+  vim.cmd.edit({ args = { path }, magic = { file = false, bar = false } })
+  if lnum then
+    pcall(vim.api.nvim_win_set_cursor, 0, { tonumber(lnum), (tonumber(col) or 1) - 1 })
+  end
+end
+
 return {
   {
     "folke/snacks.nvim",
@@ -281,6 +329,14 @@ return {
           Snacks.picker.files()
         end,
         desc = "Find files",
+      },
+      {
+        "<leader>fp",
+        function()
+          local opts = { prompt = "Path: ", default = clipboard_path(), completion = "file" }
+          vim.ui.input(opts, open_path)
+        end,
+        desc = "Open path (any file path)",
       },
       {
         "<leader>fr",
