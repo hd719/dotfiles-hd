@@ -27,25 +27,54 @@ hd_require() {
   }
 }
 
-# Ensure a Herdr server is running so the socket API calls below succeed.
-# `herdr api snapshot` only succeeds against a live server, so we use it as the
-# readiness probe and start a headless server if none is up.
+# Reply from the last hd_server_probe, kept so callers can report it.
+HD_PROBE=""
+
+# Probe the Herdr server. `herdr api snapshot` only succeeds against a live
+# server, so it doubles as the readiness check.
+hd_server_probe() {
+  HD_PROBE="$(herdr api snapshot 2>&1)"
+}
+
+# True when the probe failed because a server is up but speaks a different
+# protocol. Homebrew upgrading herdr under a running server lands here, and no
+# amount of waiting or starting a second server resolves it.
+hd_server_mismatch() {
+  case "$HD_PROBE" in
+    *protocol_mismatch*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Ensure a Herdr server is running so the socket API calls below succeed,
+# starting a headless one if none is up.
 hd_ensure_server() {
-  if herdr api snapshot >/dev/null 2>&1; then
+  if hd_server_probe; then
     return 0
+  fi
+  if hd_server_mismatch; then
+    echo "hd-lib: $HD_PROBE" >&2
+    exit 1
   fi
 
   (herdr server >/dev/null 2>&1 &)
 
+  # Tunable so tests can reach the timeout without waiting out a real 10s.
+  local attempts="${HD_SERVER_WAIT_ATTEMPTS:-50}"
   local i
-  for i in $(seq 1 50); do
-    if herdr api snapshot >/dev/null 2>&1; then
+  for i in $(seq 1 "$attempts"); do
+    if hd_server_probe; then
       return 0
+    fi
+    if hd_server_mismatch; then
+      echo "hd-lib: $HD_PROBE" >&2
+      exit 1
     fi
     sleep 0.2
   done
 
   echo "hd-lib: Herdr server did not become ready" >&2
+  echo "hd-lib: last probe: $HD_PROBE" >&2
   exit 1
 }
 
