@@ -20,6 +20,10 @@ set -euo pipefail
 printf 'herdr %s\n' "$*" >> "$HD_STOP_TEST_LOG"
 case "$*" in
   "api snapshot")
+    if [[ "${HD_STOP_TEST_SERVER:-running}" == mismatch ]]; then
+      printf '%s\n' '{"error":{"code":"protocol_mismatch","message":"client protocol 20 is newer than server protocol 19"}}'
+      exit 1
+    fi
     [[ "${HD_STOP_TEST_SERVER:-running}" != stopped ]]
     ;;
   "server stop")
@@ -70,5 +74,17 @@ HOME="$TEST_DIR/home" \
 
 grep -Fxq 'herdr api snapshot' "$LOG_FILE"
 ! grep -Fxq 'herdr server stop' "$LOG_FILE"
+
+# A protocol-mismatched server is still running, so it must be stopped rather
+# than reported as absent. Stopping it is how the mismatch gets resolved.
+: > "$LOG_FILE"
+HOME="$TEST_DIR/home" \
+  PATH="$BIN_DIR:/usr/bin:/bin" \
+  HD_STOP_TEST_LOG="$LOG_FILE" \
+  HD_STOP_TEST_SERVER=mismatch \
+  "$HD_STOP" >/dev/null
+
+grep -Fxq 'herdr api snapshot' "$LOG_FILE"
+grep -Fxq 'herdr server stop' "$LOG_FILE"
 
 printf 'hd-stop test: ok\n'

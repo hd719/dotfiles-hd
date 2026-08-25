@@ -27,7 +27,9 @@ for port in "${PORTS[@]}"; do
   hd_free_port "$port"
 done
 
-if herdr api snapshot >/dev/null 2>&1; then
+# A protocol-mismatched server still needs stopping; that is the documented way
+# to recover after herdr is upgraded under a running server.
+if hd_server_probe || hd_server_mismatch; then
   if [[ -n "${HD_DRY_RUN:-}" ]]; then
     echo "would stop Herdr through its native server stop command"
   elif herdr server stop >/dev/null 2>&1; then
