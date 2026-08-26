@@ -1,3 +1,23 @@
+local function refresh_markdown_table_readers()
+  local reader = require("markdown-table-wrap.reader")
+  local refreshed = 0
+  local seen = {}
+
+  for _, winid in ipairs(vim.api.nvim_list_wins()) do
+    local bufnr = vim.api.nvim_win_get_buf(winid)
+    if not seen[bufnr] and reader.is_reader(bufnr) then
+      seen[bufnr] = true
+      if reader.refresh(bufnr) then
+        refreshed = refreshed + 1
+      end
+    end
+  end
+
+  if refreshed == 0 then
+    vim.notify("No active Markdown table reader", vim.log.levels.INFO)
+  end
+end
+
 return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
@@ -32,6 +52,13 @@ return {
       reader = {
         wrap = true,
         linebreak = true,
+      },
+    },
+    keys = {
+      {
+        "<leader>mR",
+        refresh_markdown_table_readers,
+        desc = "Refresh Markdown table readers",
       },
     },
   },
