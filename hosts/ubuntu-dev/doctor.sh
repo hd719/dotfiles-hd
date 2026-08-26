@@ -8,6 +8,7 @@ OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
 NEOVIM_SETUP_SCRIPT="${DOTFILES_NEOVIM_SETUP_SCRIPT:-$SCRIPT_DIR/setup-neovim.sh}"
 MISE_BIN="${DOTFILES_MISE_BIN:-$HOME/.local/bin/mise}"
 CHEZMOI_DOCTOR="${DOTFILES_CHEZMOI_DOCTOR:-$REPO_DIR/chezmoi/doctor.sh}"
+SQLITE_BIN="${DOTFILES_SQLITE_BIN:-/usr/bin/sqlite3}"
 EXPECTED_DOTFILES_ORIGIN="git@github.com:hd719/dotfiles-hd.git"
 EXPECTED_DOTFILES_HTTPS_ORIGIN="https://github.com/hd719/dotfiles-hd.git"
 EXPECTED_DOTFILES_BRANCH="${DOTFILES_EXPECTED_BRANCH:-master}"
@@ -183,6 +184,12 @@ if "$CHEZMOI_DOCTOR" ubuntu; then
   pass "Ubuntu Chezmoi configuration"
 else
   fail "Ubuntu Chezmoi configuration"
+fi
+
+if [[ -x "$SQLITE_BIN" ]]; then
+  pass "SQLite CLI for Codex archive picker"
+else
+  fail "SQLite CLI for Codex archive picker is missing: $SQLITE_BIN"
 fi
 
 mise_herdr="$("$MISE_BIN" which herdr 2>/dev/null || true)"
