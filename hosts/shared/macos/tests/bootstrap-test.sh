@@ -1143,7 +1143,7 @@ test_shared_zsh_interface() {
   local shared_dir="$REPO_DIR/config/zsh/mac"
   local shared_init="$shared_dir/init.zsh"
   local personal_init="$shared_dir/personal/init.zsh"
-  local personal_codex="$shared_dir/personal/codex-functions.zsh"
+  local shared_codex="$REPO_DIR/config/zsh/shared/codex-functions.zsh"
   local root="$TMP_ROOT/shared-zsh-completions"
   local home_dir="$root/home"
   local completion_dir="$root/docker-completions"
@@ -1172,7 +1172,7 @@ test_shared_zsh_interface() {
     "$module" \
     "$REPO_DIR/config/zsh/shared/aliases.zsh" \
     "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" \
-    "$personal_codex" \
+    "$shared_codex" \
     "$REPO_DIR/config/zsh/shared/development-aliases.zsh" \
     "$REPO_DIR/config/zsh/shared/functions.zsh" \
     "$REPO_DIR/config/zsh/shared/herdr.zsh" \
@@ -1211,7 +1211,7 @@ test_shared_zsh_interface() {
   assert_contains "$REPO_DIR/hosts/mac-mini/.zshrc" 'export DOTFILES_MAC_PROFILE="mac-mini"'
   assert_not_contains "$REPO_DIR/hosts/work-mac/resilience/.zshrc" 'config/zsh/mac/personal/'
   assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-aliases.zsh"'
-  assert_contains "$personal_init" 'source "$zsh_personal_dir/codex-functions.zsh"'
+  assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-functions.zsh"'
   assert_contains "$shared_init" 'source "$zsh_shared_dir/completions.zsh"'
 
   actual="$(
@@ -1260,7 +1260,7 @@ test_shared_zsh_interface() {
       source "$1"
       source "$2"
       coda named-session
-    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex"
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$shared_codex"
   assert_contains "$root/codex.log" "archive named-session"
 
   mkdir -p "$home_dir/.codex"
@@ -1296,7 +1296,7 @@ test_shared_zsh_interface() {
       source "$1"
       source "$2"
       coda
-    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$shared_codex" \
     >/dev/null
   assert_contains "$root/codex.log" "archive session-cli"
 
@@ -1307,7 +1307,7 @@ test_shared_zsh_interface() {
       source "$1"
       source "$2"
       coda
-    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$shared_codex" \
     </dev/null > "$root/codex-eof.log" &
   coda_pid=$!
   for attempt in {1..20}; do
@@ -1334,7 +1334,7 @@ test_shared_zsh_interface() {
       source "$1"
       source "$2"
       coda
-    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$personal_codex" \
+    ' zsh "$REPO_DIR/config/zsh/shared/codex-aliases.zsh" "$shared_codex" \
     >/dev/null
   assert_contains "$root/codex.log" "archive session-cli"
 

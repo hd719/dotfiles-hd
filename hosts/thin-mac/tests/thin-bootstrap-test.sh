@@ -442,7 +442,7 @@ grep -Fxq 'cask "codex"' "$REPO_DIR/hosts/thin-mac/Brewfile"
 grep -Fxq 'cask "vagrant"' "$REPO_DIR/hosts/thin-mac/Brewfile"
 grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/hosts/thin-mac/Brewfile"
 grep -Fxq 'cask "zoom"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fq 'config/zsh/mac/personal/codex-functions.zsh' \
+grep -Fq 'config/zsh/shared/codex-functions.zsh' \
   "$REPO_DIR/hosts/thin-mac/.zshrc"
 ! grep -Fq 'diff-so-fancy' "$REPO_DIR/hosts/thin-mac/Brewfile"
 ! grep -Fq 'zsh-autocomplete' \

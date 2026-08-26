@@ -263,8 +263,8 @@ The shell is assembled from scoped modules:
 - `config/zsh/shared/` provides portable Git, navigation, SSH, and reload helpers.
 - `config/zsh/shared/codex-aliases.zsh` provides personal Mac and Linux Codex
   shortcuts.
-- `config/zsh/mac/personal/codex-functions.zsh` provides the interactive Codex
-  archive picker on personal Macs.
+- `config/zsh/shared/codex-functions.zsh` provides the interactive Codex archive
+  picker on personal Macs and Linux workstations.
 - `config/zsh/mac/aliases.zsh` adds safe macOS controls.
 - `config/zsh/mac/personal/aliases.zsh` adds the vault control.
 - `hosts/thin-mac/vm.zsh` stays host-specific and owns VMware shortcuts.

@@ -1,4 +1,4 @@
-# Personal Mac Codex workflows.
+# Codex archive picker shared by personal Macs and Linux workstations.
 
 carchive() {
   emulate -L zsh

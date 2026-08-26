@@ -65,6 +65,7 @@ workstation_apt_packages:
   - openssh-server
   - pkg-config
   - rsync
+  - sqlite3
   - sudo
   - tk-dev
   - tmux
