@@ -24,6 +24,7 @@ FASTFETCH_CONFIG="$ROOT_DIR/config/fastfetch/config.jsonc"
 BTOP_CONFIG="$ROOT_DIR/config/btop/btop.conf"
 SHARED_ALIASES="$ROOT_DIR/config/zsh/shared/aliases.zsh"
 SHARED_CODEX_ALIASES="$ROOT_DIR/config/zsh/shared/codex-aliases.zsh"
+SHARED_CODEX_FUNCTIONS="$ROOT_DIR/config/zsh/shared/codex-functions.zsh"
 SHARED_DEVELOPMENT_ALIASES="$ROOT_DIR/config/zsh/shared/development-aliases.zsh"
 SHARED_FUNCTIONS="$ROOT_DIR/config/zsh/shared/functions.zsh"
 MAC_INIT="$ROOT_DIR/config/zsh/mac/init.zsh"
@@ -216,6 +217,7 @@ test_vagrant_ansible_contract() {
   assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
     '/var/lib/dotfiles-hd/initial-upgrade-complete'
   assert_file_contains "$ANSIBLE_DIR/vars.yml" '  - gh'
+  assert_file_contains "$ANSIBLE_DIR/vars.yml" '  - sqlite3'
   assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
     'when: not workstation_initial_upgrade.stat.exists'
   assert_file_contains "$ANSIBLE_DIR/tasks/system.yml" \
@@ -676,6 +678,7 @@ alias dc='docker compose'
 source_if_exists "$ubuntu_repo/config/zsh/shared/functions.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/aliases.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/codex-aliases.zsh"
+source_if_exists "$ubuntu_repo/config/zsh/shared/codex-functions.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/herdr.zsh"
 source_if_exists "$ubuntu_repo/config/zsh/shared/development-aliases.zsh"
 EOF
@@ -689,6 +692,7 @@ EOF
   assert_file_contains "$SHARED_ALIASES" "alias v='nvim'"
   assert_file_contains "$SHARED_CODEX_ALIASES" "alias cod='codex'"
   assert_file_contains "$SHARED_CODEX_ALIASES" "alias codu='codex update'"
+  assert_file_contains "$SHARED_CODEX_FUNCTIONS" "coda()"
   assert_file_contains "$SHARED_FUNCTIONS" "reload()"
 
   while IFS= read -r expected; do
@@ -725,6 +729,14 @@ EOF
       zsh -f -c 'source "$1"; printf "%s|%s|%s|%s" "$EDITOR" "$TERM" "$path[1]" "$ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE"' _ "$ZSH_CONFIG"
   )"
   [[ "$output" == "nvim|xterm-test|$TEST_ROOT/zsh-home/.local/bin|fg=#9399b2" ]] || fail "Ubuntu zsh config did not load cleanly with the readable autosuggestion color"
+
+  output="$(
+    HOME="$TEST_ROOT/zsh-home" \
+      PATH="/usr/bin:/bin" \
+      TERM="xterm-test" \
+      zsh -f -c 'source "$1"; whence -w coda' _ "$ZSH_CONFIG"
+  )"
+  [[ "$output" == "coda: function" ]] || fail "Ubuntu coda did not load the interactive picker"
 
   output="$(
     HOME="$TEST_ROOT/zsh-home" \
