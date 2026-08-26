@@ -439,6 +439,10 @@ EOF
 #!/usr/bin/env bash
 [[ "$*" == "api user --jq .login" ]] && printf 'arbiter-hd\n'
 EOF
+  cat > "$case_dir/bin/sqlite3" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
   mkdir -p "$case_dir/mise-installs" "$case_dir/home/.local/bin"
   printf '#!/usr/bin/env bash\nprintf "herdr 0.8.0\\n"\n' \
     > "$case_dir/mise-installs/herdr"
@@ -497,6 +501,7 @@ EOF
       DOTFILES_MISE_BIN="$case_dir/bin/mise" \
       DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/neovim-check.sh" \
       DOTFILES_CHEZMOI_DOCTOR="$case_dir/chezmoi-doctor.sh" \
+      DOTFILES_SQLITE_BIN="$case_dir/bin/sqlite3" \
       bash "$DOCTOR_SCRIPT"
   } 2>&1)"
   assert_contains "$output" "Doctor passed for Ubuntu."
@@ -510,6 +515,7 @@ EOF
   assert_contains "$output" "root filesystem has at least 200 GiB"
   assert_contains "$output" "Maple Mono NF is the Ghostty default"
   assert_contains "$output" "remote Herdr client matches mise"
+  assert_contains "$output" "SQLite CLI for Codex archive picker"
 
   set +e
   output="$({
@@ -520,6 +526,7 @@ EOF
       DOTFILES_MISE_BIN="$case_dir/bin/mise" \
       DOTFILES_NEOVIM_SETUP_SCRIPT="$case_dir/neovim-check.sh" \
       DOTFILES_CHEZMOI_DOCTOR="$case_dir/chezmoi-doctor.sh" \
+      DOTFILES_SQLITE_BIN="$case_dir/bin/missing-sqlite3" \
       DOTFILES_TEST_CHEZMOI_FAIL=1 \
       bash "$DOCTOR_SCRIPT" --offline
   } 2>&1)"
@@ -527,6 +534,7 @@ EOF
   set -e
   ((status != 0)) || fail "doctor ignored a Chezmoi configuration failure"
   assert_contains "$output" "FAIL  Ubuntu Chezmoi configuration"
+  assert_contains "$output" "FAIL  SQLite CLI for Codex archive picker is missing"
   assert_contains "$output" "SKIP  Tailscale connection (--offline)"
   assert_contains "$output" \
     "SKIP  remote GitHub, Forgejo, and Codex login checks (--offline)"
