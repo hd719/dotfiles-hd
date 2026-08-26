@@ -217,6 +217,11 @@ one there. Herdr subcommands keep their native behavior.
 `server stop` command. It does not create, close, or remove workspaces or saved
 session files. Docker remains running. Use `HD_DRY_RUN=1 hd-stop` to preview it.
 
+`hdk`, short for `herdr server reset`, is the separate hard reset: it closes
+every workspace, keeps one fresh `home` workspace, and never touches ports or
+Docker. Run from inside Herdr it leaves the server up and closes the workspace
+that owns the shell last. Add `--dry-run` to preview it.
+
 In exactly one fresh Ghostty window, confirm:
 
 - the shell checks above pass

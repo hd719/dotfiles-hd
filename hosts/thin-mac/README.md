@@ -203,6 +203,11 @@ Running plain `herdr` on the thin Mac focuses an existing local workspace for
 the current directory or creates one there when needed. Repeated launches from
 the same directory reuse its workspace.
 
+`hdk`, short for `herdr server reset`, clears the accumulated local workspaces
+and leaves one fresh `home` workspace. It only touches the local server, so the
+`hu` and `hmini` clients and their remote sessions are unaffected. Add
+`--dry-run` to preview it.
+
 After a fresh Ghostty launch, the thin-Mac host override opens one window with
 `hu`, `hmini`, and local `herdr` tabs in that order. It disables macOS window
 state restoration and full-screen startup so a prior layout cannot replace this

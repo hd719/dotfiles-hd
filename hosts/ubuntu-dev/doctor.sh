@@ -237,6 +237,7 @@ if zsh -lic '
   alias npb >/dev/null
   test "$(whence -w herdr)" = "herdr: function"
   test "$(whence -w _dotfiles_herdr_reset)" = "_dotfiles_herdr_reset: function"
+  test "$(alias hdk)" = "hdk='\''herdr server reset'\''"
   whence -w _zsh_autosuggest_start >/dev/null
   whence -w _zsh_highlight >/dev/null
   test -z "${GIT_PAGER+x}"

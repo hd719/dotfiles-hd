@@ -262,9 +262,12 @@ commands. Every other `sudo` command still requires authentication.
 If it reports that a reboot is required, leave the SSH session and use
 `uvm-stop` followed by `uvm-up`.
 
-From a regular Ubuntu terminal, `herdr server reset` closes every local Herdr
-workspace, preserves one fresh `home` workspace rooted at `~`, and stops the
-server. The next `herdr` starts from that clean state.
+`herdr server reset`, aliased to `hdk`, closes every local Herdr workspace and
+preserves one fresh `home` workspace rooted at `~`. From a regular terminal it
+also stops the server, so the next `herdr` starts from that clean state. Run
+from inside Herdr it leaves the server up and drops you in the fresh `home`
+workspace, closing the workspace that owns the shell last. Add `--dry-run` to
+preview it.
 
 Routine maintenance does not change the pinned Bento box, VMware provider, or
 reviewed mise runtime versions.
