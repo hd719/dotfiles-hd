@@ -66,6 +66,18 @@ line_of() {
   grep -nFx "$1" "$LOG_FILE" | cut -d: -f1
 }
 
+# set -e never aborts on a command whose status is inverted by !, so every
+# negative assertion has to fail explicitly or it proves nothing.
+refute() {
+  local needle="$1"
+  local file="$2"
+  local reason="$3"
+  if grep -Fq "$needle" "$file"; then
+    printf '%s\n' "$reason" >&2
+    exit 1
+  fi
+}
+
 # Outside Herdr: every workspace closes and the server stops.
 run_reset "$RESET"
 grep -Fxq "herdr workspace create --label home --cwd $HOME_DIR --focus" "$LOG_FILE"
@@ -73,12 +85,13 @@ grep -Fxq 'herdr workspace close ws-mine' "$LOG_FILE"
 grep -Fxq 'herdr workspace close ws-other' "$LOG_FILE"
 grep -Fxq 'herdr workspace close ws-third' "$LOG_FILE"
 grep -Fxq 'herdr server stop' "$LOG_FILE"
-! grep -Fq 'workspace close ws-home' "$LOG_FILE"
+refute 'workspace close ws-home' "$LOG_FILE" 'the fresh home workspace must never be closed'
 
 # Inside Herdr: the server must survive so this client keeps running, and the
 # workspace owning the shell must be the last one closed.
 run_reset HERDR_ENV=1 HERDR_WORKSPACE_ID=ws-mine "$RESET"
-! grep -Fq 'server stop' "$LOG_FILE"
+refute 'server stop' "$LOG_FILE" 'an inside-Herdr reset must not stop the server'
+refute 'workspace close ws-home' "$LOG_FILE" 'the fresh home workspace must never be closed'
 
 create_line="$(grep -n 'workspace create' "$LOG_FILE" | cut -d: -f1)"
 own_line="$(line_of 'herdr workspace close ws-mine')"
@@ -100,8 +113,8 @@ if run_reset HERDR_ENV=1 "$RESET"; then
   exit 1
 fi
 grep -Fq 'did not report which workspace' "$ERR_FILE"
-! grep -Fq 'workspace close' "$LOG_FILE"
-! grep -Fq 'workspace create' "$LOG_FILE"
+refute 'workspace close' "$LOG_FILE" 'a refused reset must not close anything'
+refute 'workspace create' "$LOG_FILE" 'a refused reset must not create anything'
 
 # A stopped server has nothing to reset.
 if run_reset RESET_TEST_SERVER=stopped "$RESET"; then
@@ -109,18 +122,19 @@ if run_reset RESET_TEST_SERVER=stopped "$RESET"; then
   exit 1
 fi
 grep -Fq 'not running' "$ERR_FILE"
-! grep -Fq 'workspace create' "$LOG_FILE"
+refute 'workspace create' "$LOG_FILE" 'a stopped server must not be reset'
 
 # --dry-run reports the plan and changes nothing.
 run_reset "$RESET" --dry-run
 grep -Fq 'Would close Herdr workspace: ws-mine' "$OUT_FILE"
 grep -Fq 'Would stop Herdr.' "$OUT_FILE"
-! grep -Fq 'workspace create' "$LOG_FILE"
-! grep -Fq 'workspace close' "$LOG_FILE"
+refute 'workspace create' "$LOG_FILE" '--dry-run must not create a workspace'
+refute 'workspace close' "$LOG_FILE" '--dry-run must not close a workspace'
+refute 'server stop' "$LOG_FILE" '--dry-run must not stop the server'
 
 # The dry run has to describe the inside-Herdr ending too.
 run_reset HERDR_ENV=1 HERDR_WORKSPACE_ID=ws-mine "$RESET" --dry-run
 grep -Fq 'Would leave the server running' "$OUT_FILE"
-! grep -Fq 'Would stop Herdr.' "$OUT_FILE"
+refute 'Would stop Herdr.' "$OUT_FILE" 'an inside-Herdr dry run must not promise to stop the server'
 
 printf 'reset-server test: ok\n'

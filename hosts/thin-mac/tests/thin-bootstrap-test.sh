@@ -372,7 +372,10 @@ export DOTFILES_TEST_RESET_LOG="$TEST_ROOT/reset.log"
   herdr server reset --dry-run
 " >/dev/null
 grep -Fxq 'reset-stub --dry-run' "$DOTFILES_TEST_RESET_LOG"
-! grep -Fq 'server reset' "$DOTFILES_TEST_HERDR_LOG"
+if grep -Fq 'server reset' "$DOTFILES_TEST_HERDR_LOG"; then
+  printf 'the wrapper must intercept server reset instead of calling the binary\n' >&2
+  exit 1
+fi
 
 : > "$DOTFILES_TEST_HERDR_LOG"
 /bin/zsh -dfc "
