@@ -1361,6 +1361,7 @@ test_shared_zsh_interface() {
       source "$1"
       (( $+functions[herdr] )) || exit 1
       (( $+functions[_dotfiles_herdr_reset] )) || exit 1
+      [[ "$(alias hdk)" == "hdk='\''herdr server reset'\''" ]] || exit 1
       (( _dotfiles_herdr_route_plain == 0 )) || exit 1
       print -r -- herdr-ok
     ' zsh "$REPO_DIR/hosts/mac-mini/.zshrc" 2>/dev/null
@@ -1381,9 +1382,9 @@ test_shared_zsh_interface() {
       alias hm-dev >/dev/null 2>&1 && exit 1
       (( $+functions[herdr] )) || exit 1
       (( $+functions[_dotfiles_herdr_route_cwd] )) || exit 1
-      (( $+functions[_dotfiles_herdr_reset] )) && exit 1
+      (( $+functions[_dotfiles_herdr_reset] )) || exit 1
+      [[ "$(alias hdk)" == "hdk='\''herdr server reset'\''" ]] || exit 1
       (( _dotfiles_herdr_route_plain == 1 )) || exit 1
-      (( _dotfiles_herdr_reset_enabled == 0 )) || exit 1
       print -r -- resilience-ok
     ' zsh "$REPO_DIR/hosts/work-mac/resilience/.zshrc" 2>/dev/null
   )"
@@ -1936,6 +1937,12 @@ test_resilience_hd_pargasite() {
   TESTS=$((TESTS + 1))
 }
 
+test_herdr_reset_server() {
+  bash "$REPO_DIR/hosts/shared/macos/tests/reset-server-test.sh" \
+    >/dev/null || fail "Herdr reset cannot safely reset from inside a Herdr pane"
+  TESTS=$((TESTS + 1))
+}
+
 test_zprofile_helper
 test_neovim_lock_guard
 test_neovim_plugin_checkout_integrity
@@ -1953,5 +1960,6 @@ test_personal_goodmorning_mac_mini_maintenance
 test_resilience_goodmorning_guards
 test_resilience_hd_stop
 test_resilience_hd_pargasite
+test_herdr_reset_server
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"

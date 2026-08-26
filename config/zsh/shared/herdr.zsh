@@ -1,9 +1,8 @@
-# Portable Herdr routing and optional reset wrapper for supported hosts.
+# Portable Herdr routing and reset wrapper for supported hosts.
 
 typeset -g _dotfiles_herdr_module="${${(%):-%N}:A}"
 typeset -g _dotfiles_herdr_reset_script="${_dotfiles_herdr_module:h:h:h}/herdr/reset-server.sh"
 typeset -gi _dotfiles_herdr_route_plain="${DOTFILES_HERDR_ROUTE_CWD:-0}"
-typeset -gi _dotfiles_herdr_reset_enabled="${DOTFILES_HERDR_RESET_ENABLED:-1}"
 unset _dotfiles_herdr_module
 
 _dotfiles_herdr_route_cwd() {
@@ -60,19 +59,15 @@ _dotfiles_herdr_route_cwd() {
     >/dev/null
 }
 
-if (( _dotfiles_herdr_reset_enabled )); then
-  _dotfiles_herdr_reset() {
-    emulate -L zsh
-    "$_dotfiles_herdr_reset_script"
-  }
-else
-  unfunction _dotfiles_herdr_reset 2>/dev/null || true
-fi
+_dotfiles_herdr_reset() {
+  emulate -L zsh
+  "$_dotfiles_herdr_reset_script" "$@"
+}
 
 herdr() {
   emulate -L zsh
 
-  # Current-directory routing and reset are enabled independently by profiles.
+  # Current-directory routing is enabled independently by each profile.
   if (( $# == 0 && _dotfiles_herdr_route_plain == 1 )) \
     && [[ -z "${HERDR_ENV:-}" ]]; then
     _dotfiles_herdr_route_cwd || return 1
@@ -80,11 +75,13 @@ herdr() {
     return
   fi
 
-  if (( _dotfiles_herdr_reset_enabled && $# == 2 )) \
-    && [[ "$1" == server && "$2" == reset ]]; then
-    _dotfiles_herdr_reset
+  # Herdr has no native reset, so trailing options go to the wrapper script.
+  if (( $# >= 2 )) && [[ "$1" == server && "$2" == reset ]]; then
+    _dotfiles_herdr_reset "${@:3}"
     return
   fi
 
   command herdr "$@"
 }
+
+alias hdk='herdr server reset'

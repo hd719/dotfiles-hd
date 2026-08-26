@@ -781,6 +781,7 @@ EOF
       [[ "$(whence -w reload)" == "reload: function" ]]
       [[ "$(whence -w herdr)" == "herdr: function" ]]
       [[ "$(whence -w _dotfiles_herdr_reset)" == "_dotfiles_herdr_reset: function" ]]
+      [[ "$(alias hdk)" == "hdk='\''herdr server reset'\''" ]]
       (( _dotfiles_herdr_route_plain == 0 ))
     ' _ "$ZSH_CONFIG" || fail "Ubuntu did not load the portable shell layer"
 

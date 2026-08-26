@@ -334,8 +334,8 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
   [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
   [[ \"\$(whence -w _dotfiles_herdr_route_cwd)\" == '_dotfiles_herdr_route_cwd: function' ]]
-  [[ \"\$(whence -w _dotfiles_herdr_reset)\" != '_dotfiles_herdr_reset: function' ]]
-  (( _dotfiles_herdr_reset_enabled == 0 ))
+  [[ \"\$(whence -w _dotfiles_herdr_reset)\" == '_dotfiles_herdr_reset: function' ]]
+  [[ \"\$(alias hdk)\" == \"hdk='herdr server reset'\" ]]
   (( _dotfiles_herdr_route_plain == 1 ))
   ! alias uc >/dev/null 2>&1
   ! alias uct >/dev/null 2>&1
@@ -355,14 +355,24 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   ! alias docker-nuke >/dev/null 2>&1
 "
 
+cat > "$TEST_ROOT/bin/reset-stub" <<'EOF'
+#!/bin/sh
+printf 'reset-stub %s\n' "$*" >> "$DOTFILES_TEST_RESET_LOG"
+EOF
+chmod +x "$TEST_ROOT/bin/reset-stub"
+export DOTFILES_TEST_RESET_LOG="$TEST_ROOT/reset.log"
+
+# Herdr has no native reset, so the wrapper must intercept it and forward the
+# trailing options rather than hand them to the binary.
+: > "$DOTFILES_TEST_RESET_LOG"
 : > "$DOTFILES_TEST_HERDR_LOG"
 /bin/zsh -dfc "
   source '$HOME/.zshrc'
-  herdr server reset
+  _dotfiles_herdr_reset_script='$TEST_ROOT/bin/reset-stub'
+  herdr server reset --dry-run
 " >/dev/null
-grep -Fxq 'herdr server reset' "$DOTFILES_TEST_HERDR_LOG"
-! grep -Fxq 'herdr api snapshot' "$DOTFILES_TEST_HERDR_LOG"
-! grep -Fq 'workspace create' "$DOTFILES_TEST_HERDR_LOG"
+grep -Fxq 'reset-stub --dry-run' "$DOTFILES_TEST_RESET_LOG"
+! grep -Fq 'server reset' "$DOTFILES_TEST_HERDR_LOG"
 
 : > "$DOTFILES_TEST_HERDR_LOG"
 /bin/zsh -dfc "

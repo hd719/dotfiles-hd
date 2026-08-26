@@ -2,18 +2,14 @@
 
 set -euo pipefail
 
-ALLOW_INSIDE_HERDR=0
 DRY_RUN=0
 
 usage() {
-  printf 'Usage: reset-server.sh [--allow-inside-herdr] [--dry-run]\n'
+  printf 'Usage: reset-server.sh [--dry-run]\n'
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --allow-inside-herdr)
-      ALLOW_INSIDE_HERDR=1
-      ;;
     --dry-run)
       DRY_RUN=1
       ;;
@@ -29,13 +25,6 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
-
-# Closing the workspace that owns this shell would kill the reset halfway
-# through. hd-stop is the exception because it launches this script separately.
-if [[ -n "${HERDR_ENV:-}" && "$ALLOW_INSIDE_HERDR" -ne 1 ]]; then
-  echo "Run 'herdr server reset' from a regular terminal, not inside Herdr." >&2
-  exit 1
-fi
 
 HERDR_BIN="${HERDR_BIN:-$(command -v herdr 2>/dev/null || true)}"
 JQ_BIN="${JQ_BIN:-$(command -v jq 2>/dev/null || true)}"
@@ -56,13 +45,25 @@ if ! "$HERDR_BIN" api snapshot >/dev/null 2>&1; then
   exit 1
 fi
 
+# One workspace owns this shell when the reset runs inside Herdr. It has to be
+# closed last, and the server has to stay up so this client keeps running.
+INSIDE_WORKSPACE=""
+if [[ -n "${HERDR_ENV:-}" ]]; then
+  INSIDE_WORKSPACE="${HERDR_WORKSPACE_ID:-}"
+  if [[ -z "$INSIDE_WORKSPACE" ]]; then
+    echo "Herdr did not report which workspace owns this shell." >&2
+    echo "Run the reset from a regular terminal instead." >&2
+    exit 1
+  fi
+fi
+
 # Capture the old IDs before creating the one workspace that must survive.
 workspace_json="$("$HERDR_BIN" workspace list)" || exit 1
 if ! workspace_ids="$(
   printf '%s\n' "$workspace_json" \
     | "$JQ_BIN" -r '.result.workspaces[]?.workspace_id'
 )"; then
-  echo "Herdr returned an invalid workspace list; server was not stopped." >&2
+  echo "Herdr returned an invalid workspace list; nothing was closed." >&2
   exit 1
 fi
 
@@ -72,11 +73,17 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     [[ -n "$workspace_id" ]] || continue
     echo "Would close Herdr workspace: $workspace_id"
   done <<< "$workspace_ids"
-  echo "Would stop Herdr."
+  if [[ -n "$INSIDE_WORKSPACE" ]]; then
+    echo "Would leave the server running for this Herdr client."
+  else
+    echo "Would stop Herdr."
+  fi
   exit 0
 fi
 
-# Create the landing workspace first so Herdr is never left with zero workspaces.
+# Create the landing workspace first so Herdr is never left with zero
+# workspaces, and focus it so this client is already elsewhere before its own
+# workspace closes.
 landing_json="$(
   "$HERDR_BIN" workspace create --label home --cwd "$HOME" --focus
 )" || exit 1
@@ -91,7 +98,9 @@ fi
 
 close_failed=0
 while IFS= read -r workspace_id; do
-  [[ -n "$workspace_id" && "$workspace_id" != "$landing_id" ]] || continue
+  [[ -n "$workspace_id" ]] || continue
+  [[ "$workspace_id" != "$landing_id" ]] || continue
+  [[ -z "$INSIDE_WORKSPACE" || "$workspace_id" != "$INSIDE_WORKSPACE" ]] || continue
   if "$HERDR_BIN" workspace close "$workspace_id" >/dev/null 2>&1; then
     echo "Closed Herdr workspace: $workspace_id"
   else
@@ -103,6 +112,14 @@ done <<< "$workspace_ids"
 if [[ "$close_failed" -ne 0 ]]; then
   echo "Herdr was left running because workspace cleanup was incomplete." >&2
   exit 1
+fi
+
+if [[ -n "$INSIDE_WORKSPACE" ]]; then
+  echo "Herdr keeps running with one fresh home workspace."
+  # Closing the workspace that owns this shell can terminate this process, so
+  # it must remain the final action.
+  "$HERDR_BIN" workspace close "$INSIDE_WORKSPACE" >/dev/null 2>&1 || true
+  exit 0
 fi
 
 "$HERDR_BIN" server stop
