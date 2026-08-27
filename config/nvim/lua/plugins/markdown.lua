@@ -1,4 +1,4 @@
-local function refresh_markdown_table_readers()
+local function refresh_markdown_tables()
   local reader = require("markdown-table-wrap.reader")
   local refreshed = 0
   local seen = {}
@@ -13,7 +13,9 @@ local function refresh_markdown_table_readers()
     end
   end
 
-  if refreshed == 0 then
+  if refreshed == 0 and vim.bo.filetype == "markdown" then
+    vim.cmd("MarkdownTableRefresh")
+  elseif refreshed == 0 then
     vim.notify("No active Markdown table reader", vim.log.levels.INFO)
   end
 end
@@ -57,8 +59,8 @@ return {
     keys = {
       {
         "<leader>mR",
-        refresh_markdown_table_readers,
-        desc = "Refresh Markdown table readers",
+        refresh_markdown_tables,
+        desc = "Refresh Markdown tables",
       },
     },
   },

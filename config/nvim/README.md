@@ -246,7 +246,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space o e`                              | Open the current file externally; PDFs use Bookokrat                          |
 | `Space m m`                              | Toggle Marksman for the current Markdown file                                 |
 | `Space m r`                              | Toggle Markdown rendering                                                     |
-| `Space m R`                              | Refresh active Markdown table readers, including from the Explorer            |
+| `Space m R`                              | Refresh Markdown tables from Source, Inline, Reader, or another pane          |
 | `Space u`                                | Built-in `z` actions: folds, viewport, and spelling                           |
 | `gd` / `gh` / `grr`                      | Definition / hover / references                                               |
 | `gsa` / `gsd` / `gsr`                    | Surround add / delete / replace                                               |
