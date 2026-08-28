@@ -2,7 +2,7 @@
 set -euo pipefail
 
 {{- $repo := joinPath .chezmoi.sourceDir ".." ".." }}
-# brew: {{ output "git" "-C" $repo "hash-object" "hosts/mac-work/resilience/Brewfile" | trim }}
+# brew: {{ output "git" "-C" $repo "hash-object" "hosts/mac-work/Brewfile" | trim }}
 # nvim: {{ output "git" "-C" $repo "hash-object" "config/nvim/lazy-lock.json" | trim }}
 brewfile="$HOME/.config/homebrew/Brewfile"
 lockfile="$HOME/.config/nvim/lazy-lock.json"

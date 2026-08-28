@@ -163,16 +163,16 @@ res-plat-init-up() {
 }
 
 # [Tmux Platform Session Aliases]
-alias tm-plat-fe="~/Developer/dotfiles-hd/hosts/mac-work/resilience/tmux/platform/tm-fe.sh"
-alias tm-plat-proxy="~/Developer/dotfiles-hd/hosts/mac-work/resilience/tmux/platform/tm-ed.sh"
-alias tm-plat-be="~/Developer/dotfiles-hd/hosts/mac-work/resilience/tmux/platform/tm-be.sh"
-alias tm-plat="~/Developer/dotfiles-hd/hosts/mac-work/resilience/tmux/platform/tm-platform.sh"
+alias tm-plat-fe="~/Developer/dotfiles-hd/hosts/mac-work/tmux/platform/tm-fe.sh"
+alias tm-plat-proxy="~/Developer/dotfiles-hd/hosts/mac-work/tmux/platform/tm-ed.sh"
+alias tm-plat-be="~/Developer/dotfiles-hd/hosts/mac-work/tmux/platform/tm-be.sh"
+alias tm-plat="~/Developer/dotfiles-hd/hosts/mac-work/tmux/platform/tm-platform.sh"
 
 # [Herdr Platform Session Aliases]
-alias hd-plat-fe="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/platform/hd-fe.sh"
-alias hd-plat-proxy="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/platform/hd-ed.sh"
-alias hd-plat-be="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/platform/hd-be.sh"
-alias hd-plat="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/platform/hd-platform.sh"
+alias hd-plat-fe="~/Developer/dotfiles-hd/hosts/mac-work/herdr/platform/hd-fe.sh"
+alias hd-plat-proxy="~/Developer/dotfiles-hd/hosts/mac-work/herdr/platform/hd-ed.sh"
+alias hd-plat-be="~/Developer/dotfiles-hd/hosts/mac-work/herdr/platform/hd-be.sh"
+alias hd-plat="~/Developer/dotfiles-hd/hosts/mac-work/herdr/platform/hd-platform.sh"
 
 # Build all workspace packages (run after install or pulling changes to internal packages)
 alias res-plat-build="cd ~/Developer/Resilience/resilience-platform && run-with-codeartifact-token yarn build"
@@ -215,23 +215,23 @@ alias res-parg-calc="cd ~/Developer/Resilience/resilience-pargasite/apps/cyber-r
 alias res-parg-gql="cd ~/Developer/Resilience/resilience-pargasite && run-with-codeartifact-token yarn refresh-gql"
 
 # [Tmux Pargasite Session Aliases]
-alias tm-parg-client="~/Developer/dotfiles-hd/hosts/mac-work/resilience/tmux/pargasite/tm-client.sh"
-alias tm-parg-arc="~/Developer/dotfiles-hd/hosts/mac-work/resilience/tmux/pargasite/tm-arc.sh"
-alias tm-parg-calc="~/Developer/dotfiles-hd/hosts/mac-work/resilience/tmux/pargasite/tm-calc.sh"
-alias tm-parg="~/Developer/dotfiles-hd/hosts/mac-work/resilience/tmux/pargasite/tm-pargasite.sh"
+alias tm-parg-client="~/Developer/dotfiles-hd/hosts/mac-work/tmux/pargasite/tm-client.sh"
+alias tm-parg-arc="~/Developer/dotfiles-hd/hosts/mac-work/tmux/pargasite/tm-arc.sh"
+alias tm-parg-calc="~/Developer/dotfiles-hd/hosts/mac-work/tmux/pargasite/tm-calc.sh"
+alias tm-parg="~/Developer/dotfiles-hd/hosts/mac-work/tmux/pargasite/tm-pargasite.sh"
 
 # [Herdr Pargasite Session Aliases]
-alias hd-parg-client="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/pargasite/hd-client.sh"
-alias hd-parg-arc="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/pargasite/hd-arc.sh"
-alias hd-parg-calc="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/pargasite/hd-calc.sh"
-alias hd-parg="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/pargasite/hd-pargasite.sh"
+alias hd-parg-client="~/Developer/dotfiles-hd/hosts/mac-work/herdr/pargasite/hd-client.sh"
+alias hd-parg-arc="~/Developer/dotfiles-hd/hosts/mac-work/herdr/pargasite/hd-arc.sh"
+alias hd-parg-calc="~/Developer/dotfiles-hd/hosts/mac-work/herdr/pargasite/hd-calc.sh"
+alias hd-parg="~/Developer/dotfiles-hd/hosts/mac-work/herdr/pargasite/hd-pargasite.sh"
 
 # [Herdr Control Aliases]
 # Stop Herdr + free dev-server ports, but leave Docker containers running.
-alias hd-stop="~/Developer/dotfiles-hd/hosts/mac-work/resilience/herdr/hd-stop.sh"
+alias hd-stop="~/Developer/dotfiles-hd/hosts/mac-work/herdr/hd-stop.sh"
 
 # [Morning maintenance]
-source "$HOME/Developer/dotfiles-hd/hosts/mac-work/resilience/goodmorning.zsh"
+source "$HOME/Developer/dotfiles-hd/hosts/mac-work/goodmorning.zsh"
 
 # Create a CA Bundle with the ZScaler root CA
 #   Similar process to exporting via GUI from /System/Library/CoreServices/Applications/Keychain\ Access.app

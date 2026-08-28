@@ -55,7 +55,8 @@ chmod +x "$BIN_DIR/herdr"
 # assignments for env, then any trailing script options.
 run_reset() {
   : > "$LOG_FILE"
-  env PATH="$BIN_DIR:/usr/bin:/bin" \
+  env -u HERDR_ENV -u HERDR_WORKSPACE_ID \
+    PATH="$BIN_DIR:/usr/bin:/bin" \
     HOME="$HOME_DIR" \
     JQ_BIN="$JQ_BIN" \
     RESET_TEST_LOG="$LOG_FILE" \

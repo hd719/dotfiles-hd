@@ -159,8 +159,8 @@ Service lifecycle changes require separate approval.
 
 - Manage only Ghostty, Herdr, Hunk, Neovim, Bookokrat, and the portable Git
   alias include.
-- Use `hosts/mac-work/resilience/Brewfile` and
-  `hosts/mac-work/resilience/link-terminal-editor-config.sh`.
+- Use `hosts/mac-work/Brewfile` and
+  `hosts/mac-work/link-terminal-editor-config.sh`.
 - Never run the personal Mac bootstrap or the Mac mini Brewfile.
 - Keep the live work `~/.zshrc`, `config/mise`, Git identity, work runtimes,
   credentials, certificates, and Docker state machine-owned.
@@ -228,8 +228,7 @@ Run checks that match the changed surface:
 ```bash
 git diff --check
 bash /Users/hameldesai/.codex/skills/dotfiles-sync/tests/sync-dotfiles-test.sh
-bash hosts/shared/macos/tests/bootstrap-test.sh
-bash hosts/ubuntu-dev/tests/lean-setup.sh
+bash hosts/tests/run.sh
 bash hosts/ubuntu-dev/doctor.sh
 ```
 

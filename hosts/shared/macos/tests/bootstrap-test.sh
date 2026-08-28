@@ -645,11 +645,11 @@ test_profile_names_and_paths() {
 
   while IFS= read -r helper_path; do
     [[ -f "$REPO_DIR/$helper_path" ]] \
-      || fail "missing Mac Pro Resilience helper: $helper_path"
+      || fail "missing Work Mac helper: $helper_path"
     TESTS=$((TESTS + 1))
   done < <(
-    grep -Eo 'hosts/mac-work/resilience/[^"]+\.sh' \
-      "$REPO_DIR/hosts/mac-work/resilience/.zshrc" | LC_ALL=C sort -u
+    grep -Eo 'hosts/mac-work/[^"]+\.sh' \
+      "$REPO_DIR/hosts/mac-work/.zshrc" | LC_ALL=C sort -u
   )
 }
 
@@ -1189,8 +1189,8 @@ test_shared_zsh_interface() {
     "$shared_dir/personal/development-aliases.zsh" \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc" \
-    "$REPO_DIR/hosts/mac-work/resilience/goodmorning.zsh" \
-    "$REPO_DIR/hosts/mac-work/resilience/.zshrc" \
+    "$REPO_DIR/hosts/mac-work/goodmorning.zsh" \
+    "$REPO_DIR/hosts/mac-work/.zshrc" \
     "$REPO_DIR/hosts/mac-thin/vm.zsh"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
     TESTS=$((TESTS + 1))
@@ -1199,17 +1199,17 @@ test_shared_zsh_interface() {
   for zsh_file in \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc" \
-    "$REPO_DIR/hosts/mac-work/resilience/.zshrc"; do
+    "$REPO_DIR/hosts/mac-work/.zshrc"; do
     assert_contains "$zsh_file" 'config/zsh/mac/init.zsh'
   done
   assert_contains "$REPO_DIR/hosts/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/hosts/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/hosts/mac-mini/.zshrc" 'config/zsh/shared/herdr.zsh'
-  assert_contains "$REPO_DIR/hosts/mac-work/resilience/.zshrc" 'config/zsh/shared/herdr.zsh'
-  assert_contains "$REPO_DIR/hosts/mac-work/resilience/Brewfile" 'brew "jq"'
+  assert_contains "$REPO_DIR/hosts/mac-work/.zshrc" 'config/zsh/shared/herdr.zsh'
+  assert_contains "$REPO_DIR/hosts/mac-work/Brewfile" 'brew "jq"'
   assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Mac mini shared Herdr reset'
   assert_contains "$REPO_DIR/hosts/mac-mini/.zshrc" 'export DOTFILES_MAC_PROFILE="mac-mini"'
-  assert_not_contains "$REPO_DIR/hosts/mac-work/resilience/.zshrc" 'config/zsh/mac/personal/'
+  assert_not_contains "$REPO_DIR/hosts/mac-work/.zshrc" 'config/zsh/mac/personal/'
   assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-aliases.zsh"'
   assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-functions.zsh"'
   assert_contains "$shared_init" 'source "$zsh_shared_dir/completions.zsh"'
@@ -1386,7 +1386,7 @@ test_shared_zsh_interface() {
       [[ "$(alias hdk)" == "hdk='\''herdr server reset'\''" ]] || exit 1
       (( _dotfiles_herdr_route_plain == 1 )) || exit 1
       print -r -- resilience-ok
-    ' zsh "$REPO_DIR/hosts/mac-work/resilience/.zshrc" 2>/dev/null
+    ' zsh "$REPO_DIR/hosts/mac-work/.zshrc" 2>/dev/null
   )"
   assert_eq resilience-ok "$actual" "Resilience profile keeps work behavior without personal workflows"
 
@@ -1444,7 +1444,7 @@ test_shared_zsh_interface() {
   chmod +x "$fake_bin/uname"
   actual="$(
     HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
-      source "$HOME/Developer/dotfiles-hd/hosts/mac-work/resilience/.zshrc"
+      source "$HOME/Developer/dotfiles-hd/hosts/mac-work/.zshrc"
       whence -w _zsh_load_common_tool_completions _zsh_cache_and_source
       alias v
     ' 2>/dev/null
@@ -1474,105 +1474,6 @@ test_shared_zsh_interface() {
   assert_eq $'first=generated\nsecond=preserved\ndisk=shared_completion_state=preserved' "$actual" "failed refresh preserves a valid completion cache"
 }
 
-test_ubuntu_vagrant_lifecycle() {
-  local root="$TMP_ROOT/ubuntu-vagrant-lifecycle"
-  local fake_bin="$root/bin"
-  local home_dir="$root/home"
-  local log="$root/vagrant.log"
-  local output
-
-  mkdir -p "$fake_bin" "$home_dir"
-  : > "$log"
-
-  cat > "$fake_bin/vagrant" <<'EOF'
-#!/usr/bin/env bash
-printf 'cwd=%s vagrant_cwd=%s gui=%s provider=%s clone=%s args=%s\n' \
-  "$PWD" \
-  "${VAGRANT_CWD:-unset}" \
-  "${UBUNTU_VM_GUI:-unset}" \
-  "${VAGRANT_DEFAULT_PROVIDER:-unset}" \
-  "${VAGRANT_VMWARE_CLONE_DIRECTORY:-unset}" \
-  "$*" >> "${VAGRANT_TEST_LOG:?}"
-if [[ "${1:-}" == "ssh" ]]; then
-  printf '192.0.2.10\n'
-fi
-EOF
-  chmod +x "$fake_bin/vagrant"
-
-  output="$(
-    HOME="$home_dir" \
-      PATH="$fake_bin:/usr/bin:/bin" \
-      DOTFILES_UBUNTU_VAGRANT_DIR="$REPO_DIR/hosts/ubuntu-dev" \
-      VAGRANT_TEST_LOG="$log" \
-      /bin/zsh -dfc '
-        source "$1"
-        uvm-up
-        uvm-stop
-        uvm-suspend
-        uvm-resume
-        uvm-status
-        uvm-ip
-        uvm-destroy
-      ' zsh "$REPO_DIR/hosts/mac-thin/vm.zsh"
-  )"
-
-  assert_contains "$log" \
-    "cwd=$REPO_DIR/hosts/ubuntu-dev vagrant_cwd=$REPO_DIR/hosts/ubuntu-dev gui=1 provider=vmware_desktop"
-  assert_contains "$log" "args=up"
-  assert_contains "$log" "args=halt"
-  assert_contains "$log" "args=suspend"
-  assert_contains "$log" "args=resume"
-  assert_contains "$log" "args=status"
-  assert_contains "$log" "args=ssh -c hostname -I"
-  assert_contains "$log" "args=destroy"
-  assert_contains "$log" "sudo -n -u hamel"
-  assert_not_contains "$log" "destroy -f"
-  [[ "$output" == *"Remove this VM's three registered Git public keys"* ]] \
-    || fail "destroy should print the Git-key removal reminder"
-  TESTS=$((TESTS + 1))
-
-  assert_not_contains "$REPO_DIR/hosts/mac-thin/vm.zsh" \
-    'Ubuntu 64-bit Arm 25.10.vmwarevm'
-  assert_contains "$REPO_DIR/config/zsh/mac/personal/aliases.zsh" \
-    "alias u='ssh ubuntu-vm'"
-  assert_contains "$REPO_DIR/config/zsh/mac/personal/aliases.zsh" \
-    "alias mini='ssh mac-mini-lan'"
-  assert_contains "$REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf" \
-    "Host ubuntu-vm"
-  assert_contains "$REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf" \
-    "HostName 127.0.0.1"
-  assert_contains "$REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf" \
-    "ForwardAgent no"
-  assert_contains "$REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf" \
-    "StrictHostKeyChecking yes"
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
-    'config.vm.box_version = "202606.01.0"'
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
-    'config.vm.box_architecture = "arm64"'
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
-    "config.vm.box_check_update = false"
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
-    'vmware.base_mac = "00:0C:29:10:D0:E6"'
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
-    '"DOTFILES_GIT_REF" => dotfiles_git_ref'
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
-    'config.vm.synced_folder ".", "/vagrant", disabled: true'
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" 'id: "ssh"'
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
-    'host_ip: "127.0.0.1"'
-  assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
-    'config.vm.disk :disk, size: 250 * 1024**3, primary: true'
-  assert_contains "$REPO_DIR/hosts/mac-thin/Brewfile" 'cask "vagrant"'
-  assert_contains "$REPO_DIR/hosts/mac-thin/Brewfile" \
-    'cask "vagrant-vmware-utility"'
-  assert_contains "$REPO_DIR/hosts/mac-thin/bootstrap.sh" \
-    'VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"'
-  assert_contains "$REPO_DIR/hosts/mac-thin/bootstrap.sh" \
-    'vagrant plugin install vagrant-vmware-desktop'
-  assert_contains "$REPO_DIR/hosts/mac-thin/bootstrap.sh" \
-    '--plugin-version "$VAGRANT_VMWARE_PLUGIN_VERSION"'
-}
-
 test_goodmorning_timeout_helper() {
   local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
   local start_epoch
@@ -1593,8 +1494,6 @@ test_goodmorning_timeout_helper() {
 
 test_goodmorning_dotfiles_sync() {
   local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
-  local resilience_module="$REPO_DIR/hosts/mac-work/resilience/goodmorning.zsh"
-  local resilience_profile="$REPO_DIR/hosts/mac-work/resilience/.zshrc"
   local root="$TMP_ROOT/goodmorning-dotfiles-sync"
   local home_dir="$root/home"
   local fake_bin="$root/bin"
@@ -1636,8 +1535,6 @@ EOF
     || fail "unexpected dotfiles origin should be rejected"
   TESTS=$((TESTS + 1))
   assert_no_path "$git_log"
-  assert_contains "$resilience_module" "_goodmorning_sync_dotfiles"
-  assert_contains "$resilience_profile" "goodmorning.zsh"
 }
 
 test_personal_goodmorning_mac_mini_maintenance() {
@@ -1775,174 +1672,6 @@ EOF
   assert_contains "$reload_log" "1|--updates-only"
 }
 
-test_resilience_goodmorning_guards() {
-  local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
-  local resilience_module="$REPO_DIR/hosts/mac-work/resilience/goodmorning.zsh"
-  local root="$TMP_ROOT/resilience-goodmorning"
-  local home_dir="$root/home"
-  local fake_bin="$root/bin"
-  local repo_dir="$home_dir/Developer/Resilience/resilience-platform"
-  local git_log="$root/git.log"
-  local brew_log="$root/brew.log"
-  local marker_file="$root/resilience-homebrew-upgrade"
-  local output
-  local actual
-
-  mkdir -p "$repo_dir/.git" "$fake_bin"
-  cat > "$fake_bin/git" <<'EOF'
-#!/bin/sh
-printf '%s\n' "$*" >> "$FAKE_GIT_LOG"
-if [ "$3" = "status" ] && [ -n "${FAKE_GIT_STATUS:-}" ]; then
-  printf '%s\n' "$FAKE_GIT_STATUS"
-fi
-exit 0
-EOF
-  cat > "$fake_bin/brew" <<'EOF'
-#!/bin/sh
-printf '%s\n' "$*" >> "$FAKE_BREW_LOG"
-if [ "${FAKE_BREW_FAIL:-}" = "$1" ]; then
-  exit 1
-fi
-if [ "$1" = "outdated" ]; then
-  printf '%s\n' "${FAKE_BREW_OUTDATED:-}"
-fi
-exit 0
-EOF
-  chmod +x "$fake_bin/git" "$fake_bin/brew"
-
-  output="$(
-    HOME="$home_dir" \
-      PATH="$fake_bin:/usr/bin:/bin" \
-      FAKE_GIT_LOG="$git_log" \
-      FAKE_GIT_STATUS=' M tracked-file' \
-      /bin/zsh -dfc \
-      'source "$1"; _resilience_update_repo "$2" "Test Repo"' \
-      zsh "$resilience_module" "$repo_dir" 2>&1 \
-      || true
-  )"
-  [[ "$output" == *"working tree is not clean"* ]] \
-    || fail "dirty Resilience repo should be rejected"
-  TESTS=$((TESTS + 1))
-  assert_contains "$git_log" "status --porcelain"
-  assert_not_contains "$git_log" "checkout"
-  assert_not_contains "$git_log" "pull"
-
-  : > "$git_log"
-  HOME="$home_dir" \
-    PATH="$fake_bin:/usr/bin:/bin" \
-    FAKE_GIT_LOG="$git_log" \
-    FAKE_GIT_STATUS='' \
-    /bin/zsh -dfc \
-    'source "$1"; _resilience_update_repo "$2" "Test Repo"' \
-    zsh "$resilience_module" "$repo_dir" >/dev/null
-  assert_contains "$git_log" "checkout dev"
-  assert_contains "$git_log" "pull --ff-only origin dev"
-
-  assert_eq 259200 "$(
-    /bin/zsh -dfc \
-      'source "$1"; _resilience_brew_cooldown_seconds' \
-      zsh "$resilience_module"
-  )" "Resilience Homebrew cooldown is 72 hours"
-
-  printf '1000000\n' > "$marker_file"
-  actual="$(
-    /bin/zsh -dfc '
-      source "$1"
-      source "$2"
-      _now_epoch_ms() { print -r -- 4600000 }
-      _resilience_brew_cooldown_remaining_seconds "$3" 7200
-    ' zsh "$functions_file" "$resilience_module" "$marker_file"
-  )"
-  assert_eq 3600 "$actual" "Homebrew cooldown reports remaining seconds"
-
-  HOME="$home_dir" \
-    PATH="$fake_bin:/usr/bin:/bin" \
-    FAKE_BREW_LOG="$brew_log" \
-    FAKE_BREW_OUTDATED='formula' \
-    /bin/zsh -dfc '
-      source "$1"
-      source "$2"
-      _now_epoch_ms() { print -r -- 5000000 }
-      _resilience_run_homebrew_upgrade "$3"
-    ' zsh "$functions_file" "$resilience_module" "$marker_file" >/dev/null
-  assert_contains "$brew_log" "update"
-  assert_contains "$brew_log" "outdated --greedy"
-  assert_contains "$brew_log" "upgrade --greedy"
-  assert_contains "$brew_log" "cleanup"
-  assert_contains "$brew_log" "autoremove"
-  assert_contains "$marker_file" "5000000"
-
-  rm -f "$marker_file"
-  : > "$brew_log"
-  if HOME="$home_dir" \
-    PATH="$fake_bin:/usr/bin:/bin" \
-    FAKE_BREW_LOG="$brew_log" \
-    FAKE_BREW_FAIL='update' \
-    /bin/zsh -dfc '
-      source "$1"
-      source "$2"
-      _resilience_run_homebrew_upgrade "$3"
-    ' zsh "$functions_file" "$resilience_module" "$marker_file" >/dev/null 2>&1; then
-    fail "failed Homebrew update should return nonzero"
-  fi
-  TESTS=$((TESTS + 1))
-  assert_no_path "$marker_file"
-
-  output="$(
-    /bin/zsh -dfc '
-      source "$1"
-      source "$2"
-      shift 2
-      _goodmorning_sync_dotfiles() { return 0 }
-      _resilience_host_is_virtual() { return 1 }
-      _resilience_brew_cooldown_remaining_seconds() { print -r -- 60 }
-      _resilience_run_homebrew_upgrade() { print -r -- brew-run }
-      gda() { return 0 }
-      goodMorning "$@"
-    ' zsh "$functions_file" "$resilience_module"
-  )"
-  [[ "$output" == *"60s remain in the 72-hour cooldown"* ]] \
-    || fail "default goodMorning should respect the Homebrew cooldown"
-  [[ "$output" != *"brew-run"* ]] \
-    || fail "default goodMorning should not bypass the Homebrew cooldown"
-  TESTS=$((TESTS + 2))
-
-  output="$(
-    /bin/zsh -dfc '
-      source "$1"
-      source "$2"
-      shift 2
-      _goodmorning_sync_dotfiles() { return 0 }
-      _resilience_host_is_virtual() { return 1 }
-      _resilience_brew_cooldown_remaining_seconds() { print -r -- 60 }
-      _resilience_run_homebrew_upgrade() { print -r -- brew-run }
-      gda() { return 0 }
-      goodMorning "$@"
-    ' zsh "$functions_file" "$resilience_module" --force-brew
-  )"
-  [[ "$output" == *"brew-run"* ]] \
-    || fail "--force-brew should bypass the Homebrew cooldown"
-  TESTS=$((TESTS + 1))
-}
-
-test_resilience_hd_stop() {
-  bash "$REPO_DIR/hosts/mac-work/resilience/herdr/tests/hd-stop-test.sh" \
-    >/dev/null || fail "Resilience hd-stop did not preserve native Herdr stop behavior"
-  TESTS=$((TESTS + 1))
-}
-
-test_resilience_hd_pargasite() {
-  bash "$REPO_DIR/hosts/mac-work/resilience/herdr/tests/hd-pargasite-test.sh" \
-    >/dev/null || fail "Resilience hd-parg cannot safely replace its current workspace"
-  TESTS=$((TESTS + 1))
-}
-
-test_herdr_reset_server() {
-  bash "$REPO_DIR/hosts/shared/macos/tests/reset-server-test.sh" \
-    >/dev/null || fail "Herdr reset cannot safely reset from inside a Herdr pane"
-  TESTS=$((TESTS + 1))
-}
-
 test_zprofile_helper
 test_neovim_lock_guard
 test_neovim_plugin_checkout_integrity
@@ -1953,13 +1682,8 @@ test_mac_mini_apply
 test_xdg_bin_home
 test_profile_and_failure_guards
 test_shared_zsh_interface
-test_ubuntu_vagrant_lifecycle
 test_goodmorning_timeout_helper
 test_goodmorning_dotfiles_sync
 test_personal_goodmorning_mac_mini_maintenance
-test_resilience_goodmorning_guards
-test_resilience_hd_stop
-test_resilience_hd_pargasite
-test_herdr_reset_server
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"
