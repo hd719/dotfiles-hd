@@ -40,6 +40,13 @@ assert_file() {
   [[ -f "$1" ]] || fail "expected file: $1"
 }
 
+assert_link_target() {
+  local path="$1"
+  local expected="$2"
+  [[ -L "$path" ]] || fail "expected symlink: $path"
+  assert_eq "$expected" "$(readlink "$path")" "symlink target for $path"
+}
+
 assert_no_path() {
   TESTS=$((TESTS + 1))
   [[ ! -e "$1" && ! -L "$1" ]] || fail "expected no path: $1"
@@ -648,8 +655,8 @@ test_profile_names_and_paths() {
       || fail "missing Mac Pro Resilience helper: $helper_path"
     TESTS=$((TESTS + 1))
   done < <(
-    grep -Eo 'hosts/work-mac/resilience/[^"]+\.sh' \
-      "$REPO_DIR/hosts/work-mac/resilience/.zshrc" | LC_ALL=C sort -u
+    grep -Eo 'hosts/mac-work/resilience/[^"]+\.sh' \
+      "$REPO_DIR/hosts/mac-work/resilience/.zshrc" | LC_ALL=C sort -u
   )
 }
 
@@ -1189,9 +1196,9 @@ test_shared_zsh_interface() {
     "$shared_dir/personal/development-aliases.zsh" \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc" \
-    "$REPO_DIR/hosts/work-mac/resilience/goodmorning.zsh" \
-    "$REPO_DIR/hosts/work-mac/resilience/.zshrc" \
-    "$REPO_DIR/hosts/thin-mac/vm.zsh"; do
+    "$REPO_DIR/hosts/mac-work/resilience/goodmorning.zsh" \
+    "$REPO_DIR/hosts/mac-work/resilience/.zshrc" \
+    "$REPO_DIR/hosts/mac-thin/vm.zsh"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
     TESTS=$((TESTS + 1))
   done
@@ -1199,17 +1206,17 @@ test_shared_zsh_interface() {
   for zsh_file in \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc" \
-    "$REPO_DIR/hosts/work-mac/resilience/.zshrc"; do
+    "$REPO_DIR/hosts/mac-work/resilience/.zshrc"; do
     assert_contains "$zsh_file" 'config/zsh/mac/init.zsh'
   done
   assert_contains "$REPO_DIR/hosts/mac-pro/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/hosts/mac-mini/.zshrc" 'config/zsh/mac/personal/init.zsh'
   assert_contains "$REPO_DIR/hosts/mac-mini/.zshrc" 'config/zsh/shared/herdr.zsh'
-  assert_contains "$REPO_DIR/hosts/work-mac/resilience/.zshrc" 'config/zsh/shared/herdr.zsh'
-  assert_contains "$REPO_DIR/hosts/work-mac/resilience/Brewfile" 'brew "jq"'
+  assert_contains "$REPO_DIR/hosts/mac-work/resilience/.zshrc" 'config/zsh/shared/herdr.zsh'
+  assert_contains "$REPO_DIR/hosts/mac-work/resilience/Brewfile" 'brew "jq"'
   assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Mac mini shared Herdr reset'
   assert_contains "$REPO_DIR/hosts/mac-mini/.zshrc" 'export DOTFILES_MAC_PROFILE="mac-mini"'
-  assert_not_contains "$REPO_DIR/hosts/work-mac/resilience/.zshrc" 'config/zsh/mac/personal/'
+  assert_not_contains "$REPO_DIR/hosts/mac-work/resilience/.zshrc" 'config/zsh/mac/personal/'
   assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-aliases.zsh"'
   assert_contains "$personal_init" 'source "$zsh_personal_shared_dir/codex-functions.zsh"'
   assert_contains "$shared_init" 'source "$zsh_shared_dir/completions.zsh"'
@@ -1386,7 +1393,7 @@ test_shared_zsh_interface() {
       [[ "$(alias hdk)" == "hdk='\''herdr server reset'\''" ]] || exit 1
       (( _dotfiles_herdr_route_plain == 1 )) || exit 1
       print -r -- resilience-ok
-    ' zsh "$REPO_DIR/hosts/work-mac/resilience/.zshrc" 2>/dev/null
+    ' zsh "$REPO_DIR/hosts/mac-work/resilience/.zshrc" 2>/dev/null
   )"
   assert_eq resilience-ok "$actual" "Resilience profile keeps work behavior without personal workflows"
 
@@ -1444,7 +1451,7 @@ test_shared_zsh_interface() {
   chmod +x "$fake_bin/uname"
   actual="$(
     HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '
-      source "$HOME/Developer/dotfiles-hd/hosts/work-mac/resilience/.zshrc"
+      source "$HOME/Developer/dotfiles-hd/hosts/mac-work/resilience/.zshrc"
       whence -w _zsh_load_common_tool_completions _zsh_cache_and_source
       alias v
     ' 2>/dev/null
@@ -1513,7 +1520,7 @@ EOF
         uvm-status
         uvm-ip
         uvm-destroy
-      ' zsh "$REPO_DIR/hosts/thin-mac/vm.zsh"
+      ' zsh "$REPO_DIR/hosts/mac-thin/vm.zsh"
   )"
 
   assert_contains "$log" \
@@ -1531,19 +1538,19 @@ EOF
     || fail "destroy should print the Git-key removal reminder"
   TESTS=$((TESTS + 1))
 
-  assert_not_contains "$REPO_DIR/hosts/thin-mac/vm.zsh" \
+  assert_not_contains "$REPO_DIR/hosts/mac-thin/vm.zsh" \
     'Ubuntu 64-bit Arm 25.10.vmwarevm'
   assert_contains "$REPO_DIR/config/zsh/mac/personal/aliases.zsh" \
     "alias u='ssh ubuntu-vm'"
   assert_contains "$REPO_DIR/config/zsh/mac/personal/aliases.zsh" \
     "alias mini='ssh mac-mini-lan'"
-  assert_contains "$REPO_DIR/hosts/thin-mac/ssh/ubuntu-vagrant.conf" \
+  assert_contains "$REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf" \
     "Host ubuntu-vm"
-  assert_contains "$REPO_DIR/hosts/thin-mac/ssh/ubuntu-vagrant.conf" \
+  assert_contains "$REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf" \
     "HostName 127.0.0.1"
-  assert_contains "$REPO_DIR/hosts/thin-mac/ssh/ubuntu-vagrant.conf" \
+  assert_contains "$REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf" \
     "ForwardAgent no"
-  assert_contains "$REPO_DIR/hosts/thin-mac/ssh/ubuntu-vagrant.conf" \
+  assert_contains "$REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf" \
     "StrictHostKeyChecking yes"
   assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
     'config.vm.box_version = "202606.01.0"'
@@ -1562,14 +1569,14 @@ EOF
     'host_ip: "127.0.0.1"'
   assert_contains "$REPO_DIR/hosts/ubuntu-dev/Vagrantfile" \
     'config.vm.disk :disk, size: 250 * 1024**3, primary: true'
-  assert_contains "$REPO_DIR/hosts/thin-mac/Brewfile" 'cask "vagrant"'
-  assert_contains "$REPO_DIR/hosts/thin-mac/Brewfile" \
+  assert_contains "$REPO_DIR/hosts/mac-thin/Brewfile" 'cask "vagrant"'
+  assert_contains "$REPO_DIR/hosts/mac-thin/Brewfile" \
     'cask "vagrant-vmware-utility"'
-  assert_contains "$REPO_DIR/hosts/thin-mac/bootstrap.sh" \
+  assert_contains "$REPO_DIR/hosts/mac-thin/bootstrap.sh" \
     'VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"'
-  assert_contains "$REPO_DIR/hosts/thin-mac/bootstrap.sh" \
+  assert_contains "$REPO_DIR/hosts/mac-thin/bootstrap.sh" \
     'vagrant plugin install vagrant-vmware-desktop'
-  assert_contains "$REPO_DIR/hosts/thin-mac/bootstrap.sh" \
+  assert_contains "$REPO_DIR/hosts/mac-thin/bootstrap.sh" \
     '--plugin-version "$VAGRANT_VMWARE_PLUGIN_VERSION"'
 }
 
@@ -1593,8 +1600,8 @@ test_goodmorning_timeout_helper() {
 
 test_goodmorning_dotfiles_sync() {
   local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
-  local resilience_module="$REPO_DIR/hosts/work-mac/resilience/goodmorning.zsh"
-  local resilience_profile="$REPO_DIR/hosts/work-mac/resilience/.zshrc"
+  local resilience_module="$REPO_DIR/hosts/mac-work/resilience/goodmorning.zsh"
+  local resilience_profile="$REPO_DIR/hosts/mac-work/resilience/.zshrc"
   local root="$TMP_ROOT/goodmorning-dotfiles-sync"
   local home_dir="$root/home"
   local fake_bin="$root/bin"
@@ -1777,7 +1784,7 @@ EOF
 
 test_resilience_goodmorning_guards() {
   local functions_file="$REPO_DIR/config/zsh/mac/development-functions.zsh"
-  local resilience_module="$REPO_DIR/hosts/work-mac/resilience/goodmorning.zsh"
+  local resilience_module="$REPO_DIR/hosts/mac-work/resilience/goodmorning.zsh"
   local root="$TMP_ROOT/resilience-goodmorning"
   local home_dir="$root/home"
   local fake_bin="$root/bin"
@@ -1926,15 +1933,20 @@ EOF
 }
 
 test_resilience_hd_stop() {
-  bash "$REPO_DIR/hosts/work-mac/resilience/herdr/tests/hd-stop-test.sh" \
+  bash "$REPO_DIR/hosts/mac-work/resilience/herdr/tests/hd-stop-test.sh" \
     >/dev/null || fail "Resilience hd-stop did not preserve native Herdr stop behavior"
   TESTS=$((TESTS + 1))
 }
 
 test_resilience_hd_pargasite() {
-  bash "$REPO_DIR/hosts/work-mac/resilience/herdr/tests/hd-pargasite-test.sh" \
+  bash "$REPO_DIR/hosts/mac-work/resilience/herdr/tests/hd-pargasite-test.sh" \
     >/dev/null || fail "Resilience hd-parg cannot safely replace its current workspace"
   TESTS=$((TESTS + 1))
+}
+
+test_host_rename_compatibility() {
+  assert_link_target "$REPO_DIR/hosts/thin-mac" mac-thin
+  assert_link_target "$REPO_DIR/hosts/work-mac" mac-work
 }
 
 test_herdr_reset_server() {
@@ -1960,6 +1972,7 @@ test_personal_goodmorning_mac_mini_maintenance
 test_resilience_goodmorning_guards
 test_resilience_hd_stop
 test_resilience_hd_pargasite
+test_host_rename_compatibility
 test_herdr_reset_server
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"

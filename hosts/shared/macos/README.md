@@ -8,7 +8,7 @@ Shared provisioning for two full local macOS profiles:
 | `mac-mini` | Production runtime Mac with extra apply gates |
 
 Do not run this bootstrap on the thin Mac. Use
-[`../../thin-mac/README.md`](../../thin-mac/README.md) there.
+[`../../mac-thin/README.md`](../../mac-thin/README.md) there.
 
 ## Prerequisites
 

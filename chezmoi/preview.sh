@@ -78,7 +78,7 @@ if [[ "${DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW:-0}" != 1 ]]; then
     mac-thin)
       if command -v brew >/dev/null 2>&1; then
         HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
-          --file "$REPO_DIR/hosts/thin-mac/Brewfile" || true
+          --file "$REPO_DIR/hosts/mac-thin/Brewfile" || true
       else
         printf '  Homebrew is required before the approved apply\n'
       fi
@@ -96,10 +96,10 @@ if [[ "${DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW:-0}" != 1 ]]; then
         printf '  Homebrew is required before the approved apply\n'
       fi
       ;;
-    work-mac)
+    mac-work)
       if command -v brew >/dev/null 2>&1; then
         HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --verbose \
-          --file "$REPO_DIR/hosts/work-mac/resilience/Brewfile" || true
+          --file "$REPO_DIR/hosts/mac-work/resilience/Brewfile" || true
       else
         printf '  Homebrew is required before the approved apply\n'
       fi

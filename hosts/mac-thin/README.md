@@ -54,16 +54,16 @@ installs Rosetta 2 when needed by Vagrant's VMware utility.
 Preview and audit first:
 
 ```bash
-hosts/thin-mac/bootstrap.sh --dry-run
-hosts/thin-mac/bootstrap.sh --check
+hosts/mac-thin/bootstrap.sh --dry-run
+hosts/mac-thin/bootstrap.sh --check
 ```
 
 Apply from a clean canonical checkout, then repeat to prove idempotency:
 
 ```bash
-hosts/thin-mac/bootstrap.sh --apply
-hosts/thin-mac/bootstrap.sh --apply
-hosts/thin-mac/doctor.sh
+hosts/mac-thin/bootstrap.sh --apply
+hosts/mac-thin/bootstrap.sh --apply
+hosts/mac-thin/doctor.sh
 ```
 
 The bootstrap installs the policy packages, including the Codex CLI, and pins
@@ -76,14 +76,14 @@ Sync reviewed `master` across the thin Mac, Ubuntu VM, and Mac mini from this
 control plane:
 
 ```bash
-hosts/thin-mac/sync-dotfiles.sh
+hosts/mac-thin/sync-dotfiles.sh
 ```
 
 ## Adding Another CLI Tool
 
 Fastfetch is the reference pattern:
 
-1. Add the formula to `hosts/thin-mac/Brewfile`.
+1. Add the formula to `hosts/mac-thin/Brewfile`.
 2. Keep declarative configuration under `config/`.
 3. Add only approved child files to `chezmoi/profiles/mac-thin.paths`.
 4. Adjust `.chezmoiignore.tmpl` for the `mac-thin` profile.
@@ -190,7 +190,7 @@ force flag and does not reference the legacy VMware VM.
 
 The Vagrant local route is fixed at `127.0.0.1:2222`, so it works without
 Tailscale or local networking. The remote route uses Tailscale MagicDNS.
-`hosts/thin-mac/ssh/ubuntu-vagrant.conf` keeps host-key checking on and disables
+`hosts/mac-thin/ssh/ubuntu-vagrant.conf` keeps host-key checking on and disables
 agent forwarding.
 
 Herdr runs on macOS only as a thin client for the Ubuntu server. Use `hu`
@@ -235,4 +235,4 @@ The shell is assembled from scoped modules:
   picker on personal Macs and Linux workstations.
 - `config/zsh/mac/aliases.zsh` adds safe macOS controls.
 - `config/zsh/mac/personal/aliases.zsh` adds the vault control.
-- `hosts/thin-mac/vm.zsh` stays host-specific and owns VMware shortcuts.
+- `hosts/mac-thin/vm.zsh` stays host-specific and owns VMware shortcuts.

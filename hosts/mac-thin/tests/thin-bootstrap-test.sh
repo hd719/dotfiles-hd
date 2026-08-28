@@ -27,7 +27,7 @@ chmod 700 \
   "$TEST_ROOT/home/.config/herdr" \
   "$TEST_ROOT/home/.config/hunk"
 cat > "$TEST_ROOT/home/.ssh/config" <<EOF
-Include $REPO_DIR/hosts/thin-mac/ssh/ubuntu-vagrant.conf
+Include $REPO_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf
 EOF
 printf 'runtime state\n' > "$TEST_ROOT/home/.config/herdr/session"
 printf 'hunk state\n' > "$TEST_ROOT/home/.config/hunk/state.json"
@@ -242,20 +242,20 @@ export DOTFILES_CHEZMOI_TEST=1
 export DOTFILES_CHEZMOI_DOCTOR=/usr/bin/true
 : > "$DOTFILES_TEST_HERDR_LOG"
 
-"$REPO_DIR/hosts/thin-mac/bootstrap.sh" --dry-run >/dev/null
+"$REPO_DIR/hosts/mac-thin/bootstrap.sh" --dry-run >/dev/null
 [[ ! -e "$HOME/.zshrc" ]]
 
 printf '#!/bin/sh\nexit 71\n' > "$TEST_ROOT/failed-chezmoi.sh"
 chmod +x "$TEST_ROOT/failed-chezmoi.sh"
 if DOTFILES_CHEZMOI_BOOTSTRAP="$TEST_ROOT/failed-chezmoi.sh" \
-  "$REPO_DIR/hosts/thin-mac/bootstrap.sh" --apply >/dev/null 2>&1; then
+  "$REPO_DIR/hosts/mac-thin/bootstrap.sh" --apply >/dev/null 2>&1; then
   printf 'Chezmoi preflight failure should stop thin bootstrap.\n' >&2
   exit 1
 fi
 [[ ! -e "$DOTFILES_TEST_ROSETTA_STATE" ]]
 [[ ! -s "$DOTFILES_TEST_BREW_LOG" ]]
 
-"$REPO_DIR/hosts/thin-mac/bootstrap.sh" --apply >/dev/null
+"$REPO_DIR/hosts/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -f "$DOTFILES_TEST_ROSETTA_STATE" ]]
 [[ "$(git config --global --includes --get alias.st)" == "status" ]]
 [[ "$(readlink "$HOME/.config/bookokrat")" == "$REPO_DIR/config/bookokrat" ]]
@@ -280,11 +280,11 @@ done
   "$REPO_DIR/chezmoi/doctor.sh" mac-thin >/dev/null
 )
 [[ ! -e "$HOME/.config/fastfetch/legacy" ]]
-[[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/hosts/thin-mac/.zshrc" ]]
+[[ "$(readlink "$HOME/.zshrc")" == "$REPO_DIR/hosts/mac-thin/.zshrc" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" \
   == "$REPO_DIR/config/ghostty/config" ]]
 [[ "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/host.conf")" \
-  == "$REPO_DIR/hosts/thin-mac/ghostty.conf" ]]
+  == "$REPO_DIR/hosts/mac-thin/ghostty.conf" ]]
 [[ "$(readlink "$HOME/.config/herdr/config.toml")" \
   == "$REPO_DIR/config/herdr/config.toml" ]]
 [[ "$(readlink "$HOME/.config/hunk/config.toml")" \
@@ -297,13 +297,13 @@ done
 grep -Fxq 'selection-background = #9ABACE' "$REPO_DIR/config/ghostty/config"
 grep -Fxq 'selection-foreground = #000001' "$REPO_DIR/config/ghostty/config"
 grep -Fxq 'config-file = ?host.conf' "$REPO_DIR/config/ghostty/config"
-grep -Fxq 'fullscreen = false' "$REPO_DIR/hosts/thin-mac/ghostty.conf"
-grep -Fxq 'window-save-state = never' "$REPO_DIR/hosts/thin-mac/ghostty.conf"
-grep -Fxq 'window-new-tab-position = end' "$REPO_DIR/hosts/thin-mac/ghostty.conf"
+grep -Fxq 'fullscreen = false' "$REPO_DIR/hosts/mac-thin/ghostty.conf"
+grep -Fxq 'window-save-state = never' "$REPO_DIR/hosts/mac-thin/ghostty.conf"
+grep -Fxq 'window-new-tab-position = end' "$REPO_DIR/hosts/mac-thin/ghostty.conf"
 /usr/bin/osacompile -o /dev/null \
-  "$REPO_DIR/hosts/thin-mac/ghostty-startup.applescript"
+  "$REPO_DIR/hosts/mac-thin/ghostty-startup.applescript"
 [[ "$(/usr/bin/osascript \
-  "$REPO_DIR/hosts/thin-mac/ghostty-startup.applescript" --dry-run)" \
+  "$REPO_DIR/hosts/mac-thin/ghostty-startup.applescript" --dry-run)" \
   == $'hu\nhmini\nherdr' ]]
 GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   source '$HOME/.zshrc'
@@ -423,10 +423,10 @@ HOMEBREW_PREFIX="$TEST_ROOT/homebrew" TERM=xterm-256color /bin/zsh -dfic "
   whence -w _zsh_highlight >/dev/null
 "
 
-"$REPO_DIR/hosts/thin-mac/bootstrap.sh" --apply >/dev/null
+"$REPO_DIR/hosts/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -z "$(find "$HOME" -name '*.backup-*' -print -quit)" ]]
 rm "$TEST_ROOT/bin/vagrant"
-"$REPO_DIR/hosts/thin-mac/bootstrap.sh" --apply >/dev/null
+"$REPO_DIR/hosts/mac-thin/bootstrap.sh" --apply >/dev/null
 [[ -x "$TEST_ROOT/bin/vagrant" ]]
 grep -Fq 'bundle install --no-upgrade' "$TEST_ROOT/brew.log"
 grep -Fq 'reinstall --cask vagrant' "$TEST_ROOT/brew.log"
@@ -437,31 +437,31 @@ grep -Fq \
   "$TEST_ROOT/brew.log"
 grep -Fq 'nvim --headless +Lazy! restore +qa' "$TEST_ROOT/brew.log"
 grep -Fq "markdown_inline" "$TEST_ROOT/brew.log"
-grep -Fxq 'brew "bookokrat"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "fastfetch"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "gh"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "herdr"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "hunk"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "lsd"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "marksman"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "neovim"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "ripgrep"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "starship"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "tree-sitter-cli"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "zoxide"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "zsh-autosuggestions"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'brew "zsh-syntax-highlighting"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'cask "codex"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'cask "vagrant"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/hosts/thin-mac/Brewfile"
-grep -Fxq 'cask "zoom"' "$REPO_DIR/hosts/thin-mac/Brewfile"
+grep -Fxq 'brew "bookokrat"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "fastfetch"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "gh"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "herdr"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "hunk"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "lsd"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "marksman"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "neovim"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "ripgrep"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "starship"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "tree-sitter-cli"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "zoxide"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "zsh-autosuggestions"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "zsh-syntax-highlighting"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'cask "codex"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'cask "vagrant"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'cask "vagrant-vmware-utility"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'cask "zoom"' "$REPO_DIR/hosts/mac-thin/Brewfile"
 grep -Fq 'config/zsh/shared/codex-functions.zsh' \
-  "$REPO_DIR/hosts/thin-mac/.zshrc"
-! grep -Fq 'diff-so-fancy' "$REPO_DIR/hosts/thin-mac/Brewfile"
+  "$REPO_DIR/hosts/mac-thin/.zshrc"
+! grep -Fq 'diff-so-fancy' "$REPO_DIR/hosts/mac-thin/Brewfile"
 ! grep -Fq 'zsh-autocomplete' \
-  "$REPO_DIR/hosts/thin-mac/Brewfile" \
-  "$REPO_DIR/hosts/thin-mac/.zshrc" \
-  "$REPO_DIR/hosts/thin-mac/doctor.sh" \
-  "$REPO_DIR/hosts/thin-mac/README.md"
+  "$REPO_DIR/hosts/mac-thin/Brewfile" \
+  "$REPO_DIR/hosts/mac-thin/.zshrc" \
+  "$REPO_DIR/hosts/mac-thin/doctor.sh" \
+  "$REPO_DIR/hosts/mac-thin/README.md"
 
 printf 'Thin Mac bootstrap tests passed.\n'

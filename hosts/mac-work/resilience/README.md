@@ -17,7 +17,7 @@ Keep the work `~/.zshrc`, `config/mise`, Git identity, credentials,
 certificates, Docker state, Karabiner, and company-managed applications
 machine-owned. Never use the personal Mac bootstrap or Mac mini Brewfile here.
 
-`hosts/work-mac/resilience/.zshrc` loads the full Mac development interface,
+`hosts/mac-work/resilience/.zshrc` loads the full Mac development interface,
 shared Herdr current-directory routing, and work-specific behavior, but not
 `config/zsh/mac/personal/init.zsh`. This runbook repairs an existing work shell;
 it never replaces or links `~/.zshrc`.
@@ -63,7 +63,7 @@ Install only missing scoped dependencies:
 
 ```bash
 brew bundle install --no-upgrade \
-  --file="$HOME/Developer/dotfiles-hd/hosts/work-mac/resilience/Brewfile"
+  --file="$HOME/Developer/dotfiles-hd/hosts/mac-work/resilience/Brewfile"
 
 uv tool install 'mdformat==1.0.0' \
   --with 'mdformat-gfm==1.0.0' \
@@ -85,7 +85,7 @@ approval. Prettier remains project-local.
 Create the five managed links:
 
 ```bash
-hosts/work-mac/resilience/link-terminal-editor-config.sh
+hosts/mac-work/resilience/link-terminal-editor-config.sh
 ```
 
 Add the portable aliases to the machine-owned global Git config:
@@ -166,7 +166,7 @@ Never reset local changes or repeatedly retry a failed stage.
   set -euo pipefail
 
   brew bundle check --verbose \
-    --file="$HOME/Developer/dotfiles-hd/hosts/work-mac/resilience/Brewfile"
+    --file="$HOME/Developer/dotfiles-hd/hosts/mac-work/resilience/Brewfile"
 
   for cmd in \
     bash-language-server bookokrat fd fzf gopls herdr hunk jq lazygit \
@@ -199,7 +199,7 @@ Never reset local changes or repeatedly retry a failed stage.
   nvim --headless +qa!
 
   test "$(readlink "$HOME/.zshrc" 2>/dev/null || true)" != \
-    "$HOME/Developer/dotfiles-hd/hosts/work-mac/resilience/.zshrc"
+    "$HOME/Developer/dotfiles-hd/hosts/mac-work/resilience/.zshrc"
 )
 ```
 
@@ -236,7 +236,7 @@ If GUI control is unavailable, report the UI checks as unverified.
 ## Agent Prompt
 
 ```text
-Run the work-mac Resilience post-merge readiness workflow from
+Run the mac-work Resilience post-merge readiness workflow from
 ~/Developer/dotfiles-hd. Read AGENTS.md and this runbook first. Preflight the
 host, clean checkout, remote, links, and work-owned state. Fast-forward only,
 then run normal `goodMorning` without forcing its cooldown. Repair only through

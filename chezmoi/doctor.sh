@@ -50,7 +50,7 @@ printf '%s\n' "$managed" | grep -Eq \
 if [[ "${DOTFILES_CHEZMOI_TEST:-0}" != 1 ]]; then
   "$REPO_DIR/config/git/configure-aliases.sh" --check >/dev/null \
     && pass 'portable Git include' || fail 'portable Git include'
-  if [[ "$PROFILE" != work-mac ]]; then
+  if [[ "$PROFILE" != mac-work ]]; then
     if command -v zsh >/dev/null 2>&1 && zsh -n "$DEST_DIR/.zshrc"; then
       pass 'shell entrypoint syntax'
     else
