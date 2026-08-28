@@ -216,48 +216,11 @@ control-plane default.
 The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
 Forgejo. No Git private key is copied from the Mac.
 
-## No-Agent Operations Fallback
+## Manual No-Agent Operations
 
-If Codex, Claude, or another interactive agent is unavailable, run the tracked
-fallback directly from the canonical dotfiles checkout:
-
-```bash
-~/Developer/dotfiles-hd/hosts/thin-mac/ops-fallback.sh personal-ready
-~/Developer/dotfiles-hd/hosts/thin-mac/ops-fallback.sh home-lab-ready
-~/Developer/dotfiles-hd/hosts/thin-mac/ops-fallback.sh home-lab-ready 2026-08-10 2026-08-17
-~/Developer/dotfiles-hd/hosts/thin-mac/ops-fallback.sh home-lab-recover
-```
-
-The commands run unattended and save timestamped Markdown reports under
-`~/Desktop/Ops Fallback Reports/`. Home-lab readiness also saves its existing
-Mac mini brief with a `-manual.md` suffix. Recovery automatically performs only
-the documented service starts and verified PostgreSQL repairs. It stops for
-credentials, router settings, HomeKit pairing, ACLs, firmware, destructive
-actions, and unknown states.
-
-`personal-ready` inspects Homebrew tap trust without changing it, always runs
-`brew update` followed by `brew upgrade`, runs normal `goodMorning` on the Mac
-mini, and reruns the thin-Mac doctor. Normal mode also removes the Zoom folder
-and runs the cooldown-protected Downloads and `.DS_Store` cleanup. It selects
-Tailscale or LAN before updating and never replays a failed maintenance command.
-Cortana updates may restart only affected Cortana services through the repo-owned
-`runtime:post-merge`; broad restarts and Hermes upgrades remain excluded.
-The `personal-mac-ops` skill uses this same command as its canonical Default
-Readiness runner, so agent and direct CLI runs share one implementation.
-If the Ubuntu updater fails, the saved report preserves its most precise named
-failure stage and exit code.
-
-Run the focused offline test after changing the fallback:
-
-```bash
-bash hosts/thin-mac/tests/ops-fallback-test.sh
-```
-
-The implementation is split into commented Bash modules under
-`hosts/thin-mac/ops-fallback/`. Start with
-[`ops-fallback/README.md`](ops-fallback/README.md) for the command-to-module
-map. The public commands stay in `ops-fallback.sh`; fallback-owned parsing uses
-Bash, `curl`, and `jq` rather than embedded Python.
+Manual home-lab readiness, recovery, and maintenance now live in their
+local-only deployed skills under `~/.codex/skills/`. Dotfiles no longer carries
+duplicate operational logic.
 
 This is an explicit allowlist. Node/Bun/Go, Docker, Kubernetes, project
 toolchains, VS Code, tmux, other language servers, and development aliases
