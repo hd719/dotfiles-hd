@@ -6,11 +6,11 @@ Hamel's profile-aware dotfiles, provisioning, and machine operations.
 
 | Host | Role | Entry point |
 | --- | --- | --- |
-| Thin Mac | Control plane for Codex, SSH, Vagrant, and VMware Fusion | [`hosts/thin-mac/README.md`](hosts/thin-mac/README.md) |
+| Thin Mac | Control plane for Codex, SSH, Vagrant, and VMware Fusion | [`hosts/mac-thin/README.md`](hosts/mac-thin/README.md) |
 | Ubuntu dev | Primary VM development workstation | [`hosts/ubuntu-dev/README.md`](hosts/ubuntu-dev/README.md) |
 | Mac Pro | Standalone full-development MacBook; local Brew stack, no VM | [`hosts/mac-pro/README.md`](hosts/mac-pro/README.md) |
 | Mac mini | Production runtime host | [`hosts/mac-mini/README.md`](hosts/mac-mini/README.md) |
-| Work Mac | Company-scoped terminal and editor setup | [`hosts/work-mac/README.md`](hosts/work-mac/README.md) |
+| Work Mac | Company-scoped terminal and editor setup | [`hosts/mac-work/README.md`](hosts/mac-work/README.md) |
 
 Clone at the canonical path:
 
@@ -31,11 +31,11 @@ dotfiles-hd/
 ├── config/                  canonical application configuration
 ├── hosts/
 │   ├── shared/macos/        shared full-Mac provisioning and doctor
-│   ├── thin-mac/            control plane, VM lifecycle, and fallback ops
+│   ├── mac-thin/            control plane, VM lifecycle, and fallback ops
 │   ├── ubuntu-dev/          Vagrant guest provisioning and maintenance
 │   ├── mac-pro/             standalone development MacBook policy
 │   ├── mac-mini/            production runtime Mac policy
-│   └── work-mac/resilience/ current work-Mac setup
+│   └── mac-work/resilience/ current work-Mac setup
 ```
 
 `config/` stays canonical and is not reorganized. Chezmoi delivers only the
@@ -43,18 +43,22 @@ approved profile paths from that directory and each host directory. It does
 not own secrets, mutable application state, services, VM lifecycle, macOS
 preferences, or project repositories.
 
+During the two-phase host rename, `hosts/thin-mac` and `hosts/work-mac` are
+compatibility symlinks only. New callers must use `hosts/mac-thin` and
+`hosts/mac-work`. Remove the aliases after both live Macs use the new paths.
+
 ## Common Commands
 
 Sync reviewed `master` across the three personal hosts:
 
 ```bash
-hosts/thin-mac/sync-dotfiles.sh
+hosts/mac-thin/sync-dotfiles.sh
 ```
 
 Thin Mac and Ubuntu VM:
 
 ```bash
-hosts/thin-mac/bootstrap.sh --apply
+hosts/mac-thin/bootstrap.sh --apply
 uvm-up
 ```
 
@@ -84,11 +88,11 @@ gates pass.
 ## Ownership
 
 - `chezmoi/` owns approved user configuration links and timestamped rollback.
-- `hosts/thin-mac/` owns control-plane sync and the Vagrant and VMware lifecycle.
+- `hosts/mac-thin/` owns control-plane sync and the Vagrant and VMware lifecycle.
 - `hosts/ubuntu-dev/` owns guest provisioning and workstation maintenance.
 - `hosts/shared/macos/` owns common full-Mac packages and operational setup.
 - `hosts/mac-pro/` and `hosts/mac-mini/` own profile package overlays and shell entry points.
-- `hosts/work-mac/resilience/` keeps its current scoped linker until a separate work-Mac rollout.
+- `hosts/mac-work/resilience/` keeps its current scoped linker until a separate work-Mac rollout.
 
 Every production apply requires preview, a timestamped Chezmoi backup, a
 no-op second apply, doctor success, and a verified rollback path. Packages are

@@ -18,10 +18,10 @@ constraints, and agent workflow policy here.
 
 | Target                                     | Source of truth                      |
 | ------------------------------------------ | ------------------------------------ |
-| Thin personal MacBook (`mac-thin`)         | `hosts/thin-mac/README.md`           |
+| Thin personal MacBook (`mac-thin`)         | `hosts/mac-thin/README.md`           |
 | Standalone development MacBook (`mac-pro`) | `hosts/mac-pro/README.md`             |
 | Personal Mac mini (`mac-mini`)             | `hosts/mac-mini/README.md`            |
-| Resilience work Mac (`work-mac`)           | `hosts/work-mac/README.md`            |
+| Resilience work Mac (`mac-work`)           | `hosts/mac-work/README.md`            |
 | Ubuntu workstation                         | `hosts/ubuntu-dev/README.md`          |
 
 `config/` holds portable configuration and must not be reorganized casually.
@@ -99,10 +99,10 @@ request into a full-machine migration.
 The restored thin MacBook uses only:
 
 ```bash
-hosts/thin-mac/bootstrap.sh --dry-run
-hosts/thin-mac/bootstrap.sh --check
-hosts/thin-mac/bootstrap.sh --apply
-hosts/thin-mac/doctor.sh
+hosts/mac-thin/bootstrap.sh --dry-run
+hosts/mac-thin/bootstrap.sh --check
+hosts/mac-thin/bootstrap.sh --apply
+hosts/mac-thin/doctor.sh
 ```
 
 Keep development repositories, Docker, databases, compilers, language
@@ -159,8 +159,8 @@ Service lifecycle changes require separate approval.
 
 - Manage only Ghostty, Herdr, Hunk, Neovim, Bookokrat, and the portable Git
   alias include.
-- Use `hosts/work-mac/resilience/Brewfile` and
-  `hosts/work-mac/resilience/link-terminal-editor-config.sh`.
+- Use `hosts/mac-work/resilience/Brewfile` and
+  `hosts/mac-work/resilience/link-terminal-editor-config.sh`.
 - Never run the personal Mac bootstrap or the Mac mini Brewfile.
 - Keep the live work `~/.zshrc`, `config/mise`, Git identity, work runtimes,
   credentials, certificates, and Docker state machine-owned.
@@ -227,7 +227,7 @@ Run checks that match the changed surface:
 
 ```bash
 git diff --check
-bash hosts/thin-mac/tests/sync-dotfiles-test.sh
+bash hosts/mac-thin/tests/sync-dotfiles-test.sh
 bash hosts/shared/macos/tests/bootstrap-test.sh
 bash hosts/ubuntu-dev/tests/lean-setup.sh
 bash hosts/ubuntu-dev/doctor.sh

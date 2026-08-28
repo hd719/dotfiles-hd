@@ -716,7 +716,7 @@ EOF
   assert_file_contains "$MAC_INIT" 'source "$zsh_shared_dir/aliases.zsh"'
   assert_file_contains "$MAC_INIT" 'source "$zsh_shared_dir/development-aliases.zsh"'
   assert_file_contains "$MAC_INIT" 'source "$zsh_mac_dir/aliases.zsh"'
-  if grep -Fq 'development-aliases.zsh' "$ROOT_DIR/hosts/thin-mac/.zshrc"; then
+  if grep -Fq 'development-aliases.zsh' "$ROOT_DIR/hosts/mac-thin/.zshrc"; then
     fail "thin Mac unexpectedly loads development aliases"
   fi
 

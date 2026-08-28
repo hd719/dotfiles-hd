@@ -1,5 +1,5 @@
 {{- if eq .profile "mac-thin" -}}
-{{ joinPath .chezmoi.sourceDir ".." ".." "hosts" "thin-mac" "Brewfile" }}
+{{ joinPath .chezmoi.sourceDir ".." ".." "hosts" "mac-thin" "Brewfile" }}
 {{- else -}}
-{{ joinPath .chezmoi.sourceDir ".." ".." "hosts" "work-mac" "resilience" "Brewfile" }}
+{{ joinPath .chezmoi.sourceDir ".." ".." "hosts" "mac-work" "resilience" "Brewfile" }}
 {{- end -}}

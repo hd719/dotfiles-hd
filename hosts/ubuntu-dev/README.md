@@ -8,7 +8,7 @@ Vagrant and VMware Fusion only as its control plane.
 Prerequisites on the thin Mac:
 
 - VMware Fusion is installed and its first-run setup is complete.
-- `hosts/thin-mac/bootstrap.sh --apply` has installed Vagrant, the VMware
+- `hosts/mac-thin/bootstrap.sh --apply` has installed Vagrant, the VMware
   utility, and the pinned provider.
 - `~/.ssh/id_ed25519_ubuntu_vm.pub` exists.
 - The tailnet policy defines `tag:ubuntu-dev` and lets `hd719@github` connect
@@ -278,7 +278,7 @@ Change pins deliberately in a reviewed branch:
 
 - Bento box name, version, and matching `vmware.base_mac`:
   `hosts/ubuntu-dev/Vagrantfile`.
-- Vagrant VMware provider: `hosts/thin-mac/bootstrap.sh`, its doctor, and its
+- Vagrant VMware provider: `hosts/mac-thin/bootstrap.sh`, its doctor, and its
   tests.
 - Development tools: `hosts/ubuntu-dev/mise.toml`.
 

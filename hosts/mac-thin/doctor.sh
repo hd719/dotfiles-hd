@@ -6,10 +6,10 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
 GIT_ALIASES_SCRIPT="$DOTFILES_DIR/config/git/configure-aliases.sh"
 APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
-BREWFILE="$DOTFILES_DIR/hosts/thin-mac/Brewfile"
+BREWFILE="$DOTFILES_DIR/hosts/mac-thin/Brewfile"
 CHEZMOI_DOCTOR="${DOTFILES_CHEZMOI_DOCTOR:-$DOTFILES_DIR/chezmoi/doctor.sh}"
 SSH_CONFIG="$HOME/.ssh/config"
-VAGRANT_SSH_CONFIG="$DOTFILES_DIR/hosts/thin-mac/ssh/ubuntu-vagrant.conf"
+VAGRANT_SSH_CONFIG="$DOTFILES_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf"
 UBUNTU_LOGIN_KEY="$HOME/.ssh/id_ed25519_ubuntu_vm"
 UBUNTU_LOGIN_KEY_NAME="$(basename "$UBUNTU_LOGIN_KEY")"
 FAILURES=0
@@ -257,7 +257,7 @@ else
 fi
 
 if /bin/zsh -dfc "
-  source '$DOTFILES_DIR/hosts/thin-mac/.zshrc'
+  source '$DOTFILES_DIR/hosts/mac-thin/.zshrc'
   [[ \"\$DOTFILES_NVIM_PROFILE\" == thin ]]
   [[ \"\$EDITOR\" == nvim ]]
   [[ \"\$VISUAL\" == nvim ]]
@@ -310,7 +310,7 @@ else
 fi
 
 if HOMEBREW_PREFIX="$HOMEBREW_PREFIX" /bin/zsh -dfic "
-  source '$DOTFILES_DIR/hosts/thin-mac/.zshrc'
+  source '$DOTFILES_DIR/hosts/mac-thin/.zshrc'
   (( \${#functions[(I)*autocomplete*]} > 0 ))
   (( \${#functions[(I)*autosuggest*]} > 0 ))
   whence -w _zsh_highlight >/dev/null

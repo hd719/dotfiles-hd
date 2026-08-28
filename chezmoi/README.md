@@ -15,7 +15,7 @@ services, secrets, identity, enrollment, macOS preferences, or mutable state.
 | `mac-thin` | Thin Mac control plane | Installs the thin Brewfile |
 | `mac-pro` | Standalone full-development MacBook | Installs shared and profile Brewfiles through the Mac bootstrap |
 | `mac-mini` | Production Mac mini | Configuration-only inside Chezmoi; packages stay in the guarded Mac bootstrap |
-| `work-mac` | Resilience work Mac | Reserved for a later opt-in rollout |
+| `mac-work` | Resilience work Mac | Reserved for a later opt-in rollout |
 
 Each `profiles/*.paths` file is the exact backup, apply, doctor, and rollback
 allowlist. A matching `*.ancestors` file records parent directories whose
@@ -27,7 +27,7 @@ original type must be restored exactly.
 ./chezmoi/bootstrap.sh ubuntu --preview
 ```
 
-Substitute `mac-thin`, `mac-pro`, `mac-mini`, or `work-mac` as needed.
+Substitute `mac-thin`, `mac-pro`, `mac-mini`, or `mac-work` as needed.
 
 After review and host approval:
 

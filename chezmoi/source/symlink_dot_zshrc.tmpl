@@ -2,7 +2,7 @@
 {{- if eq .profile "ubuntu" -}}
 {{ joinPath $repo "hosts" "ubuntu-dev" ".zshrc" }}
 {{- else if eq .profile "mac-thin" -}}
-{{ joinPath $repo "hosts" "thin-mac" ".zshrc" }}
+{{ joinPath $repo "hosts" "mac-thin" ".zshrc" }}
 {{- else if eq .profile "mac-pro" -}}
 {{ joinPath $repo "hosts" "mac-pro" ".zshrc" }}
 {{- else if eq .profile "mac-mini" -}}

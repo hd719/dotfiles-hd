@@ -1,4 +1,4 @@
-{{- if eq .profile "work-mac" }}
+{{- if eq .profile "mac-work" }}
 .zshrc
 .config/zsh
 .config/starship.toml
@@ -17,13 +17,13 @@ Library/Application Support/com.mitchellh.ghostty/host.conf
 .local
 20-install-ubuntu-tools.sh
 {{- end }}
-{{- if or (eq .profile "mac-thin") (eq .profile "work-mac") }}
+{{- if or (eq .profile "mac-thin") (eq .profile "mac-work") }}
 .config/btop
 {{- end }}
-{{- if eq .profile "work-mac" }}
+{{- if eq .profile "mac-work" }}
 .config/fastfetch
 {{- end }}
-{{- if or (eq .profile "mac-thin") (eq .profile "work-mac") }}
+{{- if or (eq .profile "mac-thin") (eq .profile "mac-work") }}
 .config/mise
 {{- end }}
 {{- if eq .profile "ubuntu" }}
@@ -54,7 +54,7 @@ Library
 30-install-thin-tools.sh
 40-install-work-tools.sh
 {{- end }}
-{{- if eq .profile "work-mac" }}
+{{- if eq .profile "mac-work" }}
 .hermes
 .terminfo
 20-install-ubuntu-tools.sh

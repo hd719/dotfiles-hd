@@ -178,7 +178,7 @@ set -e
 ((layout_status != 0))
 [[ "$layout_output" == *"unapproved mac-thin symlink parent"* ]]
 
-for profile in ubuntu mac-thin mac-pro mac-mini work-mac; do
+for profile in ubuntu mac-thin mac-pro mac-mini mac-work; do
   home_dir="$case_dir/$profile/home"
   state_dir="$case_dir/$profile/state"
   mkdir -p "$home_dir" "$state_dir"
@@ -209,7 +209,7 @@ for profile in ubuntu mac-thin mac-pro mac-mini work-mac; do
     mac-thin) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
     mac-pro) printf '%s\n' 10-configure-git.sh ;;
     mac-mini) printf '%s\n' 10-configure-git.sh ;;
-    work-mac) printf '%s\n' 10-configure-git.sh 40-install-work-tools.sh ;;
+    mac-work) printf '%s\n' 10-configure-git.sh 40-install-work-tools.sh ;;
   esac > "$case_dir/$profile.expected-scripts"
   "$CHEZMOI_BIN" "${common[@]}" managed \
     --include=scripts --path-style=relative \

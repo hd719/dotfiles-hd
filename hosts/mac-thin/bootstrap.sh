@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
-BREWFILE="$DOTFILES_DIR/hosts/thin-mac/Brewfile"
+BREWFILE="$DOTFILES_DIR/hosts/mac-thin/Brewfile"
 CHEZMOI_BOOTSTRAP="${DOTFILES_CHEZMOI_BOOTSTRAP:-$DOTFILES_DIR/chezmoi/bootstrap.sh}"
 CHEZMOI_PREVIEW="${DOTFILES_CHEZMOI_PREVIEW:-$DOTFILES_DIR/chezmoi/preview.sh}"
 HOST_DOCTOR="${DOTFILES_THIN_DOCTOR:-$SCRIPT_DIR/doctor.sh}"

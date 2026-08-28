@@ -11,7 +11,7 @@ require_canonical_checkout
   || die "set DOTFILES_CHEZMOI_APPROVED=1 after approving this host and preview"
 [[ "$PROFILE" != mac-mini || "${DOTFILES_MAC_MINI_CONFIG_ONLY:-0}" == 1 ]] \
   || die "Mac mini requires DOTFILES_MAC_MINI_CONFIG_ONLY=1"
-[[ "$PROFILE" != work-mac || "${DOTFILES_WORK_MAC_OPT_IN:-0}" == 1 ]] \
+[[ "$PROFILE" != mac-work || "${DOTFILES_WORK_MAC_OPT_IN:-0}" == 1 ]] \
   || die "work Mac requires DOTFILES_WORK_MAC_OPT_IN=1"
 validate_profile_layout
 
