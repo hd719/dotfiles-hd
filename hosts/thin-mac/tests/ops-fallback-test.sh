@@ -36,120 +36,10 @@ if /usr/bin/grep -R -E "PYTHON_BIN|ssh_python_capture|<<'PY'" \
 fi
 pass "modular Bash syntax and no embedded Python"
 
-personal_ready_body="$(
-  /usr/bin/awk '/^run_personal_ready\(\)/,/^}/' \
-    "$REPO_ROOT/hosts/thin-mac/ops-fallback/commands/personal-ready.sh"
-)"
-printf '%s\n' "$personal_ready_body" \
-  | /usr/bin/grep -Fq 'capture "$BREW_BIN" update' \
-  || fail "personal readiness must run brew update"
-printf '%s\n' "$personal_ready_body" \
-  | /usr/bin/grep -Fq 'HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" upgrade' \
-  || fail "personal readiness must run brew upgrade"
-update_line="$(printf '%s\n' "$personal_ready_body" | /usr/bin/grep -nF 'capture "$BREW_BIN" update' | /usr/bin/cut -d: -f1)"
-upgrade_line="$(printf '%s\n' "$personal_ready_body" | /usr/bin/grep -nF 'HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" upgrade' | /usr/bin/cut -d: -f1)"
-((update_line < upgrade_line)) || fail "brew update must run before brew upgrade"
-[[ "$personal_ready_body" != *outdated_count* ]] \
-  || fail "Homebrew upgrade must not be conditional on outdated output"
-pass "unconditional Homebrew update and upgrade contract"
-
-printf '%s\n' "$personal_ready_body" \
-  | /usr/bin/grep -Fq 'run_personal_mac_mini_updates' \
-  || fail "personal readiness must run Mac mini goodMorning"
-printf '%s\n' "$personal_ready_body" \
-  | /usr/bin/grep -Fq 'personal_is_ready' \
-  || fail "personal readiness must return its aggregate readiness status"
-printf '%s\n' "$personal_ready_body" \
-  | /usr/bin/grep -Fq 'ubuntu_update_failure_evidence "$LAST_OUTPUT"' \
-  || fail "personal readiness must preserve Ubuntu updater failure evidence"
-mac_mini_update_body="$(
-  /usr/bin/awk '/^run_personal_mac_mini_updates\(\)/,/^}/' \
-    "$REPO_ROOT/hosts/thin-mac/ops-fallback/commands/personal-ready.sh"
-)"
-[[ "$mac_mini_update_body" == *mac-mini-ts* && "$mac_mini_update_body" == *mac-mini-lan* ]] \
-  || fail "Mac mini update lane must retain Tailscale and LAN routes"
-[[ "$mac_mini_update_body" == *goodMorning* ]] \
-  || fail "Mac mini update lane must invoke goodMorning"
-pass "Mac mini goodMorning fallback contract"
-
-mac_mini_calls=()
-ssh_capture() {
-  local host="$1"
-  local payload="$2"
-  mac_mini_calls[${#mac_mini_calls[@]}]="$host|$payload"
-  LAST_OUTPUT=""
-  if [[ "$host" == "mac-mini-ts" && "$payload" == true ]]; then
-    LAST_STATUS=1
-  else
-    LAST_STATUS=0
-  fi
-}
-reset_results
-run_personal_mac_mini_updates || fail "Mac mini LAN fallback should complete"
-[[ "${mac_mini_calls[*]}" == \
-  'mac-mini-ts|true mac-mini-lan|true mac-mini-lan|zsh -lic "_goodmorning_sync_dotfiles" mac-mini-lan|zsh -lic "goodMorning"' ]] \
-  || fail "Mac mini update lane should try Tailscale before LAN"
-[[ "${RESULT_STATUS[0]}" == WARN && "${RESULT_STATUS[1]}" == PASS ]] \
-  || fail "Mac mini LAN fallback should be a note with a passing update"
-pass "Mac mini goodMorning LAN fallback"
-
-mac_mini_calls=()
-ssh_capture() {
-  local host="$1"
-  local payload="$2"
-  mac_mini_calls[${#mac_mini_calls[@]}]="$host|$payload"
-  LAST_OUTPUT=""
-  if [[ "$payload" == *'zsh -lic "goodMorning"'* ]]; then
-    LAST_STATUS=1
-  else
-    LAST_STATUS=0
-  fi
-}
-reset_results
-if run_personal_mac_mini_updates; then
-  fail "failed Mac mini maintenance should return nonzero"
+if main personal-ready >/dev/null 2>&1; then
+  fail "personal-ready must not remain in the home-lab fallback"
 fi
-[[ "${mac_mini_calls[*]}" != *mac-mini-lan* ]] \
-  || fail "failed maintenance must not replay through LAN"
-goodmorning_calls="$(printf '%s\n' "${mac_mini_calls[@]}" | /usr/bin/grep -c 'zsh -lic "goodMorning"')"
-[[ "$goodmorning_calls" == 1 ]] || fail "Mac mini maintenance should run exactly once"
-[[ "${RESULT_STATUS[0]}" == FAIL ]] || fail "failed Mac mini maintenance should be reported"
-pass "Mac mini failure is not replayed"
-
-ubuntu_failure="$(ubuntu_update_failure_evidence $'mise download failed\nNeovim setup failed during: mise self-update (exit 73).\nUbuntu update failed during: mise and Neovim dependency refresh (exit 73).')"
-[[ "$ubuntu_failure" == 'Neovim setup failed during: mise self-update (exit 73).' ]] \
-  || fail "Ubuntu updater evidence did not preserve the precise nested stage"
-[[ "$(ubuntu_update_failure_evidence "")" == 'supported updater failed with no output' ]] \
-  || fail "Ubuntu updater evidence should handle empty SSH output"
-pass "Ubuntu updater failure evidence"
-
-reset_results
-add_result PASS thin-mac "Thin Mac" "ready" "None"
-personal_is_ready || fail "all-pass personal readiness should return success"
-add_result FAIL ubuntu-vm "Ubuntu updater" "failed" "Rerun updater"
-if personal_is_ready; then
-  fail "a failed personal check should return nonzero"
-fi
-reset_results
-add_result WARN ubuntu-vm "Ubuntu reboot" "required" "Restart VM"
-if personal_is_ready; then
-  fail "a required Ubuntu reboot should return nonzero"
-fi
-reset_results
-add_result WARN thin-mac "Thin-Mac disk" "review soon" "Inspect storage"
-personal_is_ready || fail "an ordinary personal note should stay nonblocking"
-pass "personal readiness exit contract"
-
-reset_results
-add_result PASS thin-mac "Thin Mac" "ready" "None"
-add_result PASS ubuntu-vm "Ubuntu VM" "ready" "None"
-add_result PASS mac-mini "Mac mini" "ready" "None"
-write_personal_report >/dev/null
-personal_report="$(find "$TEST_REPORT_ROOT" -type f -name 'personal-readiness-*-manual.md' -print -quit)"
-[[ -n "$personal_report" ]] || fail "personal readiness report was not created"
-grep -Fq -- '- Invocation: Canonical personal-ready runner' "$personal_report" \
-  || fail "canonical personal-ready invocation marker missing"
-pass "canonical personal readiness report"
+pass "personal-ready route removed"
 
 exact_reply OK OK || fail "exact model reply should pass"
 if exact_reply 'OK ' OK; then
@@ -213,27 +103,6 @@ check_hermes_release_pin
 [[ "$hermes_release_payload" == *"rev-parse HEAD"* && "$hermes_release_payload" == *"version_string"* ]] \
   || fail "Hermes release check should verify commit and version"
 pass "reviewed Hermes release manifest contract"
-
-ssh_capture() {
-  local payload="$2"
-  LAST_OUTPUT=""
-  if [[ "$payload" == *forgejo-truenas-ts* ]]; then
-    LAST_STATUS=1
-  else
-    LAST_STATUS=0
-  fi
-}
-reset_results
-if check_ubuntu_forgejo_routes ubuntu-vm-ts; then
-  fail "blocked Tailscale Forgejo route should fail"
-fi
-[[ "${RESULT_AREA[0]}" == "Forgejo Tailscale Git" ]] \
-  || fail "Forgejo route failure area"
-[[ "${RESULT_EVIDENCE[0]}" == *"LAN authenticates"* ]] \
-  || fail "Forgejo route failure evidence"
-[[ "${RESULT_NEXT[0]}" == *"tag:ubuntu-dev"* ]] \
-  || fail "Forgejo route ACL guidance"
-pass "Forgejo Tailscale ACL diagnosis"
 
 # Replace live checks with deterministic fixtures and exercise report generation.
 select_mac_host() {

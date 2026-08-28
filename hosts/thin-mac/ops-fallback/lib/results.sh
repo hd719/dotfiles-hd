@@ -61,20 +61,6 @@ count_readiness_warnings() {
   printf '%s\n' "$count"
 }
 
-# Return success only when personal readiness has no blockers. Ordinary notes
-# stay nonblocking, but a required Ubuntu reboot needs the operator to act.
-personal_is_ready() {
-  local index
-  for ((index = 0; index < ${#RESULT_STATUS[@]}; index++)); do
-    if [[ "${RESULT_STATUS[$index]}" == "FAIL" ]] \
-      || [[ "${RESULT_STATUS[$index]}" == "WARN" \
-        && "${RESULT_AREA[$index]}" == "Ubuntu reboot" ]]; then
-      return 1
-    fi
-  done
-  return 0
-}
-
 # Secondary failures intentionally produce READY WITH WARNINGS. Only a core
 # failure makes the readiness or recovery command fail at the shell boundary.
 home_lab_is_ready() {
@@ -95,28 +81,6 @@ home_lab_overall() {
     printf 'READY WITH WARNINGS\n'
   else
     printf 'READY\n'
-  fi
-}
-
-personal_verdict() {
-  local scope="$1"
-  local failures=0 warnings=0 user_actions=0 index
-  for ((index = 0; index < ${#RESULT_STATUS[@]}; index++)); do
-    [[ "${RESULT_SCOPE[$index]}" == "$scope" ]] || continue
-    [[ "${RESULT_STATUS[$index]}" == "FAIL" ]] && failures=$((failures + 1))
-    [[ "${RESULT_STATUS[$index]}" == "WARN" ]] && warnings=$((warnings + 1))
-    if [[ "${RESULT_STATUS[$index]}" == "WARN" && "${RESULT_AREA[$index]}" == "Ubuntu reboot" ]]; then
-      user_actions=$((user_actions + 1))
-    fi
-  done
-  if ((failures > 0)); then
-    printf 'Not ready yet\n'
-  elif ((user_actions > 0)); then
-    printf 'Need one user action\n'
-  elif ((warnings > 0)); then
-    printf 'Ready, with notes\n'
-  else
-    printf 'Ready\n'
   fi
 }
 

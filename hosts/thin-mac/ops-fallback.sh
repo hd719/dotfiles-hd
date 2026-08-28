@@ -2,12 +2,12 @@
 
 set -uo pipefail
 
-# Manual, no-agent entrypoint for Hamel's personal Mac and home lab.
+# Manual, no-agent entrypoint for Hamel's home lab.
 #
 # The implementation is intentionally split by responsibility under
 # hosts/thin-mac/ops-fallback/. Start here to see the command routing, then
 # open only the module for the workflow you are trying to understand.
-# Keep its allowlist aligned with personal-mac-ops, home-lab-readiness, and
+# Keep its allowlist aligned with home-lab-readiness and
 # home-lab-outage-recovery when those skill contracts change.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -37,7 +37,6 @@ OPS_MODULES=(
   lib/transport.sh
   lib/results.sh
   lib/dates.sh
-  commands/personal-ready.sh
   checks/runtime.sh
   checks/infrastructure.sh
   checks/providers.sh
@@ -60,7 +59,6 @@ unset module module_path
 usage() {
   printf '%s\n' \
     'Usage:' \
-    '  ops-fallback.sh personal-ready' \
     '  ops-fallback.sh home-lab-ready [AWAY_START AWAY_END]' \
     '  ops-fallback.sh home-lab-recover' \
     '' \
@@ -71,13 +69,6 @@ usage() {
 main() {
   local command="${1:-}"
   case "$command" in
-    personal-ready)
-      (($# == 1)) || {
-        usage >&2
-        return 2
-      }
-      run_personal_ready
-      ;;
     home-lab-ready)
       (($# == 1 || $# == 3)) || {
         usage >&2

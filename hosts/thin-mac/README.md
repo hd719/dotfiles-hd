@@ -222,7 +222,6 @@ If Codex, Claude, or another interactive agent is unavailable, run the tracked
 fallback directly from the canonical dotfiles checkout:
 
 ```bash
-~/Developer/dotfiles-hd/hosts/thin-mac/ops-fallback.sh personal-ready
 ~/Developer/dotfiles-hd/hosts/thin-mac/ops-fallback.sh home-lab-ready
 ~/Developer/dotfiles-hd/hosts/thin-mac/ops-fallback.sh home-lab-ready 2026-08-10 2026-08-17
 ~/Developer/dotfiles-hd/hosts/thin-mac/ops-fallback.sh home-lab-recover
@@ -235,17 +234,9 @@ the documented service starts and verified PostgreSQL repairs. It stops for
 credentials, router settings, HomeKit pairing, ACLs, firmware, destructive
 actions, and unknown states.
 
-`personal-ready` inspects Homebrew tap trust without changing it, always runs
-`brew update` followed by `brew upgrade`, runs normal `goodMorning` on the Mac
-mini, and reruns the thin-Mac doctor. Normal mode also removes the Zoom folder
-and runs the cooldown-protected Downloads and `.DS_Store` cleanup. It selects
-Tailscale or LAN before updating and never replays a failed maintenance command.
-Cortana updates may restart only affected Cortana services through the repo-owned
-`runtime:post-merge`; broad restarts and Hermes upgrades remain excluded.
-The `personal-mac-ops` skill uses this same command as its canonical Default
-Readiness runner, so agent and direct CLI runs share one implementation.
-If the Ubuntu updater fails, the saved report preserves its most precise named
-failure stage and exit code.
+Personal-machine readiness and its direct runner now live in the local-only
+`personal-ready` skill. This tracked fallback remains limited to home-lab
+readiness and approved home-lab recovery.
 
 Run the focused offline test after changing the fallback:
 
