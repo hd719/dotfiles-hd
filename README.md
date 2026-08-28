@@ -30,12 +30,13 @@ dotfiles-hd/
 ├── chezmoi/                 profile-aware config delivery and rollback
 ├── config/                  canonical application configuration
 ├── hosts/
+│   ├── tests/               one host-validation runner
 │   ├── shared/macos/        shared full-Mac provisioning and doctor
-│   ├── mac-thin/            control plane, VM lifecycle, and fallback ops
+│   ├── mac-thin/            control plane and VM lifecycle
 │   ├── ubuntu-dev/          Vagrant guest provisioning and maintenance
 │   ├── mac-pro/             standalone development MacBook policy
 │   ├── mac-mini/            production runtime Mac policy
-│   └── mac-work/resilience/ current work-Mac setup
+│   └── mac-work/            current work-Mac setup
 ```
 
 `config/` stays canonical and is not reorganized. Chezmoi delivers only the
@@ -84,11 +85,11 @@ gates pass.
 ## Ownership
 
 - `chezmoi/` owns approved user configuration links and timestamped rollback.
-- `hosts/mac-thin/` owns control-plane sync and the Vagrant and VMware lifecycle.
+- `hosts/mac-thin/` owns the Vagrant and VMware lifecycle.
 - `hosts/ubuntu-dev/` owns guest provisioning and workstation maintenance.
 - `hosts/shared/macos/` owns common full-Mac packages and operational setup.
 - `hosts/mac-pro/` and `hosts/mac-mini/` own profile package overlays and shell entry points.
-- `hosts/mac-work/resilience/` keeps its current scoped linker until a separate work-Mac rollout.
+- `hosts/mac-work/` keeps its current scoped linker until a separate work-Mac rollout.
 
 Every production apply requires preview, a timestamped Chezmoi backup, a
 no-op second apply, doctor success, and a verified rollback path. Packages are

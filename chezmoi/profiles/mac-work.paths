@@ -2,5 +2,5 @@
 Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
 .config/herdr/config.toml|config/herdr/config.toml
 .config/hunk/config.toml|config/hunk/config.toml
-.config/homebrew/Brewfile|hosts/mac-work/resilience/Brewfile
+.config/homebrew/Brewfile|hosts/mac-work/Brewfile
 .config/nvim|config/nvim

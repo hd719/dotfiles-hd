@@ -150,8 +150,8 @@ or installs project development tooling. It adds only the portable Git alias
 include to the machine-owned global Git config.
 
 The remaining Bash is operational: Rosetta, Vagrant/VMware lifecycle, package
-installation, maintenance, doctors, and fallback operations. It is not a
-second configuration-link writer.
+installation, maintenance, and doctors. It is not a second
+configuration-link writer.
 
 ## Personal Shell Allowlist
 
