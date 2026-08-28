@@ -43,10 +43,6 @@ approved profile paths from that directory and each host directory. It does
 not own secrets, mutable application state, services, VM lifecycle, macOS
 preferences, or project repositories.
 
-During the two-phase host rename, `hosts/thin-mac` and `hosts/work-mac` are
-compatibility symlinks only. New callers must use `hosts/mac-thin` and
-`hosts/mac-work`. Remove the aliases after both live Macs use the new paths.
-
 ## Common Commands
 
 Sync reviewed `master` across the three personal hosts:
