@@ -227,7 +227,7 @@ Run checks that match the changed surface:
 
 ```bash
 git diff --check
-bash hosts/mac-thin/tests/sync-dotfiles-test.sh
+bash /Users/hameldesai/.codex/skills/dotfiles-sync/tests/sync-dotfiles-test.sh
 bash hosts/shared/macos/tests/bootstrap-test.sh
 bash hosts/ubuntu-dev/tests/lean-setup.sh
 bash hosts/ubuntu-dev/doctor.sh

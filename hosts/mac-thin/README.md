@@ -76,8 +76,11 @@ Sync reviewed `master` across the thin Mac, Ubuntu VM, and Mac mini from this
 control plane:
 
 ```bash
-hosts/mac-thin/sync-dotfiles.sh
+/Users/hameldesai/.codex/skills/dotfiles-sync/scripts/fallback.sh
 ```
+
+The vault-owned `dotfiles-sync` skill is the single source for both agent and
+manual syncs.
 
 ## Adding Another CLI Tool
 

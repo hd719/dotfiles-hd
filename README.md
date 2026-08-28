@@ -48,7 +48,7 @@ preferences, or project repositories.
 Sync reviewed `master` across the three personal hosts:
 
 ```bash
-hosts/mac-thin/sync-dotfiles.sh
+/Users/hameldesai/.codex/skills/dotfiles-sync/scripts/fallback.sh
 ```
 
 Thin Mac and Ubuntu VM:
