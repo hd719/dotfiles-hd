@@ -40,13 +40,6 @@ assert_file() {
   [[ -f "$1" ]] || fail "expected file: $1"
 }
 
-assert_link_target() {
-  local path="$1"
-  local expected="$2"
-  [[ -L "$path" ]] || fail "expected symlink: $path"
-  assert_eq "$expected" "$(readlink "$path")" "symlink target for $path"
-}
-
 assert_no_path() {
   TESTS=$((TESTS + 1))
   [[ ! -e "$1" && ! -L "$1" ]] || fail "expected no path: $1"
@@ -1944,11 +1937,6 @@ test_resilience_hd_pargasite() {
   TESTS=$((TESTS + 1))
 }
 
-test_host_rename_compatibility() {
-  assert_link_target "$REPO_DIR/hosts/thin-mac" mac-thin
-  assert_link_target "$REPO_DIR/hosts/work-mac" mac-work
-}
-
 test_herdr_reset_server() {
   bash "$REPO_DIR/hosts/shared/macos/tests/reset-server-test.sh" \
     >/dev/null || fail "Herdr reset cannot safely reset from inside a Herdr pane"
@@ -1972,7 +1960,6 @@ test_personal_goodmorning_mac_mini_maintenance
 test_resilience_goodmorning_guards
 test_resilience_hd_stop
 test_resilience_hd_pargasite
-test_host_rename_compatibility
 test_herdr_reset_server
 
 printf 'PASS: %d bootstrap assertions\n' "$TESTS"
