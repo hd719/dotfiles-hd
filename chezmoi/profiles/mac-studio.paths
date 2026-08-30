@@ -1,0 +1,14 @@
+.zshrc|hosts/mac-studio/.zshrc
+.config/zsh|config/zsh
+.config/bookokrat|config/bookokrat
+.config/btop/btop.conf|config/btop/btop.conf
+.config/btop/themes|config/btop/themes
+.config/fastfetch/config.jsonc|config/fastfetch/config.jsonc
+.config/fastfetch/logo-anon-glitch.txt|config/fastfetch/logo-anon-glitch.txt
+.config/fastfetch/logo-anon.txt|config/fastfetch/logo-anon.txt
+Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
+.config/herdr/config.toml|config/herdr/config.toml
+.config/hunk/config.toml|config/hunk/config.toml
+.config/mise/config.toml|config/mise/config.toml
+.config/nvim|config/nvim
+.config/starship.toml|config/starship/starship.toml
