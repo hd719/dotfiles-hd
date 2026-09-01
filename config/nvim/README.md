@@ -388,9 +388,9 @@ Folding is Tree-sitter based and files open unfolded. Press `Space u` for the
 same fold, viewport, and spelling actions normally reached through `z`.
 
 The cursor line stays vertically centered as you move up and down
-(`scrolloff = 999`). A blue-gray row-and-column crosshair marks the cursor
-position without an extra plugin. Press `Space C` to open its menu: `c` toggles
-the full crosshair, and `v` toggles only the vertical line while keeping the row
+(`scrolloff = 999`). A blue-gray row marks the cursor by default. Press
+`Space C` to open the Crosshair menu: `c` toggles the full row-and-column
+crosshair, and `v` toggles only the vertical line while keeping the row
 highlighted.
 
 Opening Neovim with no file shows a start dashboard (Snacks) with shortcuts
