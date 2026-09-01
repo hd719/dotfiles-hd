@@ -69,8 +69,8 @@ map("n", "<Esc>", function()
 end, { desc = "Save a file edited in Insert mode" })
 
 map("n", "<C-a>", "ggVG", { desc = "Select all" })
-map("n", "H", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
-map("n", "L", "<cmd>bnext<cr>", { desc = "Next buffer" })
+map("n", "H", "<cmd>BufferLineCyclePrev<cr>", { desc = "Previous buffer" })
+map("n", "L", "<cmd>BufferLineCycleNext<cr>", { desc = "Next buffer" })
 
 map("n", "<leader>v", "<cmd>rightbelow vsplit<cr>", { desc = "Split right" })
 map("n", "<leader>s", "<cmd>rightbelow split<cr>", { desc = "Split down" })
