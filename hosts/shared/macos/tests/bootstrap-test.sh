@@ -1541,7 +1541,7 @@ test_personal_goodmorning_mac_mini_maintenance() {
   local personal_functions="$REPO_DIR/config/zsh/mac/personal/development-functions.zsh"
   local root="$TMP_ROOT/personal-goodmorning-mac-mini"
   local home_dir="$root/home"
-  local runner_dir="$home_dir/.hermes/skills/home-lab-maintenance/scripts"
+  local runner_dir="$home_dir/.hermes/profiles/monitor/skills/home-lab-maintenance/scripts"
   local runner="$runner_dir/mac-mini-maintenance.sh"
   local runner_log="$root/runner.log"
   local fake_bin="$root/bin"
