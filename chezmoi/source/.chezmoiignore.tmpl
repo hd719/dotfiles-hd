@@ -54,6 +54,14 @@ Library
 30-install-thin-tools.sh
 40-install-work-tools.sh
 {{- end }}
+{{- if eq .profile "mac-studio" }}
+.config/homebrew
+.hermes
+.terminfo
+20-install-ubuntu-tools.sh
+30-install-thin-tools.sh
+40-install-work-tools.sh
+{{- end }}
 {{- if eq .profile "mac-work" }}
 .hermes
 .terminfo
