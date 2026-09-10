@@ -8,11 +8,10 @@ Hamel's existing Zed muscle memory.
 - `full` is the default and preserves the complete development editor on
   Ubuntu, full personal Macs, and Resilience.
 - `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
-  editing behavior, Nord, Bufferline, Lualine, WhichKey, Oil, Mini pairs and
-  surround, Gitsigns, rendered Markdown with wrapped tables, Obsidian, slim
-  Snacks pickers and
-  Explorer, Snacks terminals, Tree-sitter Markdown parsing, Marksman, and
-  Bookokrat PDF reading.
+  editing behavior, Nord, Bufferline, Lualine, Modicator, hlslens, WhichKey,
+  Oil, Mini pairs and surround, Gitsigns, rendered Markdown with wrapped
+  tables, Obsidian, slim Snacks pickers and Explorer, Snacks terminals,
+  Tree-sitter Markdown parsing, Marksman, and Bookokrat PDF reading.
 
 Both profiles use this directory and the same `lazy-lock.json`. Disabled
 full-only plugins are not restored on a thin machine. An unknown profile stops
@@ -78,7 +77,7 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-The full profile installs all 22 plugins below. The thin profile installs only
+The full profile installs all 24 plugins below. The thin profile installs only
 the subset listed above. In `:Lazy`, **Loaded** means a plugin's trigger has
 happened in this session; **Not Loaded** means it is installed and waiting for
 that trigger. `lazy-lock.json` pins exact versions, while the Lua files under
@@ -99,6 +98,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `lualine.nvim`               | Bottom status line for mode, Git, diagnostics, LSP, and location                                 | Just after startup: `VeryLazy` event                     |
 | `markdown-table-wrap.nvim`   | Reflows wide Markdown table cells in a protected reader without changing the source              | First Markdown buffer                                    |
 | `mini.icons`                 | File and folder icons shared by other plugins                                                    | Immediately before startup-loaded Oil as its dependency  |
+| `modicator.nvim`             | Recolors the cursor line number per mode, reusing lualine's mode colors                          | Just after startup: `VeryLazy` event                     |
 | `nord.nvim`                  | Transparent Nord colors and custom highlights                                                    | Early every startup: `lazy = false`, priority `1000`     |
 | `nvim-lspconfig`             | Connects installed language servers to matching files                                            | Every startup: `lazy = false`                            |
 | `nvim-treesitter`            | Structure-aware highlighting and folding                                                         | Every startup: `lazy = false`                            |
@@ -113,6 +113,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `grug-far.nvim`              | Reviewed, exact-word replacement in the current file                                             | First `Space R`                                          |
 | `mini.pairs`                 | Automatically closes brackets and quotes                                                         | First entry into Insert mode: `InsertEnter`              |
 | `mini.surround`              | Adds, deletes, or replaces quotes, brackets, and tags                                            | First `gsa`, `gsd`, `gsr`, `gsf`, `gsF`, or `gsh`        |
+| `nvim-hlslens`               | Counts search matches and labels the nearest one beside the line                                 | First `/`, `?`, `n`, `N`, `*`, `#`, `g*`, or `g#`        |
 | `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, and code blocks                                  | First Markdown buffer or its profile-specific toggle     |
 
 Configuration map:
@@ -207,7 +208,8 @@ Every agent teaching Neovim must read and update both files.
 | `ci(` / `da(`                            | Change inside / delete around parentheses                                     |
 | `ci"` / `da"`                            | Change inside / delete around quotes                                          |
 | `/`, then `n` / `N`                      | Search current file, then next / previous match                               |
-| `:noh`                                   | Clear current search highlighting                                             |
+| `*` / `#`                                | Search the whole word under the cursor forward / backward                     |
+| `:noh`                                   | Clear current search highlighting and the match counters                      |
 | `Ctrl-a`                                 | Select the whole buffer                                                       |
 | `yy` / `p` / `P`                         | Yank current line / paste after / paste before                                |
 | Visual `<` / `>` / `J` / `K` / `Space c` | Outdent / indent / move down / move up / comment                              |
@@ -258,6 +260,11 @@ filenames, and `Space S` asks the LSP for named code symbols such as functions,
 methods, types, and variables. `Space f` is a discoverable Find menu: pause
 after it to see file, recent, current-line, cursor-word, Git-change, dotfiles,
 and TODO pickers.
+
+Within a `/` search, hlslens labels every match. The one you are on reads
+`[3/12]`, and the rest carry a direction and distance such as `[2n 5]`, meaning
+two `n` presses away. The counters follow `n`, `N`, `*`, and `#`, and clear with
+`:noh` along with the search highlighting.
 
 The `Space f g` Git picker keeps unchanged diff context transparent and uses
 Hunk's Dracula semantic palette: green additions, red deletions, and cyan
@@ -359,6 +366,18 @@ virtual text explains the problem.
 The statusline (lualine) keeps its center transparent while showing the current
 mode, Git branch and diff, filename, diagnostics, attached LSP client(s),
 filetype, and compact cursor location/progress.
+
+Modicator repeats that mode signal at the cursor, recoloring the current line
+number in bold with the same Nord color lualine uses for the active mode: frost
+blue in Normal, snow storm in Insert, aurora orange in Visual, yellow in
+Replace, and purple in Command. It only changes the foreground, so the cursor
+line background stays as the colorscheme sets it.
+
+Visual is the one mode whose color is overridden rather than inherited. Nord's
+frost teal and frost blue differ only in their blue channel, which is legible
+as a wide statusline block but not as a single line number, so the lualine
+theme's Visual section is recolored to aurora orange and both surfaces read
+from it.
 
 In Markdown files, render-markdown decorates headings, checkboxes, code blocks,
 tables, and quotes in the editor. `Space m r` toggles it in either profile.

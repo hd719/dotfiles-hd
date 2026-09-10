@@ -95,6 +95,34 @@ return {
     },
   },
 
+  -- Count every search match and label the nearest one, so `/` and `n` show
+  -- position instead of just jumping.
+  {
+    "kevinhwang91/nvim-hlslens",
+    keys = {
+      -- Lazy replays the key after loading, so these still open the native
+      -- search prompt; hlslens then attaches itself through `auto_enable`.
+      { "/", desc = "Search forward" },
+      { "?", desc = "Search backward" },
+      -- `n` and `N` need the explicit restart so the lens follows the jump.
+      {
+        "n",
+        "<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>",
+        desc = "Next match",
+      },
+      {
+        "N",
+        "<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>",
+        desc = "Previous match",
+      },
+      { "*", "*<Cmd>lua require('hlslens').start()<CR>", desc = "Word under cursor forward" },
+      { "#", "#<Cmd>lua require('hlslens').start()<CR>", desc = "Word under cursor backward" },
+      { "g*", "g*<Cmd>lua require('hlslens').start()<CR>", desc = "Partial word forward" },
+      { "g#", "g#<Cmd>lua require('hlslens').start()<CR>", desc = "Partial word backward" },
+    },
+    opts = {},
+  },
+
   -- Visual search and replace for the current file with a reviewable diff.
   {
     "MagicDuck/grug-far.nvim",

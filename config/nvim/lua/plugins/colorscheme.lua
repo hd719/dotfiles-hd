@@ -134,6 +134,15 @@ return {
           })
         end
 
+        -- hlslens defaults its nearest counter to CurSearch, whose near-white
+        -- text washes out against the frost pill behind it. Read it as a badge
+        -- instead, using the same dark-on-frost pair as lualine's mode section.
+        highlights.HlSearchLensNear = {
+          fg = colors.polar_night.bright,
+          bg = colors.frost.ice,
+          bold = true,
+        }
+
         -- Give rendered Markdown Codex's Catppuccin Mocha accents while the
         -- rest of Neovim keeps its transparent Nord base.
         local markdown_heading_bg = "#45475A"
