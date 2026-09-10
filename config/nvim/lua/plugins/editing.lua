@@ -123,6 +123,104 @@ return {
     opts = {},
   },
 
+  -- Insert and remove throwaway log statements without typing them by hand.
+  -- Every statement carries a marker so `Space L r` can strip them all again.
+  {
+    "chrisgrieser/nvim-chainsaw",
+    enabled = profile.is_full,
+    keys = {
+      {
+        "<leader>Ll",
+        function()
+          require("chainsaw").variableLog()
+        end,
+        mode = { "n", "x" },
+        desc = "Log variable",
+      },
+      {
+        "<leader>Lo",
+        function()
+          require("chainsaw").objectLog()
+        end,
+        mode = { "n", "x" },
+        desc = "Log object",
+      },
+      {
+        "<leader>Lt",
+        function()
+          require("chainsaw").typeLog()
+        end,
+        mode = { "n", "x" },
+        desc = "Log type",
+      },
+      {
+        "<leader>La",
+        function()
+          require("chainsaw").assertLog()
+        end,
+        mode = { "n", "x" },
+        desc = "Assert variable",
+      },
+      {
+        "<leader>Lm",
+        function()
+          require("chainsaw").messageLog()
+        end,
+        desc = "Log a message",
+      },
+      {
+        "<leader>Le",
+        function()
+          require("chainsaw").emojiLog()
+        end,
+        desc = "Log an emoji marker",
+      },
+      {
+        "<leader>LT",
+        function()
+          require("chainsaw").timeLog()
+        end,
+        desc = "Log elapsed time",
+      },
+      {
+        "<leader>Ls",
+        function()
+          require("chainsaw").stacktraceLog()
+        end,
+        desc = "Log stacktrace",
+      },
+      {
+        "<leader>Ld",
+        function()
+          require("chainsaw").debugLog()
+        end,
+        desc = "Insert debugger statement",
+      },
+      {
+        "<leader>Lc",
+        function()
+          require("chainsaw").clearLog()
+        end,
+        desc = "Clear the console",
+      },
+      {
+        "<leader>Lr",
+        function()
+          require("chainsaw").removeLogs()
+        end,
+        mode = { "n", "x" },
+        desc = "Remove all logs",
+      },
+    },
+    opts = {
+      -- A stray log statement reaching a work repository is the real risk here,
+      -- so mark the lines in the signcolumn as well as inline.
+      visuals = {
+        signHlgroup = "DiagnosticSignWarn",
+      },
+    },
+  },
+
   -- Visual search and replace for the current file with a reviewable diff.
   {
     "MagicDuck/grug-far.nvim",
