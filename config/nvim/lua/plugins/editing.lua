@@ -71,6 +71,26 @@ return {
     opts = {},
   },
 
+  -- Jump past the closer that mini.pairs just added instead of arrowing over it.
+  -- blink.cmp maps `<Tab>` buffer-locally, which shadows any global mapping, so
+  -- tabout is left keyless here and `lua/plugins/lsp.lua` calls it from inside
+  -- blink's `<Tab>` chain.
+  {
+    "abecodes/tabout.nvim",
+    enabled = profile.is_full,
+    event = "InsertEnter",
+    opts = {
+      tabkey = "",
+      backwards_tabkey = "",
+      -- With these on, tabout feeds its own `<Tab>` when it cannot jump, which
+      -- swallows the keypress before blink can fall back to a real indent.
+      act_as_tab = false,
+      act_as_shift_tab = false,
+      -- Tests `pumvisible()`, which is always false under blink's custom menu.
+      completion = false,
+    },
+  },
+
   -- Add, change, and delete surrounding pairs (quotes, brackets, tags).
   -- Uses a `gs` prefix so the native `s` (substitute) key is preserved.
   {

@@ -77,7 +77,7 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-The full profile installs all 25 plugins below. The thin profile installs only
+The full profile installs all 26 plugins below. The thin profile installs only
 the subset listed above. In `:Lazy`, **Loaded** means a plugin's trigger has
 happened in this session; **Not Loaded** means it is installed and waiting for
 that trigger. `lazy-lock.json` pins exact versions, while the Lua files under
@@ -116,6 +116,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `nvim-chainsaw`              | Writes and removes throwaway log statements for the variable under the cursor                    | First `Space L …` (full profile only)                    |
 | `nvim-hlslens`               | Counts search matches and labels the nearest one beside the line                                 | First `/`, `?`, `n`, `N`, `*`, `#`, `g*`, or `g#`        |
 | `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, and code blocks                                  | First Markdown buffer or its profile-specific toggle     |
+| `tabout.nvim`                | Moves the cursor past a closing bracket or quote on `Tab`                                        | First entry into Insert mode: `InsertEnter`              |
 
 Configuration map:
 
@@ -202,6 +203,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space C c/v`                            | Toggle the full crosshair / vertical line only; the row stays on              |
 | `u` / `Ctrl-r` / `.`                     | Undo / redo / repeat the last change                                          |
 | `o` / `O`                                | Open a new line below / above and enter Insert mode                           |
+| Insert `Tab` / `Shift-Tab`               | Jump past the closing bracket or quote / back before the opening one          |
 | `w` / `e` / `b`                          | Next word start / word end / previous word start                              |
 | `2w` / `2dw`                             | Move two words / delete two words                                             |
 | `0` / `$` / `gg` / `G`                   | Line start / line end / file top / file bottom                                |
@@ -308,6 +310,20 @@ statements beyond `fmt.Println` need their package (`log`, `time`,
 `runtime/debug`) imported by hand. If Prettier reformats a long log statement
 onto several lines, only the first keeps the marker and `Space L r` will miss
 the rest.
+
+In Insert mode, `Tab` first advances an active snippet, then tries to move the
+cursor past the next closing bracket or quote, and inserts a real indent only
+when neither applies. `Shift-Tab` mirrors it backwards. Typing `foo("bar` leaves
+the cursor inside the pair Mini pairs closed for you, and two `Tab` presses land
+it after `")` without arrowing over the closers. It is disabled on the thin
+profile.
+
+The jump reads the Tree-sitter tree, so a buffer whose language has no parser
+just indents. Tabout deliberately binds no key of its own: Blink maps `Tab` per
+buffer and would shadow a global mapping, so `lua/plugins/lsp.lua` calls tabout
+from inside Blink's `Tab` chain. Blink maps those keys as expressions, and
+Neovim restores the cursor when an expression mapping returns, so the jump is
+handed back as a key sequence rather than applied in place.
 
 `Space g` resolves the repository from the current file. In Oil, it resolves
 from the directory being viewed, so it does not depend on Neovim's `:pwd`.
