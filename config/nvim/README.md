@@ -77,7 +77,7 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-The full profile installs all 24 plugins below. The thin profile installs only
+The full profile installs all 26 plugins below. The thin profile installs only
 the subset listed above. In `:Lazy`, **Loaded** means a plugin's trigger has
 happened in this session; **Not Loaded** means it is installed and waiting for
 that trigger. `lazy-lock.json` pins exact versions, while the Lua files under
@@ -113,8 +113,10 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `grug-far.nvim`              | Reviewed, exact-word replacement in the current file                                             | First `Space R`                                          |
 | `mini.pairs`                 | Automatically closes brackets and quotes                                                         | First entry into Insert mode: `InsertEnter`              |
 | `mini.surround`              | Adds, deletes, or replaces quotes, brackets, and tags                                            | First `gsa`, `gsd`, `gsr`, `gsf`, `gsF`, or `gsh`        |
+| `nvim-chainsaw`              | Writes and removes throwaway log statements for the variable under the cursor                    | First `Space L …` (full profile only)                    |
 | `nvim-hlslens`               | Counts search matches and labels the nearest one beside the line                                 | First `/`, `?`, `n`, `N`, `*`, `#`, `g*`, or `g#`        |
 | `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, and code blocks                                  | First Markdown buffer or its profile-specific toggle     |
+| `tabout.nvim`                | Moves the cursor past a closing bracket or quote on `Tab`                                        | First entry into Insert mode: `InsertEnter`              |
 
 Configuration map:
 
@@ -195,10 +197,13 @@ Every agent teaching Neovim must read and update both files.
 | `Space d`                                | Close the current buffer                                                      |
 | `Space w` / `Space x`                    | Save / save and quit                                                          |
 | `Space R`                                | Replace the word under the cursor in the current file                         |
+| `Space L l` / `Space L o`                | Log the variable / object under the cursor                                    |
+| `Space L r`                              | Remove every log statement this plugin wrote                                  |
 | `Space C`                                | Open the Crosshair menu                                                       |
 | `Space C c/v`                            | Toggle the full crosshair / vertical line only; the row stays on              |
 | `u` / `Ctrl-r` / `.`                     | Undo / redo / repeat the last change                                          |
 | `o` / `O`                                | Open a new line below / above and enter Insert mode                           |
+| Insert `Tab` / `Shift-Tab`               | Jump past the closing bracket or quote / back before the opening one          |
 | `w` / `e` / `b`                          | Next word start / word end / previous word start                              |
 | `2w` / `2dw`                             | Move two words / delete two words                                             |
 | `0` / `$` / `gg` / `G`                   | Line start / line end / file top / file bottom                                |
@@ -290,6 +295,35 @@ For visual current-file replacement, save the file, put the cursor on the exact
 word, and press `Space R`. Type the replacement, review the diff, then press
 `Space r` inside Grug Far to apply it. The search is limited to that file and
 does not match the word inside a larger word.
+
+`Space L` is the Log menu, for the print-debugging loop in TypeScript and Go.
+Put the cursor on a variable and `Space L l` writes the statement below it,
+already filled in: `console.log("🪚 userName:", userName)` or
+`fmt.Println("🪚 userName:", userName)`. `Space L o` wraps the value in
+`JSON.stringify` for objects. Every statement carries the 🪚 marker, so
+`Space L r` strips all of them from the buffer and the signcolumn flags any
+that are left. It is disabled on the thin profile.
+
+Two things to know. The cursor must sit on the variable itself; from anywhere
+else on the line the plugin captures the whole line instead of the name. In Go,
+statements beyond `fmt.Println` need their package (`log`, `time`,
+`runtime/debug`) imported by hand. If Prettier reformats a long log statement
+onto several lines, only the first keeps the marker and `Space L r` will miss
+the rest.
+
+In Insert mode, `Tab` first advances an active snippet, then tries to move the
+cursor past the next closing bracket or quote, and inserts a real indent only
+when neither applies. `Shift-Tab` mirrors it backwards. Typing `foo("bar` leaves
+the cursor inside the pair Mini pairs closed for you, and two `Tab` presses land
+it after `")` without arrowing over the closers. It is disabled on the thin
+profile.
+
+The jump reads the Tree-sitter tree, so a buffer whose language has no parser
+just indents. Tabout deliberately binds no key of its own: Blink maps `Tab` per
+buffer and would shadow a global mapping, so `lua/plugins/lsp.lua` calls tabout
+from inside Blink's `Tab` chain. Blink maps those keys as expressions, and
+Neovim restores the cursor when an expression mapping returns, so the jump is
+handed back as a key sequence rather than applied in place.
 
 `Space g` resolves the repository from the current file. In Oil, it resolves
 from the directory being viewed, so it does not depend on Neovim's `:pwd`.

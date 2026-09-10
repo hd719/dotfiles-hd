@@ -60,6 +60,7 @@ local which_key_spec = {
   { "<leader><leader>", hidden = true },
   { "<leader>C", group = "Crosshair" },
   { "<leader>f", group = "Find" },
+  { "<leader>L", group = "Log" },
   { "<leader>m", group = "Markdown" },
   { "<leader>o", group = "Obsidian" },
   { "<leader>om", group = "Marksman" },
