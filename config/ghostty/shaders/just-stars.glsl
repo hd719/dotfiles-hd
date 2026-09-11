@@ -38,13 +38,16 @@
 #define WARP_SPEED 0.016
 #define WARP_DEPTH 0.35
 
-// Local addition: fade the field toward the corners so they stay empty.
-// Distances are in normalized screen units from the centre, so the falloff is
-// an ellipse inscribed in the window; the corners are its farthest points at
-// 0.707. Stars are at full strength inside VIGNETTE_START and gone by
-// VIGNETTE_END.
-#define VIGNETTE_START 0.50
-#define VIGNETTE_END   0.72
+// Local addition: keep the corners empty. Each axis is measured separately and
+// the two are multiplied, so the fade only bites where both are near their edge,
+// which is what a corner is. The middle of each edge keeps its stars. A radial
+// falloff cannot do this: edge midpoints sit at 0.5 and corners at 0.707, close
+// enough that clearing the corners dims the edges with them.
+//
+// The knobs act on that product, which is 0 at the centre and along the middle
+// of every edge, and 1 in the corners.
+#define CORNER_START 0.15
+#define CORNER_END   0.60
 
 const vec3 STAR_COLOR = vec3(0.85, 0.92, 1.0);
 
@@ -153,7 +156,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         acc = max(acc, star * alpha);
     }
 
-    acc *= 1.0 - smoothstep(VIGNETTE_START, VIGNETTE_END, length(uv - 0.5));
+    vec2 edge = abs(uv - 0.5) * 2.0;
+    acc *= 1.0 - smoothstep(CORNER_START, CORNER_END, edge.x * edge.y);
 
     vec4 terminal = texture(iChannel0, uv);
     fragColor = vec4(terminal.rgb + STAR_COLOR * acc, terminal.a);
