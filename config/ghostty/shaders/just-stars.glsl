@@ -4,14 +4,39 @@
 // Adapted into a starfield (density-gated cells, sin-free triangular twinkle,
 // pixel-snapped plus-shaped stars) by Eli Saliman with Claude (2026).
 // License: CC BY-NC-SA 3.0 — http://creativecommons.org/licenses/by-nc-sa/3.0/
+//
+// Local changes, marked inline below: stars fly outward from the centre instead
+// of holding still, a vignette keeps the corners clear, and the pixel-snapped
+// plus shape is now a soft round dot. The last one is required by the first —
+// hard sub-pixel edges blink rather than glide once anything moves.
 
 #define LAYERS      10
 #define DEPTH       0.75
-// Thinned out from the upstream 0.01.
-#define DENSITY     0.002
-#define SPEED       0.3
+// Fraction of grid cells holding a star. Half the upstream 0.01 in raw terms,
+// but the warp contracts the grid and puts roughly half as many cells on screen,
+// so the visible count lands a little above the old static field.
+#define DENSITY     0.007
+// Twinkle rate, slowed hard from the upstream 0.3 so stars breathe rather than
+// blink. One pulse now runs tens of seconds.
+#define SPEED       0.04
 #define PIXEL_SIZE  0.7
 #define SKIP_NEAR   2
+
+// Local addition: star radius in screen pixels. Anything under about one pixel
+// blinks as it moves rather than gliding, however smooth the falloff.
+#define STAR_SIZE   1.8
+
+// Local addition: fly forward through the field. Each layer contracts the grid
+// it samples over one cycle, which pushes stars outward from the centre on
+// screen. Screen radius goes as 1/zoom, so a linear cycle still accelerates
+// outward, and that acceleration is what reads as forward motion rather than a
+// sheet sliding past.
+//
+// WARP_SPEED is cycles per second, so 0.04 is a 25-second trip from spawn to
+// fade. WARP_DEPTH is how far the grid contracts by the end; 0.35 means a star
+// ends up about 2.9x further from the centre than it started.
+#define WARP_SPEED 0.016
+#define WARP_DEPTH 0.35
 
 // Local addition: fade the field toward the corners so they stay empty.
 // Distances are in normalized screen units from the centre, so the falloff is
@@ -48,12 +73,15 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // This makes placement stable when the terminal grows/shrinks vertically.
     vec2 starCoord = vec2(fragCoord.x, iResolution.y - fragCoord.y);
 
-    // Pixel snap in top-left anchored space.
-    vec2 snapped = (floor(starCoord / PIXEL_SIZE) + 0.5) * PIXEL_SIZE;
-
     // Absolute pixel-grid coordinates.
     // No normalized resolution here, so resizing reveals more/less of the same sky.
-    vec2 world = snapped / PIXEL_SIZE;
+    // Upstream snapped this to a PIXEL_SIZE grid for a pixel-art look. That grid
+    // is finer than a screen pixel, so once stars move, a hard-edged star lands
+    // on a sample or misses it and blinks. Left continuous instead.
+    vec2 world = starCoord / PIXEL_SIZE;
+
+    // Measured from the centre, because that is the point stars travel away from.
+    vec2 centered = world - (iResolution.xy * 0.5) / PIXEL_SIZE;
 
     float acc = 0.0;
 
@@ -64,7 +92,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         // Layer variation gives a little depth while staying resolution-independent.
         float cellSize = 10.0 + fi * 3.0;
 
-        vec2 q = world / cellSize;
+        // Layers are staggered across the cycle so stars keep arriving instead
+        // of the whole field sweeping past together.
+        float trip = fract(iTime * WARP_SPEED + (fi - float(SKIP_NEAR)) / float(LAYERS - SKIP_NEAR));
+
+        // Contracting the sampled grid pushes stars outward on screen.
+        float zoom = mix(1.0, WARP_DEPTH, trip);
+
+        // Fade in on arrival and out on departure, so the cycle wrap is
+        // invisible rather than the field snapping back to the start.
+        float envelope = smoothstep(0.0, 0.2, trip) * (1.0 - smoothstep(0.7, 1.0, trip));
+        if (envelope <= 0.0) continue;
+
+        vec2 q = centered * zoom / cellSize;
 
         vec2 cellId  = floor(q);
         vec2 cellPos = q - cellId;
@@ -79,24 +119,17 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         float ax = abs(off.x);
         float ay = abs(off.y);
 
-        // Convert pixel-sized star shape into cell-local units.
-        float px = 1.0 / cellSize;
-
-        float armScale = 1.0 - fi / float(LAYERS);
-        float coreSize = px * 0.55;
-        float armLen   = px * (0.7 + 1.8 * armScale);
-        float thick    = px * 0.45;
+        // Star radius in cell units, worked back from a size in screen pixels.
+        // Carrying the zoom through holds that size constant as a star travels
+        // outward, so it stays a pinprick instead of blooming into a blob.
+        float radius = STAR_SIZE * zoom / (cellSize * PIXEL_SIZE);
 
         // Bounding-box early out.
-        float bbox = max(armLen, coreSize);
-        if (ax > bbox || ay > bbox) continue;
+        if (ax > radius || ay > radius) continue;
 
-        // Pixelated plus/star shape.
-        float core = step(ax, coreSize) * step(ay, coreSize);
-        float h    = step(ax, armLen) * step(ay, thick);
-        float v    = step(ay, armLen) * step(ax, thick);
-
-        float star = max(core, max(h, v));
+        // Soft round dot. The gradient is the point: coverage changes smoothly
+        // as the star crosses a pixel, so motion glides instead of flickering.
+        float star = 1.0 - smoothstep(radius * 0.35, radius, length(off));
 
         // Twinkle.
         float phase = hash1(fi * 9.17 + r.x * 31.3 + r.y * 71.9) * 10.0;
@@ -115,7 +148,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         float flare = 0.65 * twinkle;
 
         float depthFade = 1.0 / (1.0 + fi * 0.08);
-        float alpha = (base + flare) * depthFade;
+        float alpha = (base + flare) * depthFade * envelope;
 
         acc = max(acc, star * alpha);
     }
