@@ -9,9 +9,10 @@ Hamel's existing Zed muscle memory.
   Ubuntu, full personal Macs, and Resilience.
 - `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
   editing behavior, Nord, Bufferline, Lualine, Modicator, hlslens, WhichKey,
-  Oil, Mini pairs and surround, Gitsigns, rendered Markdown with wrapped
-  tables, Obsidian, slim Snacks pickers and Explorer, Snacks terminals,
-  Tree-sitter Markdown parsing, Marksman, and Bookokrat PDF reading.
+  Oil with Git status columns, Mini pairs and surround, Gitsigns, rendered
+  Markdown with wrapped tables, Obsidian, slim Snacks pickers and Explorer,
+  Snacks terminals, Tree-sitter Markdown parsing, Marksman, and Bookokrat PDF
+  reading.
 
 Both profiles use this directory and the same `lazy-lock.json`. Disabled
 full-only plugins are not restored on a thin machine. An unknown profile stops
@@ -77,7 +78,7 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-The full profile installs all 26 plugins below. The thin profile installs only
+The full profile installs all 27 plugins below. The thin profile installs only
 the subset listed above. In `:Lazy`, **Loaded** means a plugin's trigger has
 happened in this session; **Not Loaded** means it is installed and waiting for
 that trigger. `lazy-lock.json` pins exact versions, while the Lua files under
@@ -103,6 +104,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `nvim-lspconfig`             | Connects installed language servers to matching files                                            | Every startup: `lazy = false`                            |
 | `nvim-treesitter`            | Structure-aware highlighting and folding                                                         | Every startup: `lazy = false`                            |
 | `obsidian.nvim`              | Vault-aware note search, backlinks, links, tags, and Obsidian app integration                    | First Markdown buffer, `Space o …`, or `:Obsidian`       |
+| `oil-git-status.nvim`        | Adds index and working-tree Git status columns to Oil listings                                   | Every startup, before Oil's first buffer                 |
 | `oil.nvim`                   | Editable directory browser and file manager                                                      | Every startup: `lazy = false`                            |
 | `schemastore.nvim`           | JSON schemas for files such as `package.json` and `tsconfig.json`                                | Immediately before LSPConfig as its dependency           |
 | `snacks.nvim`                | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and image previews | Early every startup: `lazy = false`, priority `1000`     |
@@ -124,7 +126,7 @@ Configuration map:
 - `lua/config/lazy.lua`: Lazy bootstrap.
 - `lua/plugins/colorscheme.lua`: Nord.
 - `lua/plugins/editor.lua`: WhichKey and Tree-sitter.
-- `lua/plugins/navigation.lua`: Snacks, Oil, and icons.
+- `lua/plugins/navigation.lua`: Snacks, Oil, Oil Git status, and icons.
 - `lua/plugins/lsp.lua`: completion, LSP, schemas, and formatting.
 - `lua/plugins/obsidian.lua`: safe vault navigation and explicit daily notes.
 - `lua/plugins/git.lua`, `bufferline.lua`, `statusline.lua`,
@@ -358,6 +360,13 @@ attaches only to that file; press it again to detach. Put the cursor on a
 
 `Space o m m` shows or hides only Marksman's diagnostics for the current note;
 navigation remains available while diagnostics are muted.
+
+Oil listings carry two Git status columns on both profiles, reading exactly like
+`git status --short`: the left column is the index, the right is the working
+tree. A file staged and then edited again shows `M` in both. Untracked files
+show `??`, and files matching `.gitignore` show `!!`. The status is fetched
+after the listing is drawn, so it appears a moment later on large repositories
+and never delays the browser itself. It refreshes when Oil applies a change.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space W l` moves focus to the editor, and `Space W h` moves focus back
