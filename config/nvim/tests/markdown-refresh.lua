@@ -23,6 +23,12 @@ vim.cmd("MarkdownTableReader")
 vim.cmd("MarkdownTableEditSource")
 assert(not require("markdown-table-wrap.reader").is_reader(0), "expected Markdown Source mode")
 press_refresh("Markdown Source mode")
+-- The Reader is an unlisted buffer, so being moved onto it drops the file's
+-- Bufferline tab out of the current highlight and getting back needs Space b.
+assert(
+  not require("markdown-table-wrap.reader").is_reader(0),
+  "Space m R moved the cursor off the source file into the Reader"
+)
 
 vim.cmd("MarkdownTableToggleInline")
 assert(require("markdown-table-wrap.inline").is_active(0), "expected Markdown Inline mode")
