@@ -55,14 +55,18 @@ macos-custom-icon = ~/Developer/dotfiles-hd/config/ghostty/nord.icns
 mouse-hide-while-typing = true
 mouse-scroll-multiplier = 2
 
-# A sparse field of faint stars that twinkle in place behind the text. It adds
+# A sparse starfield behind the text, flying slowly toward the viewer. It adds
 # light rather than masking by luminance, so it stays visible on the Nord
 # background; the widely shared starfield.glsl shaders draw nothing over
-# #3b4252. `always` keeps it animating while the window is unfocused.
-# Density and brightness are #define knobs at the top of the shader.
+# #3b4252. Count, speed, travel distance, star size, twinkle rate, and the
+# corner falloff are all #define knobs at the top of the shader.
 # CC BY-NC-SA 3.0; attribution is in the file header.
+#
+# `true` animates only while the surface is focused, rather than `always`, which
+# keeps the GPU redrawing behind every unfocused window. Nothing is lost, since
+# the effect is only visible in the terminal being looked at.
 custom-shader = ~/Developer/dotfiles-hd/config/ghostty/shaders/just-stars.glsl
-custom-shader-animation = always
+custom-shader-animation = true
 
 # keybindings
 keybind = opt+r=reload_config
