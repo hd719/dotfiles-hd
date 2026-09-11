@@ -82,7 +82,10 @@ local function hide_empty_scratch(item)
   if item.name ~= "" or vim.bo[buf].modified or vim.bo[buf].buftype ~= "" then
     return item
   end
-  if vim.api.nvim_buf_line_count(buf) == 1 and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == "" then
+  if
+    vim.api.nvim_buf_line_count(buf) == 1
+    and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ""
+  then
     return false
   end
   return item
