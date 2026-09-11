@@ -476,9 +476,26 @@ return {
       view_options = {
         show_hidden = true,
       },
+      win_options = {
+        -- Two columns so oil-git-status can show index and working tree side by
+        -- side.
+        signcolumn = "yes:2",
+      },
     },
     keys = {
       { "<leader>h", "<cmd>Oil<cr>", desc = "File browser" },
     },
+  },
+
+  -- Mirror `git status --short` into Oil: left column is the index, right column
+  -- is the working tree. It registers the `OilEnter` hook that fills those
+  -- columns, so it has to be set up before the first Oil buffer opens rather
+  -- than lazy-loaded behind one.
+  {
+    "refractalize/oil-git-status.nvim",
+    dependencies = {
+      "stevearc/oil.nvim",
+    },
+    config = true,
   },
 }
