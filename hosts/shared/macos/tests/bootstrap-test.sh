@@ -625,6 +625,7 @@ test_profile_names_and_paths() {
 
   assert_eq mac-pro "$(canonical_profile mac-pro)" "mac-pro remains canonical"
   assert_eq mac-mini "$(canonical_profile mac-mini)" "mac-mini remains canonical"
+  assert_eq mac-studio "$(canonical_profile mac-studio)" "mac-studio is canonical"
   if canonical_profile mac-vm >/dev/null 2>&1; then
     fail "removed mac-vm profile should be rejected"
   fi
@@ -642,6 +643,26 @@ test_profile_names_and_paths() {
     '.zshrc|hosts/mac-pro/.zshrc'
   assert_contains "$REPO_DIR/chezmoi/profiles/mac-pro.paths" \
     '.config/karabiner|config/karabiner'
+
+  load_profile mac-studio "$REPO_DIR" "$home_dir"
+  assert_eq "$REPO_DIR/hosts/mac-studio/Brewfile" "$PROFILE_BREWFILE" \
+    "Mac Studio profile uses its Brewfile"
+  assert_contains "$PROFILE_BREWFILE" 'cask "ollama-app"'
+  assert_contains "$PROFILE_BREWFILE" 'cask "vagrant"'
+  assert_contains "$PROFILE_BREWFILE" 'cask "vagrant-vmware-utility"'
+  assert_contains "$REPO_DIR/chezmoi/profiles/mac-studio.paths" \
+    '.zshrc|hosts/mac-studio/.zshrc'
+  assert_not_contains "$REPO_DIR/chezmoi/profiles/mac-studio.paths" \
+    '.config/karabiner|config/karabiner'
+  assert_contains "$MAC_BOOTSTRAP_DIR/bootstrap.sh" \
+    'would install Rosetta 2 and vagrant-vmware-desktop 3.0.5 when missing'
+  assert_contains "$MAC_BOOTSTRAP_DIR/bootstrap.sh" \
+    'brew reinstall --cask vagrant'
+  assert_contains "$MAC_BOOTSTRAP_DIR/bootstrap.sh" \
+    'vagrant plugin install vagrant-vmware-desktop'
+  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Vagrant VMware utility service active'
+  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'VMware Fusion.app'
+  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Ollama.app'
 
   while IFS= read -r helper_path; do
     [[ -f "$REPO_DIR/$helper_path" ]] \
@@ -952,6 +973,105 @@ test_mac_mini_apply() {
   assert_eq "$(cat "$protected_before")" "$(cat "$protected_after")" "Mac mini apply preserves protected state"
 }
 
+test_mac_studio_apply() {
+  local root="$TMP_ROOT/mac-studio-apply"
+  local home_dir="$root/home"
+  local fake_bin="$root/bin"
+  local log="$root/commands.log"
+  local rosetta_marker="$root/rosetta-installed"
+  local plugin_marker="$root/vagrant-plugin-installed"
+
+  mkdir -p "$home_dir/Developer"
+  ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
+  make_fake_toolchain "$fake_bin"
+  : > "$log"
+
+  cat > "$fake_bin/vagrant" <<'EOF'
+#!/usr/bin/env bash
+printf 'vagrant %s\n' "$*" >> "${COMMAND_LOG:?}"
+if [[ "$*" == 'plugin list' && -f "${VAGRANT_PLUGIN_MARKER:?}" ]]; then
+  printf 'vagrant-vmware-desktop (3.0.5, global)\n'
+elif [[ "$*" == 'plugin install vagrant-vmware-desktop --plugin-version 3.0.5' ]]; then
+  : > "$VAGRANT_PLUGIN_MARKER"
+fi
+EOF
+  chmod +x "$fake_bin/vagrant"
+
+  cat > "$fake_bin/pkgutil" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == '--pkg-info com.apple.pkg.RosettaUpdateAuto' ]] || exit 2
+[[ -f "${ROSETTA_MARKER:?}" ]]
+EOF
+  cat > "$fake_bin/softwareupdate" <<'EOF'
+#!/usr/bin/env bash
+printf 'softwareupdate %s\n' "$*" >> "${COMMAND_LOG:?}"
+[[ "$*" == '--install-rosetta --agree-to-license' ]] || exit 2
+: > "${ROSETTA_MARKER:?}"
+EOF
+  cat > "$fake_bin/sudo" <<'EOF'
+#!/usr/bin/env bash
+printf 'sudo %s\n' "$*" >> "${COMMAND_LOG:?}"
+"$@"
+EOF
+  chmod +x "$fake_bin/pkgutil" "$fake_bin/softwareupdate" "$fake_bin/sudo"
+
+  if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
+    DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply \
+      >/dev/null 2>&1; then
+    fail "Mac Studio apply should be locked before hardware arrival"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_eq '' "$(cat "$log")" "arrival gate stops before package managers"
+
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
+    DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
+    DOTFILES_MAC_STUDIO_ARRIVED=1 \
+    DOTFILES_PKGUTIL="$fake_bin/pkgutil" \
+    DOTFILES_SOFTWAREUPDATE="$fake_bin/softwareupdate" \
+    DOTFILES_SUDO="$fake_bin/sudo" ROSETTA_MARKER="$rosetta_marker" \
+    VAGRANT_PLUGIN_MARKER="$plugin_marker" \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
+
+  assert_file "$rosetta_marker"
+  assert_file "$plugin_marker"
+  assert_contains "$log" 'softwareupdate --install-rosetta --agree-to-license'
+  assert_contains "$log" \
+    'vagrant plugin install vagrant-vmware-desktop --plugin-version 3.0.5'
+  assert_not_contains "$log" 'brew services'
+  assert_not_contains "$log" 'ollama serve'
+  assert_not_contains "$log" 'ollama pull'
+
+  mkdir -p \
+    "$root/applications/VMware Fusion.app" \
+    "$root/applications/Ollama.app" \
+    "$root/vagrant-vmware"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$root/vagrant-vmware/utility"
+  chmod +x "$root/vagrant-vmware/utility"
+  cat > "$fake_bin/launchctl" <<'EOF'
+#!/usr/bin/env bash
+printf 'launchctl %s\n' "$*" >> "${COMMAND_LOG:?}"
+[[ "$*" == 'print system/com.vagrant.vagrant-vmware-utility' ]]
+EOF
+  chmod +x "$fake_bin/launchctl"
+  mkdir -p "$home_dir/.ssh"
+  printf 'Include %s\n' \
+    "$REPO_DIR/hosts/mac-studio/ssh/ubuntu-vagrant.conf" \
+    > "$home_dir/.ssh/config"
+  : > "$home_dir/.ssh/id_ed25519_ubuntu_vm"
+  chmod 600 "$home_dir/.ssh/id_ed25519_ubuntu_vm"
+
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_PKGUTIL="$fake_bin/pkgutil" \
+    DOTFILES_APPLICATIONS_DIR="$root/applications" \
+    DOTFILES_VAGRANT_VMWARE_UTILITY="$root/vagrant-vmware/utility" \
+    DOTFILES_MAC_STUDIO_CUTOVER=1 \
+    ROSETTA_MARKER="$rosetta_marker" VAGRANT_PLUGIN_MARKER="$plugin_marker" \
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-studio >/dev/null
+}
+
 test_xdg_bin_home() {
   local root="$TMP_ROOT/xdg-bin-home"
   local home_dir="$root/home"
@@ -971,6 +1091,7 @@ test_xdg_bin_home() {
 
   for zshrc in \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
+    "$REPO_DIR/hosts/mac-studio/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc"; do
     resolved="$(HOME="$home_dir" XDG_BIN_HOME="$custom_bin" PATH=/usr/bin:/bin \
       zsh -dfc "source '$MAC_BOOTSTRAP_DIR/mise-shims.zsh'; source '$zshrc'; command -v ruff" \
@@ -1678,6 +1799,7 @@ test_neovim_plugin_checkout_integrity
 test_neovim_parser_manifest
 test_profile_names_and_paths
 test_full_bootstrap
+test_mac_studio_apply
 test_mac_mini_apply
 test_xdg_bin_home
 test_profile_and_failure_guards

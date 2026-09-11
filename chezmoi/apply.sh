@@ -9,6 +9,8 @@ validate_profile_os
 require_canonical_checkout
 [[ "${DOTFILES_CHEZMOI_APPROVED:-0}" == 1 ]] \
   || die "set DOTFILES_CHEZMOI_APPROVED=1 after approving this host and preview"
+[[ "$PROFILE" != mac-studio || "${DOTFILES_MAC_STUDIO_ARRIVED:-0}" == 1 ]] \
+  || die "mac-studio apply requires DOTFILES_MAC_STUDIO_ARRIVED=1 after the hardware arrives"
 [[ "$PROFILE" != mac-mini || "${DOTFILES_MAC_MINI_CONFIG_ONLY:-0}" == 1 ]] \
   || die "Mac mini requires DOTFILES_MAC_MINI_CONFIG_ONLY=1"
 [[ "$PROFILE" != mac-work || "${DOTFILES_WORK_MAC_OPT_IN:-0}" == 1 ]] \
@@ -34,9 +36,9 @@ if [[ -n "$PROFILE_ANCESTORS" ]]; then
       prepared="$backup_dir/prepared-ancestors/$relative"
       mkdir -p "$(dirname "$prepared")"
       mv "$target" "$prepared"
-      mkdir -m "$managed_mode" "$target"
+      mkdir -p -m "$managed_mode" "$target"
     elif [[ ! -e "$target" ]]; then
-      mkdir -m "$managed_mode" "$target"
+      mkdir -p -m "$managed_mode" "$target"
     fi
   done < "$PROFILE_ANCESTORS"
   while IFS='|' read -r relative _source; do

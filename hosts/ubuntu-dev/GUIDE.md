@@ -5,7 +5,9 @@ Linux mental model behind the commands instead of treating Ubuntu like macOS
 with different spellings.
 
 The current workstation is Ubuntu 26.04 ARM64, Zsh, systemd, APT, mise, Docker,
-Neovim, and tmux. The thin Mac is the control plane; development stays here.
+Neovim, and tmux. The thin Mac is the current control plane. After the approved
+hardware cutover, the VM will live inside the Mac Studio; development remains
+inside Ubuntu.
 
 ## The 60-Second Orientation
 

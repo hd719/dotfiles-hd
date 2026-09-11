@@ -1,10 +1,11 @@
 # Shared Personal Mac Bootstrap
 
-Shared provisioning for two full local macOS profiles:
+Shared provisioning for three full local macOS profiles:
 
 | Profile | Purpose |
 | --- | --- |
 | `mac-pro` | Standalone full-development MacBook; all development tools local, no VM |
+| `mac-studio` | Staged primary controller with Ubuntu VM hosting and Ollama |
 | `mac-mini` | Production runtime Mac with extra apply gates |
 
 Do not run this bootstrap on the thin Mac. Use
@@ -51,6 +52,11 @@ ancestor manifest.
 
 Secrets, auth state, Herdr sessions, Hunk state, tmux plugins, services, Docker
 state, databases, and application data remain machine-owned.
+
+For `mac-studio`, bootstrap also installs Rosetta 2 when needed and pins the
+Vagrant VMware provider. It installs the Ollama app but never launches it or
+downloads models. VMware Fusion first-run setup and remote access remain
+manual.
 
 ## Rollback
 

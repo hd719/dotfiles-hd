@@ -8,6 +8,10 @@ STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 CHEZMOI_BOOTSTRAP="${DOTFILES_CHEZMOI_BOOTSTRAP:-$DOTFILES_DIR/chezmoi/bootstrap.sh}"
 CHEZMOI_PREVIEW="${DOTFILES_CHEZMOI_PREVIEW:-$DOTFILES_DIR/chezmoi/preview.sh}"
 HOST_DOCTOR="${DOTFILES_MAC_DOCTOR:-$SCRIPT_DIR/doctor.sh}"
+PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
+SOFTWAREUPDATE="${DOTFILES_SOFTWAREUPDATE:-/usr/sbin/softwareupdate}"
+SUDO="${DOTFILES_SUDO:-/usr/bin/sudo}"
+VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
 PROFILE=""
 MODE="dry-run"
 
@@ -16,7 +20,7 @@ source "$SCRIPT_DIR/lib.sh"
 
 usage() {
   cat <<'EOF'
-Usage: bootstrap.sh --profile mac-pro|mac-mini [--dry-run|--check|--apply]
+Usage: bootstrap.sh --profile mac-pro|mac-studio|mac-mini [--dry-run|--check|--apply]
 
 Modes:
   --dry-run  Show planned commands and filesystem changes without invoking
@@ -67,6 +71,17 @@ done
 PROFILE="$(canonical_profile "$PROFILE")" || exit 2
 load_profile "$PROFILE" "$DOTFILES_DIR" "$HOME"
 
+rosetta_installed() {
+  "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1
+}
+
+vagrant_vmware_plugin_current() {
+  command -v vagrant >/dev/null 2>&1 || return 1
+  vagrant plugin list 2>/dev/null \
+    | /usr/bin/grep -Eq \
+      "^vagrant-vmware-desktop \($VAGRANT_VMWARE_PLUGIN_VERSION([,)])"
+}
+
 [[ "$(uname -s)" == "Darwin" ]] || die "personal-Mac bootstrap requires macOS"
 [[ "$(uname -m)" == "arm64" ]] || die "personal-Mac bootstrap currently supports Apple Silicon only"
 xcode-select -p >/dev/null 2>&1 || die "install Xcode Command Line Tools first: xcode-select --install"
@@ -75,6 +90,9 @@ git -C "$DOTFILES_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "not a Git checkout: $DOTFILES_DIR"
 
 if [[ "$MODE" == "apply" ]]; then
+  [[ "$PROFILE" != mac-studio \
+    || "${DOTFILES_MAC_STUDIO_ARRIVED:-0}" == "1" ]] \
+    || die "mac-studio apply requires DOTFILES_MAC_STUDIO_ARRIVED=1 after the hardware arrives"
   [[ "$DOTFILES_DIR" == "$HOME/Developer/dotfiles-hd" \
     || "${DOTFILES_ALLOW_NONCANONICAL:-0}" == "1" ]] \
     || die "--apply requires the canonical clone at $HOME/Developer/dotfiles-hd"
@@ -112,6 +130,10 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "would apply the $PROFILE Chezmoi profile and portable Git aliases"
   say "would restore locked Neovim plugins and required Tree-sitter parsers without changing lazy-lock.json"
   say "would run the verification doctor"
+  if [[ "$PROFILE" == mac-studio ]]; then
+    say "would install Rosetta 2 and vagrant-vmware-desktop 3.0.5 when missing"
+    say "VMware Fusion remains a manual install; Ollama models remain machine-owned"
+  fi
 
   write_zprofile_block "$HOME/.zprofile" "$MISE_FRAGMENT" "$STAMP" 1
   if [[ -x "${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}" ]]; then
@@ -128,6 +150,12 @@ if [[ "$MODE" == "check" ]]; then
   say "profile: $PROFILE"
   say "dotfiles: $DOTFILES_DIR"
   say "mode: check (no installs or managed-config writes)"
+
+  if [[ "$PROFILE" == mac-studio ]]; then
+    rosetta_installed || { say "Rosetta 2 missing"; status=1; }
+    vagrant_vmware_plugin_current \
+      || { say "Vagrant VMware provider 3.0.5 missing"; status=1; }
+  fi
 
   for brewfile in "$COMMON_BREWFILE" "$PROFILE_BREWFILE"; do
     if HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade --file "$brewfile"; then
@@ -156,11 +184,30 @@ DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
   DOTFILES_CHEZMOI_REQUIRE_REVIEWED=1 \
   "$CHEZMOI_BOOTSTRAP" "$PROFILE" --preview >/dev/null
 
+if [[ "$PROFILE" == mac-studio ]] && ! rosetta_installed; then
+  say "Installing Rosetta 2 for the Vagrant VMware utility..."
+  "$SUDO" "$SOFTWAREUPDATE" --install-rosetta --agree-to-license
+fi
+
 say "Installing shared Homebrew dependencies without broad upgrades..."
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$COMMON_BREWFILE"
 say "Installing $PROFILE Homebrew overlay without broad upgrades..."
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$PROFILE_BREWFILE"
 hash -r
+
+if [[ "$PROFILE" == mac-studio ]]; then
+  if ! command -v vagrant >/dev/null 2>&1; then
+    say "Repairing the incomplete Vagrant package install..."
+    HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall --cask vagrant
+    hash -r
+  fi
+
+  if ! vagrant_vmware_plugin_current; then
+    say "Installing pinned Vagrant VMware provider..."
+    vagrant plugin install vagrant-vmware-desktop \
+      --plugin-version "$VAGRANT_VMWARE_PLUGIN_VERSION"
+  fi
+fi
 
 say "Installing pinned mise runtimes..."
 MISE_NO_CONFIG=1 mise install "${MISE_SPECS[@]}"

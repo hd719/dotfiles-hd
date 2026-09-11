@@ -5,6 +5,8 @@
 {{ joinPath $repo "hosts" "mac-thin" ".zshrc" }}
 {{- else if eq .profile "mac-pro" -}}
 {{ joinPath $repo "hosts" "mac-pro" ".zshrc" }}
+{{- else if eq .profile "mac-studio" -}}
+{{ joinPath $repo "hosts" "mac-studio" ".zshrc" }}
 {{- else if eq .profile "mac-mini" -}}
 {{ joinPath $repo "hosts" "mac-mini" ".zshrc" }}
 {{- end -}}

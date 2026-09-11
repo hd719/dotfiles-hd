@@ -9,12 +9,19 @@ CHEZMOI_DOCTOR="${DOTFILES_CHEZMOI_DOCTOR:-$DOTFILES_DIR/chezmoi/doctor.sh}"
 PROFILE=""
 FAILURES=0
 MISE_RUNTIME_FAILURES=0
+APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
+PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
+VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
+VAGRANT_VMWARE_UTILITY="${DOTFILES_VAGRANT_VMWARE_UTILITY:-/opt/vagrant-vmware-desktop/bin/vagrant-vmware-utility}"
+VAGRANT_VMWARE_SERVICE_LABEL="com.vagrant.vagrant-vmware-utility"
+SSH_CONFIG="$HOME/.ssh/config"
+UBUNTU_LOGIN_KEY="$HOME/.ssh/id_ed25519_ubuntu_vm"
 
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
 usage() {
-  printf 'Usage: doctor.sh --profile mac-pro|mac-mini\n'
+  printf 'Usage: doctor.sh --profile mac-pro|mac-studio|mac-mini\n'
 }
 
 pass() {
@@ -24,6 +31,37 @@ pass() {
 fail() {
   printf 'FAIL  %s\n' "$*" >&2
   FAILURES=$((FAILURES + 1))
+}
+
+vagrant_vmware_plugin_current() {
+  command -v vagrant >/dev/null 2>&1 \
+    && vagrant plugin list 2>/dev/null \
+      | /usr/bin/grep -Eq \
+        "^vagrant-vmware-desktop \($VAGRANT_VMWARE_PLUGIN_VERSION([,)])"
+}
+
+check_studio_ubuntu_ssh_alias() {
+  local ssh_alias="$1"
+  local expected_hostname="$2"
+  local expected_port="$3"
+  local effective
+
+  effective="$(ssh -G -F "$SSH_CONFIG" "$ssh_alias" 2>/dev/null || true)"
+  if printf '%s\n' "$effective" \
+    | /usr/bin/grep -Fxq "hostname $expected_hostname" \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "port $expected_port" \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "user hamel" \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "addressfamily inet" \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "identitiesonly yes" \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "forwardagent no" \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "hostkeyalias ubuntu-dev" \
+    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "stricthostkeychecking true" \
+    && printf '%s\n' "$effective" \
+      | /usr/bin/grep -Fq "$(basename "$UBUNTU_LOGIN_KEY")"; then
+    pass "$ssh_alias Ubuntu route"
+  else
+    fail "$ssh_alias Ubuntu route is missing or unsafe"
+  fi
 }
 
 while [[ $# -gt 0 ]]; do
@@ -82,6 +120,64 @@ for brewfile in "$COMMON_BREWFILE" "$PROFILE_BREWFILE"; do
     fail "Brewfile missing dependencies: $brewfile"
   fi
 done
+
+if [[ "$PROFILE" == mac-studio ]]; then
+  if "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1; then
+    pass "Rosetta 2 installed"
+  else
+    fail "Rosetta 2 missing"
+  fi
+
+  if command -v vagrant >/dev/null 2>&1; then
+    pass "Vagrant available"
+  else
+    fail "Vagrant missing"
+  fi
+
+  if [[ -x "$VAGRANT_VMWARE_UTILITY" ]]; then
+    pass "Vagrant VMware utility available"
+  else
+    fail "Vagrant VMware utility missing"
+  fi
+
+  if launchctl print "system/$VAGRANT_VMWARE_SERVICE_LABEL" >/dev/null 2>&1; then
+    pass "Vagrant VMware utility service active"
+  else
+    fail "Vagrant VMware utility service is not active"
+  fi
+
+  if vagrant_vmware_plugin_current; then
+    pass "Vagrant VMware provider $VAGRANT_VMWARE_PLUGIN_VERSION"
+  else
+    fail "Vagrant VMware provider must be $VAGRANT_VMWARE_PLUGIN_VERSION"
+  fi
+
+  for app_name in "VMware Fusion.app" "Ollama.app"; do
+    if [[ -d "$APPLICATIONS_DIR/$app_name" ]]; then
+      pass "$app_name installed"
+    else
+      fail "$app_name missing"
+    fi
+  done
+
+  if [[ "${DOTFILES_MAC_STUDIO_CUTOVER:-0}" == "1" ]]; then
+    if [[ -r "$SSH_CONFIG" ]]; then
+      pass "SSH config readable"
+      check_studio_ubuntu_ssh_alias ubuntu-vm 127.0.0.1 2222
+      check_studio_ubuntu_ssh_alias ubuntu-vm-ts ubuntu-dev 22
+    else
+      fail "SSH config missing or unreadable"
+    fi
+    if [[ -f "$UBUNTU_LOGIN_KEY" \
+      && "$(stat -f '%Lp' "$UBUNTU_LOGIN_KEY" 2>/dev/null)" == "600" ]]; then
+      pass "Ubuntu login key present with mode 600"
+    else
+      fail "Ubuntu login key missing or not mode 600"
+    fi
+  else
+    printf 'SKIP  Studio Ubuntu SSH routes until DOTFILES_MAC_STUDIO_CUTOVER=1\n'
+  fi
+fi
 
 if "$GIT_ALIASES_SCRIPT" --check >/dev/null 2>&1; then
   pass "portable Git aliases"

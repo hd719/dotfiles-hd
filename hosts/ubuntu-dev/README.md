@@ -1,7 +1,8 @@
 # Ubuntu Workstation
 
-Ubuntu 26.04 ARM64 is the primary development workstation. The thin Mac runs
-Vagrant and VMware Fusion only as its control plane.
+Ubuntu 26.04 ARM64 is the primary development workstation. It currently lives
+inside the thin Mac. After an approved cutover, it will be rebuilt inside the
+Mac Studio; this staged profile does not move the current VM.
 
 ## Rebuild
 
@@ -13,6 +14,9 @@ Prerequisites on the thin Mac:
 - `~/.ssh/id_ed25519_ubuntu_vm.pub` exists.
 - The tailnet policy defines `tag:ubuntu-dev` and lets `hd719@github` connect
   to that tag as the `hamel` user.
+
+After Mac Studio cutover, use the equivalent `mac-studio` bootstrap and VM
+commands from [`../mac-studio/README.md`](../mac-studio/README.md).
 
 The Forgejo Tailscale route also requires ordinary network access from Ubuntu
 to TrueNAS. Add this rule to the tailnet policy's `acls` array:

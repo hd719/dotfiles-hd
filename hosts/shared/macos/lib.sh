@@ -47,11 +47,11 @@ next_backup_path() {
 
 canonical_profile() {
   case "$1" in
-    mac-pro|mac-mini)
+    mac-pro|mac-studio|mac-mini)
       printf '%s\n' "$1"
       ;;
     *)
-      die "unknown profile '$1' (expected mac-pro or mac-mini)"
+      die "unknown profile '$1' (expected mac-pro, mac-studio, or mac-mini)"
       return 1
       ;;
   esac
@@ -233,6 +233,7 @@ load_profile() {
   MISE_FRAGMENT="$dotfiles_dir/hosts/shared/macos/mise-shims.zsh"
   case "$profile" in
     mac-pro) PROFILE_BREWFILE="$dotfiles_dir/hosts/mac-pro/Brewfile" ;;
+    mac-studio) PROFILE_BREWFILE="$dotfiles_dir/hosts/mac-studio/Brewfile" ;;
     mac-mini) PROFILE_BREWFILE="$dotfiles_dir/hosts/mac-mini/Brewfile" ;;
   esac
 }
