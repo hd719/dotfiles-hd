@@ -13,10 +13,29 @@ local function refresh_markdown_tables()
     end
   end
 
-  if refreshed == 0 and vim.bo.filetype == "markdown" then
-    vim.cmd("MarkdownTableRefresh")
-  elseif refreshed == 0 then
+  if refreshed > 0 then
+    return
+  end
+
+  if vim.bo.filetype ~= "markdown" then
     vim.notify("No active Markdown table reader", vim.log.levels.INFO)
+    return
+  end
+
+  -- Refreshing from the source file must leave the cursor on it. The plugin's
+  -- own refresh opens the Reader in the current window, and the Reader is an
+  -- unlisted buffer, so Bufferline stops marking the file as current and
+  -- getting back to it needs a buffer pick.
+  local start_win = vim.api.nvim_get_current_win()
+  local start_buf = vim.api.nvim_get_current_buf()
+
+  vim.cmd("MarkdownTableRefresh")
+
+  if vim.api.nvim_win_is_valid(start_win) then
+    vim.api.nvim_set_current_win(start_win)
+  end
+  if vim.api.nvim_buf_is_valid(start_buf) and vim.api.nvim_get_current_buf() ~= start_buf then
+    vim.api.nvim_set_current_buf(start_buf)
   end
 end
 
