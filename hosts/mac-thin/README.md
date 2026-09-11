@@ -211,10 +211,9 @@ and leaves one fresh `home` workspace. It only touches the local server, so the
 `hu` and `hmini` clients and their remote sessions are unaffected. Add
 `--dry-run` to preview it.
 
-After a fresh Ghostty launch, the thin-Mac host override opens one window with
-`hu`, `hmini`, and local `herdr` tabs in that order. It disables macOS window
-state restoration and full-screen startup so a prior layout cannot replace this
-control-plane default.
+After a fresh Ghostty launch, the thin-Mac host override opens a regular shell
+with window state restoration and full-screen startup disabled. Run `hu`,
+`hmini`, or local `herdr` manually when needed.
 
 The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
 Forgejo. No Git private key is copied from the Mac.

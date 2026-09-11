@@ -302,11 +302,6 @@ grep -Fxq 'config-file = ?host.conf' "$REPO_DIR/config/ghostty/config"
 grep -Fxq 'fullscreen = false' "$REPO_DIR/hosts/mac-thin/ghostty.conf"
 grep -Fxq 'window-save-state = never' "$REPO_DIR/hosts/mac-thin/ghostty.conf"
 grep -Fxq 'window-new-tab-position = end' "$REPO_DIR/hosts/mac-thin/ghostty.conf"
-/usr/bin/osacompile -o /dev/null \
-  "$REPO_DIR/hosts/mac-thin/ghostty-startup.applescript"
-[[ "$(/usr/bin/osascript \
-  "$REPO_DIR/hosts/mac-thin/ghostty-startup.applescript" --dry-run)" \
-  == $'hu\nhmini\nherdr' ]]
 GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   source '$HOME/.zshrc'
   [[ -z \"\${GIT_PAGER+x}\" ]] || exit 1
