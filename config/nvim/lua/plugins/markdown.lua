@@ -1,3 +1,14 @@
+-- A Reader is an `acwrite` buffer, so the AutoReloadFromDisk autocmd skips it
+-- and its hidden source buffer never learns that an agent rewrote the file.
+-- The Reader rebuilds from that buffer, so without this it redraws stale text.
+local function reload_from_disk(bufnr)
+  if bufnr and vim.api.nvim_buf_is_valid(bufnr) and not vim.bo[bufnr].modified then
+    vim.api.nvim_buf_call(bufnr, function()
+      vim.cmd("checktime")
+    end)
+  end
+end
+
 local function refresh_markdown_tables()
   local reader = require("markdown-table-wrap.reader")
   local refreshed = 0
@@ -7,6 +18,7 @@ local function refresh_markdown_tables()
     local bufnr = vim.api.nvim_win_get_buf(winid)
     if not seen[bufnr] and reader.is_reader(bufnr) then
       seen[bufnr] = true
+      reload_from_disk(reader.source_bufnr(bufnr))
       if reader.refresh(bufnr) then
         refreshed = refreshed + 1
       end
@@ -22,21 +34,11 @@ local function refresh_markdown_tables()
     return
   end
 
-  -- Refreshing from the source file must leave the cursor on it. The plugin's
-  -- own refresh opens the Reader in the current window, and the Reader is an
-  -- unlisted buffer, so Bufferline stops marking the file as current and
-  -- getting back to it needs a buffer pick.
-  local start_win = vim.api.nvim_get_current_win()
-  local start_buf = vim.api.nvim_get_current_buf()
-
+  -- Inline mode redraws in the source buffer and stays put. With no view open
+  -- at all the plugin opens the Reader in this window, and that opened Reader
+  -- is the refresh, so the cursor has to follow it. Press `e` to come back.
+  reload_from_disk(vim.api.nvim_get_current_buf())
   vim.cmd("MarkdownTableRefresh")
-
-  if vim.api.nvim_win_is_valid(start_win) then
-    vim.api.nvim_set_current_win(start_win)
-  end
-  if vim.api.nvim_buf_is_valid(start_buf) and vim.api.nvim_get_current_buf() ~= start_buf then
-    vim.api.nvim_set_current_buf(start_buf)
-  end
 end
 
 return {
