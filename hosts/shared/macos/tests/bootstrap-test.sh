@@ -653,7 +653,7 @@ test_profile_names_and_paths() {
     assert_contains "$PROFILE_BREWFILE" "brew \"$package\""
     assert_contains "$REPO_DIR/hosts/mac-mini/Brewfile" "brew \"$package\""
   done
-  assert_not_contains "$PROFILE_BREWFILE" 'cask "vagrant-vmware-utility"'
+  assert_contains "$PROFILE_BREWFILE" 'cask "vagrant-vmware-utility"'
   assert_contains "$REPO_DIR/chezmoi/profiles/mac-studio.paths" \
     '.zshrc|hosts/mac-studio/.zshrc'
   assert_not_contains "$REPO_DIR/chezmoi/profiles/mac-studio.paths" \
@@ -980,8 +980,8 @@ test_mac_studio_apply() {
   make_fake_toolchain "$fake_bin"
   : > "$log"
 
-  # Any VM/provider or service interaction is a regression while Ubuntu is dormant.
-  for command_name in vagrant launchctl softwareupdate colima docker ssh; do
+  # Bootstrap never starts the guest or workload services.
+  for command_name in vagrant launchctl colima docker ssh; do
     cat > "$fake_bin/$command_name" <<'EOF'
 #!/usr/bin/env bash
 printf 'FORBIDDEN %s %s\n' "${0##*/}" "$*" >> "${COMMAND_LOG:?}"
@@ -989,6 +989,24 @@ exit 99
 EOF
     chmod +x "$fake_bin/$command_name"
   done
+
+  local rosetta_marker="$root/rosetta-installed"
+  cat > "$fake_bin/pkgutil" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == '--pkg-info com.apple.pkg.RosettaUpdateAuto' ]] || exit 2
+[[ -f "${ROSETTA_MARKER:?}" ]]
+EOF
+  cat > "$fake_bin/softwareupdate" <<'EOF'
+#!/usr/bin/env bash
+printf 'softwareupdate %s\n' "$*" >> "${COMMAND_LOG:?}"
+[[ "$*" == '--install-rosetta --agree-to-license' ]] || exit 2
+: > "${ROSETTA_MARKER:?}"
+EOF
+  cat > "$fake_bin/sudo" <<'EOF'
+#!/usr/bin/env bash
+"$@"
+EOF
+  chmod +x "$fake_bin/pkgutil" "$fake_bin/softwareupdate" "$fake_bin/sudo"
 
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
@@ -1004,7 +1022,21 @@ EOF
     DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
     DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
     DOTFILES_MAC_STUDIO_ARRIVED=1 \
+    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
+    DOTFILES_SOFTWAREUPDATE="$fake_bin/softwareupdate" DOTFILES_SUDO="$fake_bin/sudo" \
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
+
+  assert_file "$rosetta_marker"
+  assert_contains "$log" 'softwareupdate --install-rosetta --agree-to-license'
+  : > "$log"
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
+    DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
+    DOTFILES_MAC_STUDIO_ARRIVED=1 \
+    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
+    DOTFILES_SOFTWAREUPDATE="$fake_bin/softwareupdate" DOTFILES_SUDO="$fake_bin/sudo" \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
+  assert_not_contains "$log" 'softwareupdate'
 
   assert_not_contains "$log" 'FORBIDDEN'
   assert_not_contains "$log" 'brew services'
@@ -1014,6 +1046,7 @@ EOF
   mkdir -p "$root/applications/VMware Fusion.app" "$root/applications/Ollama.app"
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_APPLICATIONS_DIR="$root/applications" \
+    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
     "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-studio > "$root/doctor.log"
   assert_contains "$root/doctor.log" 'Ubuntu runtime and SSH checks (manual use only)'
   assert_not_contains "$log" 'FORBIDDEN'
@@ -1046,6 +1079,17 @@ test_xdg_bin_home() {
       2>/dev/null | tail -n 1)"
     assert_eq "$custom_bin/ruff" "$resolved" "$(basename "$(dirname "$zshrc")") zshrc keeps XDG_BIN_HOME first"
   done
+  local dotnet_prefix="$root/brew/opt/dotnet@9"
+  mkdir -p "$dotnet_prefix/bin" "$dotnet_prefix/libexec"
+  printf '#!/bin/sh\nexit 0\n' > "$dotnet_prefix/bin/dotnet"
+  chmod +x "$dotnet_prefix/bin/dotnet"
+  ln -s "$REPO_DIR/hosts/mac-studio/.zshrc" "$home_dir/.zshrc"
+  resolved="$(HOME="$home_dir" HOMEBREW_PREFIX="$root/brew" PATH=/usr/bin:/bin \
+    /bin/zsh -lic 'printf "%s|%s\n" "$(command -v dotnet)" "$DOTNET_ROOT"' \
+    2>/dev/null | tail -n 1)"
+  assert_eq "$dotnet_prefix/bin/dotnet|$dotnet_prefix/libexec" "$resolved" \
+    'Studio login shell exposes the requested .NET SDK and root'
+
 }
 
 test_profile_and_failure_guards() {

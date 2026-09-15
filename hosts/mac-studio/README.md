@@ -43,7 +43,9 @@ hosts/shared/macos/doctor.sh --profile mac-studio
 ```
 
 The arrival flag is a hard gate; set it only on Studio. Bootstrap installs the
-shared native development tools, the Studio Brewfile and configuration. It
+shared native development tools, the Studio Brewfile and configuration. The
+VMware utility installer registers its host helper service, using Rosetta 2
+on Apple Silicon; bootstrap installs Rosetta when missing. The profile
 never starts Ubuntu, Colima, PostgreSQL or Ollama. Normal checks audit installed
 packages/configuration without requiring any guest, Docker daemon, database
 server, VMware utility service or Ubuntu SSH route to be online.
@@ -51,7 +53,11 @@ server, VMware utility service or Ubuntu SSH route to be online.
 ## Native Development
 
 Homebrew and the shared mise configuration provide the native toolchain.
-Studio adds Colima, Docker, Compose, Buildx, PostgreSQL 17, pgvector and VS Code.
+Studio includes the current personal-Mac app/font set, Vagrant and its VMware
+utility, plus the mini's shared development stack. Its overlay adds .NET 9,
+Colima, Docker, Compose, Buildx, PostgreSQL 17, pgvector, VS Code and Chromium,
+with the mini's coreutils, FFmpeg, Git filter-repo, Poppler, Tesseract, Websocat
+and XcodeGen tools. Homebrew resolves supporting libraries as dependencies.
 Colima's small VM supplies Docker only; repositories and toolchains stay native
 on Studio. [Colima setup](https://github.com/abiosoft/colima#installation)
 requires a separate, deliberate `colima start` after installation.
@@ -63,9 +69,10 @@ See the [Homebrew Compose caveat](https://formulae.brew.sh/formula/docker-compos
 Verify `docker compose version`, `docker buildx version` and, after starting
 Colima, `docker info`. Dotfiles does not rewrite Docker configuration or data.
 
-The Studio shell exposes PostgreSQL 17 client tools. Homebrew creates its
-initial empty cluster during package installation; project database setup,
-restores and server startup remain deliberate project steps. Verify local
+The Studio shell exposes PostgreSQL 17 client tools and the .NET 9 SDK.
+`DOTNET_ROOT` points to the Homebrew .NET 9 installation. Homebrew creates the
+initial PostgreSQL cluster during package installation; project database
+setup, restores and server startup remain deliberate project steps. Verify local
 builds/tests and database access for the repositories being moved, including
 Cortana Services. Never use the mini's production database for development.
 
@@ -88,11 +95,12 @@ For mini development isolation, follow its [runbook](../mac-mini/README.md).
 1. Leave Ubuntu off. Its restore boot, provider setup, identity changes or
    rebuild happen only when Hamel explicitly requests them later.
 
-The normal profile installs Vagrant but defers its VMware utility, Rosetta
-requirement and pinned `vagrant-vmware-desktop` 3.0.5 provider until Ubuntu is
-requested. Restore and verify both VM and `.vagrant` metadata before using the
-helpers. Adjust host-specific paths and provide the guest's expected login
-public key through a reviewed restoration procedure; never overwrite keys.
+The normal profile installs Vagrant, its VMware utility and Rosetta when
+needed. The pinned `vagrant-vmware-desktop` 3.0.5 provider plugin is deferred
+until Ubuntu is requested. Restore and verify both VM and `.vagrant` metadata
+before using the helpers. Adjust host-specific paths and provide the guest's
+expected login public key through a reviewed restoration procedure; never
+overwrite keys.
 
 The shell exposes `uvm-status`, `uvm-up`, `uvm-stop`, `uvm-suspend`, `uvm-resume`
 and `uvm-ip`. Loading the shell does not invoke Vagrant. Start/resume refuse a

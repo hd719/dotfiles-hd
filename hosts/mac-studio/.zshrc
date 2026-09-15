@@ -18,7 +18,13 @@ _zsh_add_completion_dirs \
   /usr/local/share/zsh/site-functions
 _zsh_init_completions 43200
 typeset -gaU path
-path=("${XDG_BIN_HOME:-$HOME/.local/bin}" "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/postgresql@17/bin" $path)
+path=(
+  "${XDG_BIN_HOME:-$HOME/.local/bin}"
+  "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/postgresql@17/bin"
+  "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/dotnet@9/bin"
+  $path
+)
+export DOTNET_ROOT="${HOMEBREW_PREFIX:-/opt/homebrew}/opt/dotnet@9/libexec"
 export PATH
 
 _activate_mise

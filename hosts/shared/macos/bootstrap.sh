@@ -8,6 +8,9 @@ STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 CHEZMOI_BOOTSTRAP="${DOTFILES_CHEZMOI_BOOTSTRAP:-$DOTFILES_DIR/chezmoi/bootstrap.sh}"
 CHEZMOI_PREVIEW="${DOTFILES_CHEZMOI_PREVIEW:-$DOTFILES_DIR/chezmoi/preview.sh}"
 HOST_DOCTOR="${DOTFILES_MAC_DOCTOR:-$SCRIPT_DIR/doctor.sh}"
+PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
+SOFTWAREUPDATE="${DOTFILES_SOFTWAREUPDATE:-/usr/sbin/softwareupdate}"
+SUDO="${DOTFILES_SUDO:-/usr/bin/sudo}"
 PROFILE=""
 MODE="dry-run"
 
@@ -27,7 +30,8 @@ Modes:
   --apply    Install dependencies and apply configuration through Chezmoi.
 
 The script never handles credentials, removes packages, cleans Homebrew, or
-starts/restarts services. Xcode Command Line Tools, Homebrew, and a clean clone
+starts/restarts workload services. The Studio VMware utility installer registers
+its host helper service. Xcode Command Line Tools, Homebrew, and a clean clone
 at ~/Developer/dotfiles-hd are prerequisites.
 EOF
 }
@@ -66,6 +70,10 @@ done
 [[ -n "$PROFILE" ]] || { usage >&2; exit 2; }
 PROFILE="$(canonical_profile "$PROFILE")" || exit 2
 load_profile "$PROFILE" "$DOTFILES_DIR" "$HOME"
+
+rosetta_installed() {
+  "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1
+}
 
 [[ "$(uname -s)" == "Darwin" ]] || die "personal-Mac bootstrap requires macOS"
 [[ "$(uname -m)" == "arm64" ]] || die "personal-Mac bootstrap currently supports Apple Silicon only"
@@ -116,7 +124,9 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "would restore locked Neovim plugins and required Tree-sitter parsers without changing lazy-lock.json"
   say "would run the verification doctor"
   if [[ "$PROFILE" == mac-studio ]]; then
-    say "Ubuntu stays dormant; provider setup is deferred until manual use"
+    say "would install Rosetta 2 when missing for the VMware utility"
+    say "the utility installer registers a host helper; Ubuntu stays dormant"
+    say "Vagrant provider plugin setup is deferred until manual use"
     say "VMware Fusion remains a manual install; Ollama models remain machine-owned"
   fi
 
@@ -162,6 +172,11 @@ fi
 DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
   DOTFILES_CHEZMOI_REQUIRE_REVIEWED=1 \
   "$CHEZMOI_BOOTSTRAP" "$PROFILE" --preview >/dev/null
+
+if [[ "$PROFILE" == mac-studio ]] && ! rosetta_installed; then
+  say "Installing Rosetta 2 for the Vagrant VMware utility..."
+  "$SUDO" "$SOFTWAREUPDATE" --install-rosetta --agree-to-license
+fi
 
 say "Installing shared Homebrew dependencies without broad upgrades..."
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$COMMON_BREWFILE"

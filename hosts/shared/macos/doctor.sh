@@ -10,6 +10,7 @@ PROFILE=""
 FAILURES=0
 MISE_RUNTIME_FAILURES=0
 APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
+PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
 
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
@@ -85,6 +86,11 @@ for brewfile in "$COMMON_BREWFILE" "$PROFILE_BREWFILE"; do
 done
 
 if [[ "$PROFILE" == mac-studio ]]; then
+  if "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1; then
+    pass "Rosetta 2 installed for the VMware utility"
+  else
+    fail "Rosetta 2 missing for the VMware utility"
+  fi
   for app_name in "VMware Fusion.app" "Ollama.app"; do
     if [[ -d "$APPLICATIONS_DIR/$app_name" ]]; then
       pass "$app_name installed"

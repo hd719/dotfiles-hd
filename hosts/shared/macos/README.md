@@ -56,8 +56,10 @@ state, databases, and application data remain machine-owned.
 Studio and mini overlays include Colima/Docker development tools; Studio also
 adds PostgreSQL 17, which mini already retains. Package installation does not
 start these services. Studio installs Ollama without activation or model
-pulls. VMware Fusion setup remains manual; Ubuntu provider installation is
-deferred until the preserved guest is explicitly requested. See the
+pulls. The Studio VMware utility installer registers its host helper service;
+Rosetta is installed when missing. VMware Fusion setup remains manual; Ubuntu
+provider plugin installation is deferred until the preserved guest is
+explicitly requested. See the
 [Studio runbook](../../mac-studio/README.md) for manual Docker plugin setup,
 database ownership and remote acceptance. Air uses its separate client
 bootstrap, never the shared full-development bootstrap.
