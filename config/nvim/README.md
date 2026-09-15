@@ -449,8 +449,9 @@ Herdr; use `n`, then `v` / `V` plus motions and `H` for keyboard highlighting.
 Folding is Tree-sitter based and files open unfolded. Press `Space u` for the
 same fold, viewport, and spelling actions normally reached through `z`.
 
-The cursor line stays vertically centered as you move up and down
-(`scrolloff = 999`). A blue-gray row marks the cursor by default. Press
+Scrolling keeps an eight-line margin around the cursor (`scrolloff = 8`),
+avoiding the large cursor jump that forced centering caused on mouse-wheel input.
+A blue-gray row marks the cursor by default. Press
 `Space C` to open the Crosshair menu: `c` toggles the full row-and-column
 crosshair, and `v` toggles only the vertical line while keeping the row
 highlighted.

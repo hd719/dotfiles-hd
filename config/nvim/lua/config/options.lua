@@ -18,9 +18,8 @@ opt.fixendofline = true
 
 opt.ignorecase = true
 opt.smartcase = true
--- Keep the cursor line vertically centered: 999 forces the view to always
--- center as you move up and down.
-opt.scrolloff = 999
+-- Keep context around the cursor without forcing large mouse-wheel jumps.
+opt.scrolloff = 8
 opt.sidescrolloff = 8
 
 if vim.env.SSH_CONNECTION ~= nil or vim.env.SSH_TTY ~= nil then
