@@ -104,8 +104,10 @@ overwrite keys.
 
 The shell exposes `uvm-status`, `uvm-up`, `uvm-stop`, `uvm-suspend`, `uvm-resume`
 and `uvm-ip`. Loading the shell does not invoke Vagrant. Start/resume refuse a
-missing restored VM; `uvm-up` disables automatic provisioning. There is no
-Studio destroy shortcut. These helpers are for deliberate manual use only.
+missing restored VM; both disable automatic provisioning. Vagrant can otherwise
+reprovision a powered-off guest on resume when restored metadata contains a
+missing or outdated provisioning marker. There is no Studio destroy shortcut.
+These helpers are for deliberate manual use only.
 
 If Ubuntu is later activated, manually configure its SSH routes using
 `hosts/mac-studio/ssh/ubuntu-vagrant.conf` after verifying host fingerprints.

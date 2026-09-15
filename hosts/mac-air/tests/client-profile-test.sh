@@ -120,4 +120,32 @@ HOME="$TEST_HOME" HOMEBREW_PREFIX="$TEST_ROOT" PATH="$FAKE_BIN:/usr/bin:/bin" \
 ! grep -Fq FORBIDDEN "$LOG" || fail 'Air invoked a development or VM tool'
 ! grep -Eq '^(brew|cask) "(vagrant|vagrant-vmware-utility|vmware-fusion|docker|colima|mise|postgresql)' \
   "$REPO_DIR/hosts/mac-air/Brewfile" || fail 'Air installs a local development environment'
+
+# Run the actual bootstrap/Chezmoi path from an empty home, not just its
+# rendered installer. Package managers and editor execution remain stubbed.
+fresh_home="$TEST_ROOT/fresh-home"
+fresh_log="$TEST_ROOT/fresh.log"
+mkdir -p "$fresh_home"
+: > "$fresh_log"
+fresh_bootstrap() {
+  HOME="$fresh_home" PATH="$FAKE_BIN:$PATH" COMMAND_LOG="$fresh_log" \
+    DOTFILES_CHEZMOI_TEST=1 DOTFILES_MAC_AIR_ARRIVED=1 \
+    CHEZMOI_BIN="$REAL_CHEZMOI_BIN" DOTFILES_AIR_DOCTOR=/usr/bin/true \
+    bash "$REPO_DIR/hosts/mac-air/bootstrap.sh" --apply \
+      > "$TEST_ROOT/fresh-apply.log"
+}
+fresh_bootstrap
+[[ "$(readlink "$fresh_home/.config/nvim")" == "$REPO_DIR/config/nvim" ]] \
+  || fail 'fresh Air did not receive the note editor configuration'
+[[ "$(readlink "$fresh_home/.config/homebrew/Brewfile")" == "$REPO_DIR/hosts/mac-air/Brewfile" ]] \
+  || fail 'fresh Air selected the wrong packages'
+[[ -d "$fresh_home/.config/fastfetch" && ! -L "$fresh_home/.config/fastfetch" ]] \
+  || fail 'fresh Air did not prepare its managed parent directory'
+grep -Fq 'rollback command:' "$TEST_ROOT/fresh-apply.log" || fail 'fresh Air has no rollback'
+[[ "$(grep -c '^brew bundle install ' "$fresh_log")" == 1 ]] \
+  || fail 'fresh Air package installation did not run exactly once'
+fresh_bootstrap
+[[ "$(grep -c '^brew bundle install ' "$fresh_log")" == 1 ]] \
+  || fail 'unchanged Air apply repeated package installation'
+! grep -Fq FORBIDDEN "$fresh_log" || fail 'fresh Air invoked a VM or development tool'
 printf 'MacBook Air client profile tests passed.\n'

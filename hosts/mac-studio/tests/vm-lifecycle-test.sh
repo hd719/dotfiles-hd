@@ -24,6 +24,11 @@ if [[ "$*" == 'status --machine-readable' ]]; then
   [[ "${VM_STATE:-poweroff}" != error ]] || exit 1
   printf '1,default,state,%s\n' "${VM_STATE:-poweroff}"
 fi
+# The VMware provider can provision a powered-off restored guest on resume
+# when its action_provision sentinel is missing or records its old machine ID.
+if [[ "$1" == resume && "$*" != 'resume --no-provision' ]]; then
+  printf 'UNSAFE automatic provisioning on resume\n' >> "${VAGRANT_TEST_LOG:?}"
+fi
 FAKE
 chmod +x "$FAKE_BIN/vagrant"
 
@@ -54,12 +59,13 @@ done
 
 : > "$VAGRANT_LOG"
 run_shell 'uvm-up; uvm-stop; uvm-suspend; uvm-resume; uvm-status; uvm-ip'
-for args in 'up --no-provision' halt suspend resume status 'ssh -c hostname -I'; do
+for args in 'up --no-provision' halt suspend 'resume --no-provision' status 'ssh -c hostname -I'; do
   grep -Fq "args=$args" "$VAGRANT_LOG" || fail "missing command: $args"
 done
 grep -Fq "cwd=$PROJECT provider=vmware_desktop gui=1 args=up --no-provision" \
   "$VAGRANT_LOG" || fail 'start did not preserve provider, project and GUI settings'
 ! grep -Fq 'args=provision' "$VAGRANT_LOG" || fail 'automatic provisioning'
+! grep -Fq 'UNSAFE' "$VAGRANT_LOG" || fail 'resume allowed automatic provisioning'
 ! grep -Fq destroy "$VAGRANT_LOG" || fail 'unexpected deletion'
 run_shell '(( ! $+functions[uvm-destroy] ))' || fail 'destroy shortcut remains'
 printf 'Mac Studio dormant VM lifecycle tests passed.\n'

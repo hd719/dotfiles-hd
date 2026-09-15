@@ -53,7 +53,7 @@ uvm-suspend() {
 
 uvm-resume() {
   _require_preserved_ubuntu || return
-  _ubuntu_vagrant resume
+  _ubuntu_vagrant resume --no-provision
 }
 
 uvm-status() {

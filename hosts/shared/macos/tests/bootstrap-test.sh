@@ -1028,15 +1028,17 @@ EOF
 
   assert_file "$rosetta_marker"
   assert_contains "$log" 'softwareupdate --install-rosetta --agree-to-license'
-  : > "$log"
-  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+  local reapply_log="$root/reapply.log"
+  : > "$reapply_log"
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$reapply_log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
     DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
     DOTFILES_MAC_STUDIO_ARRIVED=1 \
     DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
     DOTFILES_SOFTWAREUPDATE="$fake_bin/softwareupdate" DOTFILES_SUDO="$fake_bin/sudo" \
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
-  assert_not_contains "$log" 'softwareupdate'
+  assert_not_contains "$reapply_log" 'softwareupdate'
+  cat "$reapply_log" >> "$log"
 
   assert_not_contains "$log" 'FORBIDDEN'
   assert_not_contains "$log" 'brew services'
