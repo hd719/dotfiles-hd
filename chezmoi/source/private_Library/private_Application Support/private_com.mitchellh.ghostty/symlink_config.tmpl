@@ -1,1 +1,5 @@
+{{- if eq .profile "mac-air" -}}
+{{ joinPath .chezmoi.sourceDir ".." ".." "hosts" "mac-air" "ghostty.conf" }}
+{{- else -}}
 {{ joinPath .chezmoi.sourceDir ".." ".." "config" "ghostty" "config" }}
+{{- end -}}

@@ -16,14 +16,15 @@ constraints, and agent workflow policy here.
 
 ## Profile Routing
 
-| Target                                     | Source of truth                      |
-| ------------------------------------------ | ------------------------------------ |
-| Thin personal MacBook (`mac-thin`)         | `hosts/mac-thin/README.md`           |
-| Staged primary Mac Studio (`mac-studio`)   | `hosts/mac-studio/README.md`         |
-| Standalone development MacBook (`mac-pro`) | `hosts/mac-pro/README.md`             |
-| Personal Mac mini (`mac-mini`)             | `hosts/mac-mini/README.md`            |
-| Resilience work Mac (`mac-work`)           | `hosts/mac-work/README.md`            |
-| Ubuntu workstation                         | `hosts/ubuntu-dev/README.md`          |
+| Target                                     | Source of truth              |
+| ------------------------------------------ | ---------------------------- |
+| Thin personal MacBook (`mac-thin`)         | `hosts/mac-thin/README.md`   |
+| Future access-only Air (`mac-air`)         | `hosts/mac-air/README.md`    |
+| Staged primary Mac Studio (`mac-studio`)   | `hosts/mac-studio/README.md` |
+| Standalone development MacBook (`mac-pro`) | `hosts/mac-pro/README.md`    |
+| Personal Mac mini (`mac-mini`)             | `hosts/mac-mini/README.md`   |
+| Resilience work Mac (`mac-work`)           | `hosts/mac-work/README.md`   |
+| Ubuntu workstation                         | `hosts/ubuntu-dev/README.md` |
 
 `config/` holds portable configuration and must not be reorganized casually.
 `chezmoi/` owns approved user-config delivery and rollback. `hosts/` owns
@@ -66,6 +67,10 @@ The `mac-studio` profile is pre-arrival staging. Do not apply it, move or
 destroy the Ubuntu VM, or change live host routing until the Studio arrives
 and Hamel approves the cutover gates in its runbook. Studio apply requires
 `DOTFILES_MAC_STUDIO_ARRIVED=1`; never set it on another host.
+The future `mac-air` client profile requires `DOTFILES_MAC_AIR_ARRIVED=1` on
+that device. Follow the Studio runbook for native development, dormant Ubuntu
+preservation, mini development isolation, and the later Air rollout. Update
+canonical topology and sync policies only after verified live cutover.
 
 ## Package Ownership
 

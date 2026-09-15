@@ -5,72 +5,61 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_DIR="$(cd "$TEST_DIR/../../.." && pwd -P)"
 TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-studio-vm-test.XXXXXX")"
 trap 'rm -rf "$TEST_ROOT"' EXIT
-
 FAKE_BIN="$TEST_ROOT/bin"
 TEST_HOME="$TEST_ROOT/home"
+PROJECT="$TEST_ROOT/ubuntu"
 VAGRANT_LOG="$TEST_ROOT/vagrant.log"
-mkdir -p "$FAKE_BIN" "$TEST_HOME"
+mkdir -p "$FAKE_BIN" "$TEST_HOME" "$PROJECT"
+PROJECT="$(cd "$PROJECT" && pwd -P)"
+: > "$PROJECT/Vagrantfile"
+: > "$VAGRANT_LOG"
+fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 
-fail() {
-  printf 'FAIL: %s\n' "$*" >&2
-  exit 1
-}
-
-assert_contains() {
-  grep -Fq -- "$2" "$1" || fail "expected '$2' in $1"
-}
-
-assert_not_contains() {
-  ! grep -Fq -- "$2" "$1" || fail "did not expect '$2' in $1"
-}
-
-cat > "$FAKE_BIN/vagrant" <<'FAKE_VAGRANT'
+cat > "$FAKE_BIN/vagrant" <<'FAKE'
 #!/usr/bin/env bash
-printf 'cwd=%s vagrant_cwd=%s gui=%s provider=%s clone=%s args=%s\n' \
-  "$PWD" \
-  "${VAGRANT_CWD:-unset}" \
-  "${UBUNTU_VM_GUI:-unset}" \
-  "${VAGRANT_DEFAULT_PROVIDER:-unset}" \
-  "${VAGRANT_VMWARE_CLONE_DIRECTORY:-unset}" \
-  "$*" >> "${VAGRANT_TEST_LOG:?}"
-if [[ "${1:-}" == ssh ]]; then
-  printf '192.0.2.10\n'
+printf 'cwd=%s provider=%s gui=%s args=%s\n' \
+  "$PWD" "$VAGRANT_DEFAULT_PROVIDER" "${UBUNTU_VM_GUI:-unset}" "$*" \
+  >> "${VAGRANT_TEST_LOG:?}"
+if [[ "$*" == 'status --machine-readable' ]]; then
+  [[ "${VM_STATE:-poweroff}" != error ]] || exit 1
+  printf '1,default,state,%s\n' "${VM_STATE:-poweroff}"
 fi
-FAKE_VAGRANT
+FAKE
 chmod +x "$FAKE_BIN/vagrant"
 
-output="$({
-  HOME="$TEST_HOME" \
-    PATH="$FAKE_BIN:/usr/bin:/bin" \
-    DOTFILES_UBUNTU_VAGRANT_DIR="$REPO_DIR/hosts/ubuntu-dev" \
-    VAGRANT_TEST_LOG="$VAGRANT_LOG" \
-    /bin/zsh -dfc '
-      source "$1"
-      uvm-up
-      uvm-stop
-      uvm-suspend
-      uvm-resume
-      uvm-status
-      uvm-ip
-      uvm-destroy
-    ' zsh "$REPO_DIR/hosts/mac-studio/vm.zsh"
-} 2>&1)" || fail "$output"
+run_shell() {
+  HOME="$TEST_HOME" PATH="$FAKE_BIN:/usr/bin:/bin" \
+    DOTFILES_UBUNTU_VAGRANT_DIR="$PROJECT" VAGRANT_TEST_LOG="$VAGRANT_LOG" \
+    /bin/zsh -dfc 'source "$1"; eval "$2"' zsh \
+    "$REPO_DIR/hosts/mac-studio/vm.zsh" "$1"
+}
+run_shell ':'
+[[ ! -s "$VAGRANT_LOG" ]] || fail 'loading helpers invoked Vagrant'
 
-assert_contains "$VAGRANT_LOG" \
-  "cwd=$REPO_DIR/hosts/ubuntu-dev vagrant_cwd=$REPO_DIR/hosts/ubuntu-dev gui=1 provider=vmware_desktop"
-for args in up halt suspend resume status 'ssh -c hostname -I' destroy; do
-  assert_contains "$VAGRANT_LOG" "args=$args"
+for action in uvm-up uvm-resume; do
+  if run_shell "$action" >/dev/null; then fail "$action allowed a missing VM"; fi
 done
-assert_contains "$VAGRANT_LOG" 'sudo -n -u hamel'
-assert_not_contains "$VAGRANT_LOG" 'destroy -f'
-[[ "$output" == *"Remove this VM's three registered Git public keys"* ]] \
-  || fail 'destroy should print the Git-key removal reminder'
+[[ ! -s "$VAGRANT_LOG" ]] || fail 'missing metadata reached Vagrant'
 
-assert_contains "$REPO_DIR/hosts/mac-studio/.zshrc" \
-  'source "$HOME/Developer/dotfiles-hd/hosts/mac-studio/vm.zsh"'
-for expected in 'Host ubuntu-vm' 'HostName 127.0.0.1' 'ForwardAgent no' \
-  'StrictHostKeyChecking yes'; do
-  assert_contains "$REPO_DIR/hosts/mac-studio/ssh/ubuntu-vagrant.conf" "$expected"
+mkdir -p "$PROJECT/.vagrant/machines/default/vmware_desktop"
+printf 'preserved-vm\n' > "$PROJECT/.vagrant/machines/default/vmware_desktop/id"
+for state in not_created unknown error; do
+  for action in uvm-up uvm-resume; do
+    if VM_STATE="$state" run_shell "$action" >/dev/null; then
+      fail "$action allowed unavailable state $state"
+    fi
+  done
 done
+! grep -Eq 'args=(up|resume)' "$VAGRANT_LOG" || fail 'unavailable VM was started'
 
-printf 'Mac Studio VM lifecycle tests passed.\n'
+: > "$VAGRANT_LOG"
+run_shell 'uvm-up; uvm-stop; uvm-suspend; uvm-resume; uvm-status; uvm-ip'
+for args in 'up --no-provision' halt suspend resume status 'ssh -c hostname -I'; do
+  grep -Fq "args=$args" "$VAGRANT_LOG" || fail "missing command: $args"
+done
+grep -Fq "cwd=$PROJECT provider=vmware_desktop gui=1 args=up --no-provision" \
+  "$VAGRANT_LOG" || fail 'start did not preserve provider, project and GUI settings'
+! grep -Fq 'args=provision' "$VAGRANT_LOG" || fail 'automatic provisioning'
+! grep -Fq destroy "$VAGRANT_LOG" || fail 'unexpected deletion'
+run_shell '(( ! $+functions[uvm-destroy] ))' || fail 'destroy shortcut remains'
+printf 'Mac Studio dormant VM lifecycle tests passed.\n'

@@ -9,6 +9,7 @@ tests=(
   hosts/mac-thin/tests/thin-bootstrap-test.sh
   hosts/mac-thin/tests/vm-lifecycle-test.sh
   hosts/mac-studio/tests/vm-lifecycle-test.sh
+  hosts/mac-air/tests/client-profile-test.sh
   hosts/mac-work/tests/goodmorning-test.sh
   hosts/mac-work/herdr/tests/hd-lib-test.sh
   hosts/mac-work/herdr/tests/hd-pargasite-test.sh

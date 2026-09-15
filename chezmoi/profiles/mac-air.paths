@@ -1,0 +1,4 @@
+.zshrc|hosts/mac-air/.zshrc
+.config/starship.toml|config/starship/starship.toml
+.config/homebrew/Brewfile|hosts/mac-air/Brewfile
+Library/Application Support/com.mitchellh.ghostty/config|hosts/mac-air/ghostty.conf

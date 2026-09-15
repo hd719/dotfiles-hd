@@ -9,14 +9,15 @@ services, secrets, identity, enrollment, macOS preferences, or mutable state.
 
 ## Profiles
 
-| Profile | Host | Package behavior |
-| --- | --- | --- |
-| `ubuntu` | Ubuntu development VM | Installs the declared mise toolchain |
-| `mac-thin` | Thin Mac control plane | Installs the thin Brewfile |
-| `mac-pro` | Standalone full-development MacBook | Installs shared and profile Brewfiles through the Mac bootstrap |
-| `mac-studio` | Staged primary Mac, VM host, and local AI | Installs shared and profile Brewfiles through the Mac bootstrap |
-| `mac-mini` | Production Mac mini | Configuration-only inside Chezmoi; packages stay in the guarded Mac bootstrap |
-| `mac-work` | Resilience work Mac | Reserved for a later opt-in rollout |
+| Profile      | Host                                                         | Package behavior                                                              |
+| ------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `ubuntu`     | Ubuntu development VM                                        | Installs the declared mise toolchain                                          |
+| `mac-thin`   | Thin Mac control plane                                       | Installs the thin Brewfile                                                    |
+| `mac-air`    | Future remote-access clients; no VMware or local development | Client packages through the Air bootstrap                                     |
+| `mac-pro`    | Standalone full-development MacBook                          | Installs shared and profile Brewfiles through the Mac bootstrap               |
+| `mac-studio` | Staged native development, dormant Ubuntu and local AI       | Installs shared and profile Brewfiles through the Mac bootstrap               |
+| `mac-mini`   | Production Mac mini                                          | Configuration-only inside Chezmoi; packages stay in the guarded Mac bootstrap |
+| `mac-work`   | Resilience work Mac                                          | Reserved for a later opt-in rollout                                           |
 
 Each `profiles/*.paths` file is the exact backup, apply, doctor, and rollback
 allowlist. A matching `*.ancestors` file records parent directories whose
@@ -28,7 +29,7 @@ original type must be restored exactly.
 ./chezmoi/bootstrap.sh ubuntu --preview
 ```
 
-Substitute `mac-thin`, `mac-pro`, `mac-studio`, `mac-mini`, or `mac-work` as
+Substitute `mac-thin`, `mac-air`, `mac-pro`, `mac-studio`, `mac-mini`, or `mac-work` as
 needed.
 
 After review and host approval:
@@ -81,5 +82,5 @@ CHEZMOI_BIN="$HOME/.local/bin/chezmoi" \
   bash chezmoi/tests/production-test.sh
 ```
 
-The test renders and exercises all six profiles in temporary homes. It covers
+The test renders and exercises all supported profiles in temporary homes. It covers
 backup, apply, second-apply idempotence, doctor, rollback, and recovery/reapply.

@@ -178,7 +178,7 @@ set -e
 ((layout_status != 0))
 [[ "$layout_output" == *"unapproved mac-thin symlink parent"* ]]
 
-for profile in ubuntu mac-thin mac-pro mac-studio mac-mini mac-work; do
+for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
   home_dir="$case_dir/$profile/home"
   state_dir="$case_dir/$profile/state"
   mkdir -p "$home_dir" "$state_dir"
@@ -207,6 +207,7 @@ for profile in ubuntu mac-thin mac-pro mac-studio mac-mini mac-work; do
   case "$profile" in
     ubuntu) printf '%s\n' 10-configure-git.sh 20-install-ubuntu-tools.sh ;;
     mac-thin) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
+    mac-air) printf '%s\n' 10-configure-git.sh ;;
     mac-pro) printf '%s\n' 10-configure-git.sh ;;
     mac-studio) printf '%s\n' 10-configure-git.sh ;;
     mac-mini) printf '%s\n' 10-configure-git.sh ;;
@@ -255,23 +256,22 @@ for profile in ubuntu mac-thin mac-pro mac-studio mac-mini mac-work; do
     bash "$CHEZMOI_DIR/doctor.sh" "$profile" >/dev/null
 done
 
-studio_guard_home="$case_dir/mac-studio-guard/home"
-studio_guard_state="$case_dir/mac-studio-guard/state"
-mkdir -p "$studio_guard_home" "$studio_guard_state"
-set +e
-studio_guard_output="$({
-  DOTFILES_CHEZMOI_TEST=1 \
-    DOTFILES_CHEZMOI_APPROVED=1 \
-    CHEZMOI_BIN="$CHEZMOI_BIN" \
-    CHEZMOI_DESTINATION="$studio_guard_home" \
-    CHEZMOI_STATE_DIR="$studio_guard_state" \
-    bash "$CHEZMOI_DIR/apply.sh" mac-studio
-} 2>&1)"
-studio_guard_status=$?
-set -e
-((studio_guard_status != 0))
-[[ "$studio_guard_output" == \
-  *"mac-studio apply requires DOTFILES_MAC_STUDIO_ARRIVED=1"* ]]
+for staged_profile in mac-studio mac-air; do
+  guard_home="$case_dir/$staged_profile-guard/home"
+  guard_state="$case_dir/$staged_profile-guard/state"
+  mkdir -p "$guard_home" "$guard_state"
+  set +e
+  guard_output="$({
+    DOTFILES_CHEZMOI_TEST=1 DOTFILES_CHEZMOI_APPROVED=1 \
+      CHEZMOI_BIN="$CHEZMOI_BIN" CHEZMOI_DESTINATION="$guard_home" \
+      CHEZMOI_STATE_DIR="$guard_state" \
+      bash "$CHEZMOI_DIR/apply.sh" "$staged_profile"
+  } 2>&1)"
+  guard_status=$?
+  set -e
+  ((guard_status != 0))
+  [[ "$guard_output" == *"$staged_profile apply requires DOTFILES_MAC_"* ]]
+done
 
 rollback_home="$case_dir/rollback/home"
 rollback_state="$case_dir/rollback/state"

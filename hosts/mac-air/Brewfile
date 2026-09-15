@@ -1,0 +1,14 @@
+# Remote clients only. Project tools and execution belong on the Studio.
+brew "gh"
+brew "starship"
+brew "zoxide"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+
+cask "1password"
+cask "brave-browser"
+cask "chatgpt"
+cask "font-maple-mono-nf"
+cask "ghostty"
+cask "obsidian"
+cask "tailscale-app"

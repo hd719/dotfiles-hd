@@ -1,8 +1,16 @@
 # Primary personal-Mac applications. Shared development tools live in
 # ../shared/macos/Brewfile.
 
+brew "colima"
+brew "docker"
+brew "docker-buildx"
+brew "docker-compose"
+brew "postgresql@17"
+brew "pgvector"
+
 cask "1password"
 cask "brave-browser"
+cask "chatgpt"
 cask "codex"
 cask "daisydisk"
 cask "deskflow"
@@ -20,6 +28,7 @@ cask "tableplus"
 cask "tailscale-app"
 cask "telegram"
 cask "vagrant"
-cask "vagrant-vmware-utility"
+cask "visual-studio-code"
+vscode "openai.chatgpt"
 cask "vlc"
 cask "zoom"

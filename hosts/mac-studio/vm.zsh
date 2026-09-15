@@ -1,4 +1,4 @@
-# Mac Studio Vagrant shortcuts. Development runs inside the Ubuntu guest.
+# Mac Studio Vagrant shortcuts. Ubuntu is preserved for explicitly requested manual use.
 
 _ubuntu_vagrant() {
   emulate -L zsh
@@ -20,8 +20,27 @@ _ubuntu_vagrant() {
   )
 }
 
+_require_preserved_ubuntu() {
+  local project_dir="${DOTFILES_UBUNTU_VAGRANT_DIR:-$HOME/Developer/dotfiles-hd/hosts/ubuntu-dev}"
+  if [[ ! -s "$project_dir/.vagrant/machines/default/vmware_desktop/id" ]]; then
+    echo "Restore and verify the preserved VM and Vagrant metadata before starting Ubuntu."
+    echo "This helper will not create a replacement VM."
+    return 1
+  fi
+  local vm_status
+  vm_status="$(_ubuntu_vagrant status --machine-readable)" || return
+  if ! print -r -- "$vm_status" | awk -F, '
+    $2 == "default" && $3 == "state" && $4 ~ /^(poweroff|running|suspended|saved)$/ { found = 1 }
+    END { exit !found }
+  '; then
+    echo "Preserved Ubuntu is unavailable; refusing to create a replacement VM."
+    return 1
+  fi
+}
+
 uvm-up() {
-  UBUNTU_VM_GUI=1 _ubuntu_vagrant up
+  _require_preserved_ubuntu || return
+  UBUNTU_VM_GUI=1 _ubuntu_vagrant up --no-provision
 }
 
 uvm-stop() {
@@ -33,6 +52,7 @@ uvm-suspend() {
 }
 
 uvm-resume() {
+  _require_preserved_ubuntu || return
   _ubuntu_vagrant resume
 }
 
@@ -42,17 +62,4 @@ uvm-status() {
 
 uvm-ip() {
   _ubuntu_vagrant ssh -c 'hostname -I'
-}
-
-uvm-destroy() {
-  emulate -L zsh
-
-  # Best effort only: the VM may already be stopped. Never start it to inspect keys.
-  _ubuntu_vagrant ssh -c \
-    'sudo -n -u hamel sh -c '\''for key in /home/hamel/.ssh/id_ed25519_hd719 /home/hamel/.ssh/id_ed25519_arbiter_hd /home/hamel/.ssh/id_ed25519_forgejo_truenas; do test -f "$key.pub" && ssh-keygen -lf "$key.pub"; done'\''' \
-    2>/dev/null || true
-
-  echo "Remove this VM's three registered Git public keys after replacement."
-  echo "Vagrant will ask for confirmation; this command never forces destroy."
-  _ubuntu_vagrant destroy
 }

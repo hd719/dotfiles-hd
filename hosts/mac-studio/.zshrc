@@ -1,4 +1,4 @@
-# Mac Studio primary control plane and compute host.
+# Mac Studio primary native development workstation.
 
 export DOTFILES_MAC_PROFILE="mac-studio"
 
@@ -18,7 +18,7 @@ _zsh_add_completion_dirs \
   /usr/local/share/zsh/site-functions
 _zsh_init_completions 43200
 typeset -gaU path
-path=("${XDG_BIN_HOME:-$HOME/.local/bin}" $path)
+path=("${XDG_BIN_HOME:-$HOME/.local/bin}" "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/postgresql@17/bin" $path)
 export PATH
 
 _activate_mise

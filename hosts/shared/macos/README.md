@@ -2,11 +2,11 @@
 
 Shared provisioning for three full local macOS profiles:
 
-| Profile | Purpose |
-| --- | --- |
-| `mac-pro` | Standalone full-development MacBook; all development tools local, no VM |
-| `mac-studio` | Staged primary controller with Ubuntu VM hosting and Ollama |
-| `mac-mini` | Production runtime Mac with extra apply gates |
+| Profile      | Purpose                                                                          |
+| ------------ | -------------------------------------------------------------------------------- |
+| `mac-pro`    | Standalone full-development MacBook; all development tools local, no VM          |
+| `mac-studio` | Staged native development, dormant Ubuntu and Ollama                             |
+| `mac-mini`   | Production and explicitly selected secondary development, with extra apply gates |
 
 Do not run this bootstrap on the thin Mac. Use
 [`../../mac-thin/README.md`](../../mac-thin/README.md) there.
@@ -53,10 +53,14 @@ ancestor manifest.
 Secrets, auth state, Herdr sessions, Hunk state, tmux plugins, services, Docker
 state, databases, and application data remain machine-owned.
 
-For `mac-studio`, bootstrap also installs Rosetta 2 when needed and pins the
-Vagrant VMware provider. It installs the Ollama app but never launches it or
-downloads models. VMware Fusion first-run setup and remote access remain
-manual.
+Studio and mini overlays include Colima/Docker development tools; Studio also
+adds PostgreSQL 17, which mini already retains. Package installation does not
+start these services. Studio installs Ollama without activation or model
+pulls. VMware Fusion setup remains manual; Ubuntu provider installation is
+deferred until the preserved guest is explicitly requested. See the
+[Studio runbook](../../mac-studio/README.md) for manual Docker plugin setup,
+database ownership and remote acceptance. Air uses its separate client
+bootstrap, never the shared full-development bootstrap.
 
 ## Rollback
 
