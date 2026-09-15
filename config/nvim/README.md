@@ -8,11 +8,11 @@ Hamel's existing Zed muscle memory.
 - `full` is the default and preserves the complete development editor on
   Ubuntu, full personal Macs, and Resilience.
 - `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
-  editing behavior, Nord, Bufferline, Lualine, WhichKey, Oil, Mini pairs and
-  surround, Gitsigns, rendered Markdown with wrapped tables, Obsidian, slim
-  Snacks pickers and
-  Explorer, Snacks terminals, Tree-sitter Markdown parsing, Marksman, and
-  Bookokrat PDF reading.
+  editing behavior, Nord, Bufferline, Lualine, Modicator, hlslens, WhichKey,
+  Oil with Git status columns, Mini pairs and surround, Gitsigns, rendered
+  Markdown with wrapped tables, Obsidian, slim Snacks pickers and Explorer,
+  Snacks terminals, Tree-sitter Markdown parsing, Marksman, and Bookokrat PDF
+  reading.
 
 Both profiles use this directory and the same `lazy-lock.json`. Disabled
 full-only plugins are not restored on a thin machine. An unknown profile stops
@@ -78,7 +78,7 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-The full profile installs all 22 plugins below. The thin profile installs only
+The full profile installs all 27 plugins below. The thin profile installs only
 the subset listed above. In `:Lazy`, **Loaded** means a plugin's trigger has
 happened in this session; **Not Loaded** means it is installed and waiting for
 that trigger. `lazy-lock.json` pins exact versions, while the Lua files under
@@ -99,10 +99,12 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `lualine.nvim`               | Bottom status line for mode, Git, diagnostics, LSP, and location                                 | Just after startup: `VeryLazy` event                     |
 | `markdown-table-wrap.nvim`   | Reflows wide Markdown table cells in a protected reader without changing the source              | First Markdown buffer                                    |
 | `mini.icons`                 | File and folder icons shared by other plugins                                                    | Immediately before startup-loaded Oil as its dependency  |
+| `modicator.nvim`             | Recolors the cursor line number per mode, reusing lualine's mode colors                          | Just after startup: `VeryLazy` event                     |
 | `nord.nvim`                  | Transparent Nord colors and custom highlights                                                    | Early every startup: `lazy = false`, priority `1000`     |
 | `nvim-lspconfig`             | Connects installed language servers to matching files                                            | Every startup: `lazy = false`                            |
 | `nvim-treesitter`            | Structure-aware highlighting and folding                                                         | Every startup: `lazy = false`                            |
 | `obsidian.nvim`              | Vault-aware note search, backlinks, links, tags, and Obsidian app integration                    | First Markdown buffer, `Space o …`, or `:Obsidian`       |
+| `oil-git-status.nvim`        | Adds index and working-tree Git status columns to Oil listings                                   | Every startup, before Oil's first buffer                 |
 | `oil.nvim`                   | Editable directory browser and file manager                                                      | Every startup: `lazy = false`                            |
 | `schemastore.nvim`           | JSON schemas for files such as `package.json` and `tsconfig.json`                                | Immediately before LSPConfig as its dependency           |
 | `snacks.nvim`                | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and image previews | Early every startup: `lazy = false`, priority `1000`     |
@@ -113,7 +115,10 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `grug-far.nvim`              | Reviewed, exact-word replacement in the current file                                             | First `Space R`                                          |
 | `mini.pairs`                 | Automatically closes brackets and quotes                                                         | First entry into Insert mode: `InsertEnter`              |
 | `mini.surround`              | Adds, deletes, or replaces quotes, brackets, and tags                                            | First `gsa`, `gsd`, `gsr`, `gsf`, `gsF`, or `gsh`        |
+| `nvim-chainsaw`              | Writes and removes throwaway log statements for the variable under the cursor                    | First `Space L …` (full profile only)                    |
+| `nvim-hlslens`               | Counts search matches and labels the nearest one beside the line                                 | First `/`, `?`, `n`, `N`, `*`, `#`, `g*`, or `g#`        |
 | `render-markdown.nvim`       | Decorates Markdown headings, lists, checkboxes, and code blocks                                  | First Markdown buffer or its profile-specific toggle     |
+| `tabout.nvim`                | Moves the cursor past a closing bracket or quote on `Tab`                                        | First entry into Insert mode: `InsertEnter`              |
 
 Configuration map:
 
@@ -121,7 +126,7 @@ Configuration map:
 - `lua/config/lazy.lua`: Lazy bootstrap.
 - `lua/plugins/colorscheme.lua`: Nord.
 - `lua/plugins/editor.lua`: WhichKey and Tree-sitter.
-- `lua/plugins/navigation.lua`: Snacks, Oil, and icons.
+- `lua/plugins/navigation.lua`: Snacks, Oil, Oil Git status, and icons.
 - `lua/plugins/lsp.lua`: completion, LSP, schemas, and formatting.
 - `lua/plugins/obsidian.lua`: safe vault navigation and explicit daily notes.
 - `lua/plugins/git.lua`, `bufferline.lua`, `statusline.lua`,
@@ -194,10 +199,13 @@ Every agent teaching Neovim must read and update both files.
 | `Space d`                                | Close the current buffer                                                      |
 | `Space w` / `Space x`                    | Save / save and quit                                                          |
 | `Space R`                                | Replace the word under the cursor in the current file                         |
+| `Space L l` / `Space L o`                | Log the variable / object under the cursor                                    |
+| `Space L r`                              | Remove every log statement this plugin wrote                                  |
 | `Space C`                                | Open the Crosshair menu                                                       |
 | `Space C c/v`                            | Toggle the full crosshair / vertical line only; the row stays on              |
 | `u` / `Ctrl-r` / `.`                     | Undo / redo / repeat the last change                                          |
 | `o` / `O`                                | Open a new line below / above and enter Insert mode                           |
+| Insert `Tab` / `Shift-Tab`               | Jump past the closing bracket or quote / back before the opening one          |
 | `w` / `e` / `b`                          | Next word start / word end / previous word start                              |
 | `2w` / `2dw`                             | Move two words / delete two words                                             |
 | `0` / `$` / `gg` / `G`                   | Line start / line end / file top / file bottom                                |
@@ -207,7 +215,8 @@ Every agent teaching Neovim must read and update both files.
 | `ci(` / `da(`                            | Change inside / delete around parentheses                                     |
 | `ci"` / `da"`                            | Change inside / delete around quotes                                          |
 | `/`, then `n` / `N`                      | Search current file, then next / previous match                               |
-| `:noh`                                   | Clear current search highlighting                                             |
+| `*` / `#`                                | Search the whole word under the cursor forward / backward                     |
+| `:noh`                                   | Clear current search highlighting and the match counters                      |
 | `Ctrl-a`                                 | Select the whole buffer                                                       |
 | `yy` / `p` / `P`                         | Yank current line / paste after / paste before                                |
 | Visual `<` / `>` / `J` / `K` / `Space c` | Outdent / indent / move down / move up / comment                              |
@@ -246,7 +255,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space o e`                              | Open the current file externally; PDFs use Bookokrat                          |
 | `Space m m`                              | Toggle Marksman for the current Markdown file                                 |
 | `Space m r`                              | Toggle Markdown rendering                                                     |
-| `Space m R`                              | Refresh Markdown tables from Source, Inline, Reader, or another pane          |
+| `Space m R`                              | Refresh Markdown tables, rereading the file from disk first                   |
 | `Space u`                                | Built-in `z` actions: folds, viewport, and spelling                           |
 | `gd` / `gh` / `grr`                      | Definition / hover / references                                               |
 | `gsa` / `gsd` / `gsr`                    | Surround add / delete / replace                                               |
@@ -258,6 +267,11 @@ filenames, and `Space S` asks the LSP for named code symbols such as functions,
 methods, types, and variables. `Space f` is a discoverable Find menu: pause
 after it to see file, recent, current-line, cursor-word, Git-change, dotfiles,
 and TODO pickers.
+
+Within a `/` search, hlslens labels every match. The one you are on reads
+`[3/12]`, and the rest carry a direction and distance such as `[2n 5]`, meaning
+two `n` presses away. The counters follow `n`, `N`, `*`, and `#`, and clear with
+`:noh` along with the search highlighting.
 
 The `Space f g` Git picker keeps unchanged diff context transparent and uses
 Hunk's Dracula semantic palette: green additions, red deletions, and cyan
@@ -283,6 +297,35 @@ For visual current-file replacement, save the file, put the cursor on the exact
 word, and press `Space R`. Type the replacement, review the diff, then press
 `Space r` inside Grug Far to apply it. The search is limited to that file and
 does not match the word inside a larger word.
+
+`Space L` is the Log menu, for the print-debugging loop in TypeScript and Go.
+Put the cursor on a variable and `Space L l` writes the statement below it,
+already filled in: `console.log("🪚 userName:", userName)` or
+`fmt.Println("🪚 userName:", userName)`. `Space L o` wraps the value in
+`JSON.stringify` for objects. Every statement carries the 🪚 marker, so
+`Space L r` strips all of them from the buffer and the signcolumn flags any
+that are left. It is disabled on the thin profile.
+
+Two things to know. The cursor must sit on the variable itself; from anywhere
+else on the line the plugin captures the whole line instead of the name. In Go,
+statements beyond `fmt.Println` need their package (`log`, `time`,
+`runtime/debug`) imported by hand. If Prettier reformats a long log statement
+onto several lines, only the first keeps the marker and `Space L r` will miss
+the rest.
+
+In Insert mode, `Tab` first advances an active snippet, then tries to move the
+cursor past the next closing bracket or quote, and inserts a real indent only
+when neither applies. `Shift-Tab` mirrors it backwards. Typing `foo("bar` leaves
+the cursor inside the pair Mini pairs closed for you, and two `Tab` presses land
+it after `")` without arrowing over the closers. It is disabled on the thin
+profile.
+
+The jump reads the Tree-sitter tree, so a buffer whose language has no parser
+just indents. Tabout deliberately binds no key of its own: Blink maps `Tab` per
+buffer and would shadow a global mapping, so `lua/plugins/lsp.lua` calls tabout
+from inside Blink's `Tab` chain. Blink maps those keys as expressions, and
+Neovim restores the cursor when an expression mapping returns, so the jump is
+handed back as a key sequence rather than applied in place.
 
 `Space g` resolves the repository from the current file. In Oil, it resolves
 from the directory being viewed, so it does not depend on Neovim's `:pwd`.
@@ -317,6 +360,13 @@ attaches only to that file; press it again to detach. Put the cursor on a
 
 `Space o m m` shows or hides only Marksman's diagnostics for the current note;
 navigation remains available while diagnostics are muted.
+
+Oil listings carry two Git status columns on both profiles, reading exactly like
+`git status --short`: the left column is the index, the right is the working
+tree. A file staged and then edited again shows `M` in both. Untracked files
+show `??`, and files matching `.gitignore` show `!!`. The status is fetched
+after the listing is drawn, so it appears a moment later on large repositories
+and never delays the browser itself. It refreshes when Oil applies a change.
 
 The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
 tree, `Space W l` moves focus to the editor, and `Space W h` moves focus back
@@ -360,6 +410,18 @@ The statusline (lualine) keeps its center transparent while showing the current
 mode, Git branch and diff, filename, diagnostics, attached LSP client(s),
 filetype, and compact cursor location/progress.
 
+Modicator repeats that mode signal at the cursor, recoloring the current line
+number in bold with the same Nord color lualine uses for the active mode: frost
+blue in Normal, snow storm in Insert, aurora orange in Visual, yellow in
+Replace, and purple in Command. It only changes the foreground, so the cursor
+line background stays as the colorscheme sets it.
+
+Visual is the one mode whose color is overridden rather than inherited. Nord's
+frost teal and frost blue differ only in their blue channel, which is legible
+as a wide statusline block but not as a single line number, so the lualine
+theme's Visual section is recolored to aurora orange and both surfaces read
+from it.
+
 In Markdown files, render-markdown decorates headings, checkboxes, code blocks,
 tables, and quotes in the editor. `Space m r` toggles it in either profile.
 Those decorations use Catppuccin Mocha accents over Neovim's transparent Nord
@@ -387,10 +449,11 @@ Herdr; use `n`, then `v` / `V` plus motions and `H` for keyboard highlighting.
 Folding is Tree-sitter based and files open unfolded. Press `Space u` for the
 same fold, viewport, and spelling actions normally reached through `z`.
 
-The cursor line stays vertically centered as you move up and down
-(`scrolloff = 999`). A blue-gray row-and-column crosshair marks the cursor
-position without an extra plugin. Press `Space C` to open its menu: `c` toggles
-the full crosshair, and `v` toggles only the vertical line while keeping the row
+Scrolling keeps an eight-line margin around the cursor (`scrolloff = 8`),
+avoiding the large cursor jump that forced centering caused on mouse-wheel input.
+A blue-gray row marks the cursor by default. Press
+`Space C` to open the Crosshair menu: `c` toggles the full row-and-column
+crosshair, and `v` toggles only the vertical line while keeping the row
 highlighted.
 
 Opening Neovim with no file shows a start dashboard (Snacks) with shortcuts

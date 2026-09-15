@@ -3910,3 +3910,17 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   directory does exist on the Ubuntu workstation.
 - Curriculum 9.D5 remains open until Hamel creates and saves the file from
   Neovim and confirms the result.
+
+## 2026-09-15 — Session 059: Mouse-Wheel Cursor Jump
+
+- Hamel reported a first wheel scroll jumping from line 1 to line 41 in
+  Ghostty on the thin Mac.
+- An isolated Neovim mouse event reproduced that cursor jump with
+  `scrolloff = 999`; the viewport moved only three lines. Forced centering
+  moved the cursor to the middle of the window.
+- Reducing wheel speed alone still moved the cursor to line 39. Changed
+  `scrolloff` to `8`, keeping context without locking the cursor to the center.
+- The same isolated event now moves the cursor to line 12 and the viewport
+  three lines. Physical mouse feel still needs Hamel's confirmation.
+- No curriculum items were marked practiced. Best next core lesson remains
+  Curriculum 9.7, after confirming scrolling feels comfortable.

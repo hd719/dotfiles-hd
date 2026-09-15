@@ -37,6 +37,12 @@ return {
       theme.normal.c.bg = "NONE"
       theme.inactive.c.bg = "NONE"
 
+      -- Nord's frost teal for Visual differs from the frost blue used for
+      -- Normal only in its blue channel, which is indistinguishable once
+      -- Modicator reuses it for a single line number. Aurora orange is the
+      -- furthest Nord hue from the other four modes.
+      theme.visual.a.bg = "#d08770"
+
       require("lualine").setup({
         options = {
           theme = theme,
@@ -63,6 +69,32 @@ return {
           lualine_z = { position },
         },
       })
+    end,
+  },
+  {
+    "mawkler/modicator.nvim",
+    -- Recolors the cursor line number per mode, reusing lualine's mode colors.
+    -- lualine must already be set up for those highlight groups to exist, so it
+    -- is declared as a dependency rather than relying on VeryLazy ordering.
+    dependencies = {
+      "nvim-lualine/lualine.nvim",
+    },
+    event = "VeryLazy",
+    opts = {
+      -- Bold every mode so the current line number reads as the cursor anchor,
+      -- not just another number tinted a slightly different color.
+      highlights = {
+        defaults = { bold = true },
+      },
+    },
+    config = function(_, opts)
+      local modicator = require("modicator")
+      modicator.setup(opts)
+
+      -- Modicator colors the line number from a VimEnter hook, which has
+      -- already fired by the time VeryLazy loads it, so the number would stay
+      -- uncolored until the first mode change. Color it once up front.
+      modicator.set_cursor_line_highlight(modicator.hl_name_from_mode(vim.api.nvim_get_mode().mode))
     end,
   },
 }

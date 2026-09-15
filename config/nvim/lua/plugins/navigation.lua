@@ -82,7 +82,10 @@ local function hide_empty_scratch(item)
   if item.name ~= "" or vim.bo[buf].modified or vim.bo[buf].buftype ~= "" then
     return item
   end
-  if vim.api.nvim_buf_line_count(buf) == 1 and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == "" then
+  if
+    vim.api.nvim_buf_line_count(buf) == 1
+    and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ""
+  then
     return false
   end
   return item
@@ -476,9 +479,26 @@ return {
       view_options = {
         show_hidden = true,
       },
+      win_options = {
+        -- Two columns so oil-git-status can show index and working tree side by
+        -- side.
+        signcolumn = "yes:2",
+      },
     },
     keys = {
       { "<leader>h", "<cmd>Oil<cr>", desc = "File browser" },
     },
+  },
+
+  -- Mirror `git status --short` into Oil: left column is the index, right column
+  -- is the working tree. It registers the `OilEnter` hook that fills those
+  -- columns, so it has to be set up before the first Oil buffer opens rather
+  -- than lazy-loaded behind one.
+  {
+    "refractalize/oil-git-status.nvim",
+    dependencies = {
+      "stevearc/oil.nvim",
+    },
+    config = true,
   },
 }

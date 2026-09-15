@@ -1,5 +1,41 @@
 local profile = require("config.profile")
 
+-- tabout reports nothing about whether it moved, so compare the cursor. Standing
+-- still means there was no pair to jump out of and blink should carry on down the
+-- chain to a real indent. See the tabout spec in `lua/plugins/editing.lua`.
+local function tabout(direction)
+  if vim.fn.mode() ~= "i" then
+    return false
+  end
+
+  local ok, plugin = pcall(require, "tabout")
+  if not ok then
+    return false
+  end
+
+  local before = vim.api.nvim_win_get_cursor(0)
+  if direction == "forward" then
+    plugin.tabout()
+  else
+    plugin.taboutBack()
+  end
+  local after = vim.api.nvim_win_get_cursor(0)
+
+  if after[1] == before[1] and after[2] == before[2] then
+    return false
+  end
+
+  -- blink binds these keys as expressions, and Neovim restores the cursor once
+  -- one returns, which would undo the jump. Hand the move back as keys so it
+  -- lands after the mapping finishes.
+  return vim.api.nvim_replace_termcodes(
+    ("<Cmd>lua vim.api.nvim_win_set_cursor(0, { %d, %d })<CR>"):format(after[1], after[2]),
+    true,
+    false,
+    true
+  )
+end
+
 return {
   {
     "saghen/blink.cmp",
@@ -13,6 +49,20 @@ return {
       keymap = {
         preset = "enter",
         ["<C-Space>"] = false,
+        ["<Tab>"] = {
+          "snippet_forward",
+          function()
+            return tabout("forward")
+          end,
+          "fallback",
+        },
+        ["<S-Tab>"] = {
+          "snippet_backward",
+          function()
+            return tabout("backward")
+          end,
+          "fallback",
+        },
       },
       cmdline = {
         keymap = {

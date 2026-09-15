@@ -71,6 +71,26 @@ return {
     opts = {},
   },
 
+  -- Jump past the closer that mini.pairs just added instead of arrowing over it.
+  -- blink.cmp maps `<Tab>` buffer-locally, which shadows any global mapping, so
+  -- tabout is left keyless here and `lua/plugins/lsp.lua` calls it from inside
+  -- blink's `<Tab>` chain.
+  {
+    "abecodes/tabout.nvim",
+    enabled = profile.is_full,
+    event = "InsertEnter",
+    opts = {
+      tabkey = "",
+      backwards_tabkey = "",
+      -- With these on, tabout feeds its own `<Tab>` when it cannot jump, which
+      -- swallows the keypress before blink can fall back to a real indent.
+      act_as_tab = false,
+      act_as_shift_tab = false,
+      -- Tests `pumvisible()`, which is always false under blink's custom menu.
+      completion = false,
+    },
+  },
+
   -- Add, change, and delete surrounding pairs (quotes, brackets, tags).
   -- Uses a `gs` prefix so the native `s` (substitute) key is preserved.
   {
@@ -91,6 +111,132 @@ return {
         find_left = "gsF",
         highlight = "gsh",
         replace = "gsr",
+      },
+    },
+  },
+
+  -- Count every search match and label the nearest one, so `/` and `n` show
+  -- position instead of just jumping.
+  {
+    "kevinhwang91/nvim-hlslens",
+    keys = {
+      -- Lazy replays the key after loading, so these still open the native
+      -- search prompt; hlslens then attaches itself through `auto_enable`.
+      { "/", desc = "Search forward" },
+      { "?", desc = "Search backward" },
+      -- `n` and `N` need the explicit restart so the lens follows the jump.
+      {
+        "n",
+        "<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>",
+        desc = "Next match",
+      },
+      {
+        "N",
+        "<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>",
+        desc = "Previous match",
+      },
+      { "*", "*<Cmd>lua require('hlslens').start()<CR>", desc = "Word under cursor forward" },
+      { "#", "#<Cmd>lua require('hlslens').start()<CR>", desc = "Word under cursor backward" },
+      { "g*", "g*<Cmd>lua require('hlslens').start()<CR>", desc = "Partial word forward" },
+      { "g#", "g#<Cmd>lua require('hlslens').start()<CR>", desc = "Partial word backward" },
+    },
+    opts = {},
+  },
+
+  -- Insert and remove throwaway log statements without typing them by hand.
+  -- Every statement carries a marker so `Space L r` can strip them all again.
+  {
+    "chrisgrieser/nvim-chainsaw",
+    enabled = profile.is_full,
+    keys = {
+      {
+        "<leader>Ll",
+        function()
+          require("chainsaw").variableLog()
+        end,
+        mode = { "n", "x" },
+        desc = "Log variable",
+      },
+      {
+        "<leader>Lo",
+        function()
+          require("chainsaw").objectLog()
+        end,
+        mode = { "n", "x" },
+        desc = "Log object",
+      },
+      {
+        "<leader>Lt",
+        function()
+          require("chainsaw").typeLog()
+        end,
+        mode = { "n", "x" },
+        desc = "Log type",
+      },
+      {
+        "<leader>La",
+        function()
+          require("chainsaw").assertLog()
+        end,
+        mode = { "n", "x" },
+        desc = "Assert variable",
+      },
+      {
+        "<leader>Lm",
+        function()
+          require("chainsaw").messageLog()
+        end,
+        desc = "Log a message",
+      },
+      {
+        "<leader>Le",
+        function()
+          require("chainsaw").emojiLog()
+        end,
+        desc = "Log an emoji marker",
+      },
+      {
+        "<leader>LT",
+        function()
+          require("chainsaw").timeLog()
+        end,
+        desc = "Log elapsed time",
+      },
+      {
+        "<leader>Ls",
+        function()
+          require("chainsaw").stacktraceLog()
+        end,
+        desc = "Log stacktrace",
+      },
+      {
+        "<leader>Ld",
+        function()
+          require("chainsaw").debugLog()
+        end,
+        desc = "Insert debugger statement",
+      },
+      {
+        "<leader>Lc",
+        function()
+          require("chainsaw").clearLog()
+        end,
+        desc = "Clear the console",
+      },
+      {
+        "<leader>Lr",
+        function()
+          require("chainsaw").removeLogs()
+        end,
+        mode = { "n", "x" },
+        desc = "Remove all logs",
+      },
+    },
+    opts = {
+      -- A stray log statement reaching a work repository is the real risk here,
+      -- so mark the lines in the signcolumn as well as inline.
+      visuals = {
+        signHlgroup = "DiagnosticSignWarn",
       },
     },
   },

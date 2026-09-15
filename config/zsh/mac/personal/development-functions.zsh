@@ -4,7 +4,7 @@
 _goodmorning_run_mac_mini_maintenance() {
   emulate -L zsh
 
-  local runner="$HOME/.hermes/skills/home-lab-maintenance/scripts/mac-mini-maintenance.sh"
+  local runner="$HOME/.hermes/profiles/monitor/skills/home-lab-maintenance/scripts/mac-mini-maintenance.sh"
   local report=""
 
   if [[ ! -x "$runner" ]]; then
