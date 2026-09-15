@@ -625,6 +625,7 @@ test_profile_names_and_paths() {
 
   assert_eq mac-pro "$(canonical_profile mac-pro)" "mac-pro remains canonical"
   assert_eq mac-mini "$(canonical_profile mac-mini)" "mac-mini remains canonical"
+  assert_eq mac-studio "$(canonical_profile mac-studio)" "mac-studio is canonical"
   if canonical_profile mac-vm >/dev/null 2>&1; then
     fail "removed mac-vm profile should be rejected"
   fi
@@ -642,6 +643,23 @@ test_profile_names_and_paths() {
     '.zshrc|hosts/mac-pro/.zshrc'
   assert_contains "$REPO_DIR/chezmoi/profiles/mac-pro.paths" \
     '.config/karabiner|config/karabiner'
+
+  load_profile mac-studio "$REPO_DIR" "$home_dir"
+  assert_eq "$REPO_DIR/hosts/mac-studio/Brewfile" "$PROFILE_BREWFILE" \
+    "Mac Studio profile uses its Brewfile"
+  assert_contains "$PROFILE_BREWFILE" 'cask "ollama-app"'
+  assert_contains "$PROFILE_BREWFILE" 'cask "vagrant"'
+  for package in colima docker docker-buildx docker-compose postgresql@17 pgvector; do
+    assert_contains "$PROFILE_BREWFILE" "brew \"$package\""
+    assert_contains "$REPO_DIR/hosts/mac-mini/Brewfile" "brew \"$package\""
+  done
+  assert_contains "$PROFILE_BREWFILE" 'cask "vagrant-vmware-utility"'
+  assert_contains "$REPO_DIR/chezmoi/profiles/mac-studio.paths" \
+    '.zshrc|hosts/mac-studio/.zshrc'
+  assert_not_contains "$REPO_DIR/chezmoi/profiles/mac-studio.paths" \
+    '.config/karabiner|config/karabiner'
+  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'VMware Fusion.app'
+  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Ollama.app'
 
   while IFS= read -r helper_path; do
     [[ -f "$REPO_DIR/$helper_path" ]] \
@@ -952,6 +970,91 @@ test_mac_mini_apply() {
   assert_eq "$(cat "$protected_before")" "$(cat "$protected_after")" "Mac mini apply preserves protected state"
 }
 
+test_mac_studio_apply() {
+  local root="$TMP_ROOT/mac-studio-apply"
+  local home_dir="$root/home"
+  local fake_bin="$root/bin"
+  local log="$root/commands.log"
+  mkdir -p "$home_dir/Developer"
+  ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
+  make_fake_toolchain "$fake_bin"
+  : > "$log"
+
+  # Bootstrap never starts the guest or workload services.
+  for command_name in vagrant launchctl colima docker ssh; do
+    cat > "$fake_bin/$command_name" <<'EOF'
+#!/usr/bin/env bash
+printf 'FORBIDDEN %s %s\n' "${0##*/}" "$*" >> "${COMMAND_LOG:?}"
+exit 99
+EOF
+    chmod +x "$fake_bin/$command_name"
+  done
+
+  local rosetta_marker="$root/rosetta-installed"
+  cat > "$fake_bin/pkgutil" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == '--pkg-info com.apple.pkg.RosettaUpdateAuto' ]] || exit 2
+[[ -f "${ROSETTA_MARKER:?}" ]]
+EOF
+  cat > "$fake_bin/softwareupdate" <<'EOF'
+#!/usr/bin/env bash
+printf 'softwareupdate %s\n' "$*" >> "${COMMAND_LOG:?}"
+[[ "$*" == '--install-rosetta --agree-to-license' ]] || exit 2
+: > "${ROSETTA_MARKER:?}"
+EOF
+  cat > "$fake_bin/sudo" <<'EOF'
+#!/usr/bin/env bash
+"$@"
+EOF
+  chmod +x "$fake_bin/pkgutil" "$fake_bin/softwareupdate" "$fake_bin/sudo"
+
+  if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
+    DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply \
+      >/dev/null 2>&1; then
+    fail "Mac Studio apply should be locked before hardware arrival"
+  fi
+  TESTS=$((TESTS + 1))
+  assert_eq '' "$(cat "$log")" "arrival gate stops before package managers"
+
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
+    DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
+    DOTFILES_MAC_STUDIO_ARRIVED=1 \
+    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
+    DOTFILES_SOFTWAREUPDATE="$fake_bin/softwareupdate" DOTFILES_SUDO="$fake_bin/sudo" \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
+
+  assert_file "$rosetta_marker"
+  assert_contains "$log" 'softwareupdate --install-rosetta --agree-to-license'
+  local reapply_log="$root/reapply.log"
+  : > "$reapply_log"
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$reapply_log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
+    DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
+    DOTFILES_MAC_STUDIO_ARRIVED=1 \
+    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
+    DOTFILES_SOFTWAREUPDATE="$fake_bin/softwareupdate" DOTFILES_SUDO="$fake_bin/sudo" \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
+  assert_not_contains "$reapply_log" 'softwareupdate'
+  cat "$reapply_log" >> "$log"
+
+  assert_not_contains "$log" 'FORBIDDEN'
+  assert_not_contains "$log" 'brew services'
+  assert_not_contains "$log" 'ollama serve'
+  assert_not_contains "$log" 'ollama pull'
+
+  mkdir -p "$root/applications/VMware Fusion.app" "$root/applications/Ollama.app"
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_APPLICATIONS_DIR="$root/applications" \
+    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
+    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-studio > "$root/doctor.log"
+  assert_contains "$root/doctor.log" 'Ubuntu runtime and SSH checks (manual use only)'
+  assert_not_contains "$log" 'FORBIDDEN'
+
+}
+
 test_xdg_bin_home() {
   local root="$TMP_ROOT/xdg-bin-home"
   local home_dir="$root/home"
@@ -971,12 +1074,24 @@ test_xdg_bin_home() {
 
   for zshrc in \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
+    "$REPO_DIR/hosts/mac-studio/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc"; do
     resolved="$(HOME="$home_dir" XDG_BIN_HOME="$custom_bin" PATH=/usr/bin:/bin \
       zsh -dfc "source '$MAC_BOOTSTRAP_DIR/mise-shims.zsh'; source '$zshrc'; command -v ruff" \
       2>/dev/null | tail -n 1)"
     assert_eq "$custom_bin/ruff" "$resolved" "$(basename "$(dirname "$zshrc")") zshrc keeps XDG_BIN_HOME first"
   done
+  local dotnet_prefix="$root/brew/opt/dotnet@9"
+  mkdir -p "$dotnet_prefix/bin" "$dotnet_prefix/libexec"
+  printf '#!/bin/sh\nexit 0\n' > "$dotnet_prefix/bin/dotnet"
+  chmod +x "$dotnet_prefix/bin/dotnet"
+  ln -s "$REPO_DIR/hosts/mac-studio/.zshrc" "$home_dir/.zshrc"
+  resolved="$(HOME="$home_dir" HOMEBREW_PREFIX="$root/brew" PATH=/usr/bin:/bin \
+    /bin/zsh -lic 'printf "%s|%s\n" "$(command -v dotnet)" "$DOTNET_ROOT"' \
+    2>/dev/null | tail -n 1)"
+  assert_eq "$dotnet_prefix/bin/dotnet|$dotnet_prefix/libexec" "$resolved" \
+    'Studio login shell exposes the requested .NET SDK and root'
+
 }
 
 test_profile_and_failure_guards() {
@@ -1678,6 +1793,7 @@ test_neovim_plugin_checkout_integrity
 test_neovim_parser_manifest
 test_profile_names_and_paths
 test_full_bootstrap
+test_mac_studio_apply
 test_mac_mini_apply
 test_xdg_bin_home
 test_profile_and_failure_guards

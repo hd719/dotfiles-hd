@@ -5,7 +5,10 @@ Linux mental model behind the commands instead of treating Ubuntu like macOS
 with different spellings.
 
 The current workstation is Ubuntu 26.04 ARM64, Zsh, systemd, APT, mise, Docker,
-Neovim, and tmux. The thin Mac is the control plane; development stays here.
+Neovim, and tmux. The thin Mac is the current control plane. After the approved
+hardware cutover, native development moves to Studio and this VM is preserved
+there powered off, with a NAS backup. Use this guide only when Linux is
+explicitly requested; Studio readiness does not depend on Ubuntu running.
 
 ## The 60-Second Orientation
 
@@ -89,7 +92,7 @@ connection, four remote identities, and Codex login.
 | Read service logs       | `journalctl -u SERVICE -n 100 --no-pager`      |
 | Check containers        | `docker compose ps`                            |
 | Check a repository      | `gs`                                           |
-| Check the workstation   | `bash hosts/ubuntu-dev/doctor.sh`                  |
+| Check the workstation   | `bash hosts/ubuntu-dev/doctor.sh`              |
 | Inspect installed tools | `mise current`, `apt-cache policy PACKAGE`     |
 | Preserve a remote shell | `tmux new -s work`, then `tmux attach -t work` |
 | Return to the Mac       | `exit` or `Ctrl-D`                             |

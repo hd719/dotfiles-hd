@@ -9,12 +9,14 @@ CHEZMOI_DOCTOR="${DOTFILES_CHEZMOI_DOCTOR:-$DOTFILES_DIR/chezmoi/doctor.sh}"
 PROFILE=""
 FAILURES=0
 MISE_RUNTIME_FAILURES=0
+APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
+PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
 
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
 usage() {
-  printf 'Usage: doctor.sh --profile mac-pro|mac-mini\n'
+  printf 'Usage: doctor.sh --profile mac-pro|mac-studio|mac-mini\n'
 }
 
 pass() {
@@ -82,6 +84,23 @@ for brewfile in "$COMMON_BREWFILE" "$PROFILE_BREWFILE"; do
     fail "Brewfile missing dependencies: $brewfile"
   fi
 done
+
+if [[ "$PROFILE" == mac-studio ]]; then
+  if "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1; then
+    pass "Rosetta 2 installed for the VMware utility"
+  else
+    fail "Rosetta 2 missing for the VMware utility"
+  fi
+  for app_name in "VMware Fusion.app" "Ollama.app"; do
+    if [[ -d "$APPLICATIONS_DIR/$app_name" ]]; then
+      pass "$app_name installed"
+    else
+      fail "$app_name missing"
+    fi
+  done
+
+  printf 'SKIP  Ubuntu runtime and SSH checks (manual use only)\n'
+fi
 
 if "$GIT_ALIASES_SCRIPT" --check >/dev/null 2>&1; then
   pass "portable Git aliases"

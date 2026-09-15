@@ -178,16 +178,16 @@ set -e
 ((layout_status != 0))
 [[ "$layout_output" == *"unapproved mac-thin symlink parent"* ]]
 
-for profile in ubuntu mac-thin mac-pro mac-mini mac-work; do
+for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
   home_dir="$case_dir/$profile/home"
   state_dir="$case_dir/$profile/state"
   mkdir -p "$home_dir" "$state_dir"
   case "$profile" in
     ubuntu) mkdir -p "$home_dir/.config/btop" "$home_dir/.config/fastfetch" ;;
-    mac-pro|mac-mini) prepare_mac_mini_home "$home_dir" ;;
+    mac-pro|mac-studio|mac-mini) prepare_mac_mini_home "$home_dir" ;;
   esac
   prepare_profile_parents "$profile" "$home_dir"
-  if [[ "$profile" == mac-thin ]]; then
+  if [[ "$profile" == mac-thin || "$profile" == mac-air ]]; then
     chmod 700 "$home_dir/.config" "$home_dir/.config/fastfetch"
   fi
   common=(
@@ -206,8 +206,9 @@ for profile in ubuntu mac-thin mac-pro mac-mini mac-work; do
 
   case "$profile" in
     ubuntu) printf '%s\n' 10-configure-git.sh 20-install-ubuntu-tools.sh ;;
-    mac-thin) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
+    mac-thin|mac-air) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
     mac-pro) printf '%s\n' 10-configure-git.sh ;;
+    mac-studio) printf '%s\n' 10-configure-git.sh ;;
     mac-mini) printf '%s\n' 10-configure-git.sh ;;
     mac-work) printf '%s\n' 10-configure-git.sh 40-install-work-tools.sh ;;
   esac > "$case_dir/$profile.expected-scripts"
@@ -235,7 +236,7 @@ for profile in ubuntu mac-thin mac-pro mac-mini mac-work; do
     [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts,dirs)" ]]
     "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts,dirs
     [[ "$(path_mode "$home_dir/.config")" == 700 ]]
-    if [[ "$profile" == mac-thin ]]; then
+    if [[ "$profile" == mac-thin || "$profile" == mac-air ]]; then
       [[ "$(path_mode "$home_dir/.config/fastfetch")" == 700 ]]
     fi
     if [[ "$profile" == mac-mini ]]; then
@@ -252,6 +253,23 @@ for profile in ubuntu mac-thin mac-pro mac-mini mac-work; do
     CHEZMOI_DESTINATION="$home_dir" \
     CHEZMOI_STATE_DIR="$state_dir" \
     bash "$CHEZMOI_DIR/doctor.sh" "$profile" >/dev/null
+done
+
+for staged_profile in mac-studio mac-air; do
+  guard_home="$case_dir/$staged_profile-guard/home"
+  guard_state="$case_dir/$staged_profile-guard/state"
+  mkdir -p "$guard_home" "$guard_state"
+  set +e
+  guard_output="$({
+    DOTFILES_CHEZMOI_TEST=1 DOTFILES_CHEZMOI_APPROVED=1 \
+      CHEZMOI_BIN="$CHEZMOI_BIN" CHEZMOI_DESTINATION="$guard_home" \
+      CHEZMOI_STATE_DIR="$guard_state" \
+      bash "$CHEZMOI_DIR/apply.sh" "$staged_profile"
+  } 2>&1)"
+  guard_status=$?
+  set -e
+  ((guard_status != 0))
+  [[ "$guard_output" == *"$staged_profile apply requires DOTFILES_MAC_"* ]]
 done
 
 rollback_home="$case_dir/rollback/home"

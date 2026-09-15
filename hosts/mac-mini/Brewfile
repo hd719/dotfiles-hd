@@ -1,5 +1,10 @@
 tap "steipete/tap"
 
+# Secondary development only; bootstrap never starts the container runtime.
+brew "colima"
+brew "docker"
+brew "docker-buildx"
+brew "docker-compose"
 brew "coreutils"
 brew "ffmpeg"
 brew "git-filter-repo"

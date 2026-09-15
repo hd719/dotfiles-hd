@@ -4,13 +4,15 @@ Hamel's profile-aware dotfiles, provisioning, and machine operations.
 
 ## Choose a Host
 
-| Host | Role | Entry point |
-| --- | --- | --- |
-| Thin Mac | Control plane for Codex, SSH, Vagrant, and VMware Fusion | [`hosts/mac-thin/README.md`](hosts/mac-thin/README.md) |
-| Ubuntu dev | Primary VM development workstation | [`hosts/ubuntu-dev/README.md`](hosts/ubuntu-dev/README.md) |
-| Mac Pro | Standalone full-development MacBook; local Brew stack, no VM | [`hosts/mac-pro/README.md`](hosts/mac-pro/README.md) |
-| Mac mini | Production runtime host | [`hosts/mac-mini/README.md`](hosts/mac-mini/README.md) |
-| Work Mac | Company-scoped terminal and editor setup | [`hosts/mac-work/README.md`](hosts/mac-work/README.md) |
+| Host       | Role                                                               | Entry point                                                |
+| ---------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |
+| Thin Mac   | Control plane for Codex, SSH, Vagrant, and VMware Fusion           | [`hosts/mac-thin/README.md`](hosts/mac-thin/README.md)     |
+| Ubuntu dev | Primary VM development workstation                                 | [`hosts/ubuntu-dev/README.md`](hosts/ubuntu-dev/README.md) |
+| Mac Studio | Staged native development workstation; dormant Ubuntu and local AI | [`hosts/mac-studio/README.md`](hosts/mac-studio/README.md) |
+| Future Air | Lightweight clients and remote Studio access; no VMware            | [`hosts/mac-air/README.md`](hosts/mac-air/README.md)       |
+| Mac Pro    | Standalone full-development MacBook; local Brew stack, no VM       | [`hosts/mac-pro/README.md`](hosts/mac-pro/README.md)       |
+| Mac mini   | Production with explicitly selected secondary development          | [`hosts/mac-mini/README.md`](hosts/mac-mini/README.md)     |
+| Work Mac   | Company-scoped terminal and editor setup                           | [`hosts/mac-work/README.md`](hosts/mac-work/README.md)     |
 
 Clone at the canonical path:
 
@@ -33,6 +35,8 @@ dotfiles-hd/
 │   ├── tests/               one host-validation runner
 │   ├── shared/macos/        shared full-Mac provisioning and doctor
 │   ├── mac-thin/            control plane and VM lifecycle
+│   ├── mac-studio/          staged native development and dormant Ubuntu
+│   ├── mac-air/             future lightweight remote clients
 │   ├── ubuntu-dev/          Vagrant guest provisioning and maintenance
 │   ├── mac-pro/             standalone development MacBook policy
 │   ├── mac-mini/            production runtime Mac policy
@@ -57,6 +61,13 @@ Thin Mac and Ubuntu VM:
 ```bash
 hosts/mac-thin/bootstrap.sh --apply
 uvm-up
+```
+
+Staged Mac Studio profile (do not apply before arrival):
+
+```bash
+hosts/shared/macos/bootstrap.sh --profile mac-studio --dry-run
+hosts/shared/macos/bootstrap.sh --profile mac-studio --check
 ```
 
 Standalone full-development MacBook:
@@ -86,6 +97,7 @@ gates pass.
 
 - `chezmoi/` owns approved user configuration links and timestamped rollback.
 - `hosts/mac-thin/` owns the Vagrant and VMware lifecycle.
+- `hosts/mac-studio/` owns native development and preserves dormant Ubuntu after approved cutover.
 - `hosts/ubuntu-dev/` owns guest provisioning and workstation maintenance.
 - `hosts/shared/macos/` owns common full-Mac packages and operational setup.
 - `hosts/mac-pro/` and `hosts/mac-mini/` own profile package overlays and shell entry points.
