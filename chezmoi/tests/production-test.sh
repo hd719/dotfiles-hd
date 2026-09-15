@@ -187,7 +187,7 @@ for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
     mac-pro|mac-studio|mac-mini) prepare_mac_mini_home "$home_dir" ;;
   esac
   prepare_profile_parents "$profile" "$home_dir"
-  if [[ "$profile" == mac-thin ]]; then
+  if [[ "$profile" == mac-thin || "$profile" == mac-air ]]; then
     chmod 700 "$home_dir/.config" "$home_dir/.config/fastfetch"
   fi
   common=(
@@ -206,8 +206,7 @@ for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
 
   case "$profile" in
     ubuntu) printf '%s\n' 10-configure-git.sh 20-install-ubuntu-tools.sh ;;
-    mac-thin) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
-    mac-air) printf '%s\n' 10-configure-git.sh ;;
+    mac-thin|mac-air) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
     mac-pro) printf '%s\n' 10-configure-git.sh ;;
     mac-studio) printf '%s\n' 10-configure-git.sh ;;
     mac-mini) printf '%s\n' 10-configure-git.sh ;;
@@ -237,7 +236,7 @@ for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
     [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts,dirs)" ]]
     "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts,dirs
     [[ "$(path_mode "$home_dir/.config")" == 700 ]]
-    if [[ "$profile" == mac-thin ]]; then
+    if [[ "$profile" == mac-thin || "$profile" == mac-air ]]; then
       [[ "$(path_mode "$home_dir/.config/fastfetch")" == 700 ]]
     fi
     if [[ "$profile" == mac-mini ]]; then

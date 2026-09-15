@@ -3,12 +3,13 @@ set -euo pipefail
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_DIR="$(cd "$TEST_DIR/../../.." && pwd -P)"
+REAL_CHEZMOI_BIN="${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}"
 TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-air-test.XXXXXX")"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 FAKE_BIN="$TEST_ROOT/bin"
 TEST_HOME="$TEST_ROOT/home"
 LOG="$TEST_ROOT/commands.log"
-mkdir -p "$FAKE_BIN" "$TEST_HOME"
+mkdir -p "$FAKE_BIN" "$TEST_HOME/.local/share/nvim/lazy" "$TEST_HOME/.local/share/nvim/site"
 : > "$LOG"
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 
@@ -30,7 +31,18 @@ cat > "$FAKE_BIN/chezmoi-doctor" <<'FAKE'
 #!/bin/sh
 printf 'chezmoi-doctor %s\n' "$*" >> "$COMMAND_LOG"
 FAKE
-for tool in vagrant mise docker colima ssh launchctl softwareupdate uv npm pnpm; do
+for tool in bookokrat fastfetch hunk lsd marksman rg tree-sitter; do
+  printf '#!/bin/sh\nexit 0\n' > "$FAKE_BIN/$tool"
+done
+cat > "$FAKE_BIN/nvim" <<'FAKE'
+#!/bin/sh
+printf 'nvim profile=%s %s\n' "${DOTFILES_NVIM_PROFILE:-}" "$*" >> "$COMMAND_LOG"
+if [ "${MUTATE_LOCK:-0}" = 1 ]; then
+  printf 'modified by restore\n' > "$HOME/.config/nvim/lazy-lock.json"
+fi
+exit "${NVIM_STATUS:-0}"
+FAKE
+for tool in vagrant mise docker colima ssh launchctl softwareupdate uv npm pnpm herdr; do
   cat > "$FAKE_BIN/$tool" <<'FAKE'
 #!/bin/sh
 printf 'FORBIDDEN %s %s\n' "${0##*/}" "$*" >> "$COMMAND_LOG"
@@ -55,10 +67,36 @@ fi
 ! grep -q '^brew ' "$LOG" || fail 'packages installed before reviewed preview'
 : > "$LOG"
 DOTFILES_MAC_AIR_ARRIVED=1 bootstrap --apply >/dev/null
-grep -Fq "brew bundle install --no-upgrade --file $REPO_DIR/hosts/mac-air/Brewfile" \
-  "$LOG" || fail 'client Brewfile was not installed'
 grep -Fq 'chezmoi mac-air --apply' "$LOG" || fail 'Air profile was not applied'
 [[ "$(head -n 1 "$LOG")" == 'chezmoi mac-air --preview' ]] || fail 'preview order'
+
+# Exercise the actual shared package/editor template against disposable state.
+[[ -x "$REAL_CHEZMOI_BIN" ]] || fail 'Chezmoi binary required'
+mkdir -p "$TEST_HOME/.config/homebrew" "$TEST_HOME/.config/nvim"
+ln -s "$REPO_DIR/hosts/mac-air/Brewfile" "$TEST_HOME/.config/homebrew/Brewfile"
+cp "$REPO_DIR/config/nvim/lazy-lock.json" "$TEST_HOME/.config/nvim/lazy-lock.json"
+"$REAL_CHEZMOI_BIN" --source "$REPO_DIR/chezmoi/source" \
+  --config "$REPO_DIR/chezmoi/profiles/mac-air.toml" --destination "$TEST_HOME" \
+  --persistent-state "$TEST_ROOT/chezmoi.boltdb" execute-template \
+  < "$REPO_DIR/chezmoi/source/run_onchange_after_30-install-thin-tools.sh.tmpl" \
+  > "$TEST_ROOT/install-tools.sh"
+bash -n "$TEST_ROOT/install-tools.sh"
+install_tools() {
+  HOME="$TEST_HOME" PATH="$FAKE_BIN:$PATH" COMMAND_LOG="$LOG" MUTATE_LOCK=1 \
+    bash "$TEST_ROOT/install-tools.sh"
+}
+install_tools
+grep -Fq "brew bundle install --no-upgrade --file $TEST_HOME/.config/homebrew/Brewfile" \
+  "$LOG" || fail 'Air Brewfile was not installed'
+grep -Fq 'nvim profile=thin --headless +Lazy! restore +qa' "$LOG" \
+  || fail 'thin editor was not restored'
+grep -Fq "install({'markdown','markdown_inline'})" "$LOG" \
+  || fail 'Markdown parsers were not restored'
+cmp -s "$REPO_DIR/config/nvim/lazy-lock.json" "$TEST_HOME/.config/nvim/lazy-lock.json" \
+  || fail 'plugin restore changed the lockfile'
+if NVIM_STATUS=1 install_tools; then fail 'editor failure passed installation'; fi
+cmp -s "$REPO_DIR/config/nvim/lazy-lock.json" "$TEST_HOME/.config/nvim/lazy-lock.json" \
+  || fail 'failed restore changed the lockfile'
 
 for app in ChatGPT Ghostty Obsidian Tailscale; do mkdir -p "$TEST_ROOT/apps/$app.app"; done
 doctor() {
@@ -68,14 +106,18 @@ doctor() {
     bash "$REPO_DIR/hosts/mac-air/doctor.sh"
 }
 doctor >/dev/null
+if NVIM_STATUS=1 doctor >/dev/null 2>&1; then fail 'broken editor passed doctor'; fi
 if BREW_STATUS=1 doctor >/dev/null 2>&1; then fail 'missing packages passed doctor'; fi
 rmdir "$TEST_ROOT/apps/ChatGPT.app"
 if doctor >/dev/null 2>&1; then fail 'missing client passed doctor'; fi
 ln -s "$REPO_DIR/hosts/mac-air/.zshrc" "$TEST_HOME/.zshrc"
 HOME="$TEST_HOME" HOMEBREW_PREFIX="$TEST_ROOT" PATH="$FAKE_BIN:/usr/bin:/bin" \
   TERM=xterm-256color COMMAND_LOG="$LOG" /bin/zsh -lic \
-    '[[ "$DOTFILES_MAC_PROFILE" == mac-air ]] && (( ! $+functions[uvm-up] ))'
+    '[[ "$DOTFILES_MAC_PROFILE" == mac-air && "$DOTFILES_NVIM_PROFILE" == thin ]] &&
+     [[ "$EDITOR" == nvim && "$VISUAL" == nvim && "$GIT_EDITOR" == nvim ]] &&
+     [[ "$aliases[hdiff]" == "hunk diff" && "$aliases[v]" == nvim ]] &&
+     (( ! $+functions[uvm-up] && ! $+aliases[hu] && ! $+aliases[u] ))'
 ! grep -Fq FORBIDDEN "$LOG" || fail 'Air invoked a development or VM tool'
-! grep -Eq '^(brew|cask) "(vagrant|vagrant-vmware-utility|vmware-fusion|docker|colima|mise|neovim|postgresql)' \
+! grep -Eq '^(brew|cask) "(vagrant|vagrant-vmware-utility|vmware-fusion|docker|colima|mise|postgresql)' \
   "$REPO_DIR/hosts/mac-air/Brewfile" || fail 'Air installs a local development environment'
 printf 'MacBook Air client profile tests passed.\n'

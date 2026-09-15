@@ -9,15 +9,15 @@ services, secrets, identity, enrollment, macOS preferences, or mutable state.
 
 ## Profiles
 
-| Profile      | Host                                                         | Package behavior                                                              |
-| ------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `ubuntu`     | Ubuntu development VM                                        | Installs the declared mise toolchain                                          |
-| `mac-thin`   | Thin Mac control plane                                       | Installs the thin Brewfile                                                    |
-| `mac-air`    | Future remote-access clients; no VMware or local development | Client packages through the Air bootstrap                                     |
-| `mac-pro`    | Standalone full-development MacBook                          | Installs shared and profile Brewfiles through the Mac bootstrap               |
-| `mac-studio` | Staged native development, dormant Ubuntu and local AI       | Installs shared and profile Brewfiles through the Mac bootstrap               |
-| `mac-mini`   | Production Mac mini                                          | Configuration-only inside Chezmoi; packages stay in the guarded Mac bootstrap |
-| `mac-work`   | Resilience work Mac                                          | Reserved for a later opt-in rollout                                           |
+| Profile      | Host                                                   | Package behavior                                                              |
+| ------------ | ------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `ubuntu`     | Ubuntu development VM                                  | Installs the declared mise toolchain                                          |
+| `mac-thin`   | Thin Mac control plane                                 | Installs the thin Brewfile                                                    |
+| `mac-air`    | Future thin-Mac clients and note tools; no VMware      | Installs the Air Brewfile and thin Neovim plugins                             |
+| `mac-pro`    | Standalone full-development MacBook                    | Installs shared and profile Brewfiles through the Mac bootstrap               |
+| `mac-studio` | Staged native development, dormant Ubuntu and local AI | Installs shared and profile Brewfiles through the Mac bootstrap               |
+| `mac-mini`   | Production Mac mini                                    | Configuration-only inside Chezmoi; packages stay in the guarded Mac bootstrap |
+| `mac-work`   | Resilience work Mac                                    | Reserved for a later opt-in rollout                                           |
 
 Each `profiles/*.paths` file is the exact backup, apply, doctor, and rollback
 allowlist. A matching `*.ancestors` file records parent directories whose

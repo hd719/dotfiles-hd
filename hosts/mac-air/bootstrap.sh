@@ -24,8 +24,8 @@ git -C "$DOTFILES_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
 [[ -f "$BREWFILE" ]] || die "missing Brewfile: $BREWFILE"
 
 if [[ "$MODE" == --dry-run ]]; then
-  printf 'profile: mac-air\nwould install remote clients from: %s\n' "$BREWFILE"
-  printf 'would apply client configuration; execution stays on Studio\n'
+  printf 'profile: mac-air\nwould install thin-Mac apps and note tools from: %s\n' "$BREWFILE"
+  printf 'would restore the thin Neovim profile and Markdown parsers; project execution stays on Studio\n'
   if [[ -x "${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}" ]]; then
     DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 bash "$CHEZMOI_PREVIEW" mac-air
   fi
@@ -42,7 +42,6 @@ fi
 # Reviewed canonical-checkout and layout validation precede package mutations.
 DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 DOTFILES_CHEZMOI_REQUIRE_REVIEWED=1 \
   "$CHEZMOI_BOOTSTRAP" mac-air --preview >/dev/null
-HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$BREWFILE"
 DOTFILES_CHEZMOI_APPROVED=1 "$CHEZMOI_BOOTSTRAP" mac-air --apply
 "$HOST_DOCTOR"
 printf 'Air client setup complete. Verify Studio access manually.\n'
