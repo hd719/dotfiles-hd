@@ -80,5 +80,6 @@ grep -Fq 'res-plat-be' "$LOG_FILE"
 grep -Fq 'res-plat-proxy-rsc' "$LOG_FILE"
 grep -Fq 'res-parg-client' "$LOG_FILE"
 grep -Fq 'res-parg-arc' "$LOG_FILE"
+grep -Fq 'res-parg-storybook' "$LOG_FILE"
 
 printf 'hd-pargasite test: ok\n'

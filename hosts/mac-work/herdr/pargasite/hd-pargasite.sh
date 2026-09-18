@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # hd-pargasite.sh - Herdr port of tm-pargasite.sh.
-# Workspace "pargasite" with tabs: plat-backend, plat-proxy, client-suite, arc.
+# Workspace "pargasite" with tabs: plat-backend, plat-proxy, client-suite, arc,
+# storybook.
 # Pargasite depends on Platform's backend + proxy, so those are started (or
 # detected as already running) before the app tabs.
 
@@ -92,6 +93,11 @@ hd_run "$PANE_CLIENT" "$STARTUP_DELAY && res-parg-client"
 # Tab 4: Arc (port 4004).
 PANE_ARC="$(hd_tab "$WS" arc)"
 hd_run "$PANE_ARC" "$STARTUP_DELAY && res-parg-arc"
+
+# Tab 5: Storybook (port 6006). Stories render components in isolation, so this
+# skips the backend/proxy wait the app tabs need.
+PANE_STORYBOOK="$(hd_tab "$WS" storybook)"
+hd_run "$PANE_STORYBOOK" "res-parg-storybook"
 
 # Focus and attach.
 hd_focus_attach "$WS"
