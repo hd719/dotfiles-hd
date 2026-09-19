@@ -1,7 +1,9 @@
 # Ubuntu Workstation
 
-Ubuntu 26.04 ARM64 is the primary development workstation. The thin Mac runs
-Vagrant and VMware Fusion only as its control plane.
+Ubuntu 26.04 ARM64 is the current development workstation on the M3 Max.
+After verified Studio cutover, development runs natively on Studio. Preserve
+this VM powered off on Studio with a NAS backup; start it only when Hamel
+requests Linux again. Staging does not move or rebuild the current VM.
 
 ## Rebuild
 
@@ -13,6 +15,10 @@ Prerequisites on the thin Mac:
 - `~/.ssh/id_ed25519_ubuntu_vm.pub` exists.
 - The tailnet policy defines `tag:ubuntu-dev` and lets `hd719@github` connect
   to that tag as the `hamel` user.
+
+Studio cutover preserves the existing guest rather than requiring this rebuild
+workflow. Follow the [Studio preservation runbook](../mac-studio/README.md);
+provider setup and any later rebuild are separate, explicit operations.
 
 The Forgejo Tailscale route also requires ordinary network access from Ubuntu
 to TrueNAS. Add this rule to the tailnet policy's `acls` array:
@@ -158,32 +164,32 @@ folder.
 | Vagrant  | VM lifecycle, box version, resources, disk, and SSH transport |
 | Ansible  | Ubuntu packages, user, services, Tailscale, and Git keys      |
 | mise     | Pinned core runtimes; other development tools track latest    |
-| Chezmoi  | Approved user configuration links and timestamped rollback     |
-| dotfiles | Portable Git alias include and host operational scripts        |
+| Chezmoi  | Approved user configuration links and timestamped rollback    |
+| dotfiles | Portable Git alias include and host operational scripts       |
 | doctor   | Final read-only acceptance check                              |
 
 Managed links:
 
-| Live path                              | Source                          |
-| -------------------------------------- | ------------------------------- |
-| `~/.zshrc`                             | `hosts/ubuntu-dev/.zshrc`           |
-| `~/.config/ghostty/config`             | `hosts/ubuntu-dev/ghostty.conf`     |
-| `~/.config/starship.toml`              | `config/starship/starship.toml` |
-| `~/.gitignore_global`                  | `config/git/.gitignore_global`  |
-| `~/.ssh/config`                        | `hosts/ubuntu-dev/ssh/config`       |
-| `~/.config/bookokrat`                  | `config/bookokrat`              |
-| `~/.config/btop/btop.conf`             | `config/btop/btop.conf`         |
-| `~/.config/btop/themes`                | `config/btop/themes`            |
-| `~/.config/fastfetch/config.jsonc`     | `config/fastfetch/config.jsonc` |
+| Live path                                  | Source                                  |
+| ------------------------------------------ | --------------------------------------- |
+| `~/.zshrc`                                 | `hosts/ubuntu-dev/.zshrc`               |
+| `~/.config/ghostty/config`                 | `hosts/ubuntu-dev/ghostty.conf`         |
+| `~/.config/starship.toml`                  | `config/starship/starship.toml`         |
+| `~/.gitignore_global`                      | `config/git/.gitignore_global`          |
+| `~/.ssh/config`                            | `hosts/ubuntu-dev/ssh/config`           |
+| `~/.config/bookokrat`                      | `config/bookokrat`                      |
+| `~/.config/btop/btop.conf`                 | `config/btop/btop.conf`                 |
+| `~/.config/btop/themes`                    | `config/btop/themes`                    |
+| `~/.config/fastfetch/config.jsonc`         | `config/fastfetch/config.jsonc`         |
 | `~/.config/fastfetch/logo-anon-glitch.txt` | `config/fastfetch/logo-anon-glitch.txt` |
-| `~/.config/fastfetch/logo-anon.txt`    | `config/fastfetch/logo-anon.txt` |
-| `~/.config/herdr/config.toml`          | `config/herdr/config.toml`      |
-| `~/.config/hunk/config.toml`           | `config/hunk/config.toml`       |
-| `~/.config/mise/config.toml`           | `hosts/ubuntu-dev/mise.toml`        |
-| `~/.config/nvim`                       | `config/nvim`                   |
-| `~/.config/tmux`                       | `config/tmux`                   |
-| `~/.local/bin/codex`                   | `hosts/ubuntu-dev/bin/codex`        |
-| `~/.local/graphql-lsp/bin/graphql-lsp` | `hosts/ubuntu-dev/bin/graphql-lsp`  |
+| `~/.config/fastfetch/logo-anon.txt`        | `config/fastfetch/logo-anon.txt`        |
+| `~/.config/herdr/config.toml`              | `config/herdr/config.toml`              |
+| `~/.config/hunk/config.toml`               | `config/hunk/config.toml`               |
+| `~/.config/mise/config.toml`               | `hosts/ubuntu-dev/mise.toml`            |
+| `~/.config/nvim`                           | `config/nvim`                           |
+| `~/.config/tmux`                           | `config/tmux`                           |
+| `~/.local/bin/codex`                       | `hosts/ubuntu-dev/bin/codex`            |
+| `~/.local/graphql-lsp/bin/graphql-lsp`     | `hosts/ubuntu-dev/bin/graphql-lsp`      |
 
 Hunk is the canonical diff viewer on every profile. Use `hdiff`, `hstaged`,
 `hshow`, or `hwatch`; the shell does not install a Git pager override.

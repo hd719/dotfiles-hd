@@ -26,3 +26,26 @@ The bootstrap does not restart, reload, or migrate Cortana, Hermes, Homebrew
 services, LaunchAgents, or other production processes. Runtime changes require
 a separate maintenance window. Use the exact timestamped Chezmoi backup printed
 by apply for configuration rollback.
+
+## Secondary Development
+
+After verified Studio cutover, Studio is the default development host. Until
+then, current topology rules apply. Select the mini explicitly when its
+secondary development environment is needed. The shared profile already
+provides native mise runtimes and editor/agent tools; its overlay also provides
+PostgreSQL 17, pgvector and Colima/Docker/Compose/Buildx. Review missing packages
+through the normal guarded apply; installation never starts services.
+
+Keep `/Users/h/Developer/cortana-services` clean on `main` for production.
+Create development clones or worktrees under `~/Developer/worktrees/`, with
+separate environment files, test databases, data directories and ports. Follow
+each project's runtime runbook for the actual port allocation; never develop
+against production credentials or mutable production data. Preserve the
+production Homebrew Node 22 prefix independently of mise development Node.
+
+Use `cortana-hd` for explicitly selected mini agent GitHub work and verify the
+actor before writes. Deploy reviewed work through the existing approval and
+runtime-verification process. Development does not authorize service reloads.
+For Docker plugin discovery and manual runtime activation, follow the
+[Studio development setup](../mac-studio/README.md#native-development), using
+a separately named Colima development profile on the mini.
