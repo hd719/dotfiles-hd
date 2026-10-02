@@ -267,6 +267,7 @@ done <<'EOF'
 CaskaydiaCove|3.4.0|CaskaydiaCove Nerd Font|Caskaydia Cove Nerd Font
 Hasklig|3.4.0|Hasklug Nerd Font|Hasklug Nerd Font
 MapleMono|7.9|Maple Mono NF|Maple Mono NF
+NerdFontsSymbolsOnly|3.4.0|Symbols Nerd Font Mono|Symbols Nerd Font
 EOF
 
 ghostty_font="$(

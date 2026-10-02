@@ -267,12 +267,18 @@ fi
   == "$REPO_DIR/config/fastfetch/logo-anon-glitch.txt" ]]
 [[ "$(readlink "$HOME/.config/fastfetch/logo-anon.txt")" \
   == "$REPO_DIR/config/fastfetch/logo-anon.txt" ]]
+[[ "$(readlink "$HOME/.config/yazi/theme.toml")" \
+  == "$REPO_DIR/config/yazi/theme.toml" ]]
+[[ "$(readlink "$HOME/.config/yazi/yazi.toml")" \
+  == "$REPO_DIR/config/yazi/yazi.toml" ]]
+[[ "$(stat -f '%Lp' "$HOME/.config/yazi")" == "700" ]]
 for private_dir in \
   "$HOME/.config" \
   "$HOME/.config/fastfetch" \
   "$HOME/.config/herdr" \
   "$HOME/.config/homebrew" \
   "$HOME/.config/hunk" \
+  "$HOME/.config/yazi" \
   "$HOME/.terminfo" \
   "$HOME/.terminfo/78"; do
   [[ "$(stat -f '%Lp' "$private_dir")" == 700 ]]
@@ -445,7 +451,9 @@ grep -Fxq 'brew "neovim"' "$REPO_DIR/hosts/mac-thin/Brewfile"
 grep -Fxq 'brew "ripgrep"' "$REPO_DIR/hosts/mac-thin/Brewfile"
 grep -Fxq 'brew "starship"' "$REPO_DIR/hosts/mac-thin/Brewfile"
 grep -Fxq 'brew "tree-sitter-cli"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'brew "yazi"' "$REPO_DIR/hosts/mac-thin/Brewfile"
 grep -Fxq 'brew "zoxide"' "$REPO_DIR/hosts/mac-thin/Brewfile"
+grep -Fxq 'cask "font-symbols-only-nerd-font"' "$REPO_DIR/hosts/mac-thin/Brewfile"
 grep -Fxq 'brew "zsh-autosuggestions"' "$REPO_DIR/hosts/mac-thin/Brewfile"
 grep -Fxq 'brew "zsh-syntax-highlighting"' "$REPO_DIR/hosts/mac-thin/Brewfile"
 grep -Fxq 'cask "codex"' "$REPO_DIR/hosts/mac-thin/Brewfile"

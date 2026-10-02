@@ -11,4 +11,6 @@ Library/Application Support/com.mitchellh.ghostty/host.conf|hosts/mac-thin/ghost
 .config/homebrew/Brewfile|hosts/mac-thin/Brewfile
 .config/nvim|config/nvim
 .config/starship.toml|config/starship/starship.toml
+.config/yazi/theme.toml|config/yazi/theme.toml
+.config/yazi/yazi.toml|config/yazi/yazi.toml
 .terminfo/78/xterm-ghostty|@absolute:/Applications/Ghostty.app/Contents/Resources/terminfo/78/xterm-ghostty

@@ -204,9 +204,10 @@ The host-local readiness record is
 only after a verified production apply. Rollback restores its prior state;
 there is no legacy link writer to reactivate.
 
-Ansible installs Caskaydia Cove Nerd Font, Hasklug Nerd Font, and Maple Mono NF
-for the Ubuntu user. Maple Mono NF is the first Ghostty font family, so it is
-the terminal default; Hasklug remains the fallback.
+Ansible installs Caskaydia Cove Nerd Font, Hasklug Nerd Font, Maple Mono NF, and
+Symbols Nerd Font for the Ubuntu user. Maple Mono NF is the first Ghostty font
+family, so it is the terminal default; Symbols Nerd Font Mono covers Yazi icons;
+Hasklug remains the last fallback.
 
 ## Verify
 

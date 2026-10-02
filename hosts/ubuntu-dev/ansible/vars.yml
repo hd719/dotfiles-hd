@@ -34,6 +34,14 @@ workstation_fonts:
     url: >-
       https://github.com/subframe7536/Maple-font/releases/download/v7.9/MapleMono-NF-unhinted.zip
     sha256: 8248d6260660be1066b5ebe90d25131582df8383f38db1c284dd1f2dc9d2b46e
+  - name: Symbols Nerd Font
+    family: Symbols Nerd Font Mono
+    directory: NerdFontsSymbolsOnly
+    version: 3.4.0
+    archive: NerdFontsSymbolsOnly.tar.xz
+    url: >-
+      https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/NerdFontsSymbolsOnly.tar.xz
+    sha256: 7f8c090da3b0eaa7108646bf34cbbb6ed13d5358a72460522108b06c7ecd716a
 
 workstation_apt_packages:
   - acl

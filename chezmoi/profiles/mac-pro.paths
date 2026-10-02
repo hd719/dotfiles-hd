@@ -12,4 +12,6 @@ Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
 .config/mise/config.toml|config/mise/config.toml
 .config/nvim|config/nvim
 .config/starship.toml|config/starship/starship.toml
+.config/yazi/theme.toml|config/yazi/theme.toml
+.config/yazi/yazi.toml|config/yazi/yazi.toml
 .config/karabiner|config/karabiner

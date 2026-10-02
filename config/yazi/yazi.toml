@@ -1,0 +1,10 @@
+# Shared Yazi defaults. Theme colors live in theme.toml (Hamel Nord).
+
+[mgr]
+show_hidden = true
+
+# Pin text files to Neovim; the live Mac ~/.zshrc keeps EDITOR="code --wait".
+[opener]
+edit = [
+  { run = "nvim %s", block = true, desc = "nvim", for = "unix" },
+]

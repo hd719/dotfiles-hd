@@ -437,7 +437,7 @@ EOF
   for command_name in \
     rg fd fzf lazygit tree-sitter lua-language-server marksman stylua vtsls \
     vscode-eslint-language-server bash-language-server gopls \
-    zoxide starship bat lsd btop fastfetch herdr hunk; do
+    zoxide starship bat lsd btop fastfetch herdr hunk yazi; do
     make_fake_command "$fake_bin" "$command_name" ''
   done
 

@@ -16,7 +16,7 @@ The host installs only:
 - DaisyDisk
 - Fastfetch for system summaries
 - Ghostty
-- Ghostty fonts
+- Ghostty fonts, including Symbols Nerd Font for Yazi icons
 - Herdr as a remote Ubuntu client
 - Hermes Desktop as a remote Mac mini agent client
 - Hunk as the local diff viewer
@@ -38,6 +38,7 @@ The host installs only:
 - VLC
 - VMware Fusion
 - Zoom
+- Yazi as a floating terminal file manager for Neovim
 - Zoxide
 - Zsh Autosuggestions and Syntax Highlighting
 - macOS SSH
@@ -103,10 +104,12 @@ Markdown parsers. The Tree-sitter CLI exists only to build those parsers.
 Marksman is the only installed language server, but it stays off by default.
 In a Markdown file, use `Space m m` to turn it on or off only for that file.
 `Space e` opens the existing Snacks file-explorer sidebar; it does not add
-another plugin. Run `v` with no path for the shared Snacks dashboard and anon
-mask; `v .` opens the current directory in Oil instead. Opening a PDF launches
-Bookokrat instead of Snacks' image converter. `Space t` opens a bottom
-terminal and `Space T` opens a floating terminal.
+another plugin. `Space -` opens Yazi in a floating window without replacing
+Oil; Chezmoi links Hamel Nord theme files under `~/.config/yazi/`. Run `v`
+with no path for the shared Snacks dashboard and anon mask; `v .` opens the
+current directory in Oil instead. Opening a PDF launches Bookokrat instead of
+Snacks' image converter. `Space t` opens a bottom terminal and `Space T` opens
+a floating terminal.
 
 Mutable state remains local: Herdr sessions, Hermes Desktop connection state,
 Hunk state, Neovim plugins/cache/undo, Zoxide history, Zsh history, and

@@ -340,6 +340,7 @@ check_daily_driver() {
     vscode-html-language-server
     vscode-json-language-server
     vtsls
+    yazi
     zoxide
   )
   local system_commands=(git gs magick mdformat wl-copy xclip)

@@ -15,5 +15,7 @@
 .config/mise/config.toml|hosts/ubuntu-dev/mise.toml
 .config/nvim|config/nvim
 .config/tmux|config/tmux
+.config/yazi/theme.toml|config/yazi/theme.toml
+.config/yazi/yazi.toml|config/yazi/yazi.toml
 .local/bin/codex|hosts/ubuntu-dev/bin/codex
 .local/graphql-lsp/bin/graphql-lsp|hosts/ubuntu-dev/bin/graphql-lsp

@@ -323,10 +323,12 @@ test_doctor_is_read_only_and_complete() {
   mkdir -p \
     "$case_dir/home/.local/share/fonts/CaskaydiaCove" \
     "$case_dir/home/.local/share/fonts/Hasklig" \
-    "$case_dir/home/.local/share/fonts/MapleMono"
+    "$case_dir/home/.local/share/fonts/MapleMono" \
+    "$case_dir/home/.local/share/fonts/NerdFontsSymbolsOnly"
   printf '3.4.0\n' > "$case_dir/home/.local/share/fonts/CaskaydiaCove/.font-version"
   printf '3.4.0\n' > "$case_dir/home/.local/share/fonts/Hasklig/.font-version"
   printf '7.9\n' > "$case_dir/home/.local/share/fonts/MapleMono/.font-version"
+  printf '3.4.0\n' > "$case_dir/home/.local/share/fonts/NerdFontsSymbolsOnly/.font-version"
   mkdir -p "$case_dir/home/.ssh"
   for target in \
     id_ed25519_hd719 \
@@ -433,7 +435,8 @@ EOF
 printf '%s\n' \
   'CaskaydiaCove Nerd Font' \
   'Hasklug Nerd Font' \
-  'Maple Mono NF'
+  'Maple Mono NF' \
+  'Symbols Nerd Font Mono'
 EOF
   cat > "$case_dir/bin/gh" <<'EOF'
 #!/usr/bin/env bash
@@ -564,6 +567,7 @@ bun = "1.3.14"
 "aqua:sharkdp/fd" = "latest"
 "aqua:junegunn/fzf" = "latest"
 "aqua:jesseduffield/lazygit" = "latest"
+"aqua:sxyazi/yazi" = "latest"
 "aqua:tree-sitter/tree-sitter" = "latest"
 "aqua:LuaLS/lua-language-server" = "latest"
 "aqua:artempyanykh/marksman" = "latest"
@@ -597,7 +601,7 @@ test_ubuntu_ghostty_reuses_shared_config() {
   [[ -f "$GHOSTTY_CONFIG" ]] || fail "Ubuntu Ghostty config symlink is broken"
 
   font_families="$(sed -n 's/^font-family = //p' "$GHOSTTY_CONFIG")"
-  [[ "$font_families" == $'Maple Mono NF\nHasklug Nerd Font' ]] || fail "shared Ghostty font fallbacks are not ordered for Mac and Ubuntu"
+  [[ "$font_families" == $'Maple Mono NF\nSymbols Nerd Font Mono\nHasklug Nerd Font' ]] || fail "shared Ghostty font fallbacks are not ordered for Mac and Ubuntu"
 }
 
 test_fastfetch_os_age_is_cross_platform() {
@@ -634,7 +638,8 @@ test_ubuntu_fonts_are_pinned() {
   for font in \
     "Caskaydia Cove Nerd Font" \
     "Hasklug Nerd Font" \
-    "Maple Mono NF"; do
+    "Maple Mono NF" \
+    "Symbols Nerd Font"; do
     assert_file_contains "$ANSIBLE_DIR/vars.yml" "name: $font"
     assert_file_contains "$DOCTOR_SCRIPT" "$font"
   done
@@ -642,6 +647,7 @@ test_ubuntu_fonts_are_pinned() {
   assert_file_contains "$ANSIBLE_DIR/vars.yml" "archive: CascadiaCode.tar.xz"
   assert_file_contains "$ANSIBLE_DIR/vars.yml" "archive: Hasklig.tar.xz"
   assert_file_contains "$ANSIBLE_DIR/vars.yml" "archive: MapleMono-NF-unhinted.zip"
+  assert_file_contains "$ANSIBLE_DIR/vars.yml" "archive: NerdFontsSymbolsOnly.tar.xz"
   assert_file_contains "$ANSIBLE_DIR/tasks/tools.yml" \
     'checksum: "sha256:{{ item.sha256 }}"'
   assert_file_contains "$ANSIBLE_DIR/tasks/tools.yml" \
@@ -829,7 +835,7 @@ test_neovim_setup_installs_and_checks_daily_driver() {
   local tree_sitter_languages tree_sitter_parsers
   local tools=(
     bash-language-server bookokrat bun fd fastfetch fzf go gopls graphql-lsp gs herdr hunk
-    lazygit lua-language-server magick marksman mdformat node nvim pnpm python rg ruff shellcheck
+    lazygit lua-language-server magick marksman mdformat node nvim pnpm python rg ruff shellcheck yazi
     starship stylua tree-sitter uv wl-copy xclip
     vscode-css-language-server vscode-eslint-language-server
     vscode-html-language-server vscode-json-language-server vtsls zoxide
