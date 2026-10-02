@@ -241,7 +241,7 @@ grep -Fxq 'config-file = ?host.conf' "$REPO_DIR/config/ghostty/config"
 grep -Fxq 'fullscreen = false' "$REPO_DIR/hosts/mac-air/ghostty.conf"
 grep -Fxq 'window-save-state = never' "$REPO_DIR/hosts/mac-air/ghostty.conf"
 grep -Fxq 'window-new-tab-position = end' "$REPO_DIR/hosts/mac-air/ghostty.conf"
-GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
+GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfec "
   source '$HOME/.zshrc'
   [[ -z \"\${GIT_PAGER+x}\" ]] || exit 1
   [[ \"\$DOTFILES_NVIM_PROFILE\" == thin ]]
@@ -257,22 +257,65 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfc "
   [[ \"\$(alias ls)\" == \"ls='lsd --tree --depth 1'\" ]]
   [[ \"\$(alias ll)\" == \"ll='lsd -la --tree --depth 1'\" ]]
   [[ \"\$(alias v)\" == 'v=nvim' ]]
-  ! alias gdiff >/dev/null 2>&1
+  ! alias gdiff >/dev/null 2>&1 || exit 1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
   [[ \"\$(whence -w coda)\" == 'coda: function' ]]
   [[ \"\$(whence -w carchive)\" == 'carchive: function' ]]
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
+  [[ \"\$(alias mini)\" == \"mini='ssh mac-mini-lan'\" ]]
+  [[ \"\$(alias minit)\" == \"minit='ssh mac-mini-ts'\" ]]
+  [[ \"\$(alias hmini)\" == \"hmini='herdr --remote mac-mini-lan'\" ]]
+  [[ \"\$(alias hminit)\" == \"hminit='herdr --remote mac-mini-ts'\" ]]
   [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
   [[ \"\$(whence -w _dotfiles_herdr_route_cwd)\" == '_dotfiles_herdr_route_cwd: function' ]]
   [[ \"\$(whence -w _dotfiles_herdr_reset)\" == '_dotfiles_herdr_reset: function' ]]
   [[ \"\$(alias hdk)\" == \"hdk='herdr server reset'\" ]]
   (( _dotfiles_herdr_route_plain == 1 ))
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
-  ! alias hm-dev >/dev/null 2>&1
-  ! alias docker-nuke >/dev/null 2>&1
+  for retired in u ut hu hut uvm-status uvm-ip uvm-up uvm-up-headless \
+    uvm-stop uvm-suspend uvm-resume uvm-destroy; do
+    if (( \${+aliases[\$retired]} || \${+functions[\$retired]} )); then
+      exit 1
+    fi
+  done
+  ! alias hm-dev >/dev/null 2>&1 || exit 1
+  ! alias docker-nuke >/dev/null 2>&1 || exit 1
 "
+
+doctor_fixture="$TEST_ROOT/doctor-fixture"
+mkdir -p "$doctor_fixture/hosts/mac-air"
+ln -s "$REPO_DIR/config" "$doctor_fixture/config"
+ln -s "$REPO_DIR/hosts/shared" "$doctor_fixture/hosts/shared"
+ln -s "$REPO_DIR/hosts/mac-air/herdr.zsh" "$doctor_fixture/hosts/mac-air/herdr.zsh"
+cp "$REPO_DIR/hosts/mac-air/Brewfile" "$doctor_fixture/hosts/mac-air/Brewfile"
+cp "$REPO_DIR/hosts/mac-air/.zshrc" "$doctor_fixture/hosts/mac-air/.zshrc"
+DOTFILES_DIR="$doctor_fixture" "$REPO_DIR/hosts/mac-air/doctor.sh" \
+  > "$TEST_ROOT/doctor.log" 2>&1
+
+assert_doctor_rejects() {
+  local shell_change="$1"
+  local expected_failure="$2"
+  cp "$REPO_DIR/hosts/mac-air/.zshrc" "$doctor_fixture/hosts/mac-air/.zshrc"
+  printf '%s\n' "$shell_change" >> "$doctor_fixture/hosts/mac-air/.zshrc"
+  if DOTFILES_DIR="$doctor_fixture" "$REPO_DIR/hosts/mac-air/doctor.sh" \
+    > "$TEST_ROOT/doctor.log" 2>&1; then
+    printf 'Doctor accepted invalid shell configuration: %s\n' "$shell_change" >&2
+    exit 1
+  fi
+  grep -Fq "$expected_failure" "$TEST_ROOT/doctor.log"
+}
+
+assert_doctor_rejects 'export EDITOR=broken-editor' 'personal shell allowlist invalid'
+assert_doctor_rejects "alias minit='ssh broken-mini-route'" 'personal shell allowlist invalid'
+assert_doctor_rejects "alias u='ssh ubuntu-vm'" 'personal shell allowlist invalid'
+assert_doctor_rejects 'uvm-up() { :; }' 'personal shell allowlist invalid'
+cp "$REPO_DIR/hosts/mac-air/.zshrc" "$doctor_fixture/hosts/mac-air/.zshrc"
+printf ':\n' > "$TEST_ROOT/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+assert_doctor_rejects ':' 'FAIL  Thin-Mac interactive Zsh plugins'
+printf '_zsh_autosuggest_start() { :; }\n' \
+  > "$TEST_ROOT/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 cat > "$TEST_ROOT/bin/reset-stub" <<'EOF'
 #!/bin/sh
@@ -368,6 +411,10 @@ grep -Fxq 'brew "zsh-autosuggestions"' "$REPO_DIR/hosts/mac-air/Brewfile"
 grep -Fxq 'brew "zsh-syntax-highlighting"' "$REPO_DIR/hosts/mac-air/Brewfile"
 grep -Fxq 'cask "codex"' "$REPO_DIR/hosts/mac-air/Brewfile"
 grep -Fxq 'cask "zoom"' "$REPO_DIR/hosts/mac-air/Brewfile"
+if grep -Eiq 'vagrant|vmware|fusion' "$REPO_DIR/hosts/mac-air/Brewfile"; then
+  printf 'Air Brewfile still requires VM tooling.\n' >&2
+  exit 1
+fi
 grep -Fq 'config/zsh/shared/codex-functions.zsh' \
   "$REPO_DIR/hosts/mac-air/.zshrc"
 ! grep -Fq 'diff-so-fancy' "$REPO_DIR/hosts/mac-air/Brewfile"

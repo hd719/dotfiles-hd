@@ -161,7 +161,7 @@ else
   fail "SSH config missing or unreadable"
 fi
 
-if /bin/zsh -dfc "
+if /bin/zsh -dfec "
   source '$DOTFILES_DIR/hosts/mac-air/.zshrc'
   [[ \"\$DOTFILES_NVIM_PROFILE\" == thin ]]
   [[ \"\$EDITOR\" == nvim ]]
@@ -177,29 +177,38 @@ if /bin/zsh -dfc "
   [[ \"\$(alias ls)\" == \"ls='lsd --tree --depth 1'\" ]]
   [[ \"\$(alias ll)\" == \"ll='lsd -la --tree --depth 1'\" ]]
   [[ \"\$(alias v)\" == 'v=nvim' ]]
-  ! alias gdiff >/dev/null 2>&1
+  ! alias gdiff >/dev/null 2>&1 || exit 1
   [[ \"\$(alias cod)\" == 'cod=codex' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
   [[ \"\$(whence -w coda)\" == 'coda: function' ]]
   [[ \"\$(whence -w carchive)\" == 'carchive: function' ]]
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
+  [[ \"\$(alias mini)\" == \"mini='ssh mac-mini-lan'\" ]]
+  [[ \"\$(alias minit)\" == \"minit='ssh mac-mini-ts'\" ]]
+  [[ \"\$(alias hmini)\" == \"hmini='herdr --remote mac-mini-lan'\" ]]
+  [[ \"\$(alias hminit)\" == \"hminit='herdr --remote mac-mini-ts'\" ]]
   [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
   [[ \"\$(whence -w _dotfiles_herdr_route_cwd)\" == '_dotfiles_herdr_route_cwd: function' ]]
   [[ \"\$(whence -w _dotfiles_herdr_reset)\" == '_dotfiles_herdr_reset: function' ]]
   [[ \"\$(alias hdk)\" == \"hdk='herdr server reset'\" ]]
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
-  ! alias hm-dev >/dev/null 2>&1
-  ! alias docker-nuke >/dev/null 2>&1
+  for retired in u ut hu hut uvm-status uvm-ip uvm-up uvm-up-headless \
+    uvm-stop uvm-suspend uvm-resume uvm-destroy; do
+    if (( \${+aliases[\$retired]} || \${+functions[\$retired]} )); then
+      exit 1
+    fi
+  done
+  ! alias hm-dev >/dev/null 2>&1 || exit 1
+  ! alias docker-nuke >/dev/null 2>&1 || exit 1
 "; then
   pass "Thin-Mac personal shell allowlist available"
 else
   fail "Thin-Mac personal shell allowlist invalid"
 fi
 
-if HOMEBREW_PREFIX="$HOMEBREW_PREFIX" /bin/zsh -dfic "
+if HOMEBREW_PREFIX="$HOMEBREW_PREFIX" /bin/zsh -dfiec "
   source '$DOTFILES_DIR/hosts/mac-air/.zshrc'
-  (( \${#functions[(I)*autocomplete*]} > 0 ))
   (( \${#functions[(I)*autosuggest*]} > 0 ))
   whence -w _zsh_highlight >/dev/null
 " >/dev/null 2>&1; then
