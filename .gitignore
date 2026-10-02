@@ -1,7 +1,7 @@
 .alias
 .secrets
 .DS_Store
-hosts/ubuntu-dev/.vagrant/
+**/.vagrant/
 
 # Karabiner creates dated snapshots automatically. Keep only the reviewed
 # baseline tracked below.

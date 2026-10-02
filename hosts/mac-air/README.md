@@ -1,7 +1,7 @@
-# Thin Mac Control Plane
+# MacBook Air Thin Client
 
-Supported setup path for Hamel's Apple Silicon MacBook after the 2026 restore.
-macOS is a control plane; the Ubuntu ARM64 VM owns development.
+The Apple Silicon MacBook Air uses SSH to work on the development Mac and
+Mac mini. Keep project tooling, Docker, databases, and runtimes on those hosts.
 
 ## Boundary
 
@@ -17,7 +17,7 @@ The host installs only:
 - Fastfetch for system summaries
 - Ghostty
 - Ghostty fonts
-- Herdr as a remote Ubuntu client
+- Herdr as a remote editor client
 - Hermes Desktop as a remote Mac mini agent client
 - Hunk as the local diff viewer
 - iStat Menus
@@ -34,9 +34,7 @@ The host installs only:
 - TablePlus
 - Tailscale
 - Tree-sitter CLI only to build Neovim's two Markdown parsers
-- Vagrant and the VMware utility
 - VLC
-- VMware Fusion
 - Zoom
 - Zoxide
 - Zsh Autosuggestions and Syntax Highlighting
@@ -48,32 +46,30 @@ language runtimes, other language servers, or project dependencies on macOS.
 ## Install
 
 Prerequisites are Xcode Command Line Tools, Homebrew, the canonical
-`~/Developer/dotfiles-hd` checkout, and restored `~/.ssh`. The bootstrap
-installs Rosetta 2 when needed by Vagrant's VMware utility.
+`~/Developer/dotfiles-hd` checkout, and machine-owned `~/.ssh`.
 
 Preview and audit first:
 
 ```bash
-hosts/mac-thin/bootstrap.sh --dry-run
-hosts/mac-thin/bootstrap.sh --check
+hosts/mac-air/bootstrap.sh --dry-run
+hosts/mac-air/bootstrap.sh --check
 ```
 
 Apply from a clean canonical checkout, then repeat to prove idempotency:
 
 ```bash
-hosts/mac-thin/bootstrap.sh --apply
-hosts/mac-thin/bootstrap.sh --apply
-hosts/mac-thin/doctor.sh
+hosts/mac-air/bootstrap.sh --apply
+hosts/mac-air/bootstrap.sh --apply
+hosts/mac-air/doctor.sh
 ```
 
-The bootstrap installs the policy packages, including the Codex CLI, and pins
-the `vagrant-vmware-desktop` provider to `3.0.5`. Chezmoi delivers Bookokrat,
+The bootstrap installs the policy packages, including the Codex CLI.
+Chezmoi delivers Bookokrat,
 Fastfetch, the thin `.zshrc`, Ghostty, Herdr, Hunk, the shared Neovim config,
 and the shared Starship config. Replaced paths are captured in the timestamped
 Chezmoi backup printed during apply.
 
-Sync reviewed `master` across the thin Mac, Ubuntu VM, and Mac mini from this
-control plane:
+Sync reviewed `master` between this Mac and the Mac mini:
 
 ```bash
 /Users/hameldesai/.codex/skills/dotfiles-sync/scripts/fallback.sh
@@ -86,11 +82,11 @@ manual syncs.
 
 Fastfetch is the reference pattern:
 
-1. Add the formula to `hosts/mac-thin/Brewfile`.
-2. Keep declarative configuration under `config/`.
-3. Add only approved child files to `chezmoi/profiles/mac-thin.paths`.
-4. Adjust `.chezmoiignore.tmpl` for the `mac-thin` profile.
-5. Update the doctor, focused tests, and this package inventory.
+1. Add the formula to `hosts/mac-air/Brewfile`.
+1. Keep declarative configuration under `config/`.
+1. Add only approved child files to `chezmoi/profiles/mac-air.paths`.
+1. Adjust `.chezmoiignore.tmpl` for the `mac-air` profile.
+1. Update the doctor, focused tests, and this package inventory.
 
 Do not link a whole configuration directory when it contains mutable or legacy
 state. After merge, sync `master`, preview, apply twice, and run the doctor.
@@ -125,32 +121,24 @@ completion caches are never symlinked.
   **Connect via SSH** with `mac-mini-ts`. Do not run the installer's **Install
   Hermes** action on the thin Mac. Keep its connection state machine-owned. See
   <https://hermes-agent.nousresearch.com/docs/user-guide/desktop>.
-- VMware Fusion is not available as a current Homebrew cask. Download it
-  through Broadcom's official flow:
-  <https://knowledge.broadcom.com/external/article/315638/download-and-install-vmware-fusion.html>.
-
-The doctor remains red until both applications exist in `/Applications`.
+  The doctor requires ChatGPT and Hermes Desktop in `/Applications`.
 
 ## First Run
 
 1. Sign in to 1Password, Tailscale, Obsidian, and ChatGPT.
 1. Grant Tailscale's requested network-extension permission.
 1. Connect Hermes Desktop to `mac-mini-ts` with its **Connect via SSH** mode.
-1. Complete VMware Fusion's one-time privileged setup.
-1. Build the Ubuntu VM with `uvm-up` and keep VMware Fusion open.
-1. Add `ubuntu-vm-ts` to Codex connections as the primary development route.
-   Keep `ubuntu-vm` as the local VMware fallback.
+1. Use your machine-owned SSH aliases for the Mini and development Mac.
+   Configure the Studio route once that machine arrives.
 1. Open Neovim once and run `:checkhealth`, `:checkhealth obsidian`, and
    `:checkhealth vim.lsp`.
-1. Keep repositories and all development execution on the guests' native Linux
-   filesystems.
+1. Keep project repositories and development execution on the development Mac.
 
 The bootstrap never restores credentials, starts services, removes packages,
 or installs project development tooling. It adds only the portable Git alias
 include to the machine-owned global Git config.
 
-The remaining Bash is operational: Rosetta, Vagrant/VMware lifecycle, package
-installation, maintenance, and doctors. It is not a second
+The remaining Bash owns package installation, maintenance, and doctors. It is not a second
 configuration-link writer.
 
 ## Personal Shell Allowlist
@@ -175,32 +163,11 @@ ls, lss, lsss Show directory trees one, two, or three levels deep
 l, la, ll    Show compact, hidden, or detailed lsd listings
 r            Reload the Zsh configuration
 v FILE, v .  Edit a local file or directory with the thin Neovim profile
-hu           Attach Herdr through local Vagrant
-hut          Attach Herdr through Tailscale
-u            SSH into the Ubuntu VM
-ut           SSH into Ubuntu through Tailscale
-uvm-up       Start the Vagrant VM with the VMware GUI
-uvm-stop     Gracefully halt the Vagrant VM
-uvm-suspend Suspend the Vagrant VM
-uvm-resume  Resume the Vagrant VM
-uvm-status  Show Vagrant VM state
-uvm-ip      Show the Vagrant guest addresses
-uvm-destroy Interactively destroy only the Vagrant VM
 ```
 
-Press `Ctrl-D` to leave the SSH session. `uvm-destroy` never uses Vagrant's
-force flag and does not reference the legacy VMware VM.
-
-The Vagrant local route is fixed at `127.0.0.1:2222`, so it works without
-Tailscale or local networking. The remote route uses Tailscale MagicDNS.
-`hosts/mac-thin/ssh/ubuntu-vagrant.conf` keeps host-key checking on and disables
-agent forwarding.
-
-Herdr runs on macOS only as a thin client for the Ubuntu server. Use `hu`
-locally or offline and `hut` through Tailscale. To send an image, copy it in
-Finder with `Cmd-C`, or capture directly to the clipboard with
-`Shift-Cmd-Ctrl-4`, then press `Ctrl-V` inside remote Herdr. A dragged Finder
-path remains Mac-local and is not readable inside Ubuntu.
+Use `minit` (Tailscale) or `mini` (LAN) for SSH to the Mac mini. Keep SSH configuration and
+credentials machine-owned. Add the Studio route after that host arrives.
+Press `Ctrl-D` to leave an SSH session.
 
 Running plain `herdr` on the thin Mac focuses an existing local workspace for
 the current directory or creates one there when needed. Repeated launches from
@@ -208,15 +175,12 @@ the same directory reuse its workspace.
 
 `hdk`, short for `herdr server reset`, clears the accumulated local workspaces
 and leaves one fresh `home` workspace. It only touches the local server, so the
-`hu` and `hmini` clients and their remote sessions are unaffected. Add
+`hmini` client and their remote sessions are unaffected. Add
 `--dry-run` to preview it.
 
 After a fresh Ghostty launch, the thin-Mac host override opens a regular shell
-with window state restoration and full-screen startup disabled. Run `hu`,
-`hmini`, or local `herdr` manually when needed.
-
-The Ubuntu VM generates separate VM-local keys for GitHub `hd719`, Arbiter, and
-Forgejo. No Git private key is copied from the Mac.
+with window state restoration and full-screen startup disabled. Run
+`hmini` or local `herdr` manually when needed.
 
 ## Manual No-Agent Operations
 
@@ -226,7 +190,7 @@ duplicate operational logic.
 
 This is an explicit allowlist. Node/Bun/Go, Docker, Kubernetes, project
 toolchains, VS Code, tmux, other language servers, and development aliases
-remain inside the Linux VMs.
+remain on the development Mac.
 
 The shell is assembled from scoped modules:
 
@@ -237,4 +201,3 @@ The shell is assembled from scoped modules:
   picker on personal Macs and Linux workstations.
 - `config/zsh/mac/aliases.zsh` adds safe macOS controls.
 - `config/zsh/mac/personal/aliases.zsh` adds the vault control.
-- `hosts/mac-thin/vm.zsh` stays host-specific and owns VMware shortcuts.

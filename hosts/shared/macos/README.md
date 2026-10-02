@@ -2,13 +2,13 @@
 
 Shared provisioning for two full local macOS profiles:
 
-| Profile | Purpose |
-| --- | --- |
-| `mac-pro` | Standalone full-development MacBook; all development tools local, no VM |
-| `mac-mini` | Production runtime Mac with extra apply gates |
+| Profile    | Purpose                                                                 |
+| ---------- | ----------------------------------------------------------------------- |
+| `mac-pro`  | Standalone full-development MacBook; all development tools local, no VM |
+| `mac-mini` | Production runtime Mac with extra apply gates                           |
 
 Do not run this bootstrap on the thin Mac. Use
-[`../../mac-thin/README.md`](../../mac-thin/README.md) there.
+[`../../mac-air/README.md`](../../mac-air/README.md) there.
 
 ## Prerequisites
 

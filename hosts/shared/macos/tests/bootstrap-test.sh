@@ -1191,7 +1191,7 @@ test_shared_zsh_interface() {
     "$REPO_DIR/hosts/mac-mini/.zshrc" \
     "$REPO_DIR/hosts/mac-work/goodmorning.zsh" \
     "$REPO_DIR/hosts/mac-work/.zshrc" \
-    "$REPO_DIR/hosts/mac-thin/vm.zsh"; do
+    "$REPO_DIR/hosts/mac-air/.zshrc"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
     TESTS=$((TESTS + 1))
   done

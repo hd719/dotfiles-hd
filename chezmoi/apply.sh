@@ -20,13 +20,6 @@ backup_dir="$($script_dir/backup.sh "$PROFILE")"
 printf 'rollback command: %s/rollback.sh %s %s\n' \
   "$script_dir" "$PROFILE" "$backup_dir"
 
-activation_preexisting=0
-if [[ -e "$ACTIVE_MARKER" || -L "$ACTIVE_MARKER" ]]; then
-  [[ -f "$ACTIVE_MARKER" && ! -L "$ACTIVE_MARKER" ]] \
-    || die "activation marker is not a regular file: $ACTIVE_MARKER"
-  activation_preexisting=1
-fi
-
 if [[ -n "$PROFILE_ANCESTORS" ]]; then
   while IFS='|' read -r relative _source managed_mode; do
     target="$(target_path "$relative")"
@@ -62,16 +55,6 @@ else
   cm verify --exclude=scripts
 fi
 
-if [[ "$PROFILE" == ubuntu ]]; then
-  activate_profile
-fi
-
 if ! "$script_dir/doctor.sh" "$PROFILE"; then
-  if [[ "$PROFILE" == ubuntu && "$activation_preexisting" == 0 ]]; then
-    failed_marker="$ACTIVE_MARKER.failed.$(date +%Y%m%d-%H%M%S)-$$"
-    mv "$ACTIVE_MARKER" "$failed_marker"
-    printf 'Ubuntu activation withdrawn after doctor failure: %s\n' \
-      "$failed_marker" >&2
-  fi
   die "profile doctor failed; roll back with $backup_dir"
 fi

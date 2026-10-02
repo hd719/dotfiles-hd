@@ -6,16 +6,10 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
 GIT_ALIASES_SCRIPT="$DOTFILES_DIR/config/git/configure-aliases.sh"
 APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
-BREWFILE="$DOTFILES_DIR/hosts/mac-thin/Brewfile"
+BREWFILE="$DOTFILES_DIR/hosts/mac-air/Brewfile"
 CHEZMOI_DOCTOR="${DOTFILES_CHEZMOI_DOCTOR:-$DOTFILES_DIR/chezmoi/doctor.sh}"
 SSH_CONFIG="$HOME/.ssh/config"
-VAGRANT_SSH_CONFIG="$DOTFILES_DIR/hosts/mac-thin/ssh/ubuntu-vagrant.conf"
-UBUNTU_LOGIN_KEY="$HOME/.ssh/id_ed25519_ubuntu_vm"
-UBUNTU_LOGIN_KEY_NAME="$(basename "$UBUNTU_LOGIN_KEY")"
 FAILURES=0
-VAGRANT_VMWARE_PLUGIN_VERSION="3.0.5"
-VAGRANT_VMWARE_UTILITY="${DOTFILES_VAGRANT_VMWARE_UTILITY:-/opt/vagrant-vmware-desktop/bin/vagrant-vmware-utility}"
-VAGRANT_VMWARE_SERVICE_LABEL="com.vagrant.vagrant-vmware-utility"
 HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
 
 # shellcheck source=../mac-bootstrap/lib.sh
@@ -51,12 +45,6 @@ else
   fail "Brewfile missing applications"
 fi
 
-if command -v vagrant >/dev/null 2>&1; then
-  pass "Vagrant available"
-else
-  fail "Vagrant missing"
-fi
-
 if command -v herdr >/dev/null 2>&1; then
   pass "Herdr remote client available"
 else
@@ -81,31 +69,10 @@ for plugin_path in \
   fi
 done
 
-if [[ -x "$VAGRANT_VMWARE_UTILITY" ]]; then
-  pass "Vagrant VMware utility available"
+if "$CHEZMOI_DOCTOR" mac-air; then
+  pass "mac-air Chezmoi configuration"
 else
-  fail "Vagrant VMware utility missing"
-fi
-
-if launchctl print "system/$VAGRANT_VMWARE_SERVICE_LABEL" >/dev/null 2>&1; then
-  pass "Vagrant VMware utility service active"
-else
-  fail "Vagrant VMware utility service is not active"
-fi
-
-if command -v vagrant >/dev/null 2>&1 \
-  && vagrant plugin list 2>/dev/null \
-    | /usr/bin/grep -Eq \
-      "^vagrant-vmware-desktop \\($VAGRANT_VMWARE_PLUGIN_VERSION([,)])"; then
-  pass "Vagrant VMware provider $VAGRANT_VMWARE_PLUGIN_VERSION"
-else
-  fail "Vagrant VMware provider must be $VAGRANT_VMWARE_PLUGIN_VERSION"
-fi
-
-if "$CHEZMOI_DOCTOR" mac-thin; then
-  pass "mac-thin Chezmoi configuration"
-else
-  fail "mac-thin Chezmoi configuration"
+  fail "mac-air Chezmoi configuration"
 fi
 
 if "$GIT_ALIASES_SCRIPT" --check >/dev/null 2>&1; then
@@ -180,7 +147,6 @@ for app_name in \
   "Hermes.app" \
   "Obsidian.app" \
   "Tailscale.app" \
-  "VMware Fusion.app" \
   "zoom.us.app"; do
   if [[ -d "$APPLICATIONS_DIR/$app_name" ]]; then
     pass "$app_name installed"
@@ -195,69 +161,8 @@ else
   fail "SSH config missing or unreadable"
 fi
 
-check_ubuntu_ssh_alias() {
-  local ssh_alias="$1"
-  local effective
-
-  effective="$(ssh -G -F "$SSH_CONFIG" "$ssh_alias" 2>/dev/null || true)"
-
-  if printf '%s\n' "$effective" \
-    | /usr/bin/awk '$1 == "addressfamily" && $2 == "inet" { found = 1 } END { exit !found }'; then
-    pass "$ssh_alias prefers IPv4"
-  else
-    fail "$ssh_alias must set AddressFamily inet"
-  fi
-
-  if printf '%s\n' "$effective" \
-    | /usr/bin/awk '$1 == "forwardagent" && $2 == "no" { found = 1 } END { exit !found }' \
-    && printf '%s\n' "$effective" \
-      | /usr/bin/awk '$1 == "identitiesonly" && $2 == "yes" { found = 1 } END { exit !found }' \
-    && printf '%s\n' "$effective" | /usr/bin/grep -Fq "$UBUNTU_LOGIN_KEY_NAME"; then
-    pass "$ssh_alias uses only the Ubuntu login key"
-  else
-    fail "$ssh_alias must use only the Ubuntu login key"
-  fi
-}
-
-check_ubuntu_ssh_alias ubuntu-vm
-check_ubuntu_ssh_alias ubuntu-vm-ts
-
-if [[ -f "$UBUNTU_LOGIN_KEY" && "$(stat -f '%Lp' "$UBUNTU_LOGIN_KEY" 2>/dev/null)" == "600" ]]; then
-  pass "$UBUNTU_LOGIN_KEY_NAME present with mode 600"
-else
-  fail "$UBUNTU_LOGIN_KEY_NAME missing or not mode 600"
-fi
-
-check_vagrant_ssh_alias() {
-  local ssh_alias="$1"
-  local expected_hostname="$2"
-  local expected_port="$3"
-  local expected_host_key_alias="$4"
-  local effective
-
-  effective="$(ssh -G -F "$VAGRANT_SSH_CONFIG" "$ssh_alias" 2>/dev/null || true)"
-  if printf '%s\n' "$effective" | /usr/bin/grep -Fq "$UBUNTU_LOGIN_KEY_NAME" \
-    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "hostname $expected_hostname" \
-    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "port $expected_port" \
-    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "hostkeyalias $expected_host_key_alias" \
-    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "forwardagent no" \
-    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "identitiesonly yes" \
-    && printf '%s\n' "$effective" | /usr/bin/grep -Fxq "stricthostkeychecking true"; then
-    pass "$ssh_alias Vagrant policy"
-  else
-    fail "$ssh_alias Vagrant SSH policy is incomplete"
-  fi
-}
-
-if [[ -r "$VAGRANT_SSH_CONFIG" ]]; then
-  check_vagrant_ssh_alias ubuntu-vm 127.0.0.1 2222 ubuntu-dev
-  check_vagrant_ssh_alias ubuntu-vm-ts ubuntu-dev 22 ubuntu-dev
-else
-  fail "Vagrant SSH config missing"
-fi
-
 if /bin/zsh -dfc "
-  source '$DOTFILES_DIR/hosts/mac-thin/.zshrc'
+  source '$DOTFILES_DIR/hosts/mac-air/.zshrc'
   [[ \"\$DOTFILES_NVIM_PROFILE\" == thin ]]
   [[ \"\$EDITOR\" == nvim ]]
   [[ \"\$VISUAL\" == nvim ]]
@@ -279,28 +184,11 @@ if /bin/zsh -dfc "
   [[ \"\$(whence -w carchive)\" == 'carchive: function' ]]
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
-  [[ \"\$(alias u)\" == \"u='ssh ubuntu-vm'\" ]]
-  [[ \"\$(alias ut)\" == \"ut='ssh ubuntu-vm-ts'\" ]]
-  [[ \"\$(alias hu)\" == \"hu='herdr --remote ubuntu-vm'\" ]]
-  [[ \"\$(alias hut)\" == \"hut='herdr --remote ubuntu-vm-ts'\" ]]
   [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
   [[ \"\$(whence -w _dotfiles_herdr_route_cwd)\" == '_dotfiles_herdr_route_cwd: function' ]]
   [[ \"\$(whence -w _dotfiles_herdr_reset)\" == '_dotfiles_herdr_reset: function' ]]
   [[ \"\$(alias hdk)\" == \"hdk='herdr server reset'\" ]]
-  ! alias uc >/dev/null 2>&1
-  ! alias uct >/dev/null 2>&1
-  ! alias ubuntu >/dev/null 2>&1
-  ! alias ubuntu-ts >/dev/null 2>&1
-  ! alias uvm-open >/dev/null 2>&1
   [[ \"\$(whence -w reload)\" == 'reload: function' ]]
-  [[ \"\$(whence -w uvm-status)\" == 'uvm-status: function' ]]
-  [[ \"\$(whence -w uvm-ip)\" == 'uvm-ip: function' ]]
-  [[ \"\$(whence -w uvm-up)\" == 'uvm-up: function' ]]
-  [[ \"\$(whence -w uvm-up-headless)\" != 'uvm-up-headless: function' ]]
-  [[ \"\$(whence -w uvm-stop)\" == 'uvm-stop: function' ]]
-  [[ \"\$(whence -w uvm-suspend)\" == 'uvm-suspend: function' ]]
-  [[ \"\$(whence -w uvm-resume)\" == 'uvm-resume: function' ]]
-  [[ \"\$(whence -w uvm-destroy)\" == 'uvm-destroy: function' ]]
   ! alias hm-dev >/dev/null 2>&1
   ! alias docker-nuke >/dev/null 2>&1
 "; then
@@ -310,7 +198,7 @@ else
 fi
 
 if HOMEBREW_PREFIX="$HOMEBREW_PREFIX" /bin/zsh -dfic "
-  source '$DOTFILES_DIR/hosts/mac-thin/.zshrc'
+  source '$DOTFILES_DIR/hosts/mac-air/.zshrc'
   (( \${#functions[(I)*autocomplete*]} > 0 ))
   (( \${#functions[(I)*autosuggest*]} > 0 ))
   whence -w _zsh_highlight >/dev/null
@@ -321,7 +209,7 @@ else
 fi
 
 if [[ "$FAILURES" -eq 0 ]]; then
-  printf 'Doctor passed for mac-thin.\n'
+  printf 'Doctor passed for mac-air.\n'
   exit 0
 fi
 
