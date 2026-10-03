@@ -6,43 +6,23 @@
 {{- if ne .profile "mac-pro" }}
 .config/karabiner
 {{- end }}
-{{- if ne .profile "mac-thin" }}
+{{- if ne .profile "mac-air" }}
 Library/Application Support/com.mitchellh.ghostty/host.conf
 {{- end }}
-{{- if ne .profile "ubuntu" }}
-.config/ghostty
-.gitignore_global
-.ssh
-.config/tmux
-.local
-20-install-ubuntu-tools.sh
-{{- end }}
-{{- if or (eq .profile "mac-thin") (eq .profile "mac-work") }}
+{{- if or (eq .profile "mac-air") (eq .profile "mac-work") }}
 .config/btop
+.config/mise
 {{- end }}
 {{- if eq .profile "mac-work" }}
 .config/fastfetch
 {{- end }}
-{{- if or (eq .profile "mac-thin") (eq .profile "mac-work") }}
-.config/mise
-{{- end }}
-{{- if eq .profile "ubuntu" }}
-Library
-.config/homebrew
+{{- if eq .profile "mac-air" }}
 .hermes
-.terminfo
-30-install-thin-tools.sh
-40-install-work-tools.sh
-{{- end }}
-{{- if eq .profile "mac-thin" }}
-.hermes
-20-install-ubuntu-tools.sh
 40-install-work-tools.sh
 {{- end }}
 {{- if eq .profile "mac-mini" }}
 .config/homebrew
 .terminfo
-20-install-ubuntu-tools.sh
 30-install-thin-tools.sh
 40-install-work-tools.sh
 {{- end }}
@@ -50,13 +30,11 @@ Library
 .config/homebrew
 .hermes
 .terminfo
-20-install-ubuntu-tools.sh
 30-install-thin-tools.sh
 40-install-work-tools.sh
 {{- end }}
 {{- if eq .profile "mac-work" }}
 .hermes
 .terminfo
-20-install-ubuntu-tools.sh
 30-install-thin-tools.sh
 {{- end }}

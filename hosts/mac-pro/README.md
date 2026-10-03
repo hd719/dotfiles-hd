@@ -2,8 +2,7 @@
 
 `mac-pro` is the full local-development MacBook profile. It installs the whole
 local package stack through Homebrew. Exact language runtimes use mise, which
-Homebrew installs. It does not use or manage an Ubuntu VM, Vagrant, or VMware
-Fusion.
+Homebrew installs.
 
 ## Install
 

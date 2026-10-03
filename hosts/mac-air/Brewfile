@@ -1,4 +1,4 @@
-# macOS control-plane applications only. Development tooling belongs in the VMs.
+# Thin-client applications only. Development tooling stays on the development Mac.
 
 brew "bookokrat"
 brew "fastfetch"
@@ -36,7 +36,5 @@ cask "raycast"
 cask "tableplus"
 cask "tailscale-app"
 cask "telegram"
-cask "vagrant"
-cask "vagrant-vmware-utility"
 cask "vlc"
 cask "zoom"

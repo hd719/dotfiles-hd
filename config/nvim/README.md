@@ -6,7 +6,7 @@ Hamel's existing Zed muscle memory.
 ## Profiles
 
 - `full` is the default and preserves the complete development editor on
-  Ubuntu, full personal Macs, and Resilience.
+  Full personal Macs and Resilience.
 - `thin` is selected by `DOTFILES_NVIM_PROFILE=thin`. It keeps the shared
   editing behavior, Nord, Bufferline, Lualine, Modicator, hlslens, WhichKey,
   Oil with Git status columns, Mini pairs and surround, Gitsigns, rendered

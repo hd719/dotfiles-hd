@@ -1,8 +1,6 @@
 {{- $repo := joinPath .chezmoi.sourceDir ".." ".." -}}
-{{- if eq .profile "ubuntu" -}}
-{{ joinPath $repo "hosts" "ubuntu-dev" ".zshrc" }}
-{{- else if eq .profile "mac-thin" -}}
-{{ joinPath $repo "hosts" "mac-thin" ".zshrc" }}
+{{- if eq .profile "mac-air" -}}
+{{ joinPath $repo "hosts" "mac-air" ".zshrc" }}
 {{- else if eq .profile "mac-pro" -}}
 {{ joinPath $repo "hosts" "mac-pro" ".zshrc" }}
 {{- else if eq .profile "mac-mini" -}}
