@@ -26,6 +26,7 @@ prepare_mac_mini_home() {
     "$home_dir/.config/herdr" \
     "$home_dir/.config/hunk" \
     "$home_dir/.config/mise" \
+    "$home_dir/.config/yazi" \
     "$home_dir/.hermes/skins" \
     "$home_dir/Library/Application Support/com.mitchellh.ghostty"
   chmod 700 "$home_dir/.config" "$home_dir/.hermes"
@@ -353,6 +354,8 @@ grep -Fxq 'original herdr' "$rollback_home/.config/herdr/config.toml"
 [[ "$(readlink "$rollback_home/.config/mise")" == \
   "$REPO_DIR/config/mise" ]]
 [[ ! -e "$rollback_home/.zshrc" && ! -L "$rollback_home/.zshrc" ]]
+[[ ! -e "$rollback_home/.config/yazi/theme.toml" && ! -L "$rollback_home/.config/yazi/theme.toml" ]]
+[[ ! -e "$rollback_home/.config/yazi/yazi.toml" && ! -L "$rollback_home/.config/yazi/yazi.toml" ]]
 
 initial_home="$case_dir/initial-rollback/home"
 initial_state="$case_dir/initial-rollback/state"
@@ -393,6 +396,7 @@ HOME="$initial_home" \
 [[ "$(readlink "$initial_home/.config/btop")" == "$REPO_DIR/config/btop" ]]
 [[ "$(readlink "$initial_home/.config/fastfetch")" == \
   "$REPO_DIR/config/fastfetch" ]]
+[[ ! -e "$initial_home/.config/yazi" && ! -L "$initial_home/.config/yazi" ]]
 
 apply_home="$case_dir/apply/home"
 mkdir -p "$apply_home"

@@ -153,18 +153,18 @@ Service lifecycle changes require separate approval.
 
 ## Resilience Work Mac
 
-- Manage only Ghostty, Herdr, Hunk, Neovim, Bookokrat, and the portable Git
+- Manage only Ghostty, Herdr, Hunk, Neovim, Bookokrat, Yazi, and the portable Git
   alias include.
 - Use `hosts/mac-work/Brewfile` and
   `hosts/mac-work/link-terminal-editor-config.sh`.
 - Never run the personal Mac bootstrap or the Mac mini Brewfile.
 - Keep the live work `~/.zshrc`, `config/mise`, Git identity, work runtimes,
   credentials, certificates, and Docker state machine-owned.
-- Use the runbook's pinned tools and exact five-link inventory.
+- Use the runbook's pinned tools and exact seven-link inventory.
 - Report every backup and policy blocker.
 
 The Resilience linker is intentional: it is the scoped, backup-safe installer
-for those five links. Do not replace it with ad hoc `ln -s` commands.
+for those seven links. Do not replace it with ad hoc `ln -s` commands.
 
 ## Preserved Zed Configuration
 

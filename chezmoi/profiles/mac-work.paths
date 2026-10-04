@@ -4,3 +4,5 @@ Library/Application Support/com.mitchellh.ghostty/config|config/ghostty/config
 .config/hunk/config.toml|config/hunk/config.toml
 .config/homebrew/Brewfile|hosts/mac-work/Brewfile
 .config/nvim|config/nvim
+.config/yazi/theme.toml|config/yazi/theme.toml
+.config/yazi/yazi.toml|config/yazi/yazi.toml

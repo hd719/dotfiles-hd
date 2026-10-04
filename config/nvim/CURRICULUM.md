@@ -333,6 +333,8 @@ unexplained magic.
   Zed/VSCode-style file tree, kept separate from Oil (`replace_netrw = false`). — Session 008
 - [ ] **9.D5** Create a file quickly by opening its full path with `:edit`, then
   save it with `Space w`.
+- [ ] **9.D6** Open Yazi with `Space -` for previews or bulk copy, then return
+  to Oil (`Space h`) or Snacks explorer (`Space e`).
 
 ## Lesson 10 — Warrior Techniques and Config Ownership
 

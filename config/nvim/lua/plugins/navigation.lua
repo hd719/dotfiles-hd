@@ -91,6 +91,36 @@ local function hide_empty_scratch(item)
   return item
 end
 
+-- Root the sidebar on the current file's repo, not Neovim's startup cwd.
+-- That way Space e on ~/Developer/Resilience/README.md shows Resilience,
+-- even when this Neovim was started from dotfiles-hd.
+local function open_explorer()
+  local file = vim.api.nvim_buf_get_name(0)
+  if vim.bo.filetype == "oil" then
+    file = require("oil").get_current_dir() or ""
+  elseif vim.bo.buftype ~= "" then
+    -- Terminal and utility buffer names are URIs, not filesystem paths.
+    file = ""
+  end
+  local root = Snacks.git.get_root(file ~= "" and file or vim.fn.getcwd())
+    or (file ~= "" and vim.fs.dirname(file))
+    or vim.fn.getcwd()
+  root = vim.fs.normalize(root)
+
+  -- Reopen instead of set_cwd + reveal: two overlapping refreshes list the
+  -- tree twice.
+  local existing = Snacks.picker.get({ source = "explorer" })[1]
+  if existing then
+    local same = vim.fs.normalize(existing:cwd()) == root
+    existing:close()
+    if same then
+      return
+    end
+  end
+
+  Snacks.explorer({ cwd = root })
+end
+
 -- Only prefill paths, so a clipboard holding copied code is ignored.
 local function clipboard_path()
   local text = vim.trim(vim.fn.getreg("+"))
@@ -386,9 +416,7 @@ return {
       },
       {
         "<leader>e",
-        function()
-          Snacks.explorer()
-        end,
+        open_explorer,
         desc = "File explorer",
       },
       {
@@ -500,5 +528,26 @@ return {
       "stevearc/oil.nvim",
     },
     config = true,
+  },
+
+  -- Floating Yazi TUI for previews and bulk copy. Oil stays the directory
+  -- buffer (`open_for_directories = false`); Snacks explorer stays Space e.
+  {
+    "mikavilpas/yazi.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      { "nvim-lua/plenary.nvim", lazy = true },
+    },
+    opts = {
+      open_for_directories = false,
+    },
+    keys = {
+      {
+        "<leader>-",
+        mode = { "n", "v" },
+        "<cmd>Yazi<cr>",
+        desc = "Yazi file manager",
+      },
+    },
   },
 }

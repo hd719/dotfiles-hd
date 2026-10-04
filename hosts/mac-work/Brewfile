@@ -21,6 +21,8 @@ brew "tree-sitter-cli"
 brew "uv"
 brew "vscode-langservers-extracted"
 brew "vtsls"
+brew "yazi"
 
 cask "font-maple-mono-nf"
+cask "font-symbols-only-nerd-font"
 cask "ghostty"

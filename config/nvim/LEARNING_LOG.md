@@ -3924,3 +3924,55 @@ Goal: add a GraphQL LSP for `.graphql` files, reproducibly on any machine.
   three lines. Physical mouse feel still needs Hamel's confirmation.
 - No curriculum items were marked practiced. Best next core lesson remains
   Curriculum 9.7, after confirming scrolling feels comfortable.
+
+## 2026-09-29 — Session 060: Yazi Alongside Oil and Snacks
+
+### Why Yazi Exists
+
+- Oil (`Space h`) edits a directory as a Neovim buffer.
+- Snacks explorer (`Space e`) is a sidebar tree for browsing and opening.
+- Yazi (`Space -`) is a separate TUI: image/document preview, bulk copy/move,
+  archives, and dual-pane-style selection. Those operations are not Oil's
+  pending-text model and not the Snacks tree.
+
+### Config Added
+
+- `yazi.nvim` opens Yazi in a float and sends chosen files back to Neovim.
+- `open_for_directories` stays false so Oil still owns directory buffers.
+- The Yazi binary is in the thin Brewfile, shared personal-Mac Brewfile,
+  work Mac Brewfile, and Ubuntu `mise.toml`.
+- Hamel Nord theme lives in `config/yazi/theme.toml`, matching Ghostty Hamel
+  Nord Blur and `config/btop/themes/hamel-nord.theme`. Chezmoi links
+  `theme.toml` and `yazi.toml` into `~/.config/yazi/` (parent mode `700`).
+- Curriculum 9.D6 is optional and unchecked until Hamel tries `Space -`.
+- Best next core lesson remains Curriculum 9.7.
+
+### Icon Fix
+
+- Hamel reported Yazi icons as boxes/blobs. Ghostty's Hasklug fallback family
+  name did not match the Mac Homebrew install, and default Material icon colors
+  clashed with Nord.
+- Installed `font-symbols-only-nerd-font`, mapped Nerd Private Use Area ranges
+  to `Symbols Nerd Font Mono` in Ghostty, and recolored Yazi `[icon]` rules to
+  Hamel Nord. Reload Ghostty (`opt+r`) then reopen Yazi with `Space -`.
+
+### Icon Fix Correction
+
+- Hamel preferred his Neovim icons. Yazi's `[icon]` table is now a full
+  override generated from `mini.icons`, the same source Oil and Snacks use.
+- The Ghostty codepoint map was removed: it forced icons onto Symbols Nerd Font
+  and drew them differently from Neovim. Maple Mono NF draws them first again;
+  Symbols Nerd Font Mono stays as the fallback.
+
+### Follow-Ups
+
+- Plain `yazi` opened text files in VS Code because the live work `~/.zshrc`
+  sets `EDITOR="code --wait"`. `config/yazi/yazi.toml` pins Yazi's `edit`
+  opener to `nvim` without changing `$EDITOR`.
+- `Space e` now roots on the current file's Git repository, or its folder
+  outside Git. A first version retargeted the open sidebar with two overlapping
+  refreshes and listed the tree twice; it now closes and reopens instead.
+- The Ghostty starfield shader is paused (commented out), not removed.
+- Hamel tried Yazi and still reaches for Oil and Snacks first. Curriculum 9.D6
+  stays optional and unchecked.
+- Best next core lesson remains Curriculum 9.7.

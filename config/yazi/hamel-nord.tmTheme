@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Hamel Nord syntax colors for Yazi previews. Mirrors the resolved Neovim
+     highlight groups from config/nvim/lua/plugins/colorscheme.lua. -->
+<plist version="1.0">
+<dict>
+  <key>name</key>
+  <string>Hamel Nord</string>
+  <key>settings</key>
+  <array>
+    <dict>
+      <key>settings</key>
+      <dict>
+        <key>background</key>
+        <string>#3b4252</string>
+        <key>foreground</key>
+        <string>#d8dee9</string>
+        <key>caret</key>
+        <string>#88c0d0</string>
+        <key>lineHighlight</key>
+        <string>#434c5e</string>
+        <key>selection</key>
+        <string>#434c5e</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Comment</string>
+      <key>scope</key>
+      <string>comment, punctuation.definition.comment</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#b5b5b5</string>
+        <key>fontStyle</key>
+        <string>italic</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>String</string>
+      <key>scope</key>
+      <string>string, punctuation.definition.string</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#a3be8c</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Escape</string>
+      <key>scope</key>
+      <string>constant.character.escape, string.regexp</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#ebcb8b</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Number</string>
+      <key>scope</key>
+      <string>constant.numeric</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#b48ead</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Keyword, operator, type, boolean</string>
+      <key>scope</key>
+      <string>keyword, storage, storage.type, keyword.operator, constant.language, support.type, entity.name.type, meta.preprocessor, punctuation.definition.variable</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#81a1c1</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Function</string>
+      <key>scope</key>
+      <string>entity.name.function, support.function, meta.function-call, variable.function, variable.parameter</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#88c0d0</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Brackets</string>
+      <key>scope</key>
+      <string>punctuation.section, meta.brace, punctuation.definition.array, punctuation.definition.parameters</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#88c0d0</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Delimiter</string>
+      <key>scope</key>
+      <string>punctuation.separator, punctuation.terminator</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#eceff4</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Variable</string>
+      <key>scope</key>
+      <string>variable, variable.other, constant.other, support.variable</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#d8dee9</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Markup heading</string>
+      <key>scope</key>
+      <string>markup.heading, entity.name.section</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#88c0d0</string>
+        <key>fontStyle</key>
+        <string>bold</string>
+      </dict>
+    </dict>
+  </array>
+</dict>
+</plist>

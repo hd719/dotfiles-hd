@@ -11,8 +11,8 @@ Hamel's existing Zed muscle memory.
   editing behavior, Nord, Bufferline, Lualine, Modicator, hlslens, WhichKey,
   Oil with Git status columns, Mini pairs and surround, Gitsigns, rendered
   Markdown with wrapped tables, Obsidian, slim Snacks pickers and Explorer,
-  Snacks terminals, Tree-sitter Markdown parsing, Marksman, and Bookokrat PDF
-  reading.
+  Snacks terminals, Yazi, Tree-sitter Markdown parsing, Marksman, and Bookokrat
+  PDF reading.
 
 Both profiles use this directory and the same `lazy-lock.json`. Disabled
 full-only plugins are not restored on a thin machine. An unknown profile stops
@@ -20,7 +20,7 @@ startup instead of silently choosing the wrong tool boundary.
 
 ## Full Profile Requirements
 
-- Neovim 0.12+, ripgrep, fd, fzf, LazyGit, and the Tree-sitter CLI.
+- Neovim 0.12+, ripgrep, fd, fzf, LazyGit, Yazi, and the Tree-sitter CLI.
 - Go: `gopls` and `gofmt`.
 - Lua: `lua-language-server` and `stylua`.
 - JavaScript and TypeScript: `vtsls` for language intelligence,
@@ -44,8 +44,8 @@ startup instead of silently choosing the wrong tool boundary.
 - Editing: `mini.pairs` auto-closes brackets and quotes; `mini.surround` adds,
   changes, and deletes surrounding pairs with a `gs` prefix.
 
-The thin profile requires Neovim 0.12+, Bookokrat, ripgrep, Marksman, and the
-Tree-sitter CLI used to build its two Markdown parsers.
+The thin profile requires Neovim 0.12+, Bookokrat, ripgrep, Marksman, Yazi, and
+the Tree-sitter CLI used to build its two Markdown parsers.
 
 Install the Markdown formatter with:
 
@@ -78,7 +78,8 @@ MISE_NO_CONFIG=1 mise exec node@24.18.0 -- \
 
 ## Plugin Catalog
 
-The full profile installs all 27 plugins below. The thin profile installs only
+The full profile installs all 29 locked plugins, including Yazi's Plenary
+dependency. The thin profile installs only
 the subset listed above. In `:Lazy`, **Loaded** means a plugin's trigger has
 happened in this session; **Not Loaded** means it is installed and waiting for
 that trigger. `lazy-lock.json` pins exact versions, while the Lua files under
@@ -110,6 +111,7 @@ plugin loads, it stays loaded until that Neovim session ends.
 | `snacks.nvim`                | Dashboard, finders, explorer, diagnostics, LazyGit, terminals, notifications, and image previews | Early every startup: `lazy = false`, priority `1000`     |
 | `treesitter-parser-registry` | Catalog that tells Tree-sitter where language parsers and queries live                           | Immediately before Tree-sitter as its dependency         |
 | `which-key.nvim`             | Shows available mappings after a key prefix                                                      | Just after startup: `VeryLazy` event                     |
+| `yazi.nvim`                  | Opens Yazi in a float; Hamel Nord theme is linked at `~/.config/yazi/theme.toml`                 | Just after startup: `VeryLazy` event or first `Space -`  |
 | `conform.nvim`               | Runs gofmt, StyLua, Prettier, mdformat, and Ruff                                                 | First file read/new file, `Space p`, or `:ConformInfo`   |
 | `gitsigns.nvim`              | Git add/change/delete gutter marks and current-line blame                                        | First file read or new file: `BufReadPre` / `BufNewFile` |
 | `grug-far.nvim`              | Reviewed, exact-word replacement in the current file                                             | First `Space R`                                          |
@@ -126,7 +128,7 @@ Configuration map:
 - `lua/config/lazy.lua`: Lazy bootstrap.
 - `lua/plugins/colorscheme.lua`: Nord.
 - `lua/plugins/editor.lua`: WhichKey and Tree-sitter.
-- `lua/plugins/navigation.lua`: Snacks, Oil, Oil Git status, and icons.
+- `lua/plugins/navigation.lua`: Snacks, Oil, Oil Git status, Yazi, and icons.
 - `lua/plugins/lsp.lua`: completion, LSP, schemas, and formatting.
 - `lua/plugins/obsidian.lua`: safe vault navigation and explicit daily notes.
 - `lua/plugins/git.lua`, `bufferline.lua`, `statusline.lua`,
@@ -194,6 +196,7 @@ Every agent teaching Neovim must read and update both files.
 | `Space S`                                | Search named code symbols with the attached LSP                               |
 | `Space h`                                | Open Oil file browser                                                         |
 | `Space e`                                | Open the file-explorer sidebar (Snacks)                                       |
+| `Space -`                                | Open Yazi in a floating window                                                |
 | `Space b`                                | Pick a buffer                                                                 |
 | `Space b`, then `Space d`                | Close the highlighted buffer; empty replacement buffers stay hidden           |
 | `Space d`                                | Close the current buffer                                                      |
@@ -368,7 +371,10 @@ show `??`, and files matching `.gitignore` show `!!`. The status is fetched
 after the listing is drawn, so it appears a moment later on large repositories
 and never delays the browser itself. It refreshes when Oil applies a change.
 
-The `Space e` file-explorer sidebar is separate from Oil (`Space h`). From the
+The `Space e` file-explorer sidebar is separate from Oil (`Space h`). It roots
+on the current file's Git repository, or its folder outside Git, rather than
+Neovim's startup directory. Terminal and utility buffers use the current
+working directory. From the
 tree, `Space W l` moves focus to the editor, and `Space W h` moves focus back
 to the tree. The existing `Space l` and `Ctrl-h/l` shortcuts remain available,
 but the `Space W` group works consistently even where a plugin owns a plain

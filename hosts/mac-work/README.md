@@ -48,6 +48,8 @@ for path in \
   "$HOME/.config/nvim" \
   "$HOME/.config/herdr/config.toml" \
   "$HOME/.config/hunk/config.toml" \
+  "$HOME/.config/yazi/theme.toml" \
+  "$HOME/.config/yazi/yazi.toml" \
   "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 do
   ls -ld "$path" 2>/dev/null || true
@@ -82,7 +84,7 @@ The GraphQL server uses a fixed prefix. Schema-aware features still require a
 project-owned GraphQL config; never add one to a work repository without
 approval. Prettier remains project-local.
 
-Create the five managed links:
+Create the seven managed links:
 
 ```bash
 hosts/mac-work/link-terminal-editor-config.sh
@@ -108,6 +110,11 @@ is safe to rerun. It owns only:
 | `~/.config/herdr/config.toml`                                | `config/herdr/config.toml` |
 | `~/.config/hunk/config.toml`                                 | `config/hunk/config.toml`  |
 | `~/.config/nvim`                                             | `config/nvim`              |
+| `~/.config/yazi/theme.toml`                                  | `config/yazi/theme.toml`   |
+| `~/.config/yazi/yazi.toml`                                   | `config/yazi/yazi.toml`    |
+
+Yazi keeps its plugins, cache, and other mutable state local. The linker
+rejects a symlinked Yazi parent before changing any managed destination.
 
 Restore every locked Neovim plugin, including plugins gated off during normal
 startup:
@@ -172,7 +179,7 @@ Never reset local changes or repeatedly retry a failed stage.
     bash-language-server bookokrat fd fzf gopls herdr hunk jq lazygit \
     lua-language-server magick marksman nvim rg stylua tree-sitter uv \
     vscode-eslint-language-server vscode-json-language-server vtsls \
-    mdformat ruff
+    mdformat ruff yazi
   do
     command -v "$cmd"
   done
@@ -190,6 +197,10 @@ Never reset local changes or repeatedly retry a failed stage.
     "$HOME/Developer/dotfiles-hd/config/herdr/config.toml"
   test "$(readlink "$HOME/.config/hunk/config.toml")" = \
     "$HOME/Developer/dotfiles-hd/config/hunk/config.toml"
+  test "$(readlink "$HOME/.config/yazi/theme.toml")" = \
+    "$HOME/Developer/dotfiles-hd/config/yazi/theme.toml"
+  test "$(readlink "$HOME/.config/yazi/yazi.toml")" = \
+    "$HOME/Developer/dotfiles-hd/config/yazi/yazi.toml"
   test "$(readlink "$HOME/Library/Application Support/com.mitchellh.ghostty/config")" = \
     "$HOME/Developer/dotfiles-hd/config/ghostty/config"
 

@@ -7,6 +7,7 @@ REPO_DIR="$(cd "$TEST_DIR/../.." && pwd -P)"
 tests=(
   hosts/shared/macos/tests/bootstrap-test.sh
   hosts/mac-air/tests/thin-bootstrap-test.sh
+  hosts/mac-work/tests/link-terminal-editor-config-test.sh
   hosts/mac-work/tests/goodmorning-test.sh
   hosts/mac-work/herdr/tests/hd-lib-test.sh
   hosts/mac-work/herdr/tests/hd-pargasite-test.sh
