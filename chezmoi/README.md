@@ -9,13 +9,12 @@ services, secrets, identity, enrollment, macOS preferences, or mutable state.
 
 ## Profiles
 
-| Profile | Host | Package behavior |
-| --- | --- | --- |
-| `ubuntu` | Ubuntu development VM | Installs the declared mise toolchain |
-| `mac-thin` | Thin Mac control plane | Installs the thin Brewfile |
-| `mac-pro` | Standalone full-development MacBook | Installs shared and profile Brewfiles through the Mac bootstrap |
-| `mac-mini` | Production Mac mini | Configuration-only inside Chezmoi; packages stay in the guarded Mac bootstrap |
-| `mac-work` | Resilience work Mac | Reserved for a later opt-in rollout |
+| Profile    | Host                                | Package behavior                                                              |
+| ---------- | ----------------------------------- | ----------------------------------------------------------------------------- |
+| `mac-air`  | MacBook Air thin client             | Installs the thin Brewfile                                                    |
+| `mac-pro`  | Standalone full-development MacBook | Installs shared and profile Brewfiles through the Mac bootstrap               |
+| `mac-mini` | Production Mac mini                 | Configuration-only inside Chezmoi; packages stay in the guarded Mac bootstrap |
+| `mac-work` | Resilience work Mac                 | Reserved for a later opt-in rollout                                           |
 
 Each `profiles/*.paths` file is the exact backup, apply, doctor, and rollback
 allowlist. A matching `*.ancestors` file records parent directories whose
@@ -24,30 +23,28 @@ original type must be restored exactly.
 ## Preview and Apply
 
 ```bash
-./chezmoi/bootstrap.sh ubuntu --preview
+./chezmoi/bootstrap.sh mac-air --preview
 ```
 
-Substitute `mac-thin`, `mac-pro`, `mac-mini`, or `mac-work` as needed.
+Substitute `mac-pro`, `mac-mini`, or `mac-work` as needed.
 
 After review and host approval:
 
 ```bash
 DOTFILES_CHEZMOI_APPROVED=1 \
-  ./chezmoi/bootstrap.sh ubuntu --apply
+  ./chezmoi/bootstrap.sh mac-air --apply
 ```
 
 Mac mini also requires `DOTFILES_MAC_MINI_CONFIG_ONLY=1`. Work Mac requires
 `DOTFILES_WORK_MAC_OPT_IN=1` and remains deferred.
 
 Apply requires a clean canonical checkout exactly matching its reviewed remote
-branch. Production defaults to `master`. The disposable Ubuntu Vagrant canary
-may set `DOTFILES_GIT_REF`; provisioning passes that reviewed branch through to
-Chezmoi without weakening normal host applies. Apply creates a mode-`0700`
+branch, `master`. Apply creates a mode-`0700`
 timestamped backup, validates rollback, requires a no-op second apply, verifies
 clean status, and runs the profile doctor.
 
 The host bootstraps are the normal entry points. They retain provisioning,
-packages, VM lifecycle, maintenance, and doctor logic while delegating managed
+packages, maintenance, and doctor logic while delegating managed
 user configuration to Chezmoi.
 
 ## Rollback
@@ -79,5 +76,5 @@ CHEZMOI_BIN="$HOME/.local/bin/chezmoi" \
   bash chezmoi/tests/production-test.sh
 ```
 
-The test renders and exercises all five profiles in temporary homes. It covers
+The test renders and exercises all four profiles in temporary homes. It covers
 backup, apply, second-apply idempotence, doctor, rollback, and recovery/reapply.

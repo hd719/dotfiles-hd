@@ -97,9 +97,12 @@ end
 local function open_explorer()
   local file = vim.api.nvim_buf_get_name(0)
   if vim.bo.filetype == "oil" then
-    file = require("oil").get_current_dir() or file
+    file = require("oil").get_current_dir() or ""
+  elseif vim.bo.buftype ~= "" then
+    -- Terminal and utility buffer names are URIs, not filesystem paths.
+    file = ""
   end
-  local root = Snacks.git.get_root(file ~= "" and file or nil)
+  local root = Snacks.git.get_root(file ~= "" and file or vim.fn.getcwd())
     or (file ~= "" and vim.fs.dirname(file))
     or vim.fn.getcwd()
   root = vim.fs.normalize(root)
