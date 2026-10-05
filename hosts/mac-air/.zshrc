@@ -1,36 +1,54 @@
-# Lightweight remote-access shell. No local project runtimes or VM helpers.
-export DOTFILES_MAC_PROFILE=mac-air
+# MacBook Air thin client. Project tooling and runtimes stay on the development Mac.
+
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+
+setopt append_history
+setopt hist_ignore_all_dups
+setopt share_history
+
 export DOTFILES_NVIM_PROFILE=thin
 export EDITOR=nvim
 export VISUAL=nvim
 export GIT_EDITOR=nvim
 unset GIT_PAGER
-HISTFILE="$HOME/.zsh_history"
-HISTSIZE=10000
-SAVEHIST=10000
-setopt append_history hist_ignore_all_dups share_history
 
-typeset -gaU path
-path=("${HOMEBREW_PREFIX:-/opt/homebrew}/bin" "$HOME/.local/bin" $path)
-export PATH
-
-typeset air_zshrc="${${(%):-%N}:A}"
-typeset air_repo="${air_zshrc:h:h:h}"
-source "$air_repo/config/zsh/shared/functions.zsh"
-source "$air_repo/config/zsh/shared/aliases.zsh"
-source "$air_repo/config/zsh/shared/codex-aliases.zsh"
-source "$air_repo/config/zsh/shared/codex-functions.zsh"
-source "$air_repo/config/zsh/mac/aliases.zsh"
-alias vault='cd ~/Developer/hd'
-unset air_repo air_zshrc
+typeset mac_air_brew_prefix="${HOMEBREW_PREFIX:-/opt/homebrew}"
 
 if [[ -o interactive ]]; then
-  (( $+commands[zoxide] )) && eval "$(zoxide init --cmd cd zsh)"
-  (( $+commands[starship] )) && eval "$(starship init zsh)"
+  if (( $+commands[zoxide] )); then
+    eval "$(zoxide init --cmd cd zsh)"
+  fi
+fi
+
+typeset mac_air_zshrc="${${(%):-%N}:A}"
+typeset mac_air_dir="${mac_air_zshrc:h}"
+typeset mac_air_repo="${mac_air_dir:h:h}"
+source "$mac_air_repo/config/zsh/shared/functions.zsh"
+source "$mac_air_repo/config/zsh/shared/aliases.zsh"
+source "$mac_air_repo/config/zsh/shared/codex-aliases.zsh"
+source "$mac_air_repo/config/zsh/shared/codex-functions.zsh"
+source "$mac_air_repo/config/zsh/mac/aliases.zsh"
+source "$mac_air_repo/config/zsh/mac/personal/aliases.zsh"
+source "$mac_air_dir/herdr.zsh"
+
+if [[ -o interactive ]]; then
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#9399b2'
-  for air_plugin in zsh-autosuggestions zsh-syntax-highlighting; do
-    air_plugin_path="${HOMEBREW_PREFIX:-/opt/homebrew}/share/$air_plugin/$air_plugin.zsh"
-    [[ ! -r "$air_plugin_path" ]] || source "$air_plugin_path"
-  done
-  unset air_plugin air_plugin_path
+  if [[ -r "$mac_air_brew_prefix/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$mac_air_brew_prefix/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  fi
+
+  if (( $+commands[starship] )); then
+    eval "$(starship init zsh)"
+  fi
+fi
+
+unset mac_air_brew_prefix
+unset mac_air_dir mac_air_repo mac_air_zshrc
+
+# Load last so it can wrap every ZLE widget created above.
+if [[ -o interactive \
+  && -r "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi

@@ -21,8 +21,8 @@ die() {
 load_profile() {
   PROFILE="${1:-}"
   case "$PROFILE" in
-    ubuntu|mac-thin|mac-air|mac-pro|mac-studio|mac-mini|mac-work) ;;
-    *) die "profile must be ubuntu, mac-thin, mac-air, mac-pro, mac-studio, mac-mini, or mac-work" ;;
+    mac-air|mac-pro|mac-studio|mac-mini|mac-work) ;;
+    *) die "profile must be mac-air, mac-pro, mac-studio, mac-mini, or mac-work" ;;
   esac
   PROFILE_CONFIG="$PROFILES_DIR/$PROFILE.toml"
   PROFILE_MANIFEST="$PROFILES_DIR/$PROFILE.paths"
@@ -33,20 +33,10 @@ load_profile() {
     || die "incomplete profile: $PROFILE"
 }
 
-activate_profile() {
-  local temporary_marker="$ACTIVE_MARKER.tmp.$$"
-
-  mkdir -p "$STATE_DIR"
-  printf 'profile=%s\ncommit=%s\n' \
-    "$PROFILE" "$(git -C "$REPO_DIR" rev-parse HEAD)" > "$temporary_marker"
-  chmod 600 "$temporary_marker"
-  mv "$temporary_marker" "$ACTIVE_MARKER"
-}
-
 validate_profile_os() {
   [[ "${DOTFILES_CHEZMOI_TEST:-0}" == 1 ]] && return
   case "$PROFILE:$(uname -s)" in
-    ubuntu:Linux|mac-thin:Darwin|mac-air:Darwin|mac-pro:Darwin|mac-studio:Darwin|mac-mini:Darwin|mac-work:Darwin) ;;
+    mac-air:Darwin|mac-pro:Darwin|mac-studio:Darwin|mac-mini:Darwin|mac-work:Darwin) ;;
     *) die "$PROFILE does not match $(uname -s)" ;;
   esac
 }
@@ -57,8 +47,8 @@ require_canonical_checkout() {
   reviewed_ref="${DOTFILES_CHEZMOI_REVIEWED_REF:-master}"
   git check-ref-format --branch "$reviewed_ref" >/dev/null 2>&1 \
     || die "invalid reviewed branch: $reviewed_ref"
-  [[ "$reviewed_ref" == master || "$PROFILE" == ubuntu ]] \
-    || die "custom reviewed branches are limited to the Ubuntu canary"
+  [[ "$reviewed_ref" == master ]] \
+    || die "apply requires the reviewed master branch"
   [[ "$REPO_DIR" == "$HOME/Developer/dotfiles-hd" ]] \
     || die "apply requires $HOME/Developer/dotfiles-hd"
   [[ "$DEST_DIR" == "$HOME" ]] || die "apply destination must be HOME"

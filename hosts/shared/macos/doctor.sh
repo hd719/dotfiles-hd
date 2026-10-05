@@ -9,8 +9,6 @@ CHEZMOI_DOCTOR="${DOTFILES_CHEZMOI_DOCTOR:-$DOTFILES_DIR/chezmoi/doctor.sh}"
 PROFILE=""
 FAILURES=0
 MISE_RUNTIME_FAILURES=0
-APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
-PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
 
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
@@ -85,23 +83,6 @@ for brewfile in "$COMMON_BREWFILE" "$PROFILE_BREWFILE"; do
   fi
 done
 
-if [[ "$PROFILE" == mac-studio ]]; then
-  if "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1; then
-    pass "Rosetta 2 installed for the VMware utility"
-  else
-    fail "Rosetta 2 missing for the VMware utility"
-  fi
-  for app_name in "VMware Fusion.app" "Ollama.app"; do
-    if [[ -d "$APPLICATIONS_DIR/$app_name" ]]; then
-      pass "$app_name installed"
-    else
-      fail "$app_name missing"
-    fi
-  done
-
-  printf 'SKIP  Ubuntu runtime and SSH checks (manual use only)\n'
-fi
-
 if "$GIT_ALIASES_SCRIPT" --check >/dev/null 2>&1; then
   pass "portable Git aliases"
 else
@@ -175,7 +156,7 @@ if [[ "$MISE_RUNTIME_FAILURES" -eq 0 ]]; then
     fi
   done
 
-  required_commands='mise node npm npx pnpm go python bun nvim rg fd fzf lazygit hunk tree-sitter lua-language-server marksman stylua vtsls vscode-eslint-language-server bash-language-server gopls ruff mdformat'
+  required_commands='mise node npm npx pnpm go python bun nvim rg fd fzf lazygit hunk tree-sitter lua-language-server marksman stylua vtsls vscode-eslint-language-server bash-language-server gopls ruff mdformat yazi'
   shell_baseline_path="$(sanitize_shell_path "$PATH")"
   shell_version_probe='printf "__DOTFILES_NODE__=%s\n" "$(node --version 2>/dev/null)"
 printf "__DOTFILES_PNPM__=%s\n" "$(pnpm --version 2>/dev/null)"

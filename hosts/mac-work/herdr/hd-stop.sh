@@ -20,7 +20,7 @@ command -v herdr >/dev/null 2>&1 || {
 
 # Dev-server ports used by the platform + pargasite apps. Docker-served ports
 # are omitted, and hd_free_port also guards against Docker-owned listeners.
-PORTS=(3000 3001 3003 4004 9001 9002 9695)
+PORTS=(3000 3001 3003 4004 6006 9001 9002 9695)
 
 echo "freeing dev-server ports:"
 for port in "${PORTS[@]}"; do

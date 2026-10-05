@@ -8,9 +8,6 @@ STAMP="${DOTFILES_STAMP:-$(date +%Y%m%d-%H%M%S)}"
 CHEZMOI_BOOTSTRAP="${DOTFILES_CHEZMOI_BOOTSTRAP:-$DOTFILES_DIR/chezmoi/bootstrap.sh}"
 CHEZMOI_PREVIEW="${DOTFILES_CHEZMOI_PREVIEW:-$DOTFILES_DIR/chezmoi/preview.sh}"
 HOST_DOCTOR="${DOTFILES_MAC_DOCTOR:-$SCRIPT_DIR/doctor.sh}"
-PKGUTIL="${DOTFILES_PKGUTIL:-/usr/sbin/pkgutil}"
-SOFTWAREUPDATE="${DOTFILES_SOFTWAREUPDATE:-/usr/sbin/softwareupdate}"
-SUDO="${DOTFILES_SUDO:-/usr/bin/sudo}"
 PROFILE=""
 MODE="dry-run"
 
@@ -30,8 +27,7 @@ Modes:
   --apply    Install dependencies and apply configuration through Chezmoi.
 
 The script never handles credentials, removes packages, cleans Homebrew, or
-starts/restarts workload services. The Studio VMware utility installer registers
-its host helper service. Xcode Command Line Tools, Homebrew, and a clean clone
+starts/restarts services. Xcode Command Line Tools, Homebrew, and a clean clone
 at ~/Developer/dotfiles-hd are prerequisites.
 EOF
 }
@@ -71,10 +67,6 @@ done
 PROFILE="$(canonical_profile "$PROFILE")" || exit 2
 load_profile "$PROFILE" "$DOTFILES_DIR" "$HOME"
 
-rosetta_installed() {
-  "$PKGUTIL" --pkg-info com.apple.pkg.RosettaUpdateAuto >/dev/null 2>&1
-}
-
 [[ "$(uname -s)" == "Darwin" ]] || die "personal-Mac bootstrap requires macOS"
 [[ "$(uname -m)" == "arm64" ]] || die "personal-Mac bootstrap currently supports Apple Silicon only"
 xcode-select -p >/dev/null 2>&1 || die "install Xcode Command Line Tools first: xcode-select --install"
@@ -83,8 +75,7 @@ git -C "$DOTFILES_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "not a Git checkout: $DOTFILES_DIR"
 
 if [[ "$MODE" == "apply" ]]; then
-  [[ "$PROFILE" != mac-studio \
-    || "${DOTFILES_MAC_STUDIO_ARRIVED:-0}" == "1" ]] \
+  [[ "$PROFILE" != mac-studio || "${DOTFILES_MAC_STUDIO_ARRIVED:-0}" == 1 ]] \
     || die "mac-studio apply requires DOTFILES_MAC_STUDIO_ARRIVED=1 after the hardware arrives"
   [[ "$DOTFILES_DIR" == "$HOME/Developer/dotfiles-hd" \
     || "${DOTFILES_ALLOW_NONCANONICAL:-0}" == "1" ]] \
@@ -123,12 +114,6 @@ if [[ "$MODE" == "dry-run" ]]; then
   say "would apply the $PROFILE Chezmoi profile and portable Git aliases"
   say "would restore locked Neovim plugins and required Tree-sitter parsers without changing lazy-lock.json"
   say "would run the verification doctor"
-  if [[ "$PROFILE" == mac-studio ]]; then
-    say "would install Rosetta 2 when missing for the VMware utility"
-    say "the utility installer registers a host helper; Ubuntu stays dormant"
-    say "Vagrant provider plugin setup is deferred until manual use"
-    say "VMware Fusion remains a manual install; Ollama models remain machine-owned"
-  fi
 
   write_zprofile_block "$HOME/.zprofile" "$MISE_FRAGMENT" "$STAMP" 1
   if [[ -x "${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}" ]]; then
@@ -172,11 +157,6 @@ fi
 DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
   DOTFILES_CHEZMOI_REQUIRE_REVIEWED=1 \
   "$CHEZMOI_BOOTSTRAP" "$PROFILE" --preview >/dev/null
-
-if [[ "$PROFILE" == mac-studio ]] && ! rosetta_installed; then
-  say "Installing Rosetta 2 for the Vagrant VMware utility..."
-  "$SUDO" "$SOFTWAREUPDATE" --install-rosetta --agree-to-license
-fi
 
 say "Installing shared Homebrew dependencies without broad upgrades..."
 HOMEBREW_NO_AUTO_UPDATE=1 brew bundle install --no-upgrade --file "$COMMON_BREWFILE"

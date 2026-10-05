@@ -232,8 +232,8 @@ load_profile() {
   MISE_CONFIG="${DOTFILES_MISE_CONFIG:-$dotfiles_dir/config/mise/config.toml}"
   MISE_FRAGMENT="$dotfiles_dir/hosts/shared/macos/mise-shims.zsh"
   case "$profile" in
-    mac-pro) PROFILE_BREWFILE="$dotfiles_dir/hosts/mac-pro/Brewfile" ;;
     mac-studio) PROFILE_BREWFILE="$dotfiles_dir/hosts/mac-studio/Brewfile" ;;
+    mac-pro) PROFILE_BREWFILE="$dotfiles_dir/hosts/mac-pro/Brewfile" ;;
     mac-mini) PROFILE_BREWFILE="$dotfiles_dir/hosts/mac-mini/Brewfile" ;;
   esac
 }

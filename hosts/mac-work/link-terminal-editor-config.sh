@@ -35,13 +35,20 @@ for source in \
   "$DOTFILES_DIR/config/ghostty/config" \
   "$DOTFILES_DIR/config/herdr/config.toml" \
   "$DOTFILES_DIR/config/hunk/config.toml" \
-  "$DOTFILES_DIR/config/nvim"
+  "$DOTFILES_DIR/config/nvim" \
+  "$DOTFILES_DIR/config/yazi/theme.toml" \
+  "$DOTFILES_DIR/config/yazi/yazi.toml"
 do
   if [[ ! -e "$source" ]]; then
     echo "Missing source: $source" >&2
     exit 1
   fi
 done
+
+if [[ -L "$HOME/.config/yazi" || ( -e "$HOME/.config/yazi" && ! -d "$HOME/.config/yazi" ) ]]; then
+  echo "Yazi config parent must be a real directory: $HOME/.config/yazi" >&2
+  exit 1
+fi
 
 backup_and_link \
   "$DOTFILES_DIR/config/bookokrat" \
@@ -56,5 +63,9 @@ backup_and_link \
   "$DOTFILES_DIR/config/hunk/config.toml" \
   "$HOME/.config/hunk/config.toml"
 backup_and_link "$DOTFILES_DIR/config/nvim" "$HOME/.config/nvim"
+mkdir -p "$HOME/.config/yazi"
+chmod 700 "$HOME/.config/yazi"
+backup_and_link "$DOTFILES_DIR/config/yazi/theme.toml" "$HOME/.config/yazi/theme.toml"
+backup_and_link "$DOTFILES_DIR/config/yazi/yazi.toml" "$HOME/.config/yazi/yazi.toml"
 
 echo "Resilience terminal/editor links are ready."

@@ -18,13 +18,11 @@ constraints, and agent workflow policy here.
 
 | Target                                     | Source of truth              |
 | ------------------------------------------ | ---------------------------- |
-| Thin personal MacBook (`mac-thin`)         | `hosts/mac-thin/README.md`   |
-| Future access-only Air (`mac-air`)         | `hosts/mac-air/README.md`    |
+| MacBook Air thin client (`mac-air`)        | `hosts/mac-air/README.md`    |
 | Staged primary Mac Studio (`mac-studio`)   | `hosts/mac-studio/README.md` |
 | Standalone development MacBook (`mac-pro`) | `hosts/mac-pro/README.md`    |
 | Personal Mac mini (`mac-mini`)             | `hosts/mac-mini/README.md`   |
 | Resilience work Mac (`mac-work`)           | `hosts/mac-work/README.md`   |
-| Ubuntu workstation                         | `hosts/ubuntu-dev/README.md` |
 
 `config/` holds portable configuration and must not be reorganized casually.
 `chezmoi/` owns approved user-config delivery and rollback. `hosts/` owns
@@ -43,34 +41,28 @@ host-specific provisioning, lifecycle, maintenance, doctors, and runbooks.
 - Never start, stop, restart, reload, or migrate production services without
   explicit approval.
 - Do not commit or push unless Hamel asks.
-- `dotfiles-hd` is the thin-Mac PR exception: agent-authored dotfiles changes
-  may be committed and pushed from a thin-Mac branch or worktree only as
-  `arbiter-hd`, through `github.com-arbiter` directly to `hd719/dotfiles-hd`.
-  Never push agent work as `hd719`.
-- Other development repositories remain Ubuntu-first and use `arbiter-hd`.
-  From the Mac mini, use `cortana-hd` only for explicitly selected or
-  Mac-mini-owned work; otherwise sync reviewed `master` only.
-- New development repositories must not be created, cloned, or worked from the
-  thin Mac. Use Ubuntu by default, or the Mac mini when Hamel explicitly selects
-  it or the repo is Mac-mini-owned. Agent PRs use `arbiter-hd` from Ubuntu or
-  `cortana-hd` from the Mac mini.
+- Agent-authored `dotfiles-hd` changes may be committed and pushed from a
+  development-Mac branch or worktree only as `arbiter-hd`, through
+  `github.com-arbiter` directly to `hd719/dotfiles-hd`. Never push agent work
+  as `hd719`.
+- Default development to the native `mac-pro` MacBook. The Mac mini remains
+  a runtime host unless Hamel explicitly selects isolated development there.
+  Agent GitHub writes use `arbiter-hd` on the development Mac and `cortana-hd`
+  on explicitly selected Mac mini checkouts. Verify the actor before each write.
 - Canonical coding prompt sources live under
-  `/Users/hameldesai/Developer/hd/Knowledge/prompts/coding/` in the thin Mac
-  vault. Edit them there, then run the vault's `sync-coding-prompts` workflow.
-  Managed thin-Mac rules and remote prompt trees are deployment targets; do not
+  `/Users/hameldesai/Developer/hd/Knowledge/prompts/coding/` in the development
+  Mac vault. Edit them there, then run the vault's `sync-coding-prompts` workflow.
+  Managed local-Mac rules and remote prompt trees are deployment targets; do not
   edit them as independent machine-local copies.
 
 If Hamel explicitly asks for one link, create it safely. Do not expand that
 request into a full-machine migration.
 
-The `mac-studio` profile is pre-arrival staging. Do not apply it, move or
-destroy the Ubuntu VM, or change live host routing until the Studio arrives
-and Hamel approves the cutover gates in its runbook. Studio apply requires
-`DOTFILES_MAC_STUDIO_ARRIVED=1`; never set it on another host.
-The future `mac-air` client profile requires `DOTFILES_MAC_AIR_ARRIVED=1` on
-that device. Follow the Studio runbook for native development, dormant Ubuntu
-preservation, mini development isolation, and the later Air rollout. Update
-canonical topology and sync policies only after verified live cutover.
+The `mac-studio` profile is pre-arrival staging. Apply requires
+`DOTFILES_MAC_STUDIO_ARRIVED=1` on Studio after its arrival and reviewed checks.
+Follow `hosts/mac-studio/README.md` for native development and verified cutover.
+Keep current MacBook ownership and canonical topology/sync policies until that
+cutover passes. The Air is optional; decide after using Studio.
 
 ## Package Ownership
 
@@ -92,14 +84,13 @@ canonical topology and sync policies only after verified live cutover.
 - `config/zsh/shared/` contains portable shell modules.
 - `config/zsh/shared/codex-aliases.zsh` is loaded by personal Macs and Linux
   workstations, never work-only profiles.
-- `config/zsh/shared/development-aliases.zsh` is loaded by Ubuntu and full Mac
-  development profiles, never the thin Mac.
+- `config/zsh/shared/development-aliases.zsh` is loaded by full Mac
+  development profiles, never the Air thin client.
 - `config/zsh/mac/init.zsh` is the full Mac development interface.
 - `config/zsh/mac/personal/init.zsh` adds personal development workflows.
-- MacBook and Mac mini profiles load both.
+- Full-development MacBook and Mac mini profiles load both.
 - Resilience loads the shared interface plus work-owned behavior, never the
   personal layer.
-- Ubuntu keeps profile-specific shell behavior under `hosts/ubuntu-dev/`.
 - Add `config/zsh/linux/` only when multiple Linux profiles share Linux-only
   modules.
 - Each profile owns plugin timing, runtimes, credentials, and its `.zshrc`
@@ -107,21 +98,22 @@ canonical topology and sync policies only after verified live cutover.
 
 ## Personal Macs
 
-The restored thin MacBook uses only:
+The MacBook Air thin client uses only:
 
 ```bash
-hosts/mac-thin/bootstrap.sh --dry-run
-hosts/mac-thin/bootstrap.sh --check
-hosts/mac-thin/bootstrap.sh --apply
-hosts/mac-thin/doctor.sh
+hosts/mac-air/bootstrap.sh --dry-run
+hosts/mac-air/bootstrap.sh --check
+hosts/mac-air/bootstrap.sh --apply
+hosts/mac-air/doctor.sh
 ```
 
 Keep development repositories, Docker, databases, compilers, language
-runtimes, project language servers, and project dependencies inside the Linux
-VMs. The only local editor exception is the shared Neovim `thin` profile with
+runtimes, project language servers, and project dependencies on the development
+Mac or an explicitly selected isolated Mac mini checkout. On the Air, the
+local editor exception is the shared Neovim `thin` profile with
 Marksman for Markdown and Obsidian notes; its Tree-sitter CLI builds only the
-two Markdown parsers. Herdr may run only as a thin client for the Ubuntu Herdr
-server. Do not run the full `mac-pro` bootstrap on the thin host.
+two Markdown parsers. Herdr is available as a remote editor client.
+Do not run the full `mac-pro` bootstrap on the Air thin client.
 
 ### Codex Backup and Restore
 
@@ -151,7 +143,7 @@ hosts/shared/macos/doctor.sh --profile mac-pro
 ```
 
 `mac-pro` installs the complete local development toolchain through Homebrew
-and mise. It owns no Vagrant, VMware Fusion, or Ubuntu VM lifecycle.
+and mise.
 
 Substitute `mac-mini` for a new mini. Apply only from a clean canonical clone.
 The bootstrap may manage links and one marked `~/.zprofile` block; it must not
@@ -168,46 +160,18 @@ Service lifecycle changes require separate approval.
 
 ## Resilience Work Mac
 
-- Manage only Ghostty, Herdr, Hunk, Neovim, Bookokrat, and the portable Git
+- Manage only Ghostty, Herdr, Hunk, Neovim, Bookokrat, Yazi, and the portable Git
   alias include.
 - Use `hosts/mac-work/Brewfile` and
   `hosts/mac-work/link-terminal-editor-config.sh`.
 - Never run the personal Mac bootstrap or the Mac mini Brewfile.
 - Keep the live work `~/.zshrc`, `config/mise`, Git identity, work runtimes,
   credentials, certificates, and Docker state machine-owned.
-- Use the runbook's pinned tools and exact five-link inventory.
+- Use the runbook's pinned tools and exact seven-link inventory.
 - Report every backup and policy blocker.
 
 The Resilience linker is intentional: it is the scoped, backup-safe installer
-for those five links. Do not replace it with ad hoc `ln -s` commands.
-
-## Ubuntu
-
-Follow `hosts/ubuntu-dev/README.md`. Vagrant owns the VM lifecycle, guest-local
-Ansible owns system setup, mise owns development tools, and dotfiles owns user
-links. Use `hosts/ubuntu-dev/GUIDE.md` for Mac-to-Ubuntu teaching and keep its
-commands aligned with the supported workstation.
-
-- Keep `~/.gitconfig` machine-owned. Hunk is the shared diff viewer through
-  `hdiff`; do not install `diff-so-fancy` or set a profile-owned `GIT_PAGER`.
-- Set `ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE` before sourcing zsh-autosuggestions.
-  Ghostty's Nord palette color 8 is too close to its background; preserve the
-  tracked higher-contrast color unless the shared terminal palette changes.
-- GitHub `hd719`, Arbiter, and Forgejo must use three separate VM-local
-  Ed25519 keys. Generate them once, never overwrite them during provisioning,
-  and never copy Git private keys from the Mac.
-- Keep plain `github.com` pinned to the local `hd719` key and reserve
-  `github.com-arbiter` for the local Arbiter key.
-- Keep GitHub CLI authenticated as `arbiter-hd`; dotfiles agent branches push
-  through `github.com-arbiter` directly to `hd719/dotfiles-hd`.
-- Use `ubuntu-vm-ts` as the primary Codex route to Tailscale node `ubuntu-dev`.
-  Keep `ubuntu-vm` as the loopback-only Vagrant fallback. Both must disable Mac
-  agent forwarding and enforce SSH host-key checking.
-- Keep Ubuntu mise-managed CLI and editor tools on their latest available
-  releases. Keep Node, Go, Python, and Bun on reviewed exact versions. Codex
-  desktop starts Codex through the remote login shell, where `codex` must be
-  on `PATH`. Preserve the issue 25 forwarded-socket wrapper as a compatibility
-  guard even though the normal Vagrant routes do not forward an agent.
+for those seven links. Do not replace it with ad hoc `ln -s` commands.
 
 ## Preserved Zed Configuration
 
@@ -240,7 +204,6 @@ Run checks that match the changed surface:
 git diff --check
 bash /Users/hameldesai/.codex/skills/dotfiles-sync/tests/sync-dotfiles-test.sh
 bash hosts/tests/run.sh
-bash hosts/ubuntu-dev/doctor.sh
 ```
 
 Run `mdformat --check` on changed Markdown files. For shell changes, run

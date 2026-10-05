@@ -28,5 +28,3 @@ export DOTNET_ROOT="${HOMEBREW_PREFIX:-/opt/homebrew}/opt/dotnet@9/libexec"
 export PATH
 
 _activate_mise
-
-source "$HOME/Developer/dotfiles-hd/hosts/mac-studio/vm.zsh"

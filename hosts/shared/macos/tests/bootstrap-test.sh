@@ -437,7 +437,7 @@ EOF
   for command_name in \
     rg fd fzf lazygit tree-sitter lua-language-server marksman stylua vtsls \
     vscode-eslint-language-server bash-language-server gopls \
-    zoxide starship bat lsd btop fastfetch herdr hunk; do
+    zoxide starship bat lsd btop fastfetch herdr hunk yazi; do
     make_fake_command "$fake_bin" "$command_name" ''
   done
 
@@ -647,19 +647,13 @@ test_profile_names_and_paths() {
   load_profile mac-studio "$REPO_DIR" "$home_dir"
   assert_eq "$REPO_DIR/hosts/mac-studio/Brewfile" "$PROFILE_BREWFILE" \
     "Mac Studio profile uses its Brewfile"
-  assert_contains "$PROFILE_BREWFILE" 'cask "ollama-app"'
-  assert_contains "$PROFILE_BREWFILE" 'cask "vagrant"'
   for package in colima docker docker-buildx docker-compose postgresql@17 pgvector; do
     assert_contains "$PROFILE_BREWFILE" "brew \"$package\""
-    assert_contains "$REPO_DIR/hosts/mac-mini/Brewfile" "brew \"$package\""
   done
-  assert_contains "$PROFILE_BREWFILE" 'cask "vagrant-vmware-utility"'
-  assert_contains "$REPO_DIR/chezmoi/profiles/mac-studio.paths" \
-    '.zshrc|hosts/mac-studio/.zshrc'
-  assert_not_contains "$REPO_DIR/chezmoi/profiles/mac-studio.paths" \
-    '.config/karabiner|config/karabiner'
-  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'VMware Fusion.app'
-  assert_contains "$MAC_BOOTSTRAP_DIR/doctor.sh" 'Ollama.app'
+  assert_not_contains "$PROFILE_BREWFILE" vagrant
+  assert_not_contains "$PROFILE_BREWFILE" vmware
+  assert_no_path "$REPO_DIR/hosts/mac-studio/vm.zsh"
+  assert_no_path "$REPO_DIR/hosts/mac-studio/ssh/ubuntu-vagrant.conf"
 
   while IFS= read -r helper_path; do
     [[ -f "$REPO_DIR/$helper_path" ]] \
@@ -975,13 +969,17 @@ test_mac_studio_apply() {
   local home_dir="$root/home"
   local fake_bin="$root/bin"
   local log="$root/commands.log"
+  local first_backup
+  local before="$root/protected.before"
+  local after="$root/protected.after"
   mkdir -p "$home_dir/Developer"
   ln -s "$REPO_DIR" "$home_dir/Developer/dotfiles-hd"
   make_fake_toolchain "$fake_bin"
+  seed_protected_state "$home_dir"
   : > "$log"
 
-  # Bootstrap never starts the guest or workload services.
-  for command_name in vagrant launchctl colima docker ssh; do
+  # An arriving Studio needs native tools, without activating workload services.
+  for command_name in vagrant launchctl colima docker ssh sudo softwareupdate; do
     cat > "$fake_bin/$command_name" <<'EOF'
 #!/usr/bin/env bash
 printf 'FORBIDDEN %s %s\n' "${0##*/}" "$*" >> "${COMMAND_LOG:?}"
@@ -990,69 +988,56 @@ EOF
     chmod +x "$fake_bin/$command_name"
   done
 
-  local rosetta_marker="$root/rosetta-installed"
-  cat > "$fake_bin/pkgutil" <<'EOF'
-#!/usr/bin/env bash
-[[ "$*" == '--pkg-info com.apple.pkg.RosettaUpdateAuto' ]] || exit 2
-[[ -f "${ROSETTA_MARKER:?}" ]]
-EOF
-  cat > "$fake_bin/softwareupdate" <<'EOF'
-#!/usr/bin/env bash
-printf 'softwareupdate %s\n' "$*" >> "${COMMAND_LOG:?}"
-[[ "$*" == '--install-rosetta --agree-to-license' ]] || exit 2
-: > "${ROSETTA_MARKER:?}"
-EOF
-  cat > "$fake_bin/sudo" <<'EOF'
-#!/usr/bin/env bash
-"$@"
-EOF
-  chmod +x "$fake_bin/pkgutil" "$fake_bin/softwareupdate" "$fake_bin/sudo"
-
   if HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
     DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
+    DOTFILES_MAC_STUDIO_ARRIVED=0 \
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply \
       >/dev/null 2>&1; then
     fail "Mac Studio apply should be locked before hardware arrival"
   fi
   TESTS=$((TESTS + 1))
   assert_eq '' "$(cat "$log")" "arrival gate stops before package managers"
+  assert_no_path "$home_dir/.zprofile"
+  assert_no_path "$home_dir/.local/state/dotfiles-hd/chezmoi-backups"
+
+  printf 'old-studio-zshrc\n' > "$home_dir/.zshrc"
+  snapshot_protected_state "$home_dir" "$before"
+  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
+    DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
+    DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
+    DOTFILES_MAC_STUDIO_ARRIVED=1 \
+    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
+  assert_eq "$REPO_DIR/hosts/mac-studio/.zshrc" "$(readlink "$home_dir/.zshrc")" \
+    "Studio gets its native shell"
+  assert_eq "$REPO_DIR/config/yazi/theme.toml" \
+    "$(readlink "$home_dir/.config/yazi/theme.toml")" "Studio retains merged Yazi config"
+  assert_contains "$log" "bundle install --no-upgrade --file $REPO_DIR/hosts/mac-studio/Brewfile"
+  assert_not_contains "$log" 'hosts/mac-mini/Brewfile'
+  snapshot_protected_state "$home_dir" "$after"
+  assert_eq "$(cat "$before")" "$(cat "$after")" "Studio preserves protected state"
+  first_backup="$(find "$home_dir/.local/state/dotfiles-hd/chezmoi-backups" \
+    -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort | head -n 1)"
+  assert_contains "$first_backup/files/.zshrc" old-studio-zshrc
 
   HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
     DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
     DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
     DOTFILES_MAC_STUDIO_ARRIVED=1 \
-    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
-    DOTFILES_SOFTWAREUPDATE="$fake_bin/softwareupdate" DOTFILES_SUDO="$fake_bin/sudo" \
     "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
-
-  assert_file "$rosetta_marker"
-  assert_contains "$log" 'softwareupdate --install-rosetta --agree-to-license'
-  local reapply_log="$root/reapply.log"
-  : > "$reapply_log"
-  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$reapply_log" \
-    DOTFILES_DIR="$REPO_DIR" DOTFILES_ALLOW_DIRTY=1 \
-    DOTFILES_ALLOW_NONCANONICAL=1 DOTFILES_MAC_DOCTOR=/usr/bin/true \
-    DOTFILES_MAC_STUDIO_ARRIVED=1 \
-    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
-    DOTFILES_SOFTWAREUPDATE="$fake_bin/softwareupdate" DOTFILES_SUDO="$fake_bin/sudo" \
-    "$MAC_BOOTSTRAP_DIR/bootstrap.sh" --profile mac-studio --apply >/dev/null
-  assert_not_contains "$reapply_log" 'softwareupdate'
-  cat "$reapply_log" >> "$log"
-
-  assert_not_contains "$log" 'FORBIDDEN'
+  assert_not_contains "$log" FORBIDDEN
   assert_not_contains "$log" 'brew services'
   assert_not_contains "$log" 'ollama serve'
   assert_not_contains "$log" 'ollama pull'
 
-  mkdir -p "$root/applications/VMware Fusion.app" "$root/applications/Ollama.app"
-  HOME="$home_dir" PATH="$fake_bin:$PATH" COMMAND_LOG="$log" \
-    DOTFILES_DIR="$REPO_DIR" DOTFILES_APPLICATIONS_DIR="$root/applications" \
-    DOTFILES_PKGUTIL="$fake_bin/pkgutil" ROSETTA_MARKER="$rosetta_marker" \
-    "$MAC_BOOTSTRAP_DIR/doctor.sh" --profile mac-studio > "$root/doctor.log"
-  assert_contains "$root/doctor.log" 'Ubuntu runtime and SSH checks (manual use only)'
-  assert_not_contains "$log" 'FORBIDDEN'
-
+  HOME="$home_dir" CHEZMOI_DESTINATION="$home_dir" \
+    CHEZMOI_STATE_DIR="$home_dir/.local/state/dotfiles-hd/chezmoi" \
+    CHEZMOI_BACKUP_ROOT="$home_dir/.local/state/dotfiles-hd/chezmoi-backups" \
+    "$REPO_DIR/chezmoi/rollback.sh" mac-studio "$first_backup" >/dev/null
+  assert_contains "$home_dir/.zshrc" old-studio-zshrc
+  assert_no_path "$home_dir/.config/yazi/theme.toml"
+  snapshot_protected_state "$home_dir" "$after"
+  assert_eq "$(cat "$before")" "$(cat "$after")" "Studio rollback preserves protected state"
 }
 
 test_xdg_bin_home() {
@@ -1082,16 +1067,17 @@ test_xdg_bin_home() {
     assert_eq "$custom_bin/ruff" "$resolved" "$(basename "$(dirname "$zshrc")") zshrc keeps XDG_BIN_HOME first"
   done
   local dotnet_prefix="$root/brew/opt/dotnet@9"
-  mkdir -p "$dotnet_prefix/bin" "$dotnet_prefix/libexec"
+  local postgres_prefix="$root/brew/opt/postgresql@17"
+  mkdir -p "$dotnet_prefix/bin" "$dotnet_prefix/libexec" "$postgres_prefix/bin"
   printf '#!/bin/sh\nexit 0\n' > "$dotnet_prefix/bin/dotnet"
-  chmod +x "$dotnet_prefix/bin/dotnet"
+  printf '#!/bin/sh\nexit 0\n' > "$postgres_prefix/bin/psql"
+  chmod +x "$dotnet_prefix/bin/dotnet" "$postgres_prefix/bin/psql"
   ln -s "$REPO_DIR/hosts/mac-studio/.zshrc" "$home_dir/.zshrc"
   resolved="$(HOME="$home_dir" HOMEBREW_PREFIX="$root/brew" PATH=/usr/bin:/bin \
-    /bin/zsh -lic 'printf "%s|%s\n" "$(command -v dotnet)" "$DOTNET_ROOT"' \
+    /bin/zsh -lic 'printf "%s|%s|%s\n" "$(command -v dotnet)" "$(command -v psql)" "$DOTNET_ROOT"' \
     2>/dev/null | tail -n 1)"
-  assert_eq "$dotnet_prefix/bin/dotnet|$dotnet_prefix/libexec" "$resolved" \
-    'Studio login shell exposes the requested .NET SDK and root'
-
+  assert_eq "$dotnet_prefix/bin/dotnet|$postgres_prefix/bin/psql|$dotnet_prefix/libexec" \
+    "$resolved" 'Studio login shell exposes its native SDK and database clients'
 }
 
 test_profile_and_failure_guards() {
@@ -1303,16 +1289,18 @@ test_shared_zsh_interface() {
     "$shared_dir/personal/development-functions.zsh" \
     "$shared_dir/personal/development-aliases.zsh" \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
+    "$REPO_DIR/hosts/mac-studio/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc" \
     "$REPO_DIR/hosts/mac-work/goodmorning.zsh" \
     "$REPO_DIR/hosts/mac-work/.zshrc" \
-    "$REPO_DIR/hosts/mac-thin/vm.zsh"; do
+    "$REPO_DIR/hosts/mac-air/.zshrc"; do
     /bin/zsh -n "$zsh_file" || fail "zsh syntax check failed: $zsh_file"
     TESTS=$((TESTS + 1))
   done
 
   for zsh_file in \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
+    "$REPO_DIR/hosts/mac-studio/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc" \
     "$REPO_DIR/hosts/mac-work/.zshrc"; do
     assert_contains "$zsh_file" 'config/zsh/mac/init.zsh'
@@ -1455,6 +1443,7 @@ test_shared_zsh_interface() {
 
   for zsh_file in \
     "$REPO_DIR/hosts/mac-pro/.zshrc" \
+    "$REPO_DIR/hosts/mac-studio/.zshrc" \
     "$REPO_DIR/hosts/mac-mini/.zshrc"; do
     actual="$(
       HOME="$home_dir" PATH="$fake_bin:/usr/bin:/bin" /bin/zsh -dfc '

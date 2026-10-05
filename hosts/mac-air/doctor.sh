@@ -1,54 +1,226 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$REPO_DIR}"
-CHEZMOI_DOCTOR="${DOTFILES_CHEZMOI_DOCTOR:-$DOTFILES_DIR/chezmoi/doctor.sh}"
+GIT_ALIASES_SCRIPT="$DOTFILES_DIR/config/git/configure-aliases.sh"
 APPLICATIONS_DIR="${DOTFILES_APPLICATIONS_DIR:-/Applications}"
-# Reuse read-only Neovim checks with the same Markdown-only parser set as thin.
+BREWFILE="$DOTFILES_DIR/hosts/mac-air/Brewfile"
+CHEZMOI_DOCTOR="${DOTFILES_CHEZMOI_DOCTOR:-$DOTFILES_DIR/chezmoi/doctor.sh}"
+SSH_CONFIG="$HOME/.ssh/config"
+FAILURES=0
+HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+
+# shellcheck source=../mac-bootstrap/lib.sh
 source "$DOTFILES_DIR/hosts/shared/macos/lib.sh"
+
 NEOVIM_PARSERS=(markdown markdown_inline)
 NEOVIM_PARSER_BINARIES=(markdown markdown_inline)
-FAILURES=0
-pass() { printf 'PASS  %s\n' "$*"; }
-fail() { printf 'FAIL  %s\n' "$*" >&2; FAILURES=$((FAILURES + 1)); }
 
-[[ "$(uname -s)" == Darwin ]] && pass macOS || fail 'macOS required'
-if HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade \
-  --file "$DOTFILES_DIR/hosts/mac-air/Brewfile"; then
-  pass 'thin-Mac client and note packages'
+pass() {
+  printf 'PASS  %s\n' "$*"
+}
+
+fail() {
+  printf 'FAIL  %s\n' "$*" >&2
+  FAILURES=$((FAILURES + 1))
+}
+
+if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+  pass "Apple Silicon macOS"
 else
-  fail 'thin-Mac client and note packages missing'
+  fail "Apple Silicon macOS required"
 fi
+
+if command -v brew >/dev/null 2>&1; then
+  pass "Homebrew available"
+else
+  fail "Homebrew missing"
+fi
+
+if HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade --file "$BREWFILE" >/dev/null; then
+  pass "Brewfile satisfied"
+else
+  fail "Brewfile missing applications"
+fi
+
+if command -v herdr >/dev/null 2>&1; then
+  pass "Herdr remote client available"
+else
+  fail "Herdr remote client missing"
+fi
+
+for command_name in bookokrat fastfetch hunk lsd marksman nvim rg starship tree-sitter yazi zoxide; do
+  if command -v "$command_name" >/dev/null 2>&1; then
+    pass "$command_name available"
+  else
+    fail "$command_name missing"
+  fi
+done
+
+for plugin_path in \
+  "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
+  "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"; do
+  if [[ -r "$plugin_path" ]]; then
+    pass "$(basename "$plugin_path") readable"
+  else
+    fail "Zsh plugin missing: $plugin_path"
+  fi
+done
+
 if "$CHEZMOI_DOCTOR" mac-air; then
-  pass 'Air client configuration'
+  pass "mac-air Chezmoi configuration"
 else
-  fail 'Air client configuration'
+  fail "mac-air Chezmoi configuration"
 fi
-for tool in bookokrat fastfetch herdr hunk lsd marksman nvim rg tree-sitter; do
-  command -v "$tool" >/dev/null 2>&1 && pass "$tool available" || fail "$tool missing"
+
+if "$GIT_ALIASES_SCRIPT" --check >/dev/null 2>&1; then
+  pass "portable Git aliases"
+else
+  fail "portable Git aliases are not configured"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && nvim --headless -u NONE -i NONE --noplugin \
+    "+lua assert(vim.fn.has('nvim-0.12') == 1, 'Neovim 0.12+ required')" \
+    '+qa' >/dev/null 2>&1; then
+  pass "Neovim 0.12+"
+else
+  fail "Neovim 0.12+ required"
+fi
+
+if command -v nvim >/dev/null 2>&1 && verify_neovim_parsers_restored; then
+  pass "Thin-profile Markdown parsers"
+else
+  fail "Thin-profile Markdown parsers are incomplete"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && verify_neovim_config_sandboxed "$DOTFILES_DIR/config/nvim" thin; then
+  pass "Thin-profile Neovim config starts in an isolated data directory"
+else
+  fail "Thin-profile Neovim isolated startup"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && DOTFILES_NVIM_PROFILE=thin nvim --headless \
+    "+lua local mapping=vim.fn.maparg(' e','n',false,true); local yazi=vim.fn.maparg(' -','n',false,true); local restart=vim.fn.maparg(' cr','n',false,true); local Snacks=require('snacks'); local source=Snacks.config.picker.sources.buffers; local buffers=source.win; local scratch=vim.api.nvim_create_buf(true,false); local dashboard=Snacks.config.dashboard; local header=dashboard.preset.header; local logo=vim.fs.dirname(vim.fn.resolve(vim.fn.stdpath('config')))..'/fastfetch/logo-anon.txt'; assert(mapping.desc=='File explorer','Space e is not mapped to Snacks Explorer'); assert(yazi.desc=='Yazi file manager','Space - is not mapped to Yazi'); assert(restart.desc=='Restart Neovim with session','Space c r is not mapped to session restart'); assert(Snacks.config.explorer.replace_netrw==false,'Snacks Explorer would replace Oil'); assert(Snacks.config.picker.sources.explorer.hidden==true,'Snacks Explorer should show dotfiles'); assert(buffers.input.keys['<leader>d'][1]=='bufdelete','Space d is not mapped in the buffer-picker input'); assert(buffers.list.keys['<leader>d']=='bufdelete','Space d is not mapped in the buffer-picker list'); assert(source.transform({buf=scratch,name=''})==false,'Empty replacement buffers should stay hidden'); assert(dashboard.enabled==true,'Thin dashboard disabled'); assert(vim.fn.filereadable(logo)==1 and header~='NVIM' and #header>100,'Anon dashboard header unavailable'); for _,key in ipairs(dashboard.preset.keys) do assert(key.key~='g','Thin dashboard advertises unavailable LazyGit') end; Snacks.dashboard.open(); vim.api.nvim_buf_delete(scratch,{force=true})" \
+    '+qa!' >/dev/null 2>&1; then
+  pass "Thin-profile Snacks dashboard, explorer, and buffer picker"
+else
+  fail "Thin-profile Snacks dashboard, explorer, or buffer picker is unavailable"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && DOTFILES_NVIM_PROFILE=thin nvim --headless \
+    "+lua local Snacks=require('snacks'); assert(not vim.tbl_contains(Snacks.config.image.formats,'pdf'),'Snacks would rasterize PDFs'); assert(vim.fn.exists('#BookokratPdfLauncher#BufReadCmd')==1,'Bookokrat PDF launcher missing'); local mapping=vim.fn.maparg(' oe','n',false,true); assert(mapping.desc=='Open file externally','Space o e is not mapped to the PDF launcher')" \
+    '+qa!' >/dev/null 2>&1; then
+  pass "Thin-profile Bookokrat PDF launcher"
+else
+  fail "Thin-profile PDFs are not routed to Bookokrat"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && DOTFILES_NVIM_PROFILE=thin nvim --headless \
+    "+lua local repeated=vim.fn.maparg('  ','n',false,true); local terminal=vim.fn.maparg(' t','n',false,true); local floating=vim.fn.maparg(' T','n',false,true); assert(repeated.desc=='Ignore repeated leader','Repeated Space is not consumed'); assert(terminal.desc=='New terminal','Space t is not mapped on thin'); assert(floating.desc=='New floating terminal','Space T is not mapped on thin'); assert(require('which-key.config').delay==0,'WhichKey is not immediate'); vim.api.nvim_buf_set_lines(0,0,-1,false,{'leader test'}); vim.api.nvim_win_set_cursor(0,{1,0}); vim.api.nvim_feedkeys('  ','xt',false); vim.wait(1000); assert(vim.api.nvim_win_get_cursor(0)[2]==0,'Repeated Space moved the cursor')" \
+    '+qa!' >/dev/null 2>&1; then
+  pass "Thin-profile immediate leader and terminal mappings"
+else
+  fail "Thin-profile leader or terminal mappings are unavailable"
+fi
+
+if command -v nvim >/dev/null 2>&1 \
+  && DOTFILES_NVIM_PROFILE=thin nvim --headless "$SCRIPT_DIR/README.md" \
+    "+lua assert(not vim.lsp.is_enabled('marksman'),'Marksman was enabled globally'); assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached before request'); local mapping=vim.fn.maparg(' mm','n',false,true); assert(mapping.desc=='Toggle Marksman for file','Space m m is not mapped to Marksman'); local first=vim.api.nvim_get_current_buf(); vim.cmd.MarksmanToggleCurrent(); assert(vim.wait(5000,function() return #vim.lsp.get_clients({bufnr=first,name='marksman'})>0 end),'Marksman did not attach on request'); vim.cmd.enew(); vim.bo.filetype='markdown'; assert(#vim.lsp.get_clients({bufnr=0,name='marksman'})==0,'Marksman attached to an unrequested buffer'); vim.api.nvim_set_current_buf(first); vim.cmd.MarksmanToggleCurrent(); assert(vim.wait(5000,function() return #vim.lsp.get_clients({bufnr=first,name='marksman'})==0 end),'Marksman did not detach on request')" \
+    '+qa!' >/dev/null 2>&1; then
+  pass "Marksman toggles per Markdown buffer"
+else
+  fail "Marksman does not toggle per Markdown buffer"
+fi
+
+for app_name in \
+  "1Password.app" \
+  "Brave Browser.app" \
+  "ChatGPT.app" \
+  "Ghostty.app" \
+  "Hermes.app" \
+  "Obsidian.app" \
+  "Tailscale.app" \
+  "zoom.us.app"; do
+  if [[ -d "$APPLICATIONS_DIR/$app_name" ]]; then
+    pass "$app_name installed"
+  else
+    fail "$app_name missing"
+  fi
 done
-if nvim --headless -u NONE -i NONE --noplugin \
-  "+lua if vim.fn.has('nvim-0.12') ~= 1 then vim.cmd('cquit 1') end" \
-  '+qa!' >/dev/null 2>&1; then
-  pass 'Neovim 0.12+'
+
+if [[ -r "$SSH_CONFIG" ]]; then
+  pass "SSH config readable"
 else
-  fail 'Neovim 0.12+ required'
+  fail "SSH config missing or unreadable"
 fi
-if verify_neovim_parsers_restored; then
-  pass 'Markdown parsers restored'
+
+if /bin/zsh -dfec "
+  source '$DOTFILES_DIR/hosts/mac-air/.zshrc'
+  [[ \"\$DOTFILES_NVIM_PROFILE\" == thin ]]
+  [[ \"\$EDITOR\" == nvim ]]
+  [[ \"\$VISUAL\" == nvim ]]
+  [[ \"\$GIT_EDITOR\" == nvim ]]
+  [[ -z \"\${GIT_PAGER+x}\" ]]
+  [[ \"\$(alias g)\" == 'g=git' ]]
+  [[ \"\$(alias gs)\" == \"gs='git status'\" ]]
+  [[ \"\$(alias hdiff)\" == \"hdiff='hunk diff'\" ]]
+  [[ \"\$(alias hstaged)\" == \"hstaged='hunk diff --staged'\" ]]
+  [[ \"\$(alias hshow)\" == \"hshow='hunk show'\" ]]
+  [[ \"\$(alias hwatch)\" == \"hwatch='hunk diff --watch'\" ]]
+  [[ \"\$(alias ls)\" == \"ls='lsd --tree --depth 1'\" ]]
+  [[ \"\$(alias ll)\" == \"ll='lsd -la --tree --depth 1'\" ]]
+  [[ \"\$(alias v)\" == 'v=nvim' ]]
+  ! alias gdiff >/dev/null 2>&1 || exit 1
+  [[ \"\$(alias cod)\" == 'cod=codex' ]]
+  [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
+  [[ \"\$(whence -w coda)\" == 'coda: function' ]]
+  [[ \"\$(whence -w carchive)\" == 'carchive: function' ]]
+  [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
+  [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
+  [[ \"\$(alias mini)\" == \"mini='ssh mac-mini-lan'\" ]]
+  [[ \"\$(alias minit)\" == \"minit='ssh mac-mini-ts'\" ]]
+  [[ \"\$(alias hmini)\" == \"hmini='herdr --remote mac-mini-lan'\" ]]
+  [[ \"\$(alias hminit)\" == \"hminit='herdr --remote mac-mini-ts'\" ]]
+  [[ \"\$(whence -w herdr)\" == 'herdr: function' ]]
+  [[ \"\$(whence -w _dotfiles_herdr_route_cwd)\" == '_dotfiles_herdr_route_cwd: function' ]]
+  [[ \"\$(whence -w _dotfiles_herdr_reset)\" == '_dotfiles_herdr_reset: function' ]]
+  [[ \"\$(alias hdk)\" == \"hdk='herdr server reset'\" ]]
+  [[ \"\$(whence -w reload)\" == 'reload: function' ]]
+  for retired in u ut hu hut uvm-status uvm-ip uvm-up uvm-up-headless \
+    uvm-stop uvm-suspend uvm-resume uvm-destroy; do
+    if (( \${+aliases[\$retired]} || \${+functions[\$retired]} )); then
+      exit 1
+    fi
+  done
+  ! alias hm-dev >/dev/null 2>&1 || exit 1
+  ! alias docker-nuke >/dev/null 2>&1 || exit 1
+"; then
+  pass "Thin-Mac personal shell allowlist available"
 else
-  fail 'Markdown parsers missing or unloadable'
+  fail "Thin-Mac personal shell allowlist invalid"
 fi
-if verify_neovim_config_sandboxed "$DOTFILES_DIR/config/nvim" thin; then
-  pass 'Thin Neovim starts in isolated data'
+
+if HOMEBREW_PREFIX="$HOMEBREW_PREFIX" /bin/zsh -dfiec "
+  source '$DOTFILES_DIR/hosts/mac-air/.zshrc'
+  (( \${#functions[(I)*autosuggest*]} > 0 ))
+  whence -w _zsh_highlight >/dev/null
+" >/dev/null 2>&1; then
+  pass "Thin-Mac interactive Zsh plugins"
 else
-  fail 'Thin Neovim isolated startup'
+  fail "Thin-Mac interactive Zsh plugins"
 fi
-for app in ChatGPT Ghostty Obsidian Tailscale; do
-  [[ -d "$APPLICATIONS_DIR/$app.app" ]] \
-    && pass "$app installed" || fail "$app missing"
-done
-printf 'MANUAL  Verify Studio SSH, Screen Sharing and remote execution over Tailscale.\n'
-((FAILURES == 0))
+
+if [[ "$FAILURES" -eq 0 ]]; then
+  printf 'Doctor passed for mac-air.\n'
+  exit 0
+fi
+
+printf 'Doctor found %d failure(s).\n' "$FAILURES" >&2
+exit 1

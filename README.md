@@ -4,15 +4,13 @@ Hamel's profile-aware dotfiles, provisioning, and machine operations.
 
 ## Choose a Host
 
-| Host       | Role                                                               | Entry point                                                |
-| ---------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |
-| Thin Mac   | Control plane for Codex, SSH, Vagrant, and VMware Fusion           | [`hosts/mac-thin/README.md`](hosts/mac-thin/README.md)     |
-| Ubuntu dev | Primary VM development workstation                                 | [`hosts/ubuntu-dev/README.md`](hosts/ubuntu-dev/README.md) |
-| Mac Studio | Staged native development workstation; dormant Ubuntu and local AI | [`hosts/mac-studio/README.md`](hosts/mac-studio/README.md) |
-| Future Air | Lightweight clients and remote Studio access; no VMware            | [`hosts/mac-air/README.md`](hosts/mac-air/README.md)       |
-| Mac Pro    | Standalone full-development MacBook; local Brew stack, no VM       | [`hosts/mac-pro/README.md`](hosts/mac-pro/README.md)       |
-| Mac mini   | Production with explicitly selected secondary development          | [`hosts/mac-mini/README.md`](hosts/mac-mini/README.md)     |
-| Work Mac   | Company-scoped terminal and editor setup                           | [`hosts/mac-work/README.md`](hosts/mac-work/README.md)     |
+| Host        | Role                                                           | Entry point                                                |
+| ----------- | -------------------------------------------------------------- | ---------------------------------------------------------- |
+| Mac Studio  | Staged primary native development workstation                  | [`hosts/mac-studio/README.md`](hosts/mac-studio/README.md) |
+| MacBook Air | Thin client for SSH access to the development Mac and Mac mini | [`hosts/mac-air/README.md`](hosts/mac-air/README.md)       |
+| Mac Pro     | Standalone full-development MacBook; local Brew stack, no VM   | [`hosts/mac-pro/README.md`](hosts/mac-pro/README.md)       |
+| Mac mini    | Production runtime host                                        | [`hosts/mac-mini/README.md`](hosts/mac-mini/README.md)     |
+| Work Mac    | Company-scoped terminal and editor setup                       | [`hosts/mac-work/README.md`](hosts/mac-work/README.md)     |
 
 Clone at the canonical path:
 
@@ -32,12 +30,10 @@ dotfiles-hd/
 ├── chezmoi/                 profile-aware config delivery and rollback
 ├── config/                  canonical application configuration
 ├── hosts/
+│   ├── mac-studio/          staged native development workstation
 │   ├── tests/               one host-validation runner
 │   ├── shared/macos/        shared full-Mac provisioning and doctor
-│   ├── mac-thin/            control plane and VM lifecycle
-│   ├── mac-studio/          staged native development and dormant Ubuntu
-│   ├── mac-air/             future lightweight remote clients
-│   ├── ubuntu-dev/          Vagrant guest provisioning and maintenance
+│   ├── mac-air/             thin SSH client
 │   ├── mac-pro/             standalone development MacBook policy
 │   ├── mac-mini/            production runtime Mac policy
 │   └── mac-work/            current work-Mac setup
@@ -50,24 +46,22 @@ preferences, or project repositories.
 
 ## Common Commands
 
-Sync reviewed `master` across the three personal hosts:
+Sync reviewed `master` between the local Mac and Mac mini:
 
 ```bash
 /Users/hameldesai/.codex/skills/dotfiles-sync/scripts/fallback.sh
 ```
 
-Thin Mac and Ubuntu VM:
+Studio setup is staged for [issue #117](https://github.com/hd719/dotfiles-hd/issues/117).
+Apply only after arrival and reviewed checks with `DOTFILES_MAC_STUDIO_ARRIVED=1`;
+follow its runbook for native development, migration and remote access. Keep the
+MacBook as the current development host until cutover. The Air is optional and
+can be decided after using Studio.
+
+MacBook Air thin client:
 
 ```bash
-hosts/mac-thin/bootstrap.sh --apply
-uvm-up
-```
-
-Staged Mac Studio profile (do not apply before arrival):
-
-```bash
-hosts/shared/macos/bootstrap.sh --profile mac-studio --dry-run
-hosts/shared/macos/bootstrap.sh --profile mac-studio --check
+hosts/mac-air/bootstrap.sh --apply
 ```
 
 Standalone full-development MacBook:
@@ -80,8 +74,7 @@ hosts/shared/macos/bootstrap.sh --profile mac-pro --apply
 
 The `mac-pro` profile installs its complete local package stack through the
 shared and profile Brewfiles. Exact language runtimes stay under the
-Brew-installed mise version manager. It does not install or manage Vagrant,
-VMware Fusion, or an Ubuntu VM.
+Brew-installed mise version manager.
 
 Existing production Mac mini:
 
@@ -96,9 +89,8 @@ gates pass.
 ## Ownership
 
 - `chezmoi/` owns approved user configuration links and timestamped rollback.
-- `hosts/mac-thin/` owns the Vagrant and VMware lifecycle.
-- `hosts/mac-studio/` owns native development and preserves dormant Ubuntu after approved cutover.
-- `hosts/ubuntu-dev/` owns guest provisioning and workstation maintenance.
+- `hosts/mac-studio/` owns the staged native development overlay and cutover runbook.
+- `hosts/mac-air/` owns the thin-client packages, shell, and editor setup.
 - `hosts/shared/macos/` owns common full-Mac packages and operational setup.
 - `hosts/mac-pro/` and `hosts/mac-mini/` own profile package overlays and shell entry points.
 - `hosts/mac-work/` keeps its current scoped linker until a separate work-Mac rollout.

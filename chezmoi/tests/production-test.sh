@@ -26,6 +26,7 @@ prepare_mac_mini_home() {
     "$home_dir/.config/herdr" \
     "$home_dir/.config/hunk" \
     "$home_dir/.config/mise" \
+    "$home_dir/.config/yazi" \
     "$home_dir/.hermes/skins" \
     "$home_dir/Library/Application Support/com.mitchellh.ghostty"
   chmod 700 "$home_dir/.config" "$home_dir/.hermes"
@@ -53,6 +54,15 @@ for script in "$CHEZMOI_DIR"/*.sh; do
   bash -n "$script"
 done
 [[ "$(wc -l < "$CHEZMOI_DIR/bootstrap.sh" | tr -d ' ')" -le 25 ]]
+
+for retired_profile in ubuntu mac-thin; do
+  if bash "$CHEZMOI_DIR/bootstrap.sh" "$retired_profile" --preview \
+    > "$case_dir/retired-profile.log" 2>&1; then
+    printf 'retired profile was accepted: %s\n' "$retired_profile" >&2
+    exit 1
+  fi
+  grep -Fq 'usage:' "$case_dir/retired-profile.log"
+done
 
 bootstrap_home="$case_dir/bootstrap/home"
 bootstrap_bin="$case_dir/bootstrap/chezmoi"
@@ -100,7 +110,7 @@ git -C "$checkout_repo" update-ref refs/remotes/origin/master HEAD
 require_reviewed_checkout() {
   HOME="$checkout_home" DOTFILES_CHEZMOI_TEST=0 \
     DOTFILES_CHEZMOI_REVIEWED_REF="${1:-master}" \
-    DOTFILES_TEST_PROFILE="${2:-ubuntu}" \
+    DOTFILES_TEST_PROFILE="${2:-mac-pro}" \
     bash -c '
       source "$1/lib.sh"
       REPO_DIR="$2"
@@ -139,20 +149,12 @@ checkout_status=$?
 set -e
 ((checkout_status != 0))
 [[ "$checkout_output" == *"apply requires reviewed master"* ]]
-require_reviewed_checkout canary
-set +e
-checkout_output="$(require_reviewed_checkout canary mac-thin 2>&1)"
-checkout_status=$?
-set -e
-((checkout_status != 0))
-[[ "$checkout_output" == *"custom reviewed branches are limited to the Ubuntu canary"* ]]
-git -C "$checkout_repo" commit -q --allow-empty -m unreviewed-canary
 set +e
 checkout_output="$(require_reviewed_checkout canary 2>&1)"
 checkout_status=$?
 set -e
 ((checkout_status != 0))
-[[ "$checkout_output" == *"canary does not match origin/canary"* ]]
+[[ "$checkout_output" == *"apply requires the reviewed master branch"* ]]
 set +e
 checkout_output="$(require_reviewed_checkout -bad 2>&1)"
 checkout_status=$?
@@ -171,23 +173,22 @@ layout_output="$({
     DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
     CHEZMOI_BIN="$CHEZMOI_BIN" \
     CHEZMOI_DESTINATION="$layout_home" \
-    bash "$CHEZMOI_DIR/preview.sh" mac-thin
+    bash "$CHEZMOI_DIR/preview.sh" mac-air
 } 2>&1)"
 layout_status=$?
 set -e
 ((layout_status != 0))
-[[ "$layout_output" == *"unapproved mac-thin symlink parent"* ]]
+[[ "$layout_output" == *"unapproved mac-air symlink parent"* ]]
 
-for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
+for profile in mac-air mac-pro mac-studio mac-mini mac-work; do
   home_dir="$case_dir/$profile/home"
   state_dir="$case_dir/$profile/state"
   mkdir -p "$home_dir" "$state_dir"
   case "$profile" in
-    ubuntu) mkdir -p "$home_dir/.config/btop" "$home_dir/.config/fastfetch" ;;
     mac-pro|mac-studio|mac-mini) prepare_mac_mini_home "$home_dir" ;;
   esac
   prepare_profile_parents "$profile" "$home_dir"
-  if [[ "$profile" == mac-thin || "$profile" == mac-air ]]; then
+  if [[ "$profile" == mac-air ]]; then
     chmod 700 "$home_dir/.config" "$home_dir/.config/fastfetch"
   fi
   common=(
@@ -205,10 +206,8 @@ for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
   diff -u "$case_dir/$profile.expected" "$case_dir/$profile.managed"
 
   case "$profile" in
-    ubuntu) printf '%s\n' 10-configure-git.sh 20-install-ubuntu-tools.sh ;;
-    mac-thin|mac-air) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
-    mac-pro) printf '%s\n' 10-configure-git.sh ;;
-    mac-studio) printf '%s\n' 10-configure-git.sh ;;
+    mac-air) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
+    mac-pro|mac-studio) printf '%s\n' 10-configure-git.sh ;;
     mac-mini) printf '%s\n' 10-configure-git.sh ;;
     mac-work) printf '%s\n' 10-configure-git.sh 40-install-work-tools.sh ;;
   esac > "$case_dir/$profile.expected-scripts"
@@ -223,20 +222,14 @@ for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
     < "$CHEZMOI_DIR/source/run_once_after_10-configure-git.sh.tmpl" \
     > "$rendered_git_script"
   sh -n "$rendered_git_script"
-  if [[ "$profile" == ubuntu ]]; then
-    grep -Fq 'git config --global core.editor nvim' "$rendered_git_script"
-    grep -Fq 'git config --global core.excludesfile' "$rendered_git_script"
-  else
-    ! grep -Fq 'git config --global core.editor' "$rendered_git_script"
-  fi
-
+  ! grep -Fq 'git config --global core.editor' "$rendered_git_script"
   if [[ -f "$CHEZMOI_DIR/profiles/$profile.ancestors" ]]; then
     "$CHEZMOI_BIN" "${common[@]}" apply \
       --exclude=scripts,dirs --force --no-tty
     [[ -z "$("$CHEZMOI_BIN" "${common[@]}" status --exclude=scripts,dirs)" ]]
     "$CHEZMOI_BIN" "${common[@]}" verify --exclude=scripts,dirs
     [[ "$(path_mode "$home_dir/.config")" == 700 ]]
-    if [[ "$profile" == mac-thin || "$profile" == mac-air ]]; then
+    if [[ "$profile" == mac-air ]]; then
       [[ "$(path_mode "$home_dir/.config/fastfetch")" == 700 ]]
     fi
     if [[ "$profile" == mac-mini ]]; then
@@ -255,22 +248,22 @@ for profile in ubuntu mac-thin mac-air mac-pro mac-studio mac-mini mac-work; do
     bash "$CHEZMOI_DIR/doctor.sh" "$profile" >/dev/null
 done
 
-for staged_profile in mac-studio mac-air; do
-  guard_home="$case_dir/$staged_profile-guard/home"
-  guard_state="$case_dir/$staged_profile-guard/state"
-  mkdir -p "$guard_home" "$guard_state"
-  set +e
-  guard_output="$({
-    DOTFILES_CHEZMOI_TEST=1 DOTFILES_CHEZMOI_APPROVED=1 \
-      CHEZMOI_BIN="$CHEZMOI_BIN" CHEZMOI_DESTINATION="$guard_home" \
-      CHEZMOI_STATE_DIR="$guard_state" \
-      bash "$CHEZMOI_DIR/apply.sh" "$staged_profile"
-  } 2>&1)"
-  guard_status=$?
-  set -e
-  ((guard_status != 0))
-  [[ "$guard_output" == *"$staged_profile apply requires DOTFILES_MAC_"* ]]
-done
+guard_home="$case_dir/studio-guard/home"
+guard_state="$case_dir/studio-guard/state"
+mkdir -p "$guard_home" "$guard_state"
+set +e
+guard_output="$({
+  DOTFILES_CHEZMOI_TEST=1 DOTFILES_CHEZMOI_APPROVED=1 \
+    DOTFILES_MAC_STUDIO_ARRIVED=0 \
+    CHEZMOI_BIN="$CHEZMOI_BIN" CHEZMOI_DESTINATION="$guard_home" \
+    CHEZMOI_STATE_DIR="$guard_state" \
+    bash "$CHEZMOI_DIR/apply.sh" mac-studio
+} 2>&1)"
+guard_status=$?
+set -e
+((guard_status != 0))
+[[ "$guard_output" == *"mac-studio apply requires DOTFILES_MAC_STUDIO_ARRIVED=1"* ]]
+[[ ! -e "$guard_home/.zshrc" ]]
 
 rollback_home="$case_dir/rollback/home"
 rollback_state="$case_dir/rollback/state"
@@ -378,6 +371,8 @@ grep -Fxq 'original herdr' "$rollback_home/.config/herdr/config.toml"
 [[ "$(readlink "$rollback_home/.config/mise")" == \
   "$REPO_DIR/config/mise" ]]
 [[ ! -e "$rollback_home/.zshrc" && ! -L "$rollback_home/.zshrc" ]]
+[[ ! -e "$rollback_home/.config/yazi/theme.toml" && ! -L "$rollback_home/.config/yazi/theme.toml" ]]
+[[ ! -e "$rollback_home/.config/yazi/yazi.toml" && ! -L "$rollback_home/.config/yazi/yazi.toml" ]]
 
 initial_home="$case_dir/initial-rollback/home"
 initial_state="$case_dir/initial-rollback/state"
@@ -391,18 +386,18 @@ initial_backup="$(
     CHEZMOI_DESTINATION="$initial_home" \
     CHEZMOI_STATE_DIR="$initial_state" \
     CHEZMOI_BACKUP_ROOT="$initial_backups" \
-    bash "$CHEZMOI_DIR/backup.sh" ubuntu
+    bash "$CHEZMOI_DIR/backup.sh" mac-pro
 )"
 initial_common=(
   --source "$CHEZMOI_DIR/source"
-  --config "$CHEZMOI_DIR/profiles/ubuntu.toml"
+  --config "$CHEZMOI_DIR/profiles/mac-pro.toml"
   --destination "$initial_home"
-  --persistent-state "$initial_state/ubuntu.boltdb"
+  --persistent-state "$initial_state/mac-pro.boltdb"
 )
 unlink "$initial_home/.config/btop"
 unlink "$initial_home/.config/fastfetch"
 mkdir -m 700 "$initial_home/.config/btop" "$initial_home/.config/fastfetch"
-prepare_profile_parents ubuntu "$initial_home"
+prepare_profile_parents mac-pro "$initial_home"
 "$CHEZMOI_BIN" "${initial_common[@]}" apply \
   --exclude=scripts,dirs --force --no-tty
 [[ -d "$initial_home/.config/btop" && ! -L "$initial_home/.config/btop" ]]
@@ -413,66 +408,12 @@ HOME="$initial_home" \
   CHEZMOI_DESTINATION="$initial_home" \
   CHEZMOI_STATE_DIR="$initial_state" \
   CHEZMOI_BACKUP_ROOT="$initial_backups" \
-  bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$initial_backup" \
+  bash "$CHEZMOI_DIR/rollback.sh" mac-pro "$initial_backup" \
   > "$case_dir/initial-rollback.log"
 [[ "$(readlink "$initial_home/.config/btop")" == "$REPO_DIR/config/btop" ]]
 [[ "$(readlink "$initial_home/.config/fastfetch")" == \
   "$REPO_DIR/config/fastfetch" ]]
-
-activation_home="$case_dir/activation/home"
-activation_state="$case_dir/activation/state"
-activation_backups="$case_dir/activation/backups"
-mkdir -p "$activation_home" "$activation_state"
-activation_backup="$({
-  DOTFILES_CHEZMOI_TEST=1 \
-    CHEZMOI_BIN="$CHEZMOI_BIN" \
-    CHEZMOI_DESTINATION="$activation_home" \
-    CHEZMOI_STATE_DIR="$activation_state" \
-    CHEZMOI_BACKUP_ROOT="$activation_backups" \
-    bash "$CHEZMOI_DIR/backup.sh" ubuntu
-})"
-grep -Fqx $'active\tabsent' "$activation_backup/metadata.tsv"
-HOME="$activation_home" \
-  DOTFILES_CHEZMOI_TEST=1 \
-  CHEZMOI_BIN="$CHEZMOI_BIN" \
-  CHEZMOI_DESTINATION="$activation_home" \
-  CHEZMOI_STATE_DIR="$activation_state" \
-  CHEZMOI_BACKUP_ROOT="$activation_backups" \
-  bash -c 'source "$1/lib.sh"; load_profile ubuntu; activate_profile' \
-  _ "$CHEZMOI_DIR"
-[[ -f "$activation_state/ubuntu-active" ]]
-DOTFILES_CHEZMOI_TEST=1 \
-  CHEZMOI_BIN="$CHEZMOI_BIN" \
-  CHEZMOI_DESTINATION="$activation_home" \
-  CHEZMOI_STATE_DIR="$activation_state" \
-  CHEZMOI_BACKUP_ROOT="$activation_backups" \
-  bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$activation_backup" \
-  > "$case_dir/activation-rollback.log"
-[[ ! -e "$activation_state/ubuntu-active" ]]
-grep -Fq 'the timestamped backup state is active' \
-  "$case_dir/activation-rollback.log"
-
-printf 'profile=ubuntu\ncommit=original\n' \
-  > "$activation_state/ubuntu-active"
-active_backup="$({
-  DOTFILES_CHEZMOI_TEST=1 \
-    CHEZMOI_BIN="$CHEZMOI_BIN" \
-    CHEZMOI_DESTINATION="$activation_home" \
-    CHEZMOI_STATE_DIR="$activation_state" \
-    CHEZMOI_BACKUP_ROOT="$activation_backups" \
-    bash "$CHEZMOI_DIR/backup.sh" ubuntu
-})"
-grep -Fqx $'active\tpresent' "$active_backup/metadata.tsv"
-printf 'profile=ubuntu\ncommit=changed\n' \
-  > "$activation_state/ubuntu-active"
-DOTFILES_CHEZMOI_TEST=1 \
-  CHEZMOI_BIN="$CHEZMOI_BIN" \
-  CHEZMOI_DESTINATION="$activation_home" \
-  CHEZMOI_STATE_DIR="$activation_state" \
-  CHEZMOI_BACKUP_ROOT="$activation_backups" \
-  bash "$CHEZMOI_DIR/rollback.sh" ubuntu "$active_backup" >/dev/null
-cmp -s "$active_backup/activation-marker" \
-  "$activation_state/ubuntu-active"
+[[ ! -e "$initial_home/.config/yazi" && ! -L "$initial_home/.config/yazi" ]]
 
 apply_home="$case_dir/apply/home"
 mkdir -p "$apply_home"

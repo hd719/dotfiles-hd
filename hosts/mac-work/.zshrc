@@ -211,6 +211,9 @@ alias res-parg-arc="cd ~/Developer/Resilience/resilience-pargasite/apps/arc && r
 # Cyber Risk Calculator: Run only the cyber-risk-calculator app
 alias res-parg-calc="cd ~/Developer/Resilience/resilience-pargasite/apps/cyber-risk-calculator && run-with-codeartifact-token yarn dev"
 
+# Storybook: Run the @arceo/ui component explorer (port 6006)
+alias res-parg-storybook="cd ~/Developer/Resilience/resilience-pargasite/packages/ui && run-with-codeartifact-token yarn storybook"
+
 # GraphQL: Refresh GraphQL schema and codegen
 alias res-parg-gql="cd ~/Developer/Resilience/resilience-pargasite && run-with-codeartifact-token yarn refresh-gql"
 
