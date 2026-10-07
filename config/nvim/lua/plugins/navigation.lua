@@ -91,6 +91,16 @@ local function hide_empty_scratch(item)
   return item
 end
 
+-- The tree hides gitignored files, so it cannot reveal one (e.g. generated
+-- code). Show ignored files only when the current file is itself ignored.
+local function file_is_ignored(root, file)
+  if file == "" then
+    return false
+  end
+  vim.fn.system({ "git", "-C", root, "check-ignore", "-q", file })
+  return vim.v.shell_error == 0
+end
+
 -- Root the sidebar on the current file's repo, not Neovim's startup cwd.
 -- That way Space e on ~/Developer/Resilience/README.md shows Resilience,
 -- even when this Neovim was started from dotfiles-hd.
@@ -106,19 +116,28 @@ local function open_explorer()
     or (file ~= "" and vim.fs.dirname(file))
     or vim.fn.getcwd()
   root = vim.fs.normalize(root)
+  local ignored = file_is_ignored(root, file)
 
-  -- Reopen instead of set_cwd + reveal: two overlapping refreshes list the
-  -- tree twice.
   local existing = Snacks.picker.get({ source = "explorer" })[1]
   if existing then
     local same = vim.fs.normalize(existing:cwd()) == root
-    existing:close()
-    if same then
+    -- Close only when the sidebar already has focus. From a file, Space e
+    -- should jump to that file, not toggle the tree shut.
+    if same and existing:is_focused() then
+      existing:close()
       return
     end
+    if same and existing.opts.ignored == ignored then
+      if file ~= "" then
+        Snacks.explorer.reveal({ file = file })
+      end
+      existing:focus()
+      return
+    end
+    existing:close()
   end
 
-  Snacks.explorer({ cwd = root })
+  Snacks.explorer({ cwd = root, ignored = ignored or nil })
 end
 
 -- Only prefill paths, so a clipboard holding copied code is ignored.
