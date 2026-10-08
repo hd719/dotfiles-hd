@@ -1,11 +1,12 @@
 # Shared Personal Mac Bootstrap
 
-Shared provisioning for two full local macOS profiles:
+Shared provisioning for three full local macOS profiles:
 
-| Profile    | Purpose                                                                 |
-| ---------- | ----------------------------------------------------------------------- |
-| `mac-pro`  | Standalone full-development MacBook; all development tools local, no VM |
-| `mac-mini` | Production runtime Mac with extra apply gates                           |
+| Profile      | Purpose                                                                 |
+| ------------ | ----------------------------------------------------------------------- |
+| `mac-pro`    | Standalone full-development MacBook; all development tools local, no VM |
+| `mac-studio` | Staged primary native development workstation; arrival-gated apply      |
+| `mac-mini`   | Production runtime Mac with extra apply gates                           |
 
 Do not run this bootstrap on the thin Mac. Use
 [`../../mac-air/README.md`](../../mac-air/README.md) there.
@@ -58,6 +59,13 @@ Use the exact Chezmoi rollback command printed by apply. The timestamped backup
 restores every managed path and approved ancestor. Restore the adjacent
 `~/.zprofile.backup-*` only when rolling back the operational mise-shims block.
 Packages and tool caches stay installed.
+
+## Studio Gate
+
+Studio apply requires `DOTFILES_MAC_STUDIO_ARRIVED=1` after hardware arrival
+and reviewed checks. Follow [`../../mac-studio/README.md`](../../mac-studio/README.md)
+for package setup, migration and remote acceptance. Workload services and Ollama
+model setup remain deliberate project steps.
 
 ## Mac mini Gate
 

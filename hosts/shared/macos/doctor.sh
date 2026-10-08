@@ -14,7 +14,7 @@ MISE_RUNTIME_FAILURES=0
 source "$SCRIPT_DIR/lib.sh"
 
 usage() {
-  printf 'Usage: doctor.sh --profile mac-pro|mac-mini\n'
+  printf 'Usage: doctor.sh --profile mac-pro|mac-studio|mac-mini\n'
 }
 
 pass() {

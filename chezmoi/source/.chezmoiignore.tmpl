@@ -26,7 +26,7 @@ Library/Application Support/com.mitchellh.ghostty/host.conf
 30-install-thin-tools.sh
 40-install-work-tools.sh
 {{- end }}
-{{- if eq .profile "mac-pro" }}
+{{- if or (eq .profile "mac-pro") (eq .profile "mac-studio") }}
 .config/homebrew
 .hermes
 .terminfo
