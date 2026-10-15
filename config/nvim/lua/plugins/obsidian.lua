@@ -1,5 +1,5 @@
 local vault = vim.fn.expand("~/Developer/hd")
-local daily_template = vim.fn.stdpath("config") .. "/templates/private-daily.md"
+local daily_template = vault .. "/Knowledge/_private/daily/_template-nvim.md"
 
 local function adjacent_day(context, offset)
   local note_id = context.partial_note and context.partial_note.id or os.date("%Y-%m-%d")
