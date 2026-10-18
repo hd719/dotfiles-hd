@@ -19,4 +19,5 @@ source "$zsh_mac_dir/aliases.zsh"
 source "$zsh_mac_dir/development-aliases.zsh"
 source "$zsh_mac_dir/k8s.zsh"
 source "$zsh_shared_dir/completions.zsh"
+source "$zsh_mac_dir/../../herdr/status-hook.zsh"
 unset zsh_mac_dir zsh_shared_dir

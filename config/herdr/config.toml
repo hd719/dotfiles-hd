@@ -6,6 +6,12 @@ onboarding = false
 [theme]
 name = "terminal"
 
+[theme.custom]
+# Nord accents for status text, separators, and the top bar.
+overlay1 = "#88c0d0"
+overlay0 = "#81a1c1"
+panel_bg = "reset"
+
 [terminal]
 shell_mode = "auto"
 new_cwd = "follow"
@@ -70,6 +76,14 @@ prompt_new_tab_name = false
 pane_borders = true
 pane_gaps = true
 accent = "#88c0d0"
+tab_bar_right = [
+  { type = "hostname" },
+  { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" system', interval_seconds = 5, timeout_seconds = 3 },
+  { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" docker', interval_seconds = 5, timeout_seconds = 3 },
+  { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" k8s', interval_seconds = 5, timeout_seconds = 3 },
+  { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" aws', interval_seconds = 5, timeout_seconds = 3 },
+]
+tab_bar_right_separator = " · "
 
 [session]
 resume_agents_on_restore = true
