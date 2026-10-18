@@ -261,10 +261,10 @@ GIT_PAGER='diff-so-fancy | less --tabs=4 -RFX' /bin/zsh -dfec "
   [[ \"\$GIT_EDITOR\" == nvim ]]
   [[ \"\$(alias g)\" == 'g=git' ]]
   [[ \"\$(alias gs)\" == \"gs='git status'\" ]]
-  [[ \"\$(alias hdiff)\" == \"hdiff='hunk diff'\" ]]
-  [[ \"\$(alias hstaged)\" == \"hstaged='hunk diff --staged'\" ]]
-  [[ \"\$(alias hshow)\" == \"hshow='hunk show'\" ]]
-  [[ \"\$(alias hwatch)\" == \"hwatch='hunk diff --watch'\" ]]
+  [[ \"\$(alias hdiff)\" == \"hdiff='EDITOR=nvim hunk diff'\" ]]
+  [[ \"\$(alias hstaged)\" == \"hstaged='EDITOR=nvim hunk diff --staged'\" ]]
+  [[ \"\$(alias hshow)\" == \"hshow='EDITOR=nvim hunk show'\" ]]
+  [[ \"\$(alias hwatch)\" == \"hwatch='EDITOR=nvim hunk diff --watch'\" ]]
   [[ \"\$(alias ls)\" == \"ls='lsd --tree --depth 1'\" ]]
   [[ \"\$(alias ll)\" == \"ll='lsd -la --tree --depth 1'\" ]]
   [[ \"\$(alias v)\" == 'v=nvim' ]]
@@ -319,6 +319,7 @@ assert_doctor_rejects() {
 }
 
 assert_doctor_rejects 'export EDITOR=broken-editor' 'personal shell allowlist invalid'
+assert_doctor_rejects "alias hdiff='EDITOR=broken-editor hunk diff'" 'personal shell allowlist invalid'
 assert_doctor_rejects "alias minit='ssh broken-mini-route'" 'personal shell allowlist invalid'
 assert_doctor_rejects "alias u='ssh ubuntu-vm'" 'personal shell allowlist invalid'
 assert_doctor_rejects 'uvm-up() { :; }' 'personal shell allowlist invalid'
