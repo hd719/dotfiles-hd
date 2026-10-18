@@ -73,17 +73,32 @@ sidebar_max_width = 36
 mouse_capture = true
 confirm_close = true
 prompt_new_tab_name = false
+agent_panel_sort = "priority"
+status_indicators = "symbols"
 pane_borders = true
 pane_gaps = true
 accent = "#88c0d0"
 tab_bar_right = [
   { type = "hostname" },
-  { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" system', interval_seconds = 5, timeout_seconds = 3 },
+  { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" system', interval_seconds = 10, timeout_seconds = 3 },
   { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" docker', interval_seconds = 5, timeout_seconds = 3 },
   { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" k8s', interval_seconds = 5, timeout_seconds = 3 },
   { type = "command", command = 'bash "$HOME/Developer/dotfiles-hd/config/herdr/status.sh" aws', interval_seconds = 5, timeout_seconds = 3 },
 ]
 tab_bar_right_separator = " · "
+
+[ui.sidebar.agents]
+rows = [
+  ["state_icon", "agent", "state_text"],
+  ["machine", "workspace", "tab"],
+]
+
+[ui.toast]
+delivery = "terminal"
+delay_seconds = 2
+
+[ui.sound]
+enabled = false
 
 [session]
 resume_agents_on_restore = true
@@ -96,4 +111,4 @@ kitty_graphics = true
 pane_history = true
 
 [advanced]
-scrollback_limit_bytes = 100000000
+scrollback_limit_bytes = 20000000

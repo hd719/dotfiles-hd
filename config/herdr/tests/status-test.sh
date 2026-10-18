@@ -121,4 +121,43 @@ done
 env -u HERDR_ENV HERDR_PANE_ID=p4 bash "$STATUS" report
 [[ ! -e "$CASE_DIR/panes/p4" ]] || exit 1
 
-printf 'Herdr status tests passed: metrics, pane isolation, selector changes, defaults, hook registration, and credential exclusion.\n'
+# Repeated prompts avoid new reporters, while selectors and local files refresh.
+mkdir -p "$CASE_DIR/cache-home/.aws" "$CASE_DIR/cache-home/.docker"
+touch "$CASE_DIR/cache-home/.aws/config" "$CASE_DIR/cache-home/.docker/config.json" "$CASE_DIR/kube-one" "$CASE_DIR/kube-two"
+HOME="$CASE_DIR/cache-home" HERDR_ENV=1 HERDR_PANE_ID=p-cache \
+  KUBECONFIG="$CASE_DIR/kube-one:$CASE_DIR/kube-two" AWS_PROFILE=cache-one \
+  AWS_CONFIG_FILE= DOCKER_CONFIG= /bin/zsh -dfc '
+  source "$1/config/herdr/status-hook.zsh"
+  bash() { print -r -- "$AWS_PROFILE" >> "$STATUS_TEST_DIR/cache-reports"; }
+  wait_reports() {
+    local attempt
+    for attempt in {1..30}; do
+      if [[ -f "$STATUS_TEST_DIR/cache-reports" ]] &&
+        (( $(wc -l < "$STATUS_TEST_DIR/cache-reports") == $1 )); then return 0; fi
+      sleep 0.05
+    done
+    return 1
+  }
+  _dotfiles_herdr_report_environment
+  wait_reports 1 || exit 1
+  for attempt in {1..10}; do _dotfiles_herdr_report_environment; done
+  sleep 0.1
+  (( $(wc -l < "$STATUS_TEST_DIR/cache-reports") == 1 )) || exit 1
+
+  export AWS_PROFILE=cache-two
+  _dotfiles_herdr_report_environment
+  wait_reports 2 || exit 1
+  [[ "$(tail -1 "$STATUS_TEST_DIR/cache-reports")" == cache-two ]] || exit 1
+  expected=2
+  for file in "$HOME/.aws/config" "$STATUS_TEST_DIR/kube-two" "$HOME/.docker/config.json"; do
+    print changed > "$file"
+    _dotfiles_herdr_report_environment
+    (( ++expected ))
+    wait_reports "$expected" || exit 1
+  done
+  (( _dotfiles_herdr_status_reported_at -= 31 ))
+  _dotfiles_herdr_report_environment
+  wait_reports 6 || exit 1
+' status-cache "$REPO_DIR"
+
+printf 'Herdr status tests passed: metrics, pane isolation, selectors, defaults, hook registration/cache, file changes, retry, and credential exclusion.\n'
