@@ -1,0 +1,7 @@
+auto_open = false
+theme = "nord"
+default_scope = "branch"
+markdown_view = "rendered"
+navigator_position = "left"
+toggle_placement = "overlay"
+editor = "nvim +{line} {file}"

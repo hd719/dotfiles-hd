@@ -156,7 +156,10 @@ if [[ "$MISE_RUNTIME_FAILURES" -eq 0 ]]; then
     fi
   done
 
-  required_commands='mise node npm npx pnpm go python bun nvim rg fd fzf lazygit hunk tree-sitter lua-language-server marksman stylua vtsls vscode-eslint-language-server bash-language-server gopls ruff mdformat yazi'
+  required_commands='mise node npm npx pnpm go python bun nvim rg fd fzf lazygit tree-sitter lua-language-server marksman stylua vtsls vscode-eslint-language-server bash-language-server gopls ruff mdformat yazi'
+  if [[ "$PROFILE" == mac-mini ]]; then
+    required_commands="$required_commands hunk"
+  fi
   shell_baseline_path="$(sanitize_shell_path "$PATH")"
   shell_version_probe='printf "__DOTFILES_NODE__=%s\n" "$(node --version 2>/dev/null)"
 printf "__DOTFILES_PNPM__=%s\n" "$(pnpm --version 2>/dev/null)"

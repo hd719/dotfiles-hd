@@ -18,14 +18,21 @@ alias gpublish='git push -u origin $(git rev-parse --abbrev-ref HEAD)'
 alias gpull='git pull'
 alias gpush='git push'
 
+## Review
+alias review='EDITOR=nvim herdr-reviewr'
+
 ## Hunk
 # EDITOR=nvim is scoped to these aliases only: pressing `e` inside Hunk opens
 # the file in Neovim, without changing $EDITOR for git commit messages or
 # other tools (some profiles pin that to `code --wait`).
-alias hwatch='EDITOR=nvim hunk diff --watch'
-alias hdiff='EDITOR=nvim hunk diff'
-alias hstaged='EDITOR=nvim hunk diff --staged'
-alias hshow='EDITOR=nvim hunk show'
+if (( $+commands[hunk] )); then
+  alias hwatch='EDITOR=nvim hunk diff --watch'
+  alias hdiff='EDITOR=nvim hunk diff'
+  alias hstaged='EDITOR=nvim hunk diff --staged'
+  alias hshow='EDITOR=nvim hunk show'
+else
+  unalias hwatch hdiff hstaged hshow 2>/dev/null || true
+fi
 
 ## Editor
 alias v='nvim'
