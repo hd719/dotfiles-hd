@@ -180,12 +180,12 @@ set -e
 ((layout_status != 0))
 [[ "$layout_output" == *"unapproved mac-air symlink parent"* ]]
 
-for profile in mac-air mac-pro mac-mini mac-work; do
+for profile in mac-air mac-pro mac-studio mac-mini mac-work; do
   home_dir="$case_dir/$profile/home"
   state_dir="$case_dir/$profile/state"
   mkdir -p "$home_dir" "$state_dir"
   case "$profile" in
-    mac-pro|mac-mini) prepare_mac_mini_home "$home_dir" ;;
+    mac-pro|mac-studio|mac-mini) prepare_mac_mini_home "$home_dir" ;;
   esac
   prepare_profile_parents "$profile" "$home_dir"
   if [[ "$profile" == mac-air ]]; then
@@ -207,7 +207,7 @@ for profile in mac-air mac-pro mac-mini mac-work; do
 
   case "$profile" in
     mac-air) printf '%s\n' 10-configure-git.sh 30-install-thin-tools.sh ;;
-    mac-pro) printf '%s\n' 10-configure-git.sh ;;
+    mac-pro|mac-studio) printf '%s\n' 10-configure-git.sh ;;
     mac-mini) printf '%s\n' 10-configure-git.sh ;;
     mac-work) printf '%s\n' 10-configure-git.sh 40-install-work-tools.sh ;;
   esac > "$case_dir/$profile.expected-scripts"
@@ -247,6 +247,23 @@ for profile in mac-air mac-pro mac-mini mac-work; do
     CHEZMOI_STATE_DIR="$state_dir" \
     bash "$CHEZMOI_DIR/doctor.sh" "$profile" >/dev/null
 done
+
+guard_home="$case_dir/studio-guard/home"
+guard_state="$case_dir/studio-guard/state"
+mkdir -p "$guard_home" "$guard_state"
+set +e
+guard_output="$({
+  DOTFILES_CHEZMOI_TEST=1 DOTFILES_CHEZMOI_APPROVED=1 \
+    DOTFILES_MAC_STUDIO_ARRIVED=0 \
+    CHEZMOI_BIN="$CHEZMOI_BIN" CHEZMOI_DESTINATION="$guard_home" \
+    CHEZMOI_STATE_DIR="$guard_state" \
+    bash "$CHEZMOI_DIR/apply.sh" mac-studio
+} 2>&1)"
+guard_status=$?
+set -e
+((guard_status != 0))
+[[ "$guard_output" == *"mac-studio apply requires DOTFILES_MAC_STUDIO_ARRIVED=1"* ]]
+[[ ! -e "$guard_home/.zshrc" ]]
 
 rollback_home="$case_dir/rollback/home"
 rollback_state="$case_dir/rollback/state"

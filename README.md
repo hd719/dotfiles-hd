@@ -4,12 +4,13 @@ Hamel's profile-aware dotfiles, provisioning, and machine operations.
 
 ## Choose a Host
 
-| Host        | Role                                                           | Entry point                                            |
-| ----------- | -------------------------------------------------------------- | ------------------------------------------------------ |
-| MacBook Air | Thin client for SSH access to the development Mac and Mac mini | [`hosts/mac-air/README.md`](hosts/mac-air/README.md)   |
-| Mac Pro     | Standalone full-development MacBook; local Brew stack, no VM   | [`hosts/mac-pro/README.md`](hosts/mac-pro/README.md)   |
-| Mac mini    | Production runtime host                                        | [`hosts/mac-mini/README.md`](hosts/mac-mini/README.md) |
-| Work Mac    | Company-scoped terminal and editor setup                       | [`hosts/mac-work/README.md`](hosts/mac-work/README.md) |
+| Host        | Role                                                           | Entry point                                                |
+| ----------- | -------------------------------------------------------------- | ---------------------------------------------------------- |
+| Mac Studio  | Staged primary native development workstation                  | [`hosts/mac-studio/README.md`](hosts/mac-studio/README.md) |
+| MacBook Air | Thin client for SSH access to the development Mac and Mac mini | [`hosts/mac-air/README.md`](hosts/mac-air/README.md)       |
+| Mac Pro     | Standalone full-development MacBook; local Brew stack, no VM   | [`hosts/mac-pro/README.md`](hosts/mac-pro/README.md)       |
+| Mac mini    | Production runtime host                                        | [`hosts/mac-mini/README.md`](hosts/mac-mini/README.md)     |
+| Work Mac    | Company-scoped terminal and editor setup                       | [`hosts/mac-work/README.md`](hosts/mac-work/README.md)     |
 
 Clone at the canonical path:
 
@@ -29,6 +30,7 @@ dotfiles-hd/
 ├── chezmoi/                 profile-aware config delivery and rollback
 ├── config/                  canonical application configuration
 ├── hosts/
+│   ├── mac-studio/          staged native development workstation
 │   ├── tests/               one host-validation runner
 │   ├── shared/macos/        shared full-Mac provisioning and doctor
 │   ├── mac-air/             thin SSH client
@@ -49,6 +51,12 @@ Sync reviewed `master` between the local Mac and Mac mini:
 ```bash
 /Users/hameldesai/.codex/skills/dotfiles-sync/scripts/fallback.sh
 ```
+
+Studio setup is staged for [issue #117](https://github.com/hd719/dotfiles-hd/issues/117).
+Apply only after arrival and reviewed checks with `DOTFILES_MAC_STUDIO_ARRIVED=1`;
+follow its runbook for native development, migration and remote access. Keep the
+MacBook as the current development host until cutover. The Air is optional and
+can be decided after using Studio.
 
 MacBook Air thin client:
 
@@ -81,6 +89,7 @@ gates pass.
 ## Ownership
 
 - `chezmoi/` owns approved user configuration links and timestamped rollback.
+- `hosts/mac-studio/` owns the staged native development overlay and cutover runbook.
 - `hosts/mac-air/` owns the thin-client packages, shell, and editor setup.
 - `hosts/shared/macos/` owns common full-Mac packages and operational setup.
 - `hosts/mac-pro/` and `hosts/mac-mini/` own profile package overlays and shell entry points.

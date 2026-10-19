@@ -16,7 +16,7 @@ source "$SCRIPT_DIR/lib.sh"
 
 usage() {
   cat <<'EOF'
-Usage: bootstrap.sh --profile mac-pro|mac-mini [--dry-run|--check|--apply]
+Usage: bootstrap.sh --profile mac-pro|mac-studio|mac-mini [--dry-run|--check|--apply]
 
 Modes:
   --dry-run  Show planned commands and filesystem changes without invoking
@@ -75,6 +75,8 @@ git -C "$DOTFILES_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "not a Git checkout: $DOTFILES_DIR"
 
 if [[ "$MODE" == "apply" ]]; then
+  [[ "$PROFILE" != mac-studio || "${DOTFILES_MAC_STUDIO_ARRIVED:-0}" == 1 ]] \
+    || die "mac-studio apply requires DOTFILES_MAC_STUDIO_ARRIVED=1 after the hardware arrives"
   [[ "$DOTFILES_DIR" == "$HOME/Developer/dotfiles-hd" \
     || "${DOTFILES_ALLOW_NONCANONICAL:-0}" == "1" ]] \
     || die "--apply requires the canonical clone at $HOME/Developer/dotfiles-hd"
