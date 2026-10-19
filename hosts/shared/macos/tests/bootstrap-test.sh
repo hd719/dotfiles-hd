@@ -1375,6 +1375,9 @@ test_shared_zsh_interface() {
       (( $+functions[carchive] )) && exit 1
       (( $+functions[opmission] )) && exit 1
       alias v >/dev/null || exit 1
+      alias review >/dev/null || exit 1
+      (( $+functions[reviewpr] )) || exit 1
+      (( $+functions[hpr] )) || exit 1
       alias hwatch >/dev/null || exit 1
       alias cod >/dev/null 2>&1 && exit 1
       alias vault >/dev/null 2>&1 && exit 1

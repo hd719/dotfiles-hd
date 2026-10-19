@@ -7,7 +7,7 @@ Production runbook for Hamel's Resilience work Mac.
 Manage only:
 
 - Ghostty with Maple Mono NF and Hamel Nord Blur
-- Herdr
+- Herdr with the reviewr plugin and shared Nord review settings
 - Hunk with the shared Catppuccin Mocha theme
 - Neovim with locked plugins and pinned tools
 - Bookokrat with the Hamel Nord theme
@@ -47,6 +47,7 @@ for path in \
   "$HOME/.config/bookokrat" \
   "$HOME/.config/nvim" \
   "$HOME/.config/herdr/config.toml" \
+  "$HOME/.config/herdr/plugins/config/persiyanov.reviewr/config.toml" \
   "$HOME/.config/hunk/config.toml" \
   "$HOME/.config/yazi/theme.toml" \
   "$HOME/.config/yazi/yazi.toml" \
@@ -116,6 +117,22 @@ is safe to rerun. It owns only:
 Yazi keeps its plugins, cache, and other mutable state local. The linker
 rejects a symlinked Yazi parent before changing any managed destination.
 
+Install reviewr through Herdr and apply the shared preset. Existing plugin
+settings are backed up first:
+
+```bash
+herdr plugin install persiyanov/herdr-reviewr
+reviewr_config_dir="$(herdr plugin config-dir persiyanov.reviewr)"
+if [[ -e "$reviewr_config_dir/config.toml" || -L "$reviewr_config_dir/config.toml" ]]; then
+  mv "$reviewr_config_dir/config.toml" \
+    "$reviewr_config_dir/config.toml.backup-$(date +%Y%m%d-%H%M%S)"
+fi
+cp config/herdr/reviewr.toml "$reviewr_config_dir/config.toml"
+```
+
+The preset opens manually with Nord colors, a file list on the left, and a wide
+overlay when opened through Herdr. Hunk remains available on the work Mac.
+
 Restore every locked Neovim plugin, including plugins gated off during normal
 startup:
 
@@ -143,11 +160,26 @@ Verify the existing login shell already loads the current profile:
 
 ```bash
 zsh -lic \
-  'alias hwatch && alias hdiff && alias hstaged && alias hshow && whence -w herdr _dotfiles_herdr_route_cwd goodMorning _resilience_update_repo _resilience_brew_cooldown_seconds'
+  'alias review && alias hwatch && alias hdiff && alias hstaged && alias hshow && whence -w reviewpr hpr herdr _dotfiles_herdr_route_cwd goodMorning _resilience_update_repo _resilience_brew_cooldown_seconds'
 ```
 
 If an alias or Resilience function is missing, report the stale shell instead
 of editing `~/.zshrc`.
+
+After opening a fresh shell, use these commands from a Git repository:
+
+| Command    | Opens                                                    |
+| ---------- | -------------------------------------------------------- |
+| `review`   | Reviewr for the current repository                       |
+| `reviewpr` | Reviewr against the PR target, or the repository default |
+| `hpr`      | The same review as `reviewpr`                            |
+
+`reviewpr` fetches the comparison branch first and stops if fetching fails.
+Branch reviews include current edits as well as commits. With authenticated
+`gh`, it detects the actual PR target; otherwise it uses the repository default.
+
+Reload Herdr settings with `Ctrl+B`, then `r`. Open or close reviewr with
+`Ctrl+B`, then `Shift+V`.
 
 Normal daily maintenance is:
 
@@ -176,7 +208,7 @@ Never reset local changes or repeatedly retry a failed stage.
     --file="$HOME/Developer/dotfiles-hd/hosts/mac-work/Brewfile"
 
   for cmd in \
-    bash-language-server bookokrat fd fzf gopls herdr hunk jq lazygit \
+    bash-language-server bookokrat fd fzf gopls herdr herdr-reviewr hunk jq lazygit \
     lua-language-server magick marksman nvim rg stylua tree-sitter uv \
     vscode-eslint-language-server vscode-json-language-server vtsls \
     mdformat ruff yazi
@@ -206,6 +238,7 @@ Never reset local changes or repeatedly retry a failed stage.
 
   /Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config
   herdr --version
+  herdr plugin list
   hunk --version
   nvim --headless +qa!
 
@@ -240,6 +273,8 @@ In exactly one fresh Ghostty window, confirm:
   are healthy
 - a PDF opens in Bookokrat with Hamel Nord, search, navigation, and zoom
 - a TypeScript file has completion, ESLint, `Space p`, and `Space g`
+- `review` opens reviewr with the shared Nord preset
+- `reviewpr` uses the expected PR target; `hpr` opens the same review
 - `hwatch` refreshes while the worktree changes
 
 If GUI control is unavailable, report the UI checks as unverified.
@@ -251,7 +286,8 @@ Run the mac-work Resilience post-merge readiness workflow from
 ~/Developer/dotfiles-hd. Read AGENTS.md and this runbook first. Preflight the
 host, clean checkout, remote, links, and work-owned state. Fast-forward only,
 then run normal `goodMorning` without forcing its cooldown. Repair only through
-the scoped Brewfile, linker, pinned tools, and Neovim restore documented here.
+the scoped Brewfile, linker, reviewr plugin setup, pinned tools, and Neovim
+restore documented here.
 
 Never replace the work .zshrc, change work runtimes or credentials, bypass
 company policy, reset changes, or commit and push. Use at most one fresh
