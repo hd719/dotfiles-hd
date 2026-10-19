@@ -13,6 +13,7 @@ tests=(
   hosts/mac-work/herdr/tests/hd-pargasite-test.sh
   hosts/mac-work/herdr/tests/hd-stop-test.sh
   config/zsh/shared/tests/herdr-reset-test.sh
+  config/zsh/shared/tests/review-test.sh
   config/herdr/tests/status-test.sh
 )
 

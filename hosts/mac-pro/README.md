@@ -30,3 +30,32 @@ application state remain machine-owned.
 
 Use the timestamped Chezmoi backup printed during apply for configuration
 rollback. Package removal is never part of rollback.
+
+## Code review
+
+Install reviewr once, then copy the shared preset into its plugin settings:
+
+```bash
+herdr plugin install persiyanov/herdr-reviewr
+reviewr_config_dir="$(herdr plugin config-dir persiyanov.reviewr)"
+cp config/herdr/reviewr.toml "$reviewr_config_dir/config.toml"
+exec zsh
+```
+
+Run these commands from a Git repository:
+
+| Command    | Opens                                                                  |
+| ---------- | ---------------------------------------------------------------------- |
+| `review`   | Reviewr for the current repository                                     |
+| `reviewpr` | Reviewr against the open PR's target branch, or the repository default |
+| `hpr`      | The same review as `reviewpr`                                          |
+
+PR reviews fetch the target branch first and stop if fetching fails. Branch
+reviews include both committed changes and current edits.
+
+In Herdr, reload settings once with `Ctrl+B`, then `r`. Open or close the wide
+review pane with `Ctrl+B`, then `Shift+V`. The preset uses Nord colors, a file
+list on the left, and manual opening.
+
+The plugin install stays manual. Hunk is no longer installed by the MacBook
+profile; its settings remain available for other hosts.

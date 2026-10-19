@@ -112,3 +112,9 @@ pane_history = true
 
 [advanced]
 scrollback_limit_bytes = 20000000
+
+# Reviewr trial: Ctrl+B, then Shift+V opens or closes the review pane.
+[[keys.command]]
+key = "prefix+shift+v"
+type = "plugin_action"
+command = "persiyanov.reviewr.toggle"
