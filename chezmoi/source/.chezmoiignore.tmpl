@@ -8,6 +8,7 @@
 {{- end }}
 {{- if ne .profile "mac-air" }}
 Library/Application Support/com.mitchellh.ghostty/host.conf
+.config/rex
 {{- end }}
 {{- if or (eq .profile "mac-air") (eq .profile "mac-work") }}
 .config/btop

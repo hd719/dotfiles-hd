@@ -10,6 +10,7 @@ Library/Application Support/com.mitchellh.ghostty/host.conf|hosts/mac-air/ghostt
 .config/hunk/config.toml|config/hunk/config.toml
 .config/homebrew/Brewfile|hosts/mac-air/Brewfile
 .config/nvim|config/nvim
+.config/rex/init.lua|config/rex/init.lua
 .config/starship.toml|config/starship/starship.toml
 .config/yazi/theme.toml|config/yazi/theme.toml
 .config/yazi/yazi.toml|config/yazi/yazi.toml
