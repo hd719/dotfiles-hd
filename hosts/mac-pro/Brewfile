@@ -2,4 +2,3 @@
 # ../shared/macos/Brewfile.
 
 cask "karabiner-elements"
-cask "vorssaint"
