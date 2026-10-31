@@ -1,7 +1,32 @@
 # MacBook Air Thin Client
 
-The Apple Silicon MacBook Air uses SSH to work on the development Mac and
-Mac mini. Keep project tooling, Docker, databases, and runtimes on those hosts.
+The Apple Silicon MacBook Air uses Rex and SSH to work on the development Mac
+and Mac mini. Keep project tooling, Docker, databases, and runtimes on those hosts.
+
+## Clone and ask the agent
+
+After macOS setup, install ChatGPT, sign in, and start an agent locally on the
+Air. Install Xcode Command Line Tools if Git requests them, then clone:
+
+```bash
+mkdir -p ~/Developer
+git clone https://github.com/hd719/dotfiles-hd.git ~/Developer/dotfiles-hd
+```
+
+Use fresh GitHub read access if prompted; do not copy another Mac's credentials.
+If the destination exists, inspect it instead of cloning over it.
+Give the agent this request:
+
+> Set up this Air as my thin client using the mac-air profile. Read AGENTS.md
+> and hosts/mac-air/README.md first. Use Rex as the main terminal, preserve
+> machine-owned credentials and state, and complete the setup and checks below.
+> Ask me for sign-ins and macOS permissions one at a time. Keep project builds,
+> Docker, databases, and project runtimes on the development Mac. Keep the Mini's
+> production services unchanged.
+
+`mac-air` is the current thin-client profile; `mac-thin` is retired.
+Use reviewed `master`; a feature branch must be reviewed and merged before
+the normal setup can apply it. No setup archive is required.
 
 ## Boundary
 
@@ -28,6 +53,7 @@ The host installs only:
 - Obsidian
 - Pearcleaner
 - ripgrep
+- Rex Beta as the main terminal
 - Starship
 - TablePlus
 - Tailscale
@@ -46,6 +72,9 @@ language runtimes, other language servers, or project dependencies on macOS.
 
 Prerequisites are Xcode Command Line Tools, Homebrew, the canonical
 `~/Developer/dotfiles-hd` checkout, and machine-owned `~/.ssh`.
+The agent installs missing prerequisites, preserves an existing `.zprofile`
+when adding Homebrew's `shellenv`, and completes the manual application steps
+below before apply. Hamel handles account sign-ins and protected macOS prompts.
 
 Preview and audit first:
 
@@ -64,8 +93,10 @@ hosts/mac-air/doctor.sh
 
 The bootstrap installs the policy packages, including the Codex CLI.
 Chezmoi delivers Bookokrat,
-Fastfetch, the thin `.zshrc`, Ghostty, Herdr, Hunk, the shared Neovim config,
-and the shared Starship config. Replaced paths are captured in the timestamped
+Fastfetch, the thin `.zshrc`, Ghostty, Herdr, Hunk, Rex keyboard bindings,
+the shared Neovim config, and the shared Starship config. Only
+`~/.config/rex/init.lua` is linked; Rex's remaining state stays on the Air.
+Replaced paths are captured in the timestamped
 Chezmoi backup printed during apply.
 
 Sync reviewed `master` between this Mac and the Mac mini:
@@ -105,12 +136,22 @@ current directory in Oil instead. Opening a PDF launches Bookokrat instead of
 Snacks' image converter. `Space t` opens a bottom terminal and `Space T` opens
 a floating terminal.
 
-Mutable state remains local: Herdr sessions, Hermes Desktop connection state,
+Mutable state remains local: Rex hosts and sessions, Herdr sessions, Hermes Desktop connection state,
 Hunk state, Neovim plugins/cache/undo, Zoxide history, Zsh history, and
 completion caches are never symlinked.
 
 ## Manual Applications
 
+- Rex Beta is the main terminal. Install the signed macOS app into
+  `/Applications/Rex Beta.app` from the
+  [official installer page](https://www.superlogical.com/rex/docs/installation).
+  The beta download may require Hamel's tester sign-in. Verify the downloaded
+  app with `codesign --verify --deep --strict` and `spctl --assess --type execute`
+  before launch; do not bypass a failed signature or Gatekeeper check. Open its
+  command palette and run **Install Rex for Agents** to install its CLI and
+  agent integration. Reopen the shell and confirm `rex --help` works. Do not
+  install Homebrew's unrelated `rex` remote-execution package. The profile
+  doctor requires the app, CLI, and a valid managed `init.lua`.
 - ChatGPT is the supported Codex desktop app. The standalone Codex CLI is
   installed by the Brewfile. Install ChatGPT from
   <https://chatgpt.com/download/> when it is not already present.
@@ -128,12 +169,42 @@ completion caches are never symlinked.
 
 1. Sign in to 1Password, Tailscale, Obsidian, and ChatGPT.
 1. Grant Tailscale's requested network-extension permission.
+1. Run `rex config check ~/.config/rex/init.lua`, `rex config reload`, and
+   `rex terminfo setup` locally on the Air. In Rex settings, use dark appearance,
+   Maple Mono NF at 13.5 points, and a block cursor to match the M3 Max.
+1. Inspect `rex hosts` on the development Mac and add the intended hosts to
+   the Air with `rex hosts add LABEL PRIVATE_REX_URL`. Keep the host list and
+   authorization machine-owned. Rex's private URL differs from the host's
+   normal Tailscale SSH address; use the existing Rex endpoint. Authenticate
+   on the Air when requested, and verify `rex -S LABEL whoami --json`.
 1. Connect Hermes Desktop to `mac-mini-ts` with its **Connect via SSH** mode.
 1. Use your machine-owned SSH aliases for the Mini and development Mac.
    Configure the Studio route once that machine arrives.
 1. Open Neovim once and run `:checkhealth`, `:checkhealth obsidian`, and
    `:checkhealth vim.lsp`.
 1. Keep project repositories and development execution on the development Mac.
+
+## Completion checks for the setup agent
+
+- Run `hosts/mac-air/bootstrap.sh --check` and `hosts/mac-air/doctor.sh`.
+  Require both to pass and a repeat apply to leave configuration unchanged.
+- In a fresh Rex shell, confirm `DOTFILES_NVIM_PROFILE=thin`. Test Escape then
+  `s`, `v`, `c`, an arrow key, and `z` in a temporary window. Reopen Rex and
+  confirm the configuration persists.
+- Verify Air-to-Mini SSH using the Air's own authentication and a checked host
+  key. Verify Rex access to the development Mac and Mini; run `hostname`,
+  `whoami`, and `codex --version` in temporary remote sessions. Remove only
+  those test sessions. Keep the development Mac awake and available.
+- Run local `codex --version` and `codex doctor --json`, then ask Codex to run
+  a harmless command. If a background server is running, compare its version
+  with the CLI using `codex app-server daemon version`. An old server can
+  retain a removed Homebrew helper path after an upgrade; inspect active work
+  before restarting it. A version check alone does not verify command execution.
+- Confirm Hermes Desktop is connected to the existing Mini backend through
+  SSH. Check Obsidian vault sync separately from app installation, using its
+  existing sync method and fresh authentication.
+- Report failed checks, pending sign-ins, and backup paths. Actual Air checks
+  remain required even when repository tests pass.
 
 The bootstrap never restores credentials, starts services, removes packages,
 or installs project development tooling. It adds only the portable Git alias

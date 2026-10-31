@@ -73,7 +73,7 @@ if [[ "$MODE" == dry-run ]]; then
   say "profile: mac-air"
   say "mode: dry-run (no package-manager calls or writes)"
   say "would apply configuration and packages through Chezmoi: $BREWFILE"
-  say "ChatGPT and Hermes Desktop remain manual installs"
+  say "Rex Beta, ChatGPT, and Hermes Desktop use the runbook's manual application steps"
   if [[ -x "${CHEZMOI_BIN:-$HOME/.local/bin/chezmoi}" ]]; then
     DOTFILES_CHEZMOI_CONFIG_ONLY_PREVIEW=1 \
       bash "$CHEZMOI_PREVIEW" mac-air

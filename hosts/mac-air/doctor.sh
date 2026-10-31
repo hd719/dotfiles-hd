@@ -51,13 +51,20 @@ else
   fail "Herdr remote client missing"
 fi
 
-for command_name in bookokrat fastfetch hunk lsd marksman nvim rg starship tree-sitter yazi zoxide; do
+for command_name in bookokrat codex fastfetch hunk lsd marksman nvim rex rg starship tree-sitter yazi zoxide; do
   if command -v "$command_name" >/dev/null 2>&1; then
     pass "$command_name available"
   else
     fail "$command_name missing"
   fi
 done
+
+if command -v rex >/dev/null 2>&1 \
+  && rex config check "$HOME/.config/rex/init.lua" >/dev/null 2>&1; then
+  pass "Rex configuration valid"
+else
+  fail "Rex configuration invalid or CLI unavailable"
+fi
 
 for plugin_path in \
   "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
@@ -146,6 +153,7 @@ for app_name in \
   "Ghostty.app" \
   "Hermes.app" \
   "Obsidian.app" \
+  "Rex Beta.app" \
   "Tailscale.app" \
   "zoom.us.app"; do
   if [[ -d "$APPLICATIONS_DIR/$app_name" ]]; then

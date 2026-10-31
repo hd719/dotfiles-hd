@@ -20,6 +20,7 @@ mkdir -p \
   "$TEST_ROOT/home/.local/share/nvim/site" \
   "$TEST_ROOT/home/.config/herdr" \
   "$TEST_ROOT/home/.config/hunk" \
+  "$TEST_ROOT/home/.config/rex" \
   "$TEST_ROOT/home/.ssh" \
   "$TEST_ROOT/homebrew/share/zsh-autosuggestions" \
   "$TEST_ROOT/homebrew/share/zsh-syntax-highlighting" \
@@ -31,6 +32,8 @@ chmod 700 \
 printf '# Machine-owned SSH config\n' > "$TEST_ROOT/home/.ssh/config"
 printf 'runtime state\n' > "$TEST_ROOT/home/.config/herdr/session"
 printf 'hunk state\n' > "$TEST_ROOT/home/.config/hunk/state.json"
+printf 'original rex config\n' > "$TEST_ROOT/home/.config/rex/init.lua"
+printf 'machine-owned rex state\n' > "$TEST_ROOT/home/.config/rex/state.json"
 
 for app_name in \
   "1Password.app" \
@@ -39,6 +42,7 @@ for app_name in \
   "Ghostty.app" \
   "Hermes.app" \
   "Obsidian.app" \
+  "Rex Beta.app" \
   "Tailscale.app" \
   "zoom.us.app"; do
   mkdir -p "$TEST_ROOT/apps/$app_name"
@@ -51,6 +55,21 @@ exit 0
 EOF
 
 cat > "$TEST_ROOT/bin/bookokrat" <<'EOF'
+#!/bin/sh
+exit 0
+EOF
+
+cat > "$TEST_ROOT/bin/rex" <<'EOF'
+#!/bin/sh
+case "$1 $2" in
+  'config check')
+    [ -r "$3" ] && [ "${DOTFILES_TEST_REX_INVALID:-0}" != 1 ]
+    ;;
+  *) exit 1 ;;
+esac
+EOF
+
+cat > "$TEST_ROOT/bin/codex" <<'EOF'
 #!/bin/sh
 exit 0
 EOF
@@ -157,6 +176,7 @@ EOF
 
 chmod +x \
   "$TEST_ROOT/bin/bookokrat" \
+  "$TEST_ROOT/bin/codex" \
   "$TEST_ROOT/bin/brew" \
   "$TEST_ROOT/bin/fastfetch" \
   "$TEST_ROOT/bin/herdr" \
@@ -165,6 +185,7 @@ chmod +x \
   "$TEST_ROOT/bin/marksman" \
   "$TEST_ROOT/bin/nvim" \
   "$TEST_ROOT/bin/rg" \
+  "$TEST_ROOT/bin/rex" \
   "$TEST_ROOT/bin/starship" \
   "$TEST_ROOT/bin/tree-sitter" \
   "$TEST_ROOT/bin/uname" \
@@ -241,6 +262,12 @@ done
   == "$REPO_DIR/config/herdr/config.toml" ]]
 [[ "$(readlink "$HOME/.config/hunk/config.toml")" \
   == "$REPO_DIR/config/hunk/config.toml" ]]
+[[ -L "$HOME/.config/rex/init.lua" && -e "$HOME/.config/rex/init.lua" ]]
+[[ "$(readlink "$HOME/.config/rex/init.lua")" == "$REPO_DIR/config/rex/init.lua" ]]
+[[ ! -L "$HOME/.config/rex" ]]
+[[ "$(<"$HOME/.config/rex/state.json")" == 'machine-owned rex state' ]]
+rex_backup="$(find "$CHEZMOI_BACKUP_ROOT" -path '*/files/.config/rex/init.lua' -type f -print -quit)"
+[[ -n "$rex_backup" && "$(<"$rex_backup")" == 'original rex config' ]]
 [[ "$(readlink "$HOME/.config/nvim")" == "$REPO_DIR/config/nvim" ]]
 [[ "$(readlink "$HOME/.config/starship.toml")" \
   == "$REPO_DIR/config/starship/starship.toml" ]]
@@ -304,6 +331,29 @@ cp "$REPO_DIR/hosts/mac-air/Brewfile" "$doctor_fixture/hosts/mac-air/Brewfile"
 cp "$REPO_DIR/hosts/mac-air/.zshrc" "$doctor_fixture/hosts/mac-air/.zshrc"
 DOTFILES_DIR="$doctor_fixture" "$REPO_DIR/hosts/mac-air/doctor.sh" \
   > "$TEST_ROOT/doctor.log" 2>&1
+
+if DOTFILES_TEST_REX_INVALID=1 DOTFILES_DIR="$doctor_fixture" \
+  "$REPO_DIR/hosts/mac-air/doctor.sh" > "$TEST_ROOT/doctor.log" 2>&1; then
+  printf 'Doctor accepted invalid Rex configuration.\n' >&2
+  exit 1
+fi
+grep -Fq 'FAIL  Rex configuration invalid' "$TEST_ROOT/doctor.log"
+mv "$TEST_ROOT/apps/Rex Beta.app" "$TEST_ROOT/apps/Rex Beta.missing"
+if DOTFILES_DIR="$doctor_fixture" "$REPO_DIR/hosts/mac-air/doctor.sh" \
+  > "$TEST_ROOT/doctor.log" 2>&1; then
+  printf 'Doctor accepted missing Rex application.\n' >&2
+  exit 1
+fi
+grep -Fq 'FAIL  Rex Beta.app missing' "$TEST_ROOT/doctor.log"
+mv "$TEST_ROOT/apps/Rex Beta.missing" "$TEST_ROOT/apps/Rex Beta.app"
+mv "$TEST_ROOT/bin/rex" "$TEST_ROOT/bin/rex.missing"
+if DOTFILES_DIR="$doctor_fixture" "$REPO_DIR/hosts/mac-air/doctor.sh" \
+  > "$TEST_ROOT/doctor.log" 2>&1; then
+  printf 'Doctor accepted missing Rex CLI.\n' >&2
+  exit 1
+fi
+grep -Fq 'FAIL  rex missing' "$TEST_ROOT/doctor.log"
+mv "$TEST_ROOT/bin/rex.missing" "$TEST_ROOT/bin/rex"
 
 assert_doctor_rejects() {
   local shell_change="$1"
