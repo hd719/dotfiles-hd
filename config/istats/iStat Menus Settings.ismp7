@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>build</key>
-	<string>2282</string>
+	<string>2355</string>
 	<key>preferences</key>
 	<dict>
 		<key>Battery.Menubar.Mode.DualValue.Font.Name</key>
@@ -278,6 +278,23 @@
 				<key>type</key>
 				<integer>7</integer>
 			</dict>
+			<dict>
+				<key>source</key>
+				<integer>15</integer>
+				<key>useroptions</key>
+				<dict>
+					<key>width</key>
+					<integer>4</integer>
+				</dict>
+			</dict>
+			<dict>
+				<key>source</key>
+				<integer>4</integer>
+				<key>subtype</key>
+				<integer>8</integer>
+				<key>type</key>
+				<integer>7</integer>
+			</dict>
 		</array>
 		<key>Profiles.Settings.default.Disks.Menubar.Disks</key>
 		<array>
@@ -539,9 +556,9 @@
 		<key>Status.BackgroundInstall</key>
 		<true/>
 		<key>Status.Build.Last</key>
-		<real>2282</real>
+		<real>2355</real>
 		<key>Status.Version.Last</key>
-		<real>7.3000001907348633</real>
+		<real>7.5</real>
 		<key>Time.Menubar.FlashSeperators</key>
 		<integer>1</integer>
 		<key>Time.Menubar.Mode.SingleValue.Value.Dark.Text.Color</key>
