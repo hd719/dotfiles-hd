@@ -21,7 +21,10 @@ Packages come from:
 - `hosts/shared/macos/Brewfile` for the common full-Mac toolchain
 - `hosts/mac-pro/Brewfile` for the standalone MacBook overlay
 
-The `mac-pro` overlay installs Karabiner Elements and Vorssaint.
+The `mac-pro` overlay installs Karabiner Elements.
+Vorssaint's reviewed manual settings backup is preserved under
+[`config/vorssaint`](../../config/vorssaint/README.md) for an optional future
+reinstall. It is no longer installed by this profile.
 
 Chezmoi applies `chezmoi/profiles/mac-pro.paths`, including the MacBook shell,
 shared application configuration, full Neovim configuration, mise, and
