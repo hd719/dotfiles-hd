@@ -50,7 +50,6 @@ The host installs only:
 - Marksman as the only local language server
 - Mullvad VPN
 - Neovim with the shared `thin` profile
-- Obsidian
 - Pearcleaner
 - ripgrep
 - Rex Beta as the main terminal
@@ -167,7 +166,7 @@ completion caches are never symlinked.
 
 ## First Run
 
-1. Sign in to 1Password, Tailscale, Obsidian, and ChatGPT.
+1. Sign in to 1Password, Tailscale, and ChatGPT.
 1. Grant Tailscale's requested network-extension permission.
 1. Run `rex config check ~/.config/rex/init.lua`, `rex config reload`, and
    `rex terminfo setup` locally on the Air. In Rex settings, use dark appearance,
@@ -201,8 +200,9 @@ completion caches are never symlinked.
   retain a removed Homebrew helper path after an upgrade; inspect active work
   before restarting it. A version check alone does not verify command execution.
 - Confirm Hermes Desktop is connected to the existing Mini backend through
-  SSH. Check Obsidian vault sync separately from app installation, using its
-  existing sync method and fresh authentication.
+  SSH.
+- Verify the Forgejo-backed vault at `~/Developer/hd` and Neovim's Obsidian
+  integration. The Obsidian desktop app is not part of this profile.
 - Report failed checks, pending sign-ins, and backup paths. Actual Air checks
   remain required even when repository tests pass.
 
