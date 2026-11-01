@@ -152,7 +152,6 @@ for app_name in \
   "ChatGPT.app" \
   "Ghostty.app" \
   "Hermes.app" \
-  "Obsidian.app" \
   "Rex Beta.app" \
   "Tailscale.app" \
   "zoom.us.app"; do
