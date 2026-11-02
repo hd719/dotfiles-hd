@@ -51,7 +51,7 @@ else
   fail "Herdr remote client missing"
 fi
 
-for command_name in bookokrat codex fastfetch hunk lsd marksman nvim rex rg starship tree-sitter yazi zoxide; do
+for command_name in bookokrat codex fastfetch fd hunk lsd marksman nvim rex rg starship tree-sitter yazi zoxide; do
   if command -v "$command_name" >/dev/null 2>&1; then
     pass "$command_name available"
   else
@@ -215,7 +215,7 @@ else
 fi
 
 if HOMEBREW_PREFIX="$HOMEBREW_PREFIX" /bin/zsh -dfiec "
-  source '$DOTFILES_DIR/hosts/mac-air/.zshrc'
+  source '$DOTFILES_DIR/hosts/mac-air/.zshrc' || exit 1
   (( \${#functions[(I)*autosuggest*]} > 0 ))
   whence -w _zsh_highlight >/dev/null
 " >/dev/null 2>&1; then
