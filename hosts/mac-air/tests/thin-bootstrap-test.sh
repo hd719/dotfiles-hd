@@ -120,6 +120,11 @@ cat > "$TEST_ROOT/bin/fastfetch" <<'EOF'
 exit 0
 EOF
 
+cat > "$TEST_ROOT/bin/fd" <<'EOF'
+#!/bin/sh
+exit 0
+EOF
+
 cat > "$TEST_ROOT/bin/lsd" <<'EOF'
 #!/bin/sh
 exit 0
@@ -170,6 +175,8 @@ _zsh_autosuggest_start() { :; }
 EOF
 
 cat > "$TEST_ROOT/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" <<'EOF'
+# Plugin initialization may probe an unset option before registering functions.
+[[ -o xtrace ]]
 _zsh_highlight() { :; }
 EOF
 
@@ -178,6 +185,7 @@ chmod +x \
   "$TEST_ROOT/bin/codex" \
   "$TEST_ROOT/bin/brew" \
   "$TEST_ROOT/bin/fastfetch" \
+  "$TEST_ROOT/bin/fd" \
   "$TEST_ROOT/bin/herdr" \
   "$TEST_ROOT/bin/hunk" \
   "$TEST_ROOT/bin/lsd" \
@@ -458,6 +466,7 @@ grep -Fq 'nvim --headless +Lazy! restore +qa' "$TEST_ROOT/brew.log"
 grep -Fq "markdown_inline" "$TEST_ROOT/brew.log"
 grep -Fxq 'brew "bookokrat"' "$REPO_DIR/hosts/mac-air/Brewfile"
 grep -Fxq 'brew "fastfetch"' "$REPO_DIR/hosts/mac-air/Brewfile"
+grep -Fxq 'brew "fd"' "$REPO_DIR/hosts/mac-air/Brewfile"
 grep -Fxq 'brew "gh"' "$REPO_DIR/hosts/mac-air/Brewfile"
 grep -Fxq 'brew "herdr"' "$REPO_DIR/hosts/mac-air/Brewfile"
 grep -Fxq 'brew "hunk"' "$REPO_DIR/hosts/mac-air/Brewfile"

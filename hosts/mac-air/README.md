@@ -40,6 +40,7 @@ The host installs only:
 - Codex CLI
 - DaisyDisk
 - Fastfetch for system summaries
+- fd for Neovim Explorer search
 - Ghostty
 - Ghostty fonts, including Symbols Nerd Font for Yazi icons
 - Herdr as a remote editor client

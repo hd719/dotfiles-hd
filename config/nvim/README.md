@@ -44,8 +44,8 @@ startup instead of silently choosing the wrong tool boundary.
 - Editing: `mini.pairs` auto-closes brackets and quotes; `mini.surround` adds,
   changes, and deletes surrounding pairs with a `gs` prefix.
 
-The thin profile requires Neovim 0.12+, Bookokrat, ripgrep, Marksman, Yazi, and
-the Tree-sitter CLI used to build its two Markdown parsers.
+The thin profile requires Neovim 0.12+, Bookokrat, ripgrep, fd, Marksman, Yazi,
+and the Tree-sitter CLI used to build its two Markdown parsers.
 
 Install the Markdown formatter with:
 

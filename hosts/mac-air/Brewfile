@@ -2,6 +2,7 @@
 
 brew "bookokrat"
 brew "fastfetch"
+brew "fd"
 brew "gh"
 brew "herdr"
 brew "hunk"
