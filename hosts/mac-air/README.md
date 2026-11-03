@@ -188,7 +188,7 @@ completion caches are never symlinked.
 
 - Run `hosts/mac-air/bootstrap.sh --check` and `hosts/mac-air/doctor.sh`.
   Require both to pass and a repeat apply to leave configuration unchanged.
-- In a fresh Rex shell, confirm `DOTFILES_NVIM_PROFILE=thin`. Test Escape then
+- In a fresh Rex shell, confirm `DOTFILES_NVIM_PROFILE=thin`. Test Ctrl+B then
   `s`, `v`, `c`, an arrow key, and `z` in a temporary window. Reopen Rex and
   confirm the configuration persists.
 - Verify Air-to-Mini SSH using the Air's own authentication and a checked host

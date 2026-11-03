@@ -3,7 +3,7 @@
 Rex Beta bindings copied from the M3 Max MacBook Pro's live
 `~/.config/rex/init.lua`. The file contains keyboard bindings only.
 
-Press **Escape**, release it, then press the key below.
+Press **Ctrl+B**, release it, then press the key below.
 
 | Key        | Action                          |
 | ---------- | ------------------------------- |
@@ -19,14 +19,14 @@ Press **Escape**, release it, then press the key below.
 | `,` / `$`  | Rename the tab / session        |
 | Escape     | Send Escape to the terminal     |
 
-Rex uses a one-shot key mode so pressing Escape twice sends Escape to programs
-such as Neovim. An unknown prefix key leaves the mode waiting; Escape sends a
-literal Escape and leaves the mode.
+Escape goes straight to programs such as Neovim. Ctrl+B opens a one-shot
+shortcut menu. An unknown shortcut key leaves the menu waiting; Escape sends a
+literal Escape and leaves the menu.
 
-The current beta has no tmux-style copy-mode action (`Escape [` followed by
+The current beta has no tmux-style copy-mode action (`Ctrl+B [` followed by
 `v` and `y`). Use Rex's text selection and **Cmd+C**. The tmux navigator plugin
 also has no direct Rex equivalent. `Ctrl+h/j/k/l` remain available to Neovim;
-use Escape and an arrow key to move between Rex panes.
+use Ctrl+B and an arrow key to move between Rex panes.
 
 ## Air delivery
 

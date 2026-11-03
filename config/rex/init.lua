@@ -1,7 +1,7 @@
--- Match config/tmux/tmux.conf: Escape is the prefix, s splits down, v splits right.
--- A one-shot mode lets Escape twice send a real Escape instead of cancelling a sequence.
+-- Ctrl+B opens the shortcut menu; Escape stays available to terminal programs.
+-- A one-shot mode keeps s for split down and v for split right.
 rex.mode("tmux", { exclusive = true })
-rex.bind("escape", "client.mode.enter", { name = "tmux", once = true })
+rex.bind("ctrl+b", "client.mode.enter", { name = "tmux", once = true })
 rex.bind("tmux/escape", "pane.send_key", { key = "escape" })
 
 rex.bind("tmux/r", "client.config.reload")

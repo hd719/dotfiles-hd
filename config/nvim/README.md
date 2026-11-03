@@ -375,10 +375,10 @@ The `Space e` file-explorer sidebar is separate from Oil (`Space h`). It roots
 on the current file's Git repository, or its folder outside Git, rather than
 Neovim's startup directory. Terminal and utility buffers use the current
 working directory. From the
-tree, `Space W l` moves focus to the editor, and `Space W h` moves focus back
-to the tree. The existing `Space l` and `Ctrl-h/l` shortcuts remain available,
-but the `Space W` group works consistently even where a plugin owns a plain
-Control mapping. Press `Space e` again to close the sidebar. The sidebar shows
+tree or its search box, `Ctrl-l` returns to the editor without closing the
+sidebar; `Ctrl-h` moves back to the tree. `Space W l` and `Space W h` provide
+the same window navigation, including in plugins that own a plain Control
+mapping. Press `Space e` again to close the sidebar. The sidebar shows
 dotfiles by default (matching Oil) but hides `.gitignore`d files; inside the
 tree press `H` to toggle dotfiles and `I` to toggle gitignored files.
 
