@@ -237,7 +237,30 @@ return {
           -- Show dotfiles (e.g. .zshrc, .config) in the explorer sidebar so it
           -- matches Oil. Gitignored files stay hidden; press I in the tree to
           -- reveal them, or H to toggle dotfiles back off.
-          explorer = { hidden = true, ignored = false, preview = "none" },
+          explorer = {
+            hidden = true,
+            ignored = false,
+            preview = "none",
+            actions = {
+              focus_main = function(picker)
+                picker:norm(function()
+                  vim.api.nvim_set_current_win(picker.main)
+                end)
+              end,
+            },
+            win = {
+              input = {
+                keys = {
+                  ["<C-l>"] = { "focus_main", mode = { "n", "i" } },
+                },
+              },
+              list = {
+                keys = {
+                  ["<C-l>"] = "focus_main",
+                },
+              },
+            },
+          },
         },
       },
       -- Free Snacks modules: big-file performance safety, reference highlighting
