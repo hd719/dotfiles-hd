@@ -185,10 +185,11 @@ if /bin/zsh -dfec "
   [[ \"\$(alias ll)\" == \"ll='lsd -la --tree --depth 1'\" ]]
   [[ \"\$(alias v)\" == 'v=nvim' ]]
   ! alias gdiff >/dev/null 2>&1 || exit 1
-  [[ \"\$(alias cod)\" == 'cod=codex' ]]
+  [[ \"\$(alias cod)\" == 'cod=_dotfiles_codex_interactive' ]]
   [[ \"\$(alias codu)\" == \"codu='codex update'\" ]]
   [[ \"\$(whence -w coda)\" == 'coda: function' ]]
   [[ \"\$(whence -w carchive)\" == 'carchive: function' ]]
+  [[ \"\$(whence -w _dotfiles_codex_interactive)\" == '_dotfiles_codex_interactive: function' ]]
   [[ \"\$(alias dots)\" == \"dots='cd ~/Developer/dotfiles-hd'\" ]]
   [[ \"\$(alias vault)\" == \"vault='cd ~/Developer/hd'\" ]]
   [[ \"\$(alias mini)\" == \"mini='ssh mac-mini-lan'\" ]]

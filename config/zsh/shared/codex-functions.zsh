@@ -1,4 +1,13 @@
-# Codex archive picker shared by personal Macs and Linux workstations.
+# Codex launch and archive helpers shared by personal Macs and Linux workstations.
+
+_dotfiles_codex_interactive() {
+  # Native Rex sessions can gain remote viewers without inheriting SSH variables.
+  if [[ ${TERM_PROGRAM-} == rex && -z ${SSH_TTY+x} && -z ${SSH_CONNECTION+x} ]]; then
+    SSH_TTY=rex command codex "$@"
+  else
+    command codex "$@"
+  fi
+}
 
 carchive() {
   emulate -L zsh
