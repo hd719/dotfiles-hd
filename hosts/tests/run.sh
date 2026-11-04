@@ -15,6 +15,7 @@ tests=(
   config/zsh/shared/tests/herdr-reset-test.sh
   config/zsh/shared/tests/review-test.sh
   config/zsh/shared/tests/codex-clipboard-test.sh
+  config/zsh/shared/tests/colors-test.sh
   config/herdr/tests/status-test.sh
 )
 

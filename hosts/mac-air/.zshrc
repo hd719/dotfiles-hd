@@ -25,6 +25,7 @@ fi
 typeset mac_air_zshrc="${${(%):-%N}:A}"
 typeset mac_air_dir="${mac_air_zshrc:h}"
 typeset mac_air_repo="${mac_air_dir:h:h}"
+source "$mac_air_repo/config/zsh/shared/colors.zsh"
 source "$mac_air_repo/config/zsh/shared/functions.zsh"
 source "$mac_air_repo/config/zsh/shared/aliases.zsh"
 source "$mac_air_repo/config/zsh/shared/codex-aliases.zsh"

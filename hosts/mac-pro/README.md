@@ -47,11 +47,27 @@ Plain `codex` remains the unwrapped command. This is a workaround verified
 with Codex 0.166.0, not a global shell setting. Start a fresh shell after the
 merged dotfiles update to load the shortcuts.
 
-Codex 0.166.0 computes the input box's shaded background internally. Its
-`tui.theme` setting changes syntax highlighting; it does not expose the input
-background. An exact match to the terminal background needs upstream support,
-rather than a dotfiles theme change. See the
-[composer background implementation](https://github.com/openai/codex/blob/rust-v0.166.0/codex-rs/tui/src/style.rs#L212-L267).
+## Terminal colors on personal Macs
+
+Air, Pro, and Mini load [one color policy](../../config/zsh/shared/colors.zsh).
+It clears inherited `FORCE_COLOR` values so CLIs detect the terminal's full
+color support. It preserves `COLORTERM` and honors `NO_COLOR`. A deliberate
+per-command override, such as `FORCE_COLOR=3 command`, still works.
+
+The old Pro-only `FORCE_COLOR=1` setting restricted Codex 0.166.0 to basic
+colors. That fallback also removed its input shading. Automatic detection
+restores the Air's full-color Dali appearance, including the shaded input box.
+`tui.theme` controls syntax highlighting; the input shade is computed by
+[Codex itself](https://github.com/openai/codex/blob/rust-v0.166.0/codex-rs/tui/src/style.rs#L212-L267).
+The shared `cod`, `codf`, `codfl`, `codr`, `codra`, and `codrl` shortcuts
+also select Dali on all three Macs. They pass the theme at launch without
+rewriting Codex configuration, login, or session files. Plain `codex` and
+noninteractive shortcuts still use machine-owned Codex settings. A later
+`-c tui.theme=...` argument can override Dali for one launch.
+
+After merging and syncing all three checkouts, open a fresh terminal shell
+and restart or resume Codex. Existing symlinks pick up this shell-only change
+without a Chezmoi apply. Running Codex sessions keep their old environment.
 
 ## Code review
 
