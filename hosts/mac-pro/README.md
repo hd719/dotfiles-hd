@@ -34,6 +34,25 @@ application state remain machine-owned.
 Use the timestamped Chezmoi backup printed during apply for configuration
 rollback. Package removal is never part of rollback.
 
+## Codex clipboard in Rex
+
+Use `cod`, `codf`, `codfl`, `codr`, `codra`, or `codrl` to start or
+resume Codex. In native Rex sessions, these shortcuts add `SSH_TTY=rex` for
+that process so Codex also forwards selected text to the viewing Mac's
+clipboard. Normal Codex selection and scrolling stay available.
+
+Existing SSH markers are preserved. Other terminals and noninteractive
+shortcuts such as `codd`, `codu`, and `codx` keep their existing behavior.
+Plain `codex` remains the unwrapped command. This is a workaround verified
+with Codex 0.166.0, not a global shell setting. Start a fresh shell after the
+merged dotfiles update to load the shortcuts.
+
+Codex 0.166.0 computes the input box's shaded background internally. Its
+`tui.theme` setting changes syntax highlighting; it does not expose the input
+background. An exact match to the terminal background needs upstream support,
+rather than a dotfiles theme change. See the
+[composer background implementation](https://github.com/openai/codex/blob/rust-v0.166.0/codex-rs/tui/src/style.rs#L212-L267).
+
 ## Code review
 
 Install reviewr once, then copy the shared preset into its plugin settings:
