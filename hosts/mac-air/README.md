@@ -152,6 +152,8 @@ completion caches are never symlinked.
   agent integration. Reopen the shell and confirm `rex --help` works. Do not
   install Homebrew's unrelated `rex` remote-execution package. The profile
   doctor requires the app, CLI, and a valid managed `init.lua`.
+  For Air-to-Pro screenshots, install the optional
+  [Rex image paste helper](../../config/rex/README.md#remote-screenshot-paste).
 - ChatGPT is the supported Codex desktop app. The standalone Codex CLI is
   installed by the Brewfile. Install ChatGPT from
   <https://chatgpt.com/download/> when it is not already present.
