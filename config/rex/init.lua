@@ -28,3 +28,10 @@ rex.bind("tmux/x", "pane.close")
 
 -- shortcut: Rex has no copy-mode or vim-tmux-navigator action; revisit when supported.
 -- Leave Ctrl+h/j/k/l to Neovim rather than stealing its window-navigation keys.
+
+-- Paste clipboard images into a remote pane when the local helper is installed.
+local has_image_paste, image_paste = pcall(require, "rex-image-paste")
+if has_image_paste then
+    image_paste.setup()
+    rex.bind("cmd+shift+v", "image_paste")
+end
