@@ -274,3 +274,8 @@ The shell is assembled from scoped modules:
   picker on personal Macs and Linux workstations.
 - `config/zsh/mac/aliases.zsh` adds safe macOS controls.
 - `config/zsh/mac/personal/aliases.zsh` adds the vault control.
+
+## Terminal colors
+
+Air, Pro, and Mini share automatic terminal color detection. See the
+[shared color policy and reload steps](../mac-pro/README.md#terminal-colors-on-personal-macs).

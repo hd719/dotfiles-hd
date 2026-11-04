@@ -15,6 +15,7 @@ chmod +x "$test_root/codex"
 
 PATH="$test_root:$PATH" /bin/zsh -df -s "$REPO_DIR" <<'ZSH'
 set -eu
+unset _dotfiles_codex_theme
 source "$1/config/zsh/shared/codex-aliases.zsh"
 source "$1/config/zsh/shared/codex-functions.zsh"
 

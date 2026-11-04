@@ -1,11 +1,16 @@
 # Codex launch and archive helpers shared by personal Macs and Linux workstations.
 
 _dotfiles_codex_interactive() {
+  local -a color_args=()
+  if [[ -n ${_dotfiles_codex_theme-} ]]; then
+    color_args=(-c "tui.theme=\"${_dotfiles_codex_theme}\"")
+  fi
+
   # Native Rex sessions can gain remote viewers without inheriting SSH variables.
   if [[ ${TERM_PROGRAM-} == rex && -z ${SSH_TTY+x} && -z ${SSH_CONNECTION+x} ]]; then
-    SSH_TTY=rex command codex "$@"
+    SSH_TTY=rex command codex "${color_args[@]}" "$@"
   else
-    command codex "$@"
+    command codex "${color_args[@]}" "$@"
   fi
 }
 

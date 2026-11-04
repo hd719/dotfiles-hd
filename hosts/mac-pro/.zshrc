@@ -14,10 +14,8 @@ source "$HOME/Developer/dotfiles-hd/config/zsh/mac/personal/init.zsh"
 _load_homebrew_plugin "/opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 _load_homebrew_plugin "/opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
-# Keep color-capable CLIs from inheriting restrictive environment flags.
-unset NO_COLOR
+# Keep local developer shells out of CI mode.
 unset CI
-export FORCE_COLOR=1
 
 # -----------------------------------------------------------------------------
 # Completions (cached compinit for speed)

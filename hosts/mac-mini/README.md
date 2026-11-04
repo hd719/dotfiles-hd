@@ -26,3 +26,8 @@ The bootstrap does not restart, reload, or migrate Cortana, Hermes, Homebrew
 services, LaunchAgents, or other production processes. Runtime changes require
 a separate maintenance window. Use the exact timestamped Chezmoi backup printed
 by apply for configuration rollback.
+
+## Terminal colors
+
+Air, Pro, and Mini share automatic terminal color detection. See the
+[shared color policy and reload steps](../mac-pro/README.md#terminal-colors-on-personal-macs).
