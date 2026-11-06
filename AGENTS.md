@@ -16,12 +16,13 @@ constraints, and agent workflow policy here.
 
 ## Profile Routing
 
-| Target                                     | Source of truth            |
-| ------------------------------------------ | -------------------------- |
-| MacBook Air thin client (`mac-air`)        | `hosts/mac-air/README.md`  |
-| Standalone development MacBook (`mac-pro`) | `hosts/mac-pro/README.md`  |
-| Personal Mac mini (`mac-mini`)             | `hosts/mac-mini/README.md` |
-| Resilience work Mac (`mac-work`)           | `hosts/mac-work/README.md` |
+| Target                                     | Source of truth              |
+| ------------------------------------------ | ---------------------------- |
+| MacBook Air thin client (`mac-air`)        | `hosts/mac-air/README.md`    |
+| Staged primary Mac Studio (`mac-studio`)   | `hosts/mac-studio/README.md` |
+| Standalone development MacBook (`mac-pro`) | `hosts/mac-pro/README.md`    |
+| Personal Mac mini (`mac-mini`)             | `hosts/mac-mini/README.md`   |
+| Resilience work Mac (`mac-work`)           | `hosts/mac-work/README.md`   |
 
 `config/` holds portable configuration and must not be reorganized casually.
 `chezmoi/` owns approved user-config delivery and rollback. `hosts/` owns
@@ -56,6 +57,12 @@ host-specific provisioning, lifecycle, maintenance, doctors, and runbooks.
 
 If Hamel explicitly asks for one link, create it safely. Do not expand that
 request into a full-machine migration.
+
+The `mac-studio` profile is pre-arrival staging. Apply requires
+`DOTFILES_MAC_STUDIO_ARRIVED=1` on Studio after its arrival and reviewed checks.
+Follow `hosts/mac-studio/README.md` for native development and verified cutover.
+Keep current MacBook ownership and canonical topology/sync policies until that
+cutover passes. The Air is optional; decide after using Studio.
 
 ## Package Ownership
 

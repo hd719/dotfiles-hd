@@ -21,8 +21,8 @@ die() {
 load_profile() {
   PROFILE="${1:-}"
   case "$PROFILE" in
-    mac-air|mac-pro|mac-mini|mac-work) ;;
-    *) die "profile must be mac-air, mac-pro, mac-mini, or mac-work" ;;
+    mac-air|mac-pro|mac-studio|mac-mini|mac-work) ;;
+    *) die "profile must be mac-air, mac-pro, mac-studio, mac-mini, or mac-work" ;;
   esac
   PROFILE_CONFIG="$PROFILES_DIR/$PROFILE.toml"
   PROFILE_MANIFEST="$PROFILES_DIR/$PROFILE.paths"
@@ -36,7 +36,7 @@ load_profile() {
 validate_profile_os() {
   [[ "${DOTFILES_CHEZMOI_TEST:-0}" == 1 ]] && return
   case "$PROFILE:$(uname -s)" in
-    mac-air:Darwin|mac-pro:Darwin|mac-mini:Darwin|mac-work:Darwin) ;;
+    mac-air:Darwin|mac-pro:Darwin|mac-studio:Darwin|mac-mini:Darwin|mac-work:Darwin) ;;
     *) die "$PROFILE does not match $(uname -s)" ;;
   esac
 }
